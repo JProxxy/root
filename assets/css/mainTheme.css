@@ -1,0 +1,366 @@
+@font-face {
+  font-family: "Kodchasan";
+  src: url("../fonts/kodchasan/Kodchasan-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-Light.ttf") format("truetype");
+    font-weight: 300; /* Light weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-Regular.ttf") format("truetype");
+    font-weight: 400; /* Normal weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-Medium.ttf") format("truetype");
+    font-weight: 500; /* Medium weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-SemiBold.ttf") format("truetype");
+    font-weight: 600; /* SemiBold weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-Bold.ttf") format("truetype");
+    font-weight: 700; /* Bold weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-BoldItalic.ttf") format("truetype");
+    font-weight: 700; /* Bold weight */
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Kodchasan";
+    src: url("../fonts/kodchasan/Kodchasan-Italic.ttf") format("truetype");
+    font-weight: 400; /* Normal weight */
+    font-style: italic;
+}
+
+/* Poppins */
+.poppins-thin {
+    font-family: "Poppins", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+  }
+  
+  .poppins-extralight {
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-style: normal;
+  }
+  
+  .poppins-light {
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .poppins-regular {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  .poppins-medium {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+  }
+  
+  .poppins-semibold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+  }
+  
+  .poppins-bold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+  }
+  
+  .poppins-extrabold {
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-style: normal;
+  }
+  
+  .poppins-black {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+  }
+  
+  .poppins-thin-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 100;
+    font-style: italic;
+  }
+  
+  .poppins-extralight-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-style: italic;
+  }
+  
+  .poppins-light-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-style: italic;
+  }
+  
+  .poppins-regular-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .poppins-medium-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-style: italic;
+  }
+  
+  .poppins-semibold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: italic;
+  }
+  
+  .poppins-bold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    font-style: italic;
+  }
+  
+  .poppins-extrabold-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-style: italic;
+  }
+  
+  .poppins-black-italic {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-style: italic;
+  }
+  
+
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to right, #2d8b96 62.5%, #3a909a 37.5%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mainContainer {
+    background: linear-gradient(
+        90deg,
+        #e9e8e8 3.51%,
+        rgba(255, 255, 255, 0.985) 22.16%,
+        rgba(233, 233, 233, 0.95) 47.73%,
+        rgba(233, 233, 233, 0.9) 65.04%,
+        rgba(207, 219, 220, 0.750143) 76.56%,
+        rgba(195, 217, 220, 0.617735) 95.68%,
+        rgba(45, 139, 150, 0.43) 121.54%
+    );
+    width: 90vw;
+    height: 85vh;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.sidePanel {
+    position: relative;
+    background-color: #ffffff;
+    width: 8%;
+    max-width: 250px;
+    height: 100%;
+    border-radius: 31px 60px 60px 31px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 9999 !important;
+}
+
+.topBar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 15px;
+}
+
+.iconLogo {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 80px;
+    margin-bottom: 10px;
+}
+
+.middleItems {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    font-family: "Kodchasan", sans-serif;
+}
+
+.middleItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0;
+    width: 100%;
+}
+
+.icon {
+    width: auto;
+    height: 30px;
+    max-width: 100%;
+    margin-bottom: 5px;
+}
+
+.lowerBarItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0;
+    font-family: "Kodchasan", sans-serif;
+}
+
+.iconLogout {
+    width: auto;
+    height: 25px;
+    max-width: 100%;
+    margin-bottom: 5px;
+}
+
+
+@media (max-width: 768px) {
+    .sidePanel {
+        width: 20%;
+    }
+
+    .icon {
+        height: 25px;
+    }
+
+    .iconLogout {
+        height: 20px;
+    }
+}
+
+
+.topBarItem {
+  background-color: #b9000000;
+  padding: 10px;
+  text-align: center;
+  margin-top: 4%;
+  margin-bottom: 75%;
+}
+
+.middleItems {
+  background-color: #b9000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+  font-family: "Kodchasan", sans-serif;
+  margin-bottom: 90%;
+}
+
+.middleItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 15px 0;
+    width: 100%;
+    cursor: pointer; 
+    transition: background-color 0.3s; 
+}
+
+.middleItem:hover {
+    background-color: #f0f0f000; 
+    border-radius: 8px; 
+}
+
+
+.lowerBarItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+  font-family: "Kodchasan", sans-serif;
+  margin-top: 40%;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  );
+  border-radius: 50px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+  position: absolute;
+  top: 4%;
+  right: 2%;
+  z-index: 9999 !important;
+}
+
+.profile-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2d8b96;
+}
+
+/* CONTENT HERE */
+
+.mainContent {
+    background-color: #851a1a00;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; 
+    border-radius: 0px 25px 25px 0px;
+  }

@@ -1,0 +1,201 @@
+@font-face {
+  font-family: "Kodchasan"; /* Name of your font */
+  src: url("../fonts/kodchasan/Kodchasan-Light.ttf") format("truetype"); /* Relative path */
+  font-weight: normal; /* Normal weight */
+  font-style: normal; /* Normal style */
+}
+
+body {
+  background-image: url("../images/background.png");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center; /* Centers content horizontally */
+  height: 100vh; /* Full viewport height for centering */
+  margin: 0;
+  text-align: center;
+}
+
+#centered-image {
+  max-width: 100%; /* Keeps image responsive */
+  height: auto; /* Maintains aspect ratio */
+}
+
+.whiteBG {
+  width: 69%;
+  height: 75vh;
+  margin-top: 135px;
+  background-color: #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 9px;
+  box-shadow: 1px 1px 15px 20px rgba(0, 0, 0, 0.25);
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  width: 100%;
+  height: 100%;
+}
+
+.logInContainer {
+  width: 100%;
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20px;
+  margin: 0;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background-color: #0e0c0700;
+  padding-top: 5%;
+  padding-left: 10%;
+  padding-bottom: 0px;
+}
+
+.loginTitle {
+  font-size: 1.3rem;
+  color: #2d8b96;
+  font-family: "Kodchasan", sans-serif;
+  font-weight: 400;
+  margin-bottom: 8%;
+}
+
+.user-icon,
+.lock-icon {
+  position: absolute;
+  left: 25px; /* Adjust icon position */
+  font-size: 1.2em;
+  color: #ffffff; /* Icon color */
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 335px;
+  margin-bottom: 20px;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 15px 10px 17px 45px;
+  border: 1px solid #ddd;
+  border-radius: 50px;
+  background-color: #6ABDB1;
+  color: #fafafa;
+  font-family: "Kodchasan", sans-serif;
+  text-align: left; /* Align text to the left */
+  text-indent: 10%;
+  font-size: 1.05rem;
+}
+
+.input-container input::placeholder {
+  color: #ffffff;
+  font-family: "Kodchasan", sans-serif !important;
+  opacity: 0.8;
+}
+
+.loginButton {
+  font-size: 1rem;
+  font-family: "Kodchasan", sans-serif;
+  margin-top: 20%;
+  padding: 10px 10px 10px 0px;
+  width: 100%;
+  color: #fff;
+  background-color: #6ABDB1 !important;
+  border: none;
+}
+
+.loginButton:hover {
+  background-color: #2e7d7b !important;
+}
+
+.showPasswordLabel {
+    display: flex;
+    cursor: pointer;
+    margin-left: -135px; /* Adjust as needed */
+}
+
+.showPasswordLabel input[type="checkbox"] {
+    display: none; /* Hide the default checkbox */
+}
+
+.showPasswordLabel label {
+    position: relative;
+    padding-left: 4px;
+    cursor: pointer;
+    color: #2d8b96;
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-family: "Kodchasan", sans-serif;
+}
+
+.showPasswordLabel label::before {
+    content: "";
+    position: absolute;
+    left: -20%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px; /* Reduced width */
+    height: 22px; /* Reduced height */
+    border-radius: 50%;
+    border: 1px solid #2d8b96; /* Reduced border thickness */
+    background-color: #ffffff00;
+    transition: background-color 0.3s;
+}
+
+.showPasswordLabel input[type="checkbox"]:checked + label::before {
+    background-color: #39b09e; /* Change background when checked */
+}
+
+
+.createAcc,
+.forgotPass {
+  display: block;
+  color: #2d8b96;
+  cursor: pointer;
+  margin-top: 15px !important;
+  text-align: center;
+  font-weight: 800;
+  font-family: "Kodchasan", sans-serif !important;
+  width: 100%;
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+.createAcc:hover,
+.forgotPass:hover {
+  color: #439099;
+  text-decoration:none; /* Keep underline on hover */
+}
+
+.frontImg {
+  background-image: url("../images/frontImg.png");
+  width: 93%;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background-size: contain;
+  margin-top: 25px;
+  margin-left: 17px;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}

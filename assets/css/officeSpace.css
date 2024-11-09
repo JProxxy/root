@@ -1,0 +1,364 @@
+.dashboardDevider {
+  display: flex;
+  width: 92%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 8%;
+  z-index: 2;
+  background-color: rgba(55, 55, 55, 0);
+}
+
+.dashboardDeviderLeft {
+  position: relative;
+  flex: 1.57;
+  padding: 20px;
+  font-family: "Kodchasan", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 255, 0);
+}
+
+.dashboardDeviderRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex: 1;
+  padding: 20px;
+  background-color: rgba(0, 128, 0, 0);
+}
+
+.officeDropdown {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+  outline: none;
+  padding: 10px 30px 10px 10px;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 25%;
+  margin-top: 3%;
+  margin-left: 5%;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.officeDropdown::after {
+  content: "";
+  position: absolute;
+  right: 10px; /* Adjust as needed */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px; /* Size of the icon */
+  height: 20px; /* Size of the icon */
+  background-image: url("../images/dropdown.png"); /* Ensure the path is correct */
+  background-size: contain; /* Ensure it fits well */
+  background-repeat: no-repeat;
+  pointer-events: none; /* Clicks go through to the dropdown */
+  z-index: 1; /* Make sure it's above other elements */
+}
+
+.firstFloor {
+  width: 95%;
+  height: auto;
+  border-radius: 8px;
+  align-items: center;
+  margin-top: 2%;
+  margin-left: 3%;
+}
+
+.room {
+  display: block; /* Use block display to stack items */
+  padding: 10px; /* Optional padding for aesthetics */
+  background-color: rgba(255, 0, 0, 0);
+  width: 100%;
+  margin-left: 10%;
+}
+
+.roomButton {
+  display: inline-block; /* Keeps buttons in a line */
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #000000;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: "Kodchasan", sans-serif;
+  margin-right: 10px; /* Space between buttons */
+}
+
+.roomButton:hover {
+  background-color: #eaf8fa;
+}
+
+.activeButton {
+  background-color: #EAF8FA; /* Light blue color */
+}
+
+/* LEFT SIDE */
+
+.searchContainer {
+  position: relative;
+  width: 100%; /* Adjust width as needed */
+  background-color: rgba(255, 0, 0, 0);
+  margin-top: 3%;
+  margin-left: 5%;
+}
+
+.searchInput {
+  width: 63%;
+  padding: 10px 10px 10px 40px; /* Space for icon on the left */
+  font-size: 1rem;
+  border: 1px solid #3d3d3d;
+  border-radius: 25px;
+  outline: none;
+}
+
+.searchButton {
+  position: absolute;
+  left: 15px; /* Position inside input */
+  top: 53%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  color: #555; /* Adjust icon color */
+  pointer-events: none;
+}
+
+/* FIRST FLOOR LOG */
+
+.firstFloorLog {
+  width: 77%;
+  height: 30%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f3f3;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 25px;
+  padding: 20px;
+  margin-top: 7%;
+  margin-left: 5%; /* Optional: ensure no extra margin */
+}
+
+.ffLogTable {
+  width: 100%;
+  height: auto;
+  border-collapse: collapse;
+  color: #0b3236;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.ffLogTable td {
+  text-align: center; /* Center the content horizontally */
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 200;
+  padding: 1%;
+  padding-bottom: 3%;
+  vertical-align: middle; /* Centers content vertically if needed */
+}
+
+.line-with-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 85%; /* Adjust the width of the line */
+  margin: 0 auto; /* Center the line */
+  height: 2px;
+  background-color: #2d8b96;
+}
+
+.line-with-circle::before {
+  content: "";
+  position: absolute;
+  left: 0; /* Position the circle at the start of the line */
+  width: 8px; /* Circle diameter */
+  height: 8px;
+  background-color: #2d8b96;
+  border-radius: 50%; /* Make it a circle */
+}
+
+.fflogTime {
+  color: #0b3236;
+  font-weight: 400;
+  margin-left: 20%;
+  padding-left: 16%;
+}
+
+.ffuserLog {
+  color: #0b3236;
+  margin-left: 5%;
+  padding-left: 16%;
+}
+
+.deviceControl {
+  background-color: rgba(165, 73, 73, 0);
+  width: 80%;
+  height: 35%;
+  border-radius: 25px;
+  padding: 20px;
+  margin-top: 1%;
+  margin-left: 5%;
+  display: flex;
+  flex-direction: column;
+}
+
+.deviceControl p {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.devices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between columns */
+  background-color: transparent; /* Adjust background if needed */
+  width: 100%;
+  height: 95%;
+}
+
+.accessGate,
+.cameraFF {
+  width: 41%;
+  height: 86%;
+  border-radius: 20px;
+  background-color: rgb(255, 255, 255);
+  justify-content: left;
+  margin-top: 6%;
+}
+
+.accessGate {
+  margin-left: 8%;
+  margin-right: 4%;
+}
+.accessGateImage,
+.cameraImage {
+  margin-top: 7%;
+  margin-left: 7%;
+  width: 50px;
+  height: 50px;
+}
+
+.accessGate p {
+  margin-top: 10%;
+  padding-left: 11%;
+  justify-content: left;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+}
+.accessGate span {
+  margin-top: 10%;
+  padding-left: 11%;
+  justify-content: left;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+}
+
+/* Camera */
+
+
+
+
+.cameraFF p {
+  margin-top: 10%;
+  padding-left: 11%;
+  justify-content: left;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+}
+.cameraFF span {
+  margin-top: 10%;
+  padding-left: 11%;
+  justify-content: left;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+}
+
+
+/* Switch */
+
+.switch-container {
+  background-color: rgba(255, 0, 0, 0);
+  display: flex;               /* Enables flex layout */
+  justify-content: flex-end;    /* Aligns content to the right */
+  width: 100%;                  /* Makes container full width */
+
+}
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 35px;
+  margin-right: 7%;
+
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #C4C4C4;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  left: 4px;
+  bottom: 6.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+  background: linear-gradient(180deg, #6FA6AC 0%, #598489 47.5%, #2D4446 100%);
+border-radius: 40px;
+
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+

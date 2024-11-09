@@ -1,0 +1,248 @@
+.bgMain {
+  background-color: #d8151500;
+  position: absolute;
+  z-index: 0;
+}
+
+.dashboardDevider {
+  display: flex;
+  width: 92%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 8%;
+  z-index: 2;
+}
+
+.dashboardDeviderLeft {
+  flex: 1.57;
+  padding: 20px;
+  font-family: "Kodchasan", sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.mainBuilding {
+  width: 75%;
+  height: auto;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.dashboardDeviderRight {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center horizontally */
+  flex: 1;
+  padding: 20px;
+}
+
+.dashboardDeviderRight h2 {
+  margin-top: 15%;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #0b3236;
+  margin-bottom: 2%;
+  text-align: center; /* Center text within the div */
+}
+
+.dashboardDeviderRight p {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #0b3236;
+  max-width: 75%;
+  margin: 0;
+  text-align: center;
+}
+
+.forecast {
+  position: absolute;
+  width: 25%;
+  height: 20%;
+  right: 5%;
+  top: 32%;
+  display: flex;
+  background: linear-gradient(
+    285.35deg,
+    #eeeeee 37.24%,
+    #e3e3e3 56.22%,
+    #dbdbdb 66.23%,
+    #d4d4d4 75.88%,
+    #c4c4c4 87.9%,
+    #888888 105.98%
+  );
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 30px;
+}
+
+.forecastLeft {
+  background-color: rgba(255, 0, 0, 0);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.temperature {
+  display: flex;
+  width: 100%;
+  margin-top: 17%;
+  margin-left: 10%;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.tempValue {
+  background-color: rgba(208, 255, 0, 0);
+  color: #0b3236;
+  flex: 0.7;
+  text-align: right;
+  font-family: "Poppins", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 500;
+  margin-left: 10%;
+  margin-bottom: 0%;
+}
+
+.itemGroup {
+  flex: 0.6;
+  background-color: rgba(208, 255, 0, 0);
+  color: #0b3236;
+
+  margin-bottom: 0%;
+}
+.tempUnits {
+  background-color: rgba(38, 255, 0, 0);
+  margin-left: auto;
+  text-align: right;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.weatherDescription {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.cloudIcon {
+  background-color: rgba(238, 0, 255, 0);
+  width: 55px;
+  text-align: right;
+  height: auto;
+  margin-right: 0;
+}
+
+.description {
+  background-color: rgba(0, 98, 255, 0);
+  text-align: left;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-left: 29%;
+  margin-top: -3%;
+}
+
+.forecastRight {
+  flex: 1.3;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0);
+  border-radius: 0 30px 30px 0;
+}
+
+.weather {
+  background-color: rgba(255, 0, 0, 0);
+  margin-left: 18%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.dashboardLog {
+  position: absolute;
+  width: 22%;
+  height: 41%;
+  right: 5%;
+  top: 54%;
+  display: flex;
+  flex-direction: column;
+  background-color: #eeeeee;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 30px 30px 0px 0px;
+  padding: 20px;
+}
+
+.headerLog {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 3%;
+  margin-left: 2%;
+  margin-bottom: 10px;
+}
+
+.headerLog p {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.next {
+  margin-right: 8%;
+  width: 40px;
+  height: 40px;
+}
+
+.userLogTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #0B3236;
+}
+
+.userLogTable th,
+.userLogTable td {
+  font-weight: 400;
+  text-align: left;
+  padding: 10px;
+  margin-left: 3%;
+
+}
+
+.userLog {
+  display: flex;
+  align-items: center;
+}
+
+.userIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.userName {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.userTime .logTime {
+  color: #0B3236;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
