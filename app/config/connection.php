@@ -3,7 +3,7 @@
 $host = 'localhost';
 $dbname = 'rivan_iot';
 $username = 'root';
-$password = '';
+$password = 'Pa$$word1';
 
 // Create a PDO connection
 try {
