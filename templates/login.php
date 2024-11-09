@@ -2,7 +2,7 @@
 // Include the database connection
 require_once '../app/config/connection.php';
 if ($conn) {
-    echo "Database connection established.<br>";
+    // echo "Database connection established.<br>";
 } else {
     echo "Database connection failed.<br>";
 }
