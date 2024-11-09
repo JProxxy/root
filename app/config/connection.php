@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-$host = 'localhost';
+$host = '18.139.255.32';
 $dbname = 'rivan_iot';
 $username = 'root';
 $password = 'Pa$$word1';
