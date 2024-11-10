@@ -129,44 +129,71 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <script>
-            function navigateToOutdoor() {
-                // Change background color of Outdoor button
-                document.getElementById("outdoorButton").classList.add("activeButton");
-                document.getElementById("garageButton").classList.remove("activeButton");
-            }
+        <!DOCTYPE html>
+        <html lang="en">
 
-            function navigateToGarage() {
-                // Reset Outdoor button and change background for Garage button
-                document.getElementById("garageButton").classList.add("activeButton");
-                document.getElementById("outdoorButton").classList.remove("activeButton");
-            }
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Smart Building Control</title>
+            <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+        </head>
 
+        <body>
+            <label for="accessGateSwitch">Access Gate:</label>
+            <input type="checkbox" id="accessGateSwitch" />
 
-            async function toggleAccessGate() {
-                // Get the checkbox element
-                const accessGateSwitch = document.getElementById('accessGateSwitch');
+            <script>
+                // Set MQTT connection parameters
+                const endpoint = 'wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt';  // Replace with your IoT endpoint
+                const client = mqtt.connect(endpoint, {
+                    clientId: 'webClient_' + Math.floor(Math.random() * 1000),  // Ensure unique client ID
+                    clean: true,
+                    reconnectPeriod: 1000,
+                    username: '',  // Optional if using Cognito
+                    password: '',  // Optional if using Cognito
+                    ca: '../assets/certificate/AmazonRootCA1.pem',  // Path to your root certificate
+                    cert: '../assets/certificate/Device Certificate.crt',  // Path to your device certificate
+                    key: '../assets/certificate/Private Key.key',  // Path to your private key
+                });
 
-                // Determine the new state based on the checkbox
-                const newState = accessGateSwitch.checked ? 1 : 0;
+                // Connect to the broker
+                client.on('connect', function () {
+                    console.log('Connected to MQTT broker');
+                });
 
-                // Log the new state to the console
-                console.log('Access Gate state:', newState);
-
-                try {
-                    // Send the state to the ESP32 (replace 'http://esp32-ip-address' with ESP32's actual IP address)
-                    const response = await fetch(`http://192.168.31.94/setAccessGate?state=${newState}`);
-
-                    if (response.ok) {
-                        console.log(`Access Gate state set to: ${newState} on ESP32`);
-                    } else {
-                        console.error('Failed to update state on ESP32');
+                // Subscribe to a topic (optional, if you want to receive updates)
+                const topic = 'home/office/accessGate';  // The topic ESP32 is subscribed to
+                client.subscribe(topic, function (err) {
+                    if (err) {
+                        console.error('Failed to subscribe:', err);
                     }
-                } catch (error) {
-                    console.error('Error connecting to ESP32:', error);
+                });
+
+                // Listen for messages on the topic
+                client.on('message', function (topic, message) {
+                    console.log('Received message:', topic, message.toString());
+                    // You can update the UI or trigger events based on the message
+                });
+
+                // Function to publish state change when the access gate switch is toggled
+                async function toggleAccessGate() {
+                    const accessGateSwitch = document.getElementById('accessGateSwitch');
+                    const newState = accessGateSwitch.checked ? 1 : 0;
+
+                    // Publish the state change to the MQTT topic
+                    client.publish('home/office/accessGate', JSON.stringify({ state: newState }));
+
+                    console.log('Access Gate state:', newState);
                 }
-            }
-        </script>
+
+                // Add event listener to trigger the toggleAccessGate function when the checkbox changes
+                document.getElementById('accessGateSwitch').addEventListener('change', toggleAccessGate);
+            </script>
+        </body>
+
+        </html>
+
 
     </div>
 </body>
