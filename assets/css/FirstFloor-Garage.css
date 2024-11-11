@@ -252,8 +252,8 @@
   border-radius: 10px;
 }
 
-.accessGate,
-.cameraFF {
+.lights,
+.airConditionFF {
   flex: 0 0 auto; /* Prevent flex items from shrinking */
   width: 41%; /* Maintain consistent width */
   height: 86%;
@@ -272,85 +272,31 @@
 @media screen and (max-width: 768px) {
   .devices {
     flex-wrap: nowrap; /* Keep horizontal scrolling */
-    gap: 10px; /* Reduce gap for smaller screens */
+    gap: 10px;
   }
 
-  .accessGate,
-  .cameraFF {
-    width: 70%; /* Increase width for better visibility on smaller screens */
+  .lights,
+  .airConditionFF {
+    width: 70%; 
     height: auto;
     margin: 5% auto;
   }
 
-  .accessGateImage,
-  .cameraImage {
+  .lightsImage,
+  .airconImage {
     width: 30px;
     height: 30px;
   }
 
-  .accessGate p,
-  .accessGate span,
-  .cameraFF p,
-  .cameraFF span {
+  .lights p,
+  .lights span,
+  .airConditionFF p,
+  .airConditionFF span {
     font-size: 0.9rem; /* Adjust text size for smaller screens */
   }
 }
 
-.accessGate {
-  margin-left: 8%;
-  margin-right: 4%;
-}
-
-.accessGateImage,
-.cameraImage {
-  margin-top: 5%;
-  margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
-}
-
-.accessGate p,
-.accessGate span {
-  margin-top: 5%;
-  padding-left: 10%;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2rem;
-  word-wrap: break-word; /* Wrap text if needed */
-  overflow: hidden; /* Prevent text overflow */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
-  white-space: nowrap; /* Prevent wrapping */
-}
-
-.switch-container {
-  margin-top: auto;
-  margin-bottom: 5%;
-  align-self: center;
-}
-
-@media screen and (max-width: 768px) {
-  .accessGate,
-  .cameraFF {
-    width: 90%; /* Adjust width on smaller screens */
-    height: auto; /* Allow height to adjust */
-    margin: 5% auto;
-  }
-
-  .accessGateImage,
-  .cameraImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .accessGate p,
-  .accessGate span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}
-
-/* Camera */
-
-.cameraFF {
+.lights {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -360,39 +306,40 @@
   background-color: rgb(255, 255, 255);
   justify-content: flex-start;
   margin-top: 6%;
-  overflow: hidden; /* Prevent content overflow */
-  padding: 10px; /* Add padding for spacing */
-  box-sizing: border-box; /* Include padding in width/height */
+  overflow: hidden;
+  padding: 10px;
+  box-sizing: border-box;
+  position: relative;
 }
 
-.cameraFF p,
-.cameraFF span {
-  margin-top: 5%;
-  padding-left: 10%;
-  font-family: "Poppins", sans-serif;
-  font-size: 1rem;
-  word-wrap: break-word; /* Wrap text if needed */
-  overflow: hidden; /* Prevent text overflow */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
-  white-space: nowrap; /* Prevent wrapping */
-}
-
-.cameraImage {
+.lightsImage {
   margin-top: 5%;
   margin-left: 5%;
   width: 40px;
   height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
+  object-fit: contain;
+}
+
+.lights p,
+.lights span {
+  margin-top: 5%;
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+}
+
+.lights p {
+  padding-top: 2%;
 }
 
 .switch-container {
   margin-top: auto;
   margin-bottom: 5%;
-  align-self: center;
-  background-color: rgba(255, 0, 0, 0);
-  display: flex;
-  justify-content: flex-end;
+  display: flex; /* Flexbox container to align items */
+  justify-content: flex-end; /* Align to the right */
+  background-color: rgba(70, 0, 0, 0);
   width: 100%;
+  margin-right: 5%;
 }
 
 .switch {
@@ -400,7 +347,7 @@
   display: inline-block;
   width: 50px;
   height: 35px;
-  margin-right: 7%;
+  margin-right: 0; /* No extra margin on the right */
 }
 
 .switch input {
@@ -424,9 +371,9 @@
 .slider:before {
   position: absolute;
   content: "";
-  height: 17px;
-  width: 17px;
-  left: 4px;
+  height: 19px;
+  width: 19px;
+  left: 2.5px;
   bottom: 6.5px;
   background-color: white;
   transition: 0.4s;
@@ -434,7 +381,7 @@
 }
 
 input:checked + .slider {
-  background-color: #4caf50;
+  background-color: #4caf4f00;
   background: linear-gradient(180deg, #6fa6ac 0%, #598489 47.5%, #2d4446 100%);
   border-radius: 40px;
 }
@@ -443,20 +390,158 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+/* Dropdown */
+.lightDropdown {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 105px;
+  padding: 5px;
+  border-radius: 5px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9rem;
+  background-color: #f6f6f6;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.lights p,
+.lights span {
+  margin-top: 5%;
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1rem;
+}
+
+.lights p,
+.lights span {
+  margin-top: 5%;
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1rem;
+  word-wrap: break-word;
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap;
+}
+
 @media screen and (max-width: 768px) {
-  .cameraFF {
+  .lights,
+  .airConditionFF {
+    width: 90%;
+    height: auto; 
+    margin: 5% auto;
+  }
+
+  .lightsImage,
+  .airconImage {
+    width: 30px;
+    height: 30px;
+  }
+
+  .lights p,
+  .lights span {
+    font-size: 0.9rem; /* Adjust text size for smaller screens */
+  }
+}
+
+/* airCondition */
+
+.airConditionFF {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 41%;
+  height: 86%;
+  border-radius: 20px;
+  background-color: rgb(255, 255, 255);
+  justify-content: flex-start;
+  margin-top: 6%;
+  overflow: hidden; /* Prevent content overflow */
+  padding: 10px; /* Add padding for spacing */
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+.airconImage {
+  margin-top: 5%;
+  margin-left: 5%;
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* Ensure the image scales properly */
+}
+
+.airConditionFF p,
+.airConditionFF span {
+  margin-top: 8%;
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1rem;
+  word-wrap: break-word; /* Wrap text if needed */
+  overflow: hidden; /* Prevent text overflow */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.airconImage {
+  margin-top: 5%;
+  margin-left: 5%;
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* Ensure the image scales properly */
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 35px;
+  margin-right: 7%;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .airConditionFF {
     width: 90%; /* Adjust width on smaller screens */
     height: auto; /* Allow height to adjust */
     margin: 5% auto;
   }
 
-  .cameraImage {
+  .airconImage {
     width: 30px;
     height: 30px;
   }
 
-  .cameraFF p,
-  .cameraFF span {
+  .airConditionFF p,
+  .airConditionFF span {
     font-size: 0.9rem; /* Adjust text size for smaller screens */
   }
 }
+.switch-containerTwo {
+    margin-top: auto;
+    margin-bottom: 5%;
+    align-self: center;
+    background-color: rgba(255, 0, 0, 0);
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* Aligns the switch to the right */
+  }
+  
+  .switchTwo {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 35px;
+    margin-right: 7%;
+  }
+  
+  .switchTwo input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  

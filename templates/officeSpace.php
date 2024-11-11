@@ -44,7 +44,8 @@ if (!isset($_SESSION['user_id'])) {
 
                 <div class="room">
                     <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage()" class="roomButton" id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage('../templates/FirstFloor-Garage.php')" class="roomButton"
+                        id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton activeButton"
                         id="outdoorButton">Outdoor</button>
                 </div>
@@ -144,6 +145,11 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("garageButton").classList.add("activeButton");
                 document.getElementById("outdoorButton").classList.remove("activeButton");
             }
+
+            function navigateToGarage(url) {
+                window.location.href = "../templates/FirstFloor-Garage.php";
+            }
+
 
 
             // Set MQTT connection parameters
