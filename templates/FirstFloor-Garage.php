@@ -249,7 +249,7 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             // Initialize the MQTT client (replace with your actual MQTT broker's URL)
-            const mqttClient = mqtt.connect('wss://your-mqtt-broker-url:port');  // Replace with actual broker URL
+            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
 
             mqttClient.on('connect', function () {
                 console.log('Connected to MQTT broker');
