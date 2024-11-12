@@ -37,7 +37,7 @@
   }
 
   // Fetch logged-in user info from the server (PHP backend)
-  fetch('../app/cofig/get-user-info.php')
+  fetch('../app/config/get-user-info.php')
     .then(response => response.json())
     .then(data => {
       if (data.user_id) {
