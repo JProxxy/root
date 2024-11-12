@@ -27,10 +27,17 @@ function connectToMQTT(user_id) {
   // Create MQTT client
   mqttClient = mqtt.connect(endpoint, options);
 
+  // Event listener for successful connection
   mqttClient.on("connect", function () {
     console.log("Connected to AWS IoT with clientId: " + clientId);
   });
 
+  // Event listener for connection errors
+  mqttClient.on("error", function (err) {
+    console.error("MQTT connection error:", err);
+  });
+
+  // Event listener for incoming messages
   mqttClient.on("message", function (topic, message) {
     console.log("Received message:", message.toString());
   });
