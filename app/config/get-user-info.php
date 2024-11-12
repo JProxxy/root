@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Include database connection
-require('../app/config/connection.php');
+require('connection.php');
 
 // Start session to access user session data
 session_start();
