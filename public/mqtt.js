@@ -16,12 +16,18 @@ function connectToMQTT(user_id) {
   const options = {
     clientId: clientId, // Use the logged-in user's ID as part of the client ID
     clean: true,
-    reconnectPeriod: 1000,
+    reconnectPeriod: 1000, // Automatic reconnect every 1 second
     username: "", // Optional, as you're using certificates for authentication
     password: "", // Optional
     ca: "../assets/certificates/AmazonRootCA1.pem",
     cert: "../assets/certificates/DeviceCertificate.pem.crt",
     key: "../assets/certificates/Private.pem.key",
+    will: {
+      topic: "client/status", // Topic for client's "last will" message
+      payload: JSON.stringify({ status: "disconnected", clientId: clientId }),
+      qos: 1,
+      retain: false
+    }
   };
 
   // Create MQTT client
@@ -30,6 +36,10 @@ function connectToMQTT(user_id) {
   // Event listener for successful connection
   mqttClient.on("connect", function () {
     console.log("Connected to AWS IoT with clientId: " + clientId);
+    // Optionally subscribe to a topic after connection
+    subscribeToTopic("client/status");
+    // Publish a message indicating the client is online
+    publishMessage("client/status", JSON.stringify({ status: "connected", clientId: clientId }));
   });
 
   // Event listener for connection errors
@@ -37,9 +47,34 @@ function connectToMQTT(user_id) {
     console.error("MQTT connection error:", err);
   });
 
+  // Event listener for connection disconnection
+  mqttClient.on("close", function () {
+    console.log("MQTT connection closed");
+  });
+
+  // Event listener for MQTT client reconnection
+  mqttClient.on("reconnect", function () {
+    console.log("Attempting to reconnect to MQTT broker...");
+  });
+
   // Event listener for incoming messages
   mqttClient.on("message", function (topic, message) {
-    console.log("Received message:", message.toString());
+    console.log("Received message on topic: " + topic + " Message: " + message.toString());
+  });
+
+  // Event listener for MQTT connection lost (useful for diagnostics)
+  mqttClient.on("offline", function () {
+    console.log("MQTT client is offline");
+  });
+
+  // Event listener for successful publish
+  mqttClient.on("packetsend", function () {
+    console.log("Packet sent successfully.");
+  });
+
+  // Event listener for MQTT client message acknowledgement
+  mqttClient.on("ack", function (packet) {
+    console.log("Acknowledgement received for packet: ", packet);
   });
 }
 
