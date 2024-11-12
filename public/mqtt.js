@@ -6,6 +6,8 @@ const endpoint =
 
 // Central MQTT client
 let mqttClient = null;
+let reconnectAttempts = 0;  // Track the number of reconnection attempts
+const maxReconnectAttempts = 5;  // Limit the number of reconnection attempts
 
 // Function to establish MQTT connection
 function connectToMQTT(user_id) {
@@ -16,18 +18,12 @@ function connectToMQTT(user_id) {
   const options = {
     clientId: clientId, // Use the logged-in user's ID as part of the client ID
     clean: true,
-    reconnectPeriod: 1000, // Automatic reconnect every 1 second
+    reconnectPeriod: 1000,  // Set reconnect period
     username: "", // Optional, as you're using certificates for authentication
     password: "", // Optional
     ca: "../assets/certificates/AmazonRootCA1.pem",
     cert: "../assets/certificates/DeviceCertificate.pem.crt",
     key: "../assets/certificates/Private.pem.key",
-    will: {
-      topic: "client/status", // Topic for client's "last will" message
-      payload: JSON.stringify({ status: "disconnected", clientId: clientId }),
-      qos: 1,
-      retain: false
-    }
   };
 
   // Create MQTT client
@@ -36,45 +32,38 @@ function connectToMQTT(user_id) {
   // Event listener for successful connection
   mqttClient.on("connect", function () {
     console.log("Connected to AWS IoT with clientId: " + clientId);
-    // Optionally subscribe to a topic after connection
-    subscribeToTopic("client/status");
-    // Publish a message indicating the client is online
-    publishMessage("client/status", JSON.stringify({ status: "connected", clientId: clientId }));
+    reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
   });
 
   // Event listener for connection errors
   mqttClient.on("error", function (err) {
     console.error("MQTT connection error:", err);
+    console.log("Attempting to reconnect...");
   });
 
-  // Event listener for connection disconnection
+  // Event listener for connection close
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
   });
 
-  // Event listener for MQTT client reconnection
-  mqttClient.on("reconnect", function () {
-    console.log("Attempting to reconnect to MQTT broker...");
-  });
-
-  // Event listener for incoming messages
-  mqttClient.on("message", function (topic, message) {
-    console.log("Received message on topic: " + topic + " Message: " + message.toString());
-  });
-
-  // Event listener for MQTT connection lost (useful for diagnostics)
+  // Event listener for disconnection
   mqttClient.on("offline", function () {
     console.log("MQTT client is offline");
   });
 
-  // Event listener for successful publish
-  mqttClient.on("packetsend", function () {
-    console.log("Packet sent successfully.");
+  // Event listener for reconnect attempts
+  mqttClient.on("reconnect", function () {
+    reconnectAttempts++;
+    console.log("Reconnection attempt #" + reconnectAttempts);
+    if (reconnectAttempts > maxReconnectAttempts) {
+      console.error("Max reconnect attempts reached. Giving up.");
+      mqttClient.end();  // End the client if max reconnect attempts are reached
+    }
   });
 
-  // Event listener for MQTT client message acknowledgement
-  mqttClient.on("ack", function (packet) {
-    console.log("Acknowledgement received for packet: ", packet);
+  // Event listener for incoming messages
+  mqttClient.on("message", function (topic, message) {
+    console.log("Received message from topic '" + topic + "':", message.toString());
   });
 }
 
@@ -111,7 +100,7 @@ function subscribeToTopic(topic) {
     if (err) {
       console.log("Error subscribing to " + topic, err);
     } else {
-      console.log("Subscribed to topic: " + topic);
+      console.log("Successfully subscribed to topic: " + topic);
     }
   });
 }
@@ -129,9 +118,9 @@ function publishMessage(topic, message) {
 
   mqttClient.publish(topic, JSON.stringify(payload), function (err) {
     if (err) {
-      console.log("Error publishing message:", err);
+      console.log("Error publishing message to " + topic + ":", err);
     } else {
-      console.log("Message published to " + topic);
+      console.log("Message published to " + topic + ": ", JSON.stringify(payload));
     }
   });
 }
