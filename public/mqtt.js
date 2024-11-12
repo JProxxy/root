@@ -1,7 +1,8 @@
 // mqtt.php
 
 // Define MQTT broker URL
-const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt";
+const endpoint =
+  "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt";
 
 // Central MQTT client
 let mqttClient = null;
@@ -37,10 +38,33 @@ function connectToMQTT(user_id) {
   mqttClient = mqtt.connect(endpoint, options);
 
   // Event listener for successful connection
-  mqttClient.on("connect", function () {
-    console.log("Connected to AWS IoT with clientId: " + clientId);
-    reconnectAttempts = 0; // Reset reconnect attempts on successful connection
-  });
+  mqttClient
+    .on("connect", function () {
+      console.log("Connected to AWS IoT with clientId: " + clientId);
+      reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+    })
+    .on("error", function (err) {
+      console.error("MQTT connection error:", err.message);
+      if (
+        err.message.includes("ENOTFOUND") ||
+        err.message.includes("timeout")
+      ) {
+        console.error(
+          "Network issue: Could not reach the endpoint. Check network connectivity."
+        );
+      } else if (err.message.includes("certificate")) {
+        console.error(
+          "Certificate issue: Ensure the certificates are correctly configured."
+        );
+      } else if (err.message.includes("403")) {
+        console.error(
+          "Authorization issue: Check the AWS IoT policy for permissions."
+        );
+      }
+    })
+    .on("close", function () {
+      console.log("MQTT connection closed.");
+    });
 
   // Event listener for connection errors
   mqttClient.on("error", function (err) {
@@ -53,12 +77,21 @@ function connectToMQTT(user_id) {
     }
 
     // Detailed error logging for specific types of errors:
-    if (err.message.includes('certificate')) {
-      console.error("Certificate error: Please check the certificate and key paths.");
-    } else if (err.message.includes('ENOTFOUND') || err.message.includes('timeout')) {
-      console.error("Network error: Could not reach the AWS IoT endpoint. Check your network connection.");
-    } else if (err.message.includes('403')) {
-      console.error("Authorization error: The device is not authorized. Check the policies attached to the certificate.");
+    if (err.message.includes("certificate")) {
+      console.error(
+        "Certificate error: Please check the certificate and key paths."
+      );
+    } else if (
+      err.message.includes("ENOTFOUND") ||
+      err.message.includes("timeout")
+    ) {
+      console.error(
+        "Network error: Could not reach the AWS IoT endpoint. Check your network connection."
+      );
+    } else if (err.message.includes("403")) {
+      console.error(
+        "Authorization error: The device is not authorized. Check the policies attached to the certificate."
+      );
     } else {
       console.log("Attempting to reconnect...");
     }
