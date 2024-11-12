@@ -187,10 +187,8 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <?php
-        // Include necessary MQTT client libraries
-        require('../public/mqtt.js');
-        ?>
+        <!-- Include necessary MQTT client libraries -->
+        <script type="module" src="../public/mqtt.js"></script>
 
         <script>
             // Function to load the light states from localStorage
