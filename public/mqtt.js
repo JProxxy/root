@@ -1,8 +1,7 @@
 // mqtt.php
 
 // Define MQTT broker URL
-const endpoint =
-  "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
+const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
 
 // Central MQTT client
 let mqttClient = null;
