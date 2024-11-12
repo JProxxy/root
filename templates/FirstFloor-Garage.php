@@ -269,7 +269,7 @@ if (!isset($_SESSION['user_id'])) {
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
 
-                // Publish the new state to MQTT
+                // Publish the new state to MQTT only if the client is connected
                 const topic = `esp32/pub/${lightCategory}`;  // Use correct topic format
                 const message = switchElement.checked ? 'ON' : 'OFF';
 
@@ -277,10 +277,11 @@ if (!isset($_SESSION['user_id'])) {
                     mqttClient.publish(topic, message);
                     console.log(`Published to ${topic}: ${message}`);
                 } else {
-                    console.error('MQTT client is not connected');
+                    console.error('MQTT client is not connected, retrying...');
+                    // Optionally, you can add code to reconnect the client here
+                    mqttClient.reconnect(); // Attempt to reconnect
                 }
             }
-
 
 
 
