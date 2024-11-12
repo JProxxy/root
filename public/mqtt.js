@@ -1,7 +1,7 @@
 // mqtt.php
 
 // Define MQTT broker URL
-const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
+const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt";
 
 // Central MQTT client
 let mqttClient = null;
@@ -51,13 +51,22 @@ function connectToMQTT(user_id) {
     if (err.stack) {
       console.log("Error stack:", err.stack);
     }
-    console.log("Attempting to reconnect...");
+
+    // Detailed error logging for specific types of errors:
+    if (err.message.includes('certificate')) {
+      console.error("Certificate error: Please check the certificate and key paths.");
+    } else if (err.message.includes('ENOTFOUND') || err.message.includes('timeout')) {
+      console.error("Network error: Could not reach the AWS IoT endpoint. Check your network connection.");
+    } else if (err.message.includes('403')) {
+      console.error("Authorization error: The device is not authorized. Check the policies attached to the certificate.");
+    } else {
+      console.log("Attempting to reconnect...");
+    }
   });
 
   // Event listener for connection close
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
-    // Add debug to check why the connection closed
     if (mqttClient.connected === false) {
       console.log(
         "Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error."
