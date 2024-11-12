@@ -17,9 +17,9 @@ function connectToMQTT(user_id) {
   // Check if certificate paths exist
   console.log(
     "Certificate Paths:",
-    "../assets/certificates/AmazonRootCA1.pem",
-    "../assets/certificates/DeviceCertificate.pem.crt",
-    "../assets/certificates/Private.pem.key"
+    "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem",
+    "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt",
+    "../assets/certificates/firstFloor-garage-lights/Private.pem.key"
   );
 
   // Define MQTT connection options
