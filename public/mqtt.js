@@ -6,19 +6,27 @@ const endpoint =
 
 // Central MQTT client
 let mqttClient = null;
-let reconnectAttempts = 0;  // Track the number of reconnection attempts
-const maxReconnectAttempts = 5;  // Limit the number of reconnection attempts
+let reconnectAttempts = 0; // Track the number of reconnection attempts
+const maxReconnectAttempts = 5; // Limit the number of reconnection attempts
 
 // Function to establish MQTT connection
 function connectToMQTT(user_id) {
   // Generate unique MQTT client ID based on user_id
   const clientId = "webClient_" + user_id;
 
+  // Check if certificate paths exist
+  console.log(
+    "Certificate Paths:",
+    "../assets/certificates/AmazonRootCA1.pem",
+    "../assets/certificates/DeviceCertificate.pem.crt",
+    "../assets/certificates/Private.pem.key"
+  );
+
   // Define MQTT connection options
   const options = {
     clientId: clientId, // Use the logged-in user's ID as part of the client ID
     clean: true,
-    reconnectPeriod: 1000,  // Set reconnect period
+    reconnectPeriod: 1000, // Set reconnect period
     username: "", // Optional, as you're using certificates for authentication
     password: "", // Optional
     ca: "../assets/certificates/AmazonRootCA1.pem",
@@ -32,7 +40,7 @@ function connectToMQTT(user_id) {
   // Event listener for successful connection
   mqttClient.on("connect", function () {
     console.log("Connected to AWS IoT with clientId: " + clientId);
-    reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
+    reconnectAttempts = 0; // Reset reconnect attempts on successful connection
   });
 
   // Event listener for connection errors
@@ -52,7 +60,9 @@ function connectToMQTT(user_id) {
     console.log("MQTT connection closed");
     // Add debug to check why the connection closed
     if (mqttClient.connected === false) {
-      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
+      console.log(
+        "Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error."
+      );
     }
   });
 
@@ -67,13 +77,16 @@ function connectToMQTT(user_id) {
     console.log("Reconnection attempt #" + reconnectAttempts);
     if (reconnectAttempts > maxReconnectAttempts) {
       console.error("Max reconnect attempts reached. Giving up.");
-      mqttClient.end();  // End the client if max reconnect attempts are reached
+      mqttClient.end(); // End the client if max reconnect attempts are reached
     }
   });
 
   // Event listener for incoming messages
   mqttClient.on("message", function (topic, message) {
-    console.log("Received message from topic '" + topic + "':", message.toString());
+    console.log(
+      "Received message from topic '" + topic + "':",
+      message.toString()
+    );
   });
 }
 
@@ -130,7 +143,10 @@ function publishMessage(topic, message) {
     if (err) {
       console.log("Error publishing message to " + topic + ":", err);
     } else {
-      console.log("Message published to " + topic + ": ", JSON.stringify(payload));
+      console.log(
+        "Message published to " + topic + ": ",
+        JSON.stringify(payload)
+      );
     }
   });
 }
