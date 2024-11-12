@@ -38,12 +38,22 @@ function connectToMQTT(user_id) {
   // Event listener for connection errors
   mqttClient.on("error", function (err) {
     console.error("MQTT connection error:", err);
+    if (err.message) {
+      console.log("Error message:", err.message);
+    }
+    if (err.stack) {
+      console.log("Error stack:", err.stack);
+    }
     console.log("Attempting to reconnect...");
   });
 
   // Event listener for connection close
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
+    // Add debug to check why the connection closed
+    if (mqttClient.connected === false) {
+      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
+    }
   });
 
   // Event listener for disconnection
