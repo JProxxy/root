@@ -29,9 +29,9 @@ function connectToMQTT(user_id) {
     reconnectPeriod: 1000, // Set reconnect period
     username: "", // Optional, as you're using certificates for authentication
     password: "", // Optional
-    ca: "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem",
-    cert: "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt",
-    key: "../assets/certificates/firstFloor-garage-lights/Private.pem.key",
+    ca: "/../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem",
+    cert: "/../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt",
+    key: "/../assets/certificates/firstFloor-garage-lights/Private.pem.key",
   };
 
   // Create MQTT client
