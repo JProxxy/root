@@ -1,20 +1,6 @@
 // mqtt.js
 // Define AWS IoT WebSocket URL
 const endpoint = "wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt"; // Add /mqtt for WebSocket connection
-export const mqttClient = mqtt.connect('wss://your-broker-url');  // Export the MQTT client
-
-
-mqttClient.on('connect', () => {
-    console.log('Connected to MQTT broker');
-    mqttClient.subscribe('esp32/pub/#'); // Subscribe to all relevant topics
-});
-
-// Function to toggle light states and publish
-export function toggleLight(lightCategory, state) {
-    const topic = `esp32/pub/${lightCategory}`;
-    mqttClient.publish(topic, state ? 'ON' : 'OFF');
-    console.log(`Published to ${topic}: ${state ? 'ON' : 'OFF'}`);
-}
 
 // Central MQTT client
 let mqttClient = null;
@@ -163,7 +149,12 @@ function publishMessage(topic, message) {
   });
 }
 
+// Function to toggle light states and publish
+export function toggleLight(lightCategory, state) {
+    const topic = `esp32/pub/${lightCategory}`;
+    mqttClient.publish(topic, state ? 'ON' : 'OFF');
+    console.log(`Published to ${topic}: ${state ? 'ON' : 'OFF'}`);
+}
+
 // Export the functions to be used in other files
 export { connectToMQTT, subscribeToTopic, publishMessage };
-
-
