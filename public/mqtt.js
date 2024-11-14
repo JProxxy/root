@@ -45,22 +45,7 @@ function connectToMQTT(user_id) {
     })
     .on("error", function (err) {
       console.error("MQTT connection error:", err.message);
-      if (
-        err.message.includes("ENOTFOUND") ||
-        err.message.includes("timeout")
-      ) {
-        console.error(
-          "Network issue: Could not reach the endpoint. Check network connectivity."
-        );
-      } else if (err.message.includes("certificate")) {
-        console.error(
-          "Certificate issue: Ensure the certificates are correctly configured."
-        );
-      } else if (err.message.includes("403")) {
-        console.error(
-          "Authorization issue: Check the AWS IoT policy for permissions."
-        );
-      }
+      handleConnectionError(err);
     })
     .on("close", function () {
       console.log("MQTT connection closed.");
@@ -69,32 +54,7 @@ function connectToMQTT(user_id) {
   // Event listener for connection errors
   mqttClient.on("error", function (err) {
     console.error("MQTT connection error:", err);
-    if (err.message) {
-      console.log("Error message:", err.message);
-    }
-    if (err.stack) {
-      console.log("Error stack:", err.stack);
-    }
-
-    // Detailed error logging for specific types of errors:
-    if (err.message.includes("certificate")) {
-      console.error(
-        "Certificate error: Please check the certificate and key paths."
-      );
-    } else if (
-      err.message.includes("ENOTFOUND") ||
-      err.message.includes("timeout")
-    ) {
-      console.error(
-        "Network error: Could not reach the AWS IoT endpoint. Check your network connection."
-      );
-    } else if (err.message.includes("403")) {
-      console.error(
-        "Authorization error: The device is not authorized. Check the policies attached to the certificate."
-      );
-    } else {
-      console.log("Attempting to reconnect...");
-    }
+    handleConnectionError(err);
   });
 
   // Event listener for connection close
@@ -129,6 +89,28 @@ function connectToMQTT(user_id) {
       message.toString()
     );
   });
+}
+
+// Handle MQTT connection errors
+function handleConnectionError(err) {
+  if (
+    err.message.includes("ENOTFOUND") ||
+    err.message.includes("timeout")
+  ) {
+    console.error(
+      "Network issue: Could not reach the endpoint. Check network connectivity."
+    );
+  } else if (err.message.includes("certificate")) {
+    console.error(
+      "Certificate issue: Ensure the certificates are correctly configured."
+    );
+  } else if (err.message.includes("403")) {
+    console.error(
+      "Authorization issue: Check the AWS IoT policy for permissions."
+    );
+  } else {
+    console.log("Attempting to reconnect...");
+  }
 }
 
 // Fetch logged-in user info from the server (PHP backend)
