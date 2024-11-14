@@ -1,8 +1,7 @@
-// mqtt.php
+// mqtt.js (formerly mqtt.php)
 
 // Define MQTT broker URL
-const endpoint =
-  "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt";
+const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com"; // Remove '/mqtt' from the endpoint URL
 
 // Central MQTT client
 let mqttClient = null;
@@ -14,14 +13,6 @@ function connectToMQTT(user_id) {
   // Generate unique MQTT client ID based on user_id
   const clientId = "webClient_" + user_id;
 
-  // Check if certificate paths exist
-  console.log(
-    "Certificate Paths:",
-    "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem",
-    "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt",
-    "../assets/certificates/firstFloor-garage-lights/Private.pem.key"
-  );
-
   // Define MQTT connection options
   const options = {
     clientId: clientId, // Use the logged-in user's ID as part of the client ID
@@ -29,10 +20,13 @@ function connectToMQTT(user_id) {
     reconnectPeriod: 1000, // Set reconnect period
     username: "", // Optional, as you're using certificates for authentication
     password: "", // Optional
-    ca: "/../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem",
-    cert: "/../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt",
-    key: "/../assets/certificates/firstFloor-garage-lights/Private.pem.key",
+    ca: "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", // Correct relative path
+    cert: "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", // Correct relative path
+    key: "../assets/certificates/firstFloor-garage-lights/Private.pem.key", // Correct relative path
   };
+
+  // Check if certificate paths exist (for debugging purposes)
+  console.log("Certificate Paths:", options.ca, options.cert, options.key);
 
   // Create MQTT client
   mqttClient = mqtt.connect(endpoint, options);
@@ -60,10 +54,8 @@ function connectToMQTT(user_id) {
   // Event listener for connection close
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
-    if (mqttClient.connected === false) {
-      console.log(
-        "Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error."
-      );
+    if (!mqttClient.connected) {
+      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
     }
   });
 
@@ -84,30 +76,18 @@ function connectToMQTT(user_id) {
 
   // Event listener for incoming messages
   mqttClient.on("message", function (topic, message) {
-    console.log(
-      "Received message from topic '" + topic + "':",
-      message.toString()
-    );
+    console.log("Received message from topic '" + topic + "':", message.toString());
   });
 }
 
 // Handle MQTT connection errors
 function handleConnectionError(err) {
-  if (
-    err.message.includes("ENOTFOUND") ||
-    err.message.includes("timeout")
-  ) {
-    console.error(
-      "Network issue: Could not reach the endpoint. Check network connectivity."
-    );
+  if (err.message.includes("ENOTFOUND") || err.message.includes("timeout")) {
+    console.error("Network issue: Could not reach the endpoint. Check network connectivity.");
   } else if (err.message.includes("certificate")) {
-    console.error(
-      "Certificate issue: Ensure the certificates are correctly configured."
-    );
+    console.error("Certificate issue: Ensure the certificates are correctly configured.");
   } else if (err.message.includes("403")) {
-    console.error(
-      "Authorization issue: Check the AWS IoT policy for permissions."
-    );
+    console.error("Authorization issue: Check the AWS IoT policy for permissions.");
   } else {
     console.log("Attempting to reconnect...");
   }
@@ -166,10 +146,7 @@ function publishMessage(topic, message) {
     if (err) {
       console.log("Error publishing message to " + topic + ":", err);
     } else {
-      console.log(
-        "Message published to " + topic + ": ",
-        JSON.stringify(payload)
-      );
+      console.log("Message published to " + topic + ": ", JSON.stringify(payload));
     }
   });
 }
