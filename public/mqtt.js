@@ -55,7 +55,7 @@ function connectToMQTT(user_id) {
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
     if (!mqttClient.connected) {
-      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
+      console.log("TANGINAMO");
     }
   });
 
@@ -134,7 +134,7 @@ function subscribeToTopic(topic) {
 // Function to publish a message to a topic
 function publishMessage(topic, message) {
   if (!mqttClient) {
-    console.log("TANGINAMO...");
+    console.log("MQTT client is not connected. Attempting to connect...");
     return;
   }
   const payload = {
