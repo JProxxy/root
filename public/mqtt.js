@@ -1,7 +1,20 @@
-// mqtt.js (formerly mqtt.php)
+// mqtt.js
+// Define AWS IoT WebSocket URL
+const endpoint = "wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt"; // Add /mqtt for WebSocket connection
+export const mqttClient = mqtt.connect('wss://your-broker-url');  // Export the MQTT client
 
-// Define MQTT broker URL
-const endpoint = "mqtts://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com"; // Remove '/mqtt' from the endpoint URL
+
+mqttClient.on('connect', () => {
+    console.log('Connected to MQTT broker');
+    mqttClient.subscribe('esp32/pub/#'); // Subscribe to all relevant topics
+});
+
+// Function to toggle light states and publish
+export function toggleLight(lightCategory, state) {
+    const topic = `esp32/pub/${lightCategory}`;
+    mqttClient.publish(topic, state ? 'ON' : 'OFF');
+    console.log(`Published to ${topic}: ${state ? 'ON' : 'OFF'}`);
+}
 
 // Central MQTT client
 let mqttClient = null;
@@ -16,19 +29,18 @@ function connectToMQTT(user_id) {
   // Define MQTT connection options
   const options = {
     clientId: clientId, // Use the logged-in user's ID as part of the client ID
-    clean: true,
-    reconnectPeriod: 1000, // Set reconnect period
-    username: "", // Optional, as you're using certificates for authentication
-    password: "", // Optional
-    ca: "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", // Correct relative path
-    cert: "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", // Correct relative path
-    key: "../assets/certificates/firstFloor-garage-lights/Private.pem.key", // Correct relative path
+    clean: true, // Start with a clean session
+    reconnectPeriod: 1000, // Set reconnect period (milliseconds)
+    connectTimeout: 30 * 1000, // Set connection timeout
+    ca: "../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", // Correct relative path to the root CA certificate
+    cert: "../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", // Correct relative path to the device certificate
+    key: "../assets/certificates/firstFloor-garage-lights/Private.pem.key", // Correct relative path to the private key
   };
 
   // Check if certificate paths exist (for debugging purposes)
   console.log("Certificate Paths:", options.ca, options.cert, options.key);
 
-  // Create MQTT client
+  // Create MQTT client using the WebSocket URL (wss://)
   mqttClient = mqtt.connect(endpoint, options);
 
   // Event listener for successful connection
@@ -153,3 +165,5 @@ function publishMessage(topic, message) {
 
 // Export the functions to be used in other files
 export { connectToMQTT, subscribeToTopic, publishMessage };
+
+

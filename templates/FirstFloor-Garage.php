@@ -263,6 +263,11 @@ if (!isset($_SESSION['user_id'])) {
             // Function to toggle the light switch and save the new state
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
+                const isChecked = switchElement.checked;
+
+                // Call the function from mqtt.js to handle publishing
+                toggleLight(lightCategory, isChecked);
+                
                 if (!switchElement) return;
 
                 const lightStates = loadLightState();
