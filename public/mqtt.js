@@ -55,7 +55,7 @@ function connectToMQTT(user_id) {
   mqttClient.on("close", function () {
     console.log("MQTT connection closed");
     if (!mqttClient.connected) {
-      console.log("TANGINAMO");
+      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
     }
   });
 
