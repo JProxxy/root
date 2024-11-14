@@ -134,7 +134,7 @@ function subscribeToTopic(topic) {
 // Function to publish a message to a topic
 function publishMessage(topic, message) {
   if (!mqttClient) {
-    console.log("MQTT client is not connected. Attempting to connect...");
+    console.log("TANGINAMO...");
     return;
   }
   const payload = {
