@@ -257,7 +257,7 @@ if (!isset($_SESSION['user_id'])) {
 
             // Send API request to control light
             function controlLightAPI(lightId, state) {
-                fetch(`https://your-node-red-endpoint/lights/${lightId}?state=${state}`, {
+                fetch(`http://18.139.255.32:1880/lights/{lightId}?state=${state}`, {
                     method: 'GET'
                 })
                 .then(response => response.json())
@@ -269,19 +269,19 @@ if (!isset($_SESSION['user_id'])) {
                 });
             }
 
-            // Send API request to control aircon
-            function controlAirconAPI(state) {
-                fetch('https://your-node-red-endpoint/aircon?state=' + state, {
-                    method: 'GET'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Aircon control response:', data);
-                })
-                .catch(error => {
-                    console.error('Error controlling aircon:', error);
-                });
-            }
+            // // Send API request to control aircon
+            // function controlAirconAPI(state) {
+            //     fetch('https://your-node-red-endpoint/aircon?state=' + state, {
+            //         method: 'GET'
+            //     })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         console.log('Aircon control response:', data);
+            //     })
+            //     .catch(error => {
+            //         console.error('Error controlling aircon:', error);
+            //     });
+            // }
 
             // Initialize and load the light state
             updateLightState();
