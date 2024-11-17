@@ -19,18 +19,8 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>First Floor</title>
 
-    <!-- MQTT client libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
-
-    <!-- MQTT CONNECTION  -->
-    <script type="module" src="../public/mqtt.js"></script>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-
-
-
-
-
 </head>
 
 <body>
@@ -41,7 +31,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="dashboardDeviderLeft">
                 <!-- Dropdown Menu -->
                 <select id="office-select" class="officeDropdown">
-                    <option value="firstFloor" selected>First Floor</option> <!-- Set as default -->
+                    <option value="firstFloor" selected>First Floor</option>
                     <option value="secondFloor">Second Floor</option>
                     <option value="thirdFloor">Third Floor</option>
                     <option value="roofTop">Roof Top</option>
@@ -53,8 +43,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 <div class="room">
                     <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage()" class="roomButton activeButton"
-                        id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton" id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
 
@@ -127,48 +116,42 @@ if (!isset($_SESSION['user_id'])) {
                             <!-- Switch containers, all initially hidden except the selected one -->
                             <div class="switch-container" id="switch_lights1">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights1"
-                                        onchange="toggleLightSwitch('lights1')">
+                                    <input type="checkbox" id="lightSwitch_lights1" onchange="toggleLightSwitch('lights1')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights2">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights2"
-                                        onchange="toggleLightSwitch('lights2')">
+                                    <input type="checkbox" id="lightSwitch_lights2" onchange="toggleLightSwitch('lights2')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights3">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights3"
-                                        onchange="toggleLightSwitch('lights3')">
+                                    <input type="checkbox" id="lightSwitch_lights3" onchange="toggleLightSwitch('lights3')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights4">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights4"
-                                        onchange="toggleLightSwitch('lights4')">
+                                    <input type="checkbox" id="lightSwitch_lights4" onchange="toggleLightSwitch('lights4')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights5">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights5"
-                                        onchange="toggleLightSwitch('lights5')">
+                                    <input type="checkbox" id="lightSwitch_lights5" onchange="toggleLightSwitch('lights5')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights6">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights6"
-                                        onchange="toggleLightSwitch('lights6')">
+                                    <input type="checkbox" id="lightSwitch_lights6" onchange="toggleLightSwitch('lights6')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -191,8 +174,6 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-
-
 
         <script>
             // Function to load the light states from localStorage
@@ -243,65 +224,69 @@ if (!isset($_SESSION['user_id'])) {
                     switchToShow.style.display = 'block';
                     switchToShow.style.textAlign = 'right';  // Align switch to the right
 
-                    const switchElement = switchToShow.querySelector('input');
-                    switchElement.checked = lightStates[selectedLight];
+                    const switchElement = switchToShow.querySelector('input[type="checkbox"]');
+                    if (switchElement) {
+                        switchElement.checked = lightStates[selectedLight];  // Set initial state
+                    }
                 }
             }
 
-            // Initialize the MQTT client (replace with your actual MQTT broker's URL)
-            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
+            // Function to handle light toggle
+            function toggleLightSwitch(lightId) {
+                // Get the current state of the light
+                const isChecked = document.getElementById(`lightSwitch_${lightId}`).checked;
 
-            mqttClient.on('connect', function () {
-                console.log('Connected to MQTT broker');
-                // You can subscribe to topics here if needed
-            });
-
-            mqttClient.on('error', function (error) {
-                console.error('MQTT Error:', error);
-            });
-
-            // Function to toggle the light switch and save the new state
-            function toggleLightSwitch(lightCategory) {
-                const switchElement = document.getElementById('lightSwitch_' + lightCategory);
-                const isChecked = switchElement.checked;
-
-                // Call the function from mqtt.js to handle publishing
-                toggleLight(lightCategory, isChecked);
-                
-                if (!switchElement) return;
-
+                // Load the light states from localStorage
                 const lightStates = loadLightState();
-                lightStates[lightCategory] = switchElement.checked;
+
+                // Update the state of the selected light
+                lightStates[lightId] = isChecked;
+
+                // Save the updated light states back to localStorage
                 saveLightState(lightStates);
 
-                // Publish the new state to MQTT only if the client is connected
-                const topic = `esp32/pub/${lightCategory}`;  // Use correct topic format
-                const message = switchElement.checked ? 'ON' : 'OFF';
-
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.publish(topic, message);
-                    console.log(`Published to ${topic}: ${message}`);
-                } else {
-                    console.error('MQTT client is not connected, retrying...');
-                    // Optionally, you can add code to reconnect the client here
-                    mqttClient.reconnect(); // Attempt to reconnect
-                }
+                // Call an API to control the light over HTTP
+                controlLightAPI(lightId, isChecked);
             }
 
+            // Function to handle aircon toggle (for air conditioning control)
+            function toggleAirconFF() {
+                const isChecked = document.getElementById('airconFFSwitch').checked;
+                controlAirconAPI(isChecked);
+            }
 
+            // Send API request to control light
+            function controlLightAPI(lightId, state) {
+                fetch(`https://your-node-red-endpoint/lights/${lightId}?state=${state}`, {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Light control response:', data);
+                })
+                .catch(error => {
+                    console.error('Error controlling light:', error);
+                });
+            }
 
-            // Initialize the light states when the page loads
-            document.addEventListener('DOMContentLoaded', () => {
-                const dropdown = document.getElementById('lightCategory');
-                if (dropdown) {
-                    updateLightState();  // Set the initial state of the light name and switches
-                    dropdown.addEventListener('change', updateLightState);  // Add event listener for dropdown changes
-                }
-            });
+            // Send API request to control aircon
+            function controlAirconAPI(state) {
+                fetch('https://your-node-red-endpoint/aircon?state=' + state, {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Aircon control response:', data);
+                })
+                .catch(error => {
+                    console.error('Error controlling aircon:', error);
+                });
+            }
+
+            // Initialize and load the light state
+            updateLightState();
         </script>
 
-
-    </div>
 </body>
 
 </html>
