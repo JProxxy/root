@@ -220,7 +220,7 @@ if (!isset($_SESSION['user_id'])) {
                 const selectedLight = dropdown.value;
 
                 // Format the light name to "Lights #1", "Lights #2", etc.
-                const formattedLightName = Lights #${selectedLight.charAt(6)};  // Extracts the number and formats it
+                const formattedLightName = `Lights #${selectedLight.charAt(6)}`;  // Extracts the number and formats it
 
                 // Update the <p> tag or element where the light name should appear
                 const lightNameElement = document.querySelector('.lights p');
@@ -234,16 +234,15 @@ if (!isset($_SESSION['user_id'])) {
                 // Hide all switch containers initially
                 const allSwitches = document.querySelectorAll('.switch-container');
                 allSwitches.forEach(switchContainer => {
-                    switchContainer.style.display = 'none';
-                    switchContainer.style.textAlign = 'left';  // Reset to default position
+                    switchContainer.style.display = 'none';  // Hide all switch containers
                 });
 
                 // Show the switch container corresponding to the selected light category
                 const switchToShow = document.getElementById('switch_' + selectedLight);
                 if (switchToShow) {
-                    switchToShow.style.display = 'block';
-                    switchToShow.style.textAlign = 'right';  // Align switch to the right
+                    switchToShow.style.display = 'block';  // Show the switch container for the selected light
 
+                    // Set the switch state based on saved state
                     const switchElement = switchToShow.querySelector('input');
                     switchElement.checked = lightStates[selectedLight];
                 }
@@ -268,7 +267,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 // Call the function from mqtt.js to handle publishing
                 toggleLight(lightCategory, isChecked);
-                
+
                 if (!switchElement) return;
 
                 const lightStates = loadLightState();
@@ -276,12 +275,12 @@ if (!isset($_SESSION['user_id'])) {
                 saveLightState(lightStates);
 
                 // Publish the new state to MQTT only if the client is connected
-                const topic = esp32/pub/${lightCategory};  // Use correct topic format
+                const topic = esp32 / pub / ${ lightCategory };  // Use correct topic format
                 const message = switchElement.checked ? 'ON' : 'OFF';
 
                 if (mqttClient && mqttClient.connected) {
                     mqttClient.publish(topic, message);
-                    console.log(Published to ${topic}: ${message});
+                    console.log(Published to ${ topic }: ${ message });
                 } else {
                     console.error('MQTT client is not connected, retrying...');
                     // Optionally, you can add code to reconnect the client here
