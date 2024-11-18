@@ -1,4 +1,5 @@
 <?php
+//FirstFloor-Garage.php
 // Start the session
 session_start();
 
@@ -17,9 +18,16 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>First Floor</title>
+
+    <!-- MQTT client libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+
+    <!-- MQTT CONNECTION  -->
+    <script type="module" src="../public/mqtt.js"></script>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
+
 
 
 
@@ -186,6 +194,7 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
 
+
         <script>
             // Function to load the light states from localStorage
             function loadLightState() {
@@ -240,17 +249,47 @@ if (!isset($_SESSION['user_id'])) {
                 }
             }
 
+            // Initialize the MQTT client (replace with your actual MQTT broker's URL)
+            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
+
+            mqttClient.on('connect', function () {
+                console.log('Connected to MQTT broker');
+                // You can subscribe to topics here if needed
+            });
+
+            mqttClient.on('error', function (error) {
+                console.error('MQTT Error:', error);
+            });
+
             // Function to toggle the light switch and save the new state
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
-                if (!switchElement) return;  // Prevent errors if the switch doesn't exist
+                const isChecked = switchElement.checked;
+
+                // Call the function from mqtt.js to handle publishing
+                toggleLight(lightCategory, isChecked);
+                
+                if (!switchElement) return;
 
                 const lightStates = loadLightState();
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
 
-                
+                // Publish the new state to MQTT only if the client is connected
+                const topic = esp32/pub/${lightCategory};  // Use correct topic format
+                const message = switchElement.checked ? 'ON' : 'OFF';
+
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(topic, message);
+                    console.log(Published to ${topic}: ${message});
+                } else {
+                    console.error('MQTT client is not connected, retrying...');
+                    // Optionally, you can add code to reconnect the client here
+                    mqttClient.reconnect(); // Attempt to reconnect
+                }
             }
+
+
 
             // Initialize the light states when the page loads
             document.addEventListener('DOMContentLoaded', () => {
@@ -261,7 +300,6 @@ if (!isset($_SESSION['user_id'])) {
                 }
             });
         </script>
-
 
 
     </div>
