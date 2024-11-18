@@ -187,8 +187,6 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <!-- Include necessary MQTT client libraries -->
-        <script type="module" src="../public/mqtt.js"></script>
 
         <script>
             // Function to load the light states from localStorage
@@ -245,7 +243,6 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             // Function to toggle the light switch and save the new state
-            // mqtt.php has already established a connection and is accessible
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
                 if (!switchElement) return;  // Prevent errors if the switch doesn't exist
@@ -254,26 +251,8 @@ if (!isset($_SESSION['user_id'])) {
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
 
-                // Publish the new state to MQTT (assuming connectToMQTT is available globally)
-                const topic = building/${lightCategory};
-                const message = switchElement.checked ? 'ON' : 'OFF';
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.publish(topic, message);
-                    console.log(Published to ${topic}: ${message});
-                }
 
-                // Assuming mqttClient is your established MQTT connection
-                if (typeof mqttClient !== 'undefined') {
-                    mqttClient.publish(mqttTopic, mqttMessage, { qos: 1 }, (err) => {
-                        if (err) {
-                            console.error("Error publishing to MQTT:", err);
-                        } else {
-                            console.log(Published message: ${mqttMessage} to topic: ${mqttTopic});
-                        }
-                    });
-                }
             }
-
 
             // Initialize the light states when the page loads
             document.addEventListener('DOMContentLoaded', () => {
