@@ -23,15 +23,10 @@ if (!isset($_SESSION['user_id'])) {
     <!-- MQTT client libraries -->
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 
-    <!-- MQTT CONNECTION  -->
+    <!-- MQTT CONNECTION -->
     <script type="module" src="../public/mqtt.js"></script>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-
-
-
-
-
 </head>
 
 <body>
@@ -54,8 +49,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 <div class="room">
                     <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage()" class="roomButton activeButton"
-                        id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton" id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
 
@@ -65,9 +59,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="searchContainer">
                     <input type="text" id="searchInput" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
-                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
@@ -128,48 +120,42 @@ if (!isset($_SESSION['user_id'])) {
                             <!-- Switch containers, all initially hidden except the selected one -->
                             <div class="switch-container" id="switch_lights1">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights1"
-                                        onchange="toggleLightSwitch('lights1')">
+                                    <input type="checkbox" id="lightSwitch_lights1" onchange="toggleLightSwitch('lights1')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights2">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights2"
-                                        onchange="toggleLightSwitch('lights2')">
+                                    <input type="checkbox" id="lightSwitch_lights2" onchange="toggleLightSwitch('lights2')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights3">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights3"
-                                        onchange="toggleLightSwitch('lights3')">
+                                    <input type="checkbox" id="lightSwitch_lights3" onchange="toggleLightSwitch('lights3')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights4">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights4"
-                                        onchange="toggleLightSwitch('lights4')">
+                                    <input type="checkbox" id="lightSwitch_lights4" onchange="toggleLightSwitch('lights4')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights5">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights5"
-                                        onchange="toggleLightSwitch('lights5')">
+                                    <input type="checkbox" id="lightSwitch_lights5" onchange="toggleLightSwitch('lights5')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights6">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights6"
-                                        onchange="toggleLightSwitch('lights6')">
+                                    <input type="checkbox" id="lightSwitch_lights6" onchange="toggleLightSwitch('lights6')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -192,8 +178,6 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-
-
 
         <script>
             // Function to load the light states from localStorage
@@ -248,51 +232,21 @@ if (!isset($_SESSION['user_id'])) {
                     switchElement.checked = lightStates[selectedLight];
                 }
             }
+            
+            // Initialize the MQTT client (replace with your actual MQTT logic)
+            function toggleLightSwitch(lightId) {
+                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
+                const isChecked = lightSwitch.checked;
 
-
-            // Initialize the MQTT client (replace with your actual MQTT broker's URL)
-            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
-
-            mqttClient.on('connect', function () {
-                console.log('Connected to MQTT broker');
-                // You can subscribe to topics here if needed
-            });
-
-            mqttClient.on('error', function (error) {
-                console.error('MQTT Error:', error);
-            });
-
-            // Function to toggle the light switch and save the new state
-            function toggleLightSwitch(lightCategory) {
-                const switchElement = document.getElementById('lightSwitch_' + lightCategory);
-                const isChecked = switchElement.checked;
-
-                // Call the function from mqtt.js to handle publishing
-                toggleLight(lightCategory, isChecked);
-
-                if (!switchElement) return;
-
+                // Simulate saving state to localStorage
                 const lightStates = loadLightState();
-                lightStates[lightCategory] = switchElement.checked;
+                lightStates[lightId] = isChecked;
                 saveLightState(lightStates);
 
-                // Publish the new state to MQTT only if the client is connected
-                const topic = esp32 / pub / ${ lightCategory };  // Use correct topic format
-                const message = switchElement.checked ? 'ON' : 'OFF';
-
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.publish(topic, message);
-                    console.log(Published to ${ topic }: ${ message });
-                } else {
-                    console.error('MQTT client is not connected, retrying...');
-                    // Optionally, you can add code to reconnect the client here
-                    mqttClient.reconnect(); // Attempt to reconnect
-                }
+                // Handle MQTT logic here...
             }
 
-
-
-            // Initialize the light states when the page loads
+            // Initialize page when loaded
             document.addEventListener('DOMContentLoaded', () => {
                 const dropdown = document.getElementById('lightCategory');
                 if (dropdown) {
@@ -301,9 +255,6 @@ if (!isset($_SESSION['user_id'])) {
                 }
             });
         </script>
-
-
-    </div>
 </body>
 
 </html>
