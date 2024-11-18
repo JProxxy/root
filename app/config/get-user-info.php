@@ -1,4 +1,5 @@
 <?php
+//get-user-info.php
 // Enable error reporting for debugging (remove this in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
