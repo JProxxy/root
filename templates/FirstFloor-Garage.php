@@ -20,8 +20,6 @@ if (!isset($_SESSION['user_id'])) {
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-    <!-- MQTT CONNECTION -->
-    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 
 
 
@@ -251,7 +249,7 @@ if (!isset($_SESSION['user_id'])) {
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
 
-
+                
             }
 
             // Initialize the light states when the page loads
@@ -263,6 +261,7 @@ if (!isset($_SESSION['user_id'])) {
                 }
             });
         </script>
+
 
 
     </div>
