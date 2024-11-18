@@ -178,7 +178,7 @@ if (!isset($_SESSION['user_id'])) {
 
                         <div class="airConditionFF">
                             <img src="../assets/images/ac.png" alt="Camera" class="airconImage">
-                            <p>Air Condition</p>
+                            <p>tANGINA</p>
                             <span>Room 1</span>
 
                             <div class="switch-containerTwo">
