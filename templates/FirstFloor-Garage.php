@@ -234,20 +234,21 @@ if (!isset($_SESSION['user_id'])) {
                 // Hide all switch containers initially
                 const allSwitches = document.querySelectorAll('.switch-container');
                 allSwitches.forEach(switchContainer => {
-                    switchContainer.style.display = 'none';  // Hide all switch containers
+                    switchContainer.style.display = 'none';  // Hide all switches initially
+                    switchContainer.style.textAlign = 'left';  // Reset alignment
                 });
 
                 // Show the switch container corresponding to the selected light category
                 const switchToShow = document.getElementById('switch_' + selectedLight);
                 if (switchToShow) {
-                    switchToShow.style.display = 'block';  // Show the switch container for the selected light
+                    switchToShow.style.display = 'block';  // Show the switch
+                    switchToShow.style.textAlign = 'right';  // Align switch to the right
 
-                    // Set the switch state based on saved state
                     const switchElement = switchToShow.querySelector('input');
                     switchElement.checked = lightStates[selectedLight];
                 }
             }
-
+            
             // Initialize the MQTT client (replace with your actual MQTT broker's URL)
             const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
 
