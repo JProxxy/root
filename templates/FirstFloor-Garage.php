@@ -18,9 +18,16 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>First Floor</title>
+
+    <!-- MQTT client libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+
+    <!-- MQTT CONNECTION  -->
+    <script type="module" src="../public/mqtt.js"></script>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
+
 
 
 
@@ -169,16 +176,13 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
 
-
-
-
                         <div class="airConditionFF">
                             <img src="../assets/images/ac.png" alt="Camera" class="airconImage">
                             <p>Air Condition</p>
                             <span>Room 1</span>
 
-                            <div class="switch-container">
-                                <label class="switch">
+                            <div class="switch-containerTwo">
+                                <label class="switchTwo">
                                     <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()">
                                     <span class="slider"></span>
                                 </label>
@@ -188,6 +192,7 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
+
 
 
         <script>
@@ -244,15 +249,42 @@ if (!isset($_SESSION['user_id'])) {
                 }
             }
 
+            // Initialize the MQTT client (replace with your actual MQTT broker's URL)
+            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
+
+            mqttClient.on('connect', function () {
+                console.log('Connected to MQTT broker');
+                // You can subscribe to topics here if needed
+            });
+
+            mqttClient.on('error', function (error) {
+                console.error('MQTT Error:', error);
+            });
+
             // Function to toggle the light switch and save the new state
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
-                if (!switchElement) return;  // Prevent errors if the switch doesn't exist
+                if (!switchElement) return;
 
                 const lightStates = loadLightState();
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
+
+                // Publish the new state to MQTT only if the client is connected
+                const topic = esp32/pub/${lightCategory};  // Use correct topic format
+                const message = switchElement.checked ? 'ON' : 'OFF';
+
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(topic, message);
+                    console.log(Published to ${topic}: ${message});
+                } else {
+                    console.error('MQTT client is not connected, retrying...');
+                    // Optionally, you can add code to reconnect the client here
+                    mqttClient.reconnect(); // Attempt to reconnect
+                }
             }
+
+
 
             // Initialize the light states when the page loads
             document.addEventListener('DOMContentLoaded', () => {
@@ -265,81 +297,7 @@ if (!isset($_SESSION['user_id'])) {
         </script>
 
 
-
-
-        <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
-
-
-        <script>
-            function navigateToOutdoor() {
-                // Change background color of Outdoor button
-                document.getElementById("garageButton").classList.add("activeButton");
-                document.getElementById("outdoorButton").classList.remove("activeButton");
-            }
-
-            function navigateToGarage() {
-                // Reset Outdoor button and change background for Garage button
-                document.getElementById("outdoorButton").classList.add("activeButton");
-                document.getElementById("garageButton").classList.remove("activeButton");
-            }
-
-            function navigateToOutdoor(url) {
-                window.location.href = "../templates/OfficeSpace.php";
-            }
-
-
-            // Set MQTT connection parameters
-            const endpoint = 'wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt';  // Replace with your IoT endpoint
-            const client = mqtt.connect(endpoint, {
-                clientId: 'webClient_' + Math.floor(Math.random() * 1000),  // Ensure unique client ID
-                clean: true,
-                reconnectPeriod: 1000,
-                username: '',  // Optional if using Cognito
-                password: '',  // Optional if using Cognito
-                ca: '../assets/certificate/AmazonRootCA1.pem',  // Path to your root certificate
-                cert: '../assets/certificate/Device Certificate.crt',  // Path to your device certificate
-                key: '../assets/certificate/Private Key.key',  // Path to your private key
-            });
-
-            // Connect to the broker
-            client.on('connect', function () {
-                console.log('Connected to MQTT broker');
-            });
-
-            // Subscribe to a topic (optional, if you want to receive updates)
-            const topic = 'home/office/accessGate';  // The topic ESP32 is subscribed to
-            client.subscribe(topic, function (err) {
-                if (err) {
-                    console.error('Failed to subscribe:', err);
-                }
-            });
-
-            // Listen for messages on the topic
-            client.on('message', function (topic, message) {
-                console.log('Received message:', topic, message.toString());
-                // You can update the UI or trigger events based on the message
-            });
-
-            // Function to publish state change when the access gate switch is toggled
-            async function toggleLightSwitch() {
-                const lightSwitch = document.getElementById('lightSwitch');
-                const newState = lightSwitch.checked ? 1 : 0;
-
-                // Publish the state change to the MQTT topic
-                client.publish('home/office/accessGate', JSON.stringify({ state: newState }));
-
-                console.log('Access Gate state:', newState);
-            }
-
-            // Add event listener to trigger the toggleLightSwitch function when the checkbox changes
-            document.getElementById('lightSwitch').addEventListener('change', toggleLightSwitch);
-
-        </script>
-
-
-
     </div>
 </body>
 
 </html>
-
