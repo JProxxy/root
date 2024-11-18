@@ -248,18 +248,6 @@ if (!isset($_SESSION['user_id'])) {
                 }
             }
 
-            // Initialize the MQTT client (replace with your actual MQTT broker's URL)
-            const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
-
-            mqttClient.on('connect', function () {
-                console.log('Connected to MQTT broker');
-                // You can subscribe to topics here if needed
-            });
-
-            mqttClient.on('error', function (error) {
-                console.error('MQTT Error:', error);
-            });
-
             // Function to toggle the light switch and save the new state
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
