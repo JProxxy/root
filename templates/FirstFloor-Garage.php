@@ -248,7 +248,8 @@ if (!isset($_SESSION['user_id'])) {
                     switchElement.checked = lightStates[selectedLight];
                 }
             }
-            
+
+
             // Initialize the MQTT client (replace with your actual MQTT broker's URL)
             const mqttClient = mqtt.connect('wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt');  // Replace with actual broker URL
 
