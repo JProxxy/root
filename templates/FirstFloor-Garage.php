@@ -49,7 +49,8 @@ if (!isset($_SESSION['user_id'])) {
 
                 <div class="room">
                     <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage()" class="roomButton activeButton" id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton"
+                        id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
 
@@ -59,7 +60,9 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="searchContainer">
                     <input type="text" id="searchInput" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
-                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
@@ -120,42 +123,48 @@ if (!isset($_SESSION['user_id'])) {
                             <!-- Switch containers, all initially hidden except the selected one -->
                             <div class="switch-container" id="switch_lights1">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights1" onchange="toggleLightSwitch('lights1')">
+                                    <input type="checkbox" id="lightSwitch_lights1"
+                                        onchange="toggleLightSwitch('lights1')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights2">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights2" onchange="toggleLightSwitch('lights2')">
+                                    <input type="checkbox" id="lightSwitch_lights2"
+                                        onchange="toggleLightSwitch('lights2')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights3">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights3" onchange="toggleLightSwitch('lights3')">
+                                    <input type="checkbox" id="lightSwitch_lights3"
+                                        onchange="toggleLightSwitch('lights3')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights4">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights4" onchange="toggleLightSwitch('lights4')">
+                                    <input type="checkbox" id="lightSwitch_lights4"
+                                        onchange="toggleLightSwitch('lights4')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights5">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights5" onchange="toggleLightSwitch('lights5')">
+                                    <input type="checkbox" id="lightSwitch_lights5"
+                                        onchange="toggleLightSwitch('lights5')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_lights6">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights6" onchange="toggleLightSwitch('lights6')">
+                                    <input type="checkbox" id="lightSwitch_lights6"
+                                        onchange="toggleLightSwitch('lights6')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -180,6 +189,22 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
         <script>
+
+            // Function to navigate to the outdoor page or section (you can customize the behavior)
+            function navigateToOutdoor() {
+                // If you want to navigate to another page, use window.location.href
+                window.location.href = "../templates/dashboard.php.php";  // Replace with actual path
+            }
+
+            // Alternatively, if you want to show/hide certain elements or perform another action, you can implement it like this:
+            function navigateToOutdoor() {
+                const outdoorSection = document.getElementById("outdoorSection");
+                if (outdoorSection) {
+                    outdoorSection.style.display = "block";  // Show outdoor section
+                }
+                // Hide other sections if needed, or implement other navigation actions
+            }
+
             // Function to load the light states from localStorage
             function loadLightState() {
                 const lightStates = JSON.parse(localStorage.getItem('lightStates')) || {
@@ -232,7 +257,7 @@ if (!isset($_SESSION['user_id'])) {
                     switchElement.checked = lightStates[selectedLight];
                 }
             }
-            
+
             // Initialize the MQTT client (replace with your actual MQTT logic)
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
