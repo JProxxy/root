@@ -249,16 +249,17 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             // Function to toggle the light switch and save the new state
+            // mqtt.php has already established a connection and is accessible
             function toggleLightSwitch(lightCategory) {
                 const switchElement = document.getElementById('lightSwitch_' + lightCategory);
-                if (!switchElement) return;
+                if (!switchElement) return;  // Prevent errors if the switch doesn't exist
 
                 const lightStates = loadLightState();
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
 
                 // Publish the new state to MQTT
-                const topic = esp32/pub/${lightCategory};  // Use correct topic format
+                const topic = building/${lightCategory};
                 const message = switchElement.checked ? 'ON' : 'OFF';
 
                 if (mqttClient && mqttClient.connected) {
@@ -268,7 +269,6 @@ if (!isset($_SESSION['user_id'])) {
                     console.error('MQTT client is not connected');
                 }
             }
-
 
 
 
