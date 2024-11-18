@@ -248,6 +248,8 @@ if (!isset($_SESSION['user_id'])) {
                 const lightStates = loadLightState();
                 lightStates[lightCategory] = switchElement.checked;
                 saveLightState(lightStates);
+
+                
             }
 
             // Initialize the light states when the page loads
