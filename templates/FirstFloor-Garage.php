@@ -190,20 +190,22 @@ if (!isset($_SESSION['user_id'])) {
 
         <script>
 
-            // Function to navigate to the outdoor page or section (you can customize the behavior)
             function navigateToOutdoor() {
-                // If you want to navigate to another page, use window.location.href
-                window.location.href = "../templates/dashboard.php.php";  // Replace with actual path
+                // Change background color of Outdoor button
+                document.getElementById("outdoorButton").classList.remove("activeButton");
+                document.getElementById("garageButton").classList.add("activeButton");
             }
 
-            // Alternatively, if you want to show/hide certain elements or perform another action, you can implement it like this:
-            function navigateToOutdoor() {
-                const outdoorSection = document.getElementById("outdoorSection");
-                if (outdoorSection) {
-                    outdoorSection.style.display = "block";  // Show outdoor section
-                }
-                // Hide other sections if needed, or implement other navigation actions
+            function navigateToGarage() {
+                // Reset Outdoor button and change background for Garage button
+                document.getElementById("garageButton").classList.remove("activeButton");
+                document.getElementById("outdoorButton").classList.add("activeButton");
             }
+
+            function navigateToGarage(url) {
+                window.location.href = "../templates/dashboard.php";
+            }
+
 
             // Function to load the light states from localStorage
             function loadLightState() {
