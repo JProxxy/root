@@ -203,7 +203,7 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             function navigateToGarage(url) {
-                window.location.href = "../templates/dashboard.php";
+                window.location.href = "../templates/officeSpace.php";
             }
 
 
