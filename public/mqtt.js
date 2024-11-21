@@ -1,4 +1,7 @@
 // mqtt.js
+const AWS = require('aws-sdk');
+const mqtt = require('mqtt');
+
 // Define AWS IoT WebSocket URL
 const endpoint = "wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt"; // Add /mqtt for WebSocket connection
 
@@ -48,8 +51,7 @@ q8vcN810uhPEJvlR0KiKcDkP0yZfszwXmW79m/lQbq7+mvUiWtOguGRy5jmcwN5S
 jyywBF6Mcz0ct4kqIHGhBPaYAaDDqDchSk3UPLOBOIuFV+wYJWbrO4ZwtqgJ3L62
 luVhgDt/sdyLPjpdha3LZv7w0nwrabEX7SzjutnK8wNWjYlMvoJhVE5WY3hWpKr1
 oMrn+kPwvkwCbtO7jq30u4h+qx94rsImAvUyae4eca2ehdOS5bB1MUowlN804g==
------END CERTIFICATE-----
-`;
+-----END CERTIFICATE-----`;
 
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAsRO2Y8EXncsFznZ55F7Rqi0HAEt/GnMvqsnlcXs8PuqndXpi
@@ -59,176 +61,51 @@ xpHciEVLTkrfDp1uYrOiOYUY6ZWXhpuH6gKbScnHgbbNMZ8UfNoe/+4Q5Gn8n+dG
 ReFpMc/j1Kesv+WBTl+edsdL/BfdBAgozWgHY12UgqxuocBcAQ+6Mf/GKZ4Jlkkq
 Z6Mpz3Z/MgJoBa2J18kpmVHNstcpjDrfTlIesQIDAQABAoIBAEs4I28GdAC8YDAO
 1cJzoL6YN/QhHdHfgi0bbFKjVbkoNpBJt4tWhiWJsAULRkvVenDyVVermjpHjwPQ
-ydoWa6ZAFiHZbHo6+0KnNTyIGmX6Kv7pX6XGgcIcYRd1k+lpQp+/EC5RXqWnq3JJ
-Lucub1F91rXU6gePLuvM1PJwCO8YeCsucHx5imLAsSWECaqFIahrvWeTrxiR9noZ
-RL9J9pygcOnk8Ukn8eziRmiakm+xpP3++AsTRMvMt6zDqeFQ2ElxU07brkXWGr5H
-fjBCTYaAqCk3x9GWL4fSN7DKNAj4ttPfbzhVrvKpl7IOh69XaumwxERlFDeIEFkh
-3qSPPBECgYEA4rZbvzJh26MxIhlgoRqBCw9WbeD8Eqv7/eDCTPCtxwrhWisbXCvu
-+avLPh5TETCc92W4b8jlOQliASygo5J4R8XADO8va8w7bI5zwRgEGQhc4Lb7E2hZ
-el/7OgthI/sozL+qlVxvSW8D8v+dDYmwf8BBEqLjPEhvo7Ugkeaezd0CgYEAx/Pb
-B/K838v0jmBRMh0PtJeqlDe3AYxoKdrRfS2X51cAEHoKKA2czVp1e1MggIqTXbZA
-jGgw0QSr5/6hOVXvt0FOBeQJvsrhGKCYXTpKsNZ7Ord0Gm1+4+2XRLWmrBVrl9ox
-tovChvtakjIZfbSF2efA5r0cmdCfHw7H6SGAWOUCgYEAlYEQS6ub4M1jT0tQ76yc
-wIBizJ77XAzSZn9bYoWs8393UJDwv/2w4DCsHNC+kq1uNa98yyq+DrjjSkb1wCiM
-7Te5CE6LBRlvbo0aRJHj0eYz6XSBajD8ILk+4O40JxgvtaYHheuo79In1o0+MnlE
-TVqpDvMfytcx19FQIybkPnkCgYAQ75+6wZ2r2wugz5mxA/MjmcESAtIWaH0eJnGe
-B7GZH65atuuLTvPcFPBkfLsBCDvJMTmwatbPrXSeFtwzDgta20Yvi4wjw+1i959Q
-LjLLXa9cXtOPtXyM87/fSv+ODdZqK0oQqy/T3RBj16h/FD5OIaoeISB+CsSfjdHy
-9ip33QKBgC1gy/0rhOo4rEhiVzrNhxGUrt1yiXlaDUNco4NuoQ5XOF1AXKtNIlaa
-joo4LymDXxzBVZ4WpY9EM5d7FVIhxcDxSJp7aY/R7URMJb7vAPhU5fQAuMTY5tNZ
-mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
------END RSA PRIVATE KEY-----
-`;
+ydoWaFV33z67D4k9QpRvgSYIlUs5FGy0kFgx/60YrUP2Tj0g7ix2g1KszTqXk2Xp
+P7tThwtugU6TQK0t51vC8t8cBy6QX5F+I4ZXlOgpKOrDsU9gGFo8k1yCH/cIXYOw
+eza4pVMjA9BZ5rYbzNRUBy+gkg1MchB0jVDRwv/VyGVjG5tWn3tTQwyZMOqFuEvT
+l8fSOYniYo0wEqFfMNkN6EADkYOPZa7LtwV9m1xnzoDWTX1M74+aX2TZHzfJzdBf
+kUmdpDkJghV3UmFpt0FSChh9jU9gd2g27vvCndgCggEAr3lfdGChXBISmyfKHh3s
+9EOI/EXlM4S7p9TALpQqVWS5XmvBIfu5TaA== 
+-----END RSA PRIVATE KEY-----`;
 
-// Function to establish MQTT connection
-function connectToMQTT(user_id) {
-  // Generate unique MQTT client ID based on user_id
-  const clientId = "webClient_" + user_id;
+// Initialize the MQTT client
+mqttClient = mqtt.connect(endpoint, {
+  clientId: 'your-client-id',
+  username: 'garage-lights', // Optional, if required
+  password: rootCA, // Optional, if required
+  ca: rootCA,
+  cert: deviceCert,
+  key: privateKey
+});
 
-  // Define MQTT connection options
-  const options = {
-    clientId: clientId, // Use the logged-in user's ID as part of the client ID
-    clean: true, // Start with a clean session
-    reconnectPeriod: 1000, // Set reconnect period (milliseconds)
-    connectTimeout: 30 * 1000, // Set connection timeout
-    ca: rootCA, // Root CA certificate content
-    cert: deviceCert, // Device certificate content
-    key: privateKey, // Private key content
-  };
-
-  // Check if certificate contents are provided (for debugging purposes)
-  console.log("Certificate Contents:", options.ca, options.cert, options.key);
-
-  // Create MQTT client using the WebSocket URL (wss://)
-  mqttClient = mqtt.connect(endpoint, options);
-
-  // Event listener for successful connection
-  mqttClient
-    .on("connect", function () {
-      console.log("Connected to AWS IoT with clientId: " + clientId);
-      reconnectAttempts = 0; // Reset reconnect attempts on successful connection
-    })
-    .on("error", function (err) {
-      console.error("MQTT connection error:", err.message);
-      handleConnectionError(err);
-    })
-    .on("close", function () {
-      console.log("MQTT connection closed.");
-    });
-
-  // Event listener for connection errors
-  mqttClient.on("error", function (err) {
-    console.error("MQTT connection error:", err);
-    handleConnectionError(err);
-  });
-
-  // Event listener for connection close
-  mqttClient.on("close", function () {
-    console.log("MQTT connection closed");
-    if (!mqttClient.connected) {
-      console.log("Client disconnected: Possibly due to incorrect credentials, network issue, or server-side error.");
+// Event listeners for connecting, errors, and messages
+mqttClient.on('connect', () => {
+  console.log('Connected to AWS IoT');
+  mqttClient.subscribe('your/topic', (err) => {
+    if (err) {
+      console.error('Error subscribing to topic:', err);
+    } else {
+      console.log('Subscribed to topic: your/topic');
     }
   });
+});
 
-  // Event listener for disconnection
-  mqttClient.on("offline", function () {
-    console.log("MQTT client is offline");
-  });
+mqttClient.on('message', (topic, message) => {
+  console.log(`Received message on topic ${topic}:`, message.toString());
+});
 
-  // Event listener for reconnect attempts
-  mqttClient.on("reconnect", function () {
+mqttClient.on('error', (error) => {
+  console.error('Error with MQTT connection:', error);
+});
+
+// Reconnect logic with retry
+mqttClient.on('close', () => {
+  if (reconnectAttempts < maxReconnectAttempts) {
+    console.log('Connection lost. Attempting to reconnect...');
     reconnectAttempts++;
-    console.log("Reconnection attempt #" + reconnectAttempts);
-    if (reconnectAttempts > maxReconnectAttempts) {
-      console.error("Max reconnect attempts reached. Giving up.");
-      mqttClient.end(); // End the client if max reconnect attempts are reached
-    }
-  });
-
-  // Event listener for incoming messages
-  mqttClient.on("message", function (topic, message) {
-    console.log("Received message from topic '" + topic + "':", message.toString());
-  });
-}
-
-// Handle MQTT connection errors
-function handleConnectionError(err) {
-  if (err.message.includes("ENOTFOUND") || err.message.includes("timeout")) {
-    console.error("Network issue: Could not reach the endpoint. Check network connectivity.");
-  } else if (err.message.includes("certificate")) {
-    console.error("Certificate issue: Ensure the certificates are correctly configured.");
-  } else if (err.message.includes("403")) {
-    console.error("Authorization issue: Check the AWS IoT policy for permissions.");
+    setTimeout(() => mqttClient.reconnect(), 5000); // Reconnect after 5 seconds
   } else {
-    console.log("Attempting to reconnect...");
+    console.log('Maximum reconnection attempts reached. Connection failed.');
   }
-}
-
-// Fetch logged-in user info from the server (PHP backend)
-fetch("../app/config/get-user-info.php")
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return response.text(); // Use text() temporarily for debugging
-  })
-  .then((text) => {
-    try {
-      const data = JSON.parse(text);
-      if (data.user_id) {
-        console.log("User info:", data);
-        connectToMQTT(data.user_id);
-      } else {
-        console.error("Error:", data.error);
-      }
-    } catch (error) {
-      console.error("JSON parsing error:", error, "Response text:", text);
-    }
-  })
-  .catch((error) => console.error("Fetch error:", error));
-
-// Function to subscribe to a topic
-function subscribeToTopic(topic) {
-  if (!mqttClient) {
-    console.log("MQTT client is not connected. Attempting to connect...");
-    return;
-  }
-  mqttClient.subscribe(topic, function (err) {
-    if (err) {
-      console.log("Error subscribing to " + topic, err);
-    } else {
-      console.log("Successfully subscribed to topic: " + topic);
-    }
-  });
-}
-
-// Function to publish a message to a topic
-function publishMessage(topic, message) {
-  if (!mqttClient) {
-    console.log("MQTT client is not connected. Attempting to connect...");
-    return;
-  }
-  const payload = {
-    message: message,
-    timestamp: new Date().toISOString(),
-  };
-
-  mqttClient.publish(topic, JSON.stringify(payload), function (err) {
-    if (err) {
-      console.log("Error publishing message to " + topic + ":", err);
-    } else {
-      console.log("Message published to " + topic + ": ", JSON.stringify(payload));
-    }
-  });
-}
-
-// Function to toggle light states and publish
-export function toggleLight(lightCategory, state) {
-    const topic = `esp32/pub/${lightCategory}`;
-    mqttClient.publish(topic, state ? 'ON' : 'OFF');
-    console.log(`Published to ${topic}: ${state ? 'ON' : 'OFF'}`);
-}
-
-// Export the functions to be used in other files
-export { connectToMQTT, subscribeToTopic, publishMessage };
-13
+});
