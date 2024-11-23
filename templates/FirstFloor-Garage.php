@@ -23,10 +23,11 @@ if (!isset($_SESSION['user_id'])) {
     <!-- MQTT client libraries -->
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 
-    <!-- MQTT CONNECTION -->
-    <script type="module" src="../public/mqtt.js"></script>
+    <!-- MQTT CONNECTION -->    
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
+    <?php include '../config/mqtt.php'; ?>
+
 </head>
 
 <body>

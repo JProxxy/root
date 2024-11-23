@@ -9,6 +9,10 @@
 
 <body>
     <h1>MQTT Client for AWS IoT</h1>
+
+    <button id="lightOnButton">Turn On Lights</button>
+    <button id="lightOffButton">Turn Off Lights</button>
+
     <script src="https://cdn.jsdelivr.net/npm/mqtt@4.2.0/dist/mqtt.min.js"></script>
     <script>
         // AWS IoT WebSocket URL
@@ -63,74 +67,74 @@ MIIEowIBAAKCAQEAsRO2Y8EXncsFznZ55F7Rqi0HAEt/GnMvqsnlcXs8PuqndXpi
 bCR3LWEhZXyfqp/vSTuU8X0Wr040BhE/heIX0rfArXbW5q3eREX/NO8K3GPf5f90
 EeV08qPOMcYBhGbYa+/HLt3UDccy6pbECbkWTImbVymzjRCCwQQiwM6HxrYsEGSy
 xpHciEVLTkrfDp1uYrOiOYUY6ZWXhpuH6gKbScnHgbbNMZ8UfNoe/+4Q5Gn8n+dG
-ReFpMc/j1Kesv+WBTl+edsdL/BfdBAgozWgHY12UgqxuocBcAQ+6Mf/GKZ4Jlkkq
-Z6Mpz3Z/MgJoBa2J18kpmVHNstcpjDrfTlIesQIDAQABAoIBAEs4I28GdAC8YDAO
-1cJzoL6YN/QhHdHfgi0bbFKjVbkoNpBJt4tWhiWJsAULRkvVenDyVVermjpHjwPQ
-ydoWaFV33z67D4k9QpRvgSYIlUs5FGy0kFgx/60YrUP2Tj0g7ix2g1KszTqXk2Xp
-P7tThwtugU6TQK0t51vC8t8cBy6QX5F+I4ZXlOgpKOrDsU9gGFo8k1yCH/cIXYOw
-eza4pVMjA9BZ5rYbzNRUBy+gkg1MchB0jVDRwv/VyGVjG5tWn3tTQwyZMOqFuEvT
-l8fSOYniYo0wEqFfMNkN6EADkYOPZa7LtwV9m1xnzoDWTX1M74+aX2TZHzfJzdBf
-kUmdpDkJghV3UmFpt0FSChh9jU9gd2g27vvCndgCggEAr3lfdGChXBISmyfKHh3s
-9EOI/EXlM4S7p9TALpQqVWS5XmvBIfu5TaA== 
+ReFpMc/j1Kesv+WBTl+eds7pqkFHdLscmIpwTgncklTxOmdj6vjmOYz1+WcsZFi2
+mjKfp3pF1IKHvkhlIrfWm9wPTFzF5jPpoFJ+V7fvJheZTbb8QKKn9+Iq2i5g06xZ
+CwIuF6QJ6z2mjr+uz6l0zNklb8HiJlMlXU25LwHhER7z6Oxmssv9jth5Asj7l23
+yXZB01jZT6xPf4VITJ0dfgBmuFjKXdd0ZT0q8+e89En+rll+lt8fu0QHiRnmW/Z
+rPbPdeF98ePxxeXhbEX0NRba0SPLvndOXqIgFe+nS2zNlKXrtk7ZZBlt9cI3LFZ0
++wuwdszMnX1Rpr7p4Hh7Z4ckBhg9vDff6hDlr5PYtVZq9VVyI/9ak5htbbfpftU8
+OEh6w4g8iS6akPyokug4IEYXOhTmbahW06sm7A9MiNkH9g5zxge6rr6P3xw3LCxD
+tdrcMJ7q0Nm2GRVuzM1t7Yal9vqwnzKgbyFyDFoOHiw2XXdklOnEshDN1NEdEdjf
+cgNkvG6D1oCEJrsF3qS7lZowCg==
 -----END RSA PRIVATE KEY-----`;
 
-        // MQTT Client connection setup
-        const client = mqtt.connect(endpoint, {
-            clientId: "SmartBuildingClient", // Unique Client ID for MQTT connection
-            cert: deviceCert, // Device Certificate
-            key: deviceKey,   // Device Private Key
-            ca: rootCA,       // Root CA
-            rejectUnauthorized: false,  // Allow self-signed certificates (set to true for production)
+        const clientId = "client-" + Math.random().toString(16).substr(2, 8);
+
+        // AWS IoT configuration
+        const options = {
+            clientId: clientId,
+            protocol: "wss", // WebSocket Secure
+            connectTimeout: 4000,
+            keepalive: 60,
+            clean: true,
+            // AWS IoT does not require username and password for WebSocket. Instead, use AWS SigV4 for authentication.
+            username: undefined,
+            password: undefined
+        };
+
+        // Initialize the MQTT client
+        mqttClient = mqtt.connect(brokerUrl, options);
+
+        // Event listeners
+        mqttClient.on("connect", () => {
+            console.log("Connected to AWS IoT");
+            // Subscribe to default topics
+            mqttClient.subscribe("home/+/lights");
+            mqttClient.subscribe("home/+/aircon");
         });
 
-        // MQTT connection callback
-        client.on("connect", () => {
-            console.log("Connected to MQTT broker");
-
-            // Subscribe to topics related to your devices (lights, aircon, etc.)
-            client.subscribe("building/lights", (err) => {
-                if (err) {
-                    console.error("Subscription error to lights topic", err);
-                }
-            });
-            client.subscribe("building/aircon", (err) => {
-                if (err) {
-                    console.error("Subscription error to aircon topic", err);
-                }
-            });
+        mqttClient.on("message", (topic, message) => {
+            console.log(`Received message from topic ${topic}: ${message.toString()}`);
         });
 
-        // Message handling callback
-        client.on("message", (topic, message) => {
-            console.log(`Received message: ${message} on topic: ${topic}`);
-            // Handle different topics, e.g., turning on/off lights, aircon, etc.
-            if (topic === "building/lights") {
-                // Process message to control lights
-                console.log("Processing lights control...");
-            } else if (topic === "building/aircon") {
-                // Process message to control aircon
-                console.log("Processing aircon control...");
-            }
+        mqttClient.on("error", (err) => {
+            console.error("Connection error:", err);
         });
 
-        // Error handling callback
-        client.on("error", (err) => {
-            console.error("MQTT Client Error", err);
+
+        client.on('connect', function () {
+            console.log('Connected to AWS IoT');
         });
 
-        // Function to publish messages to topics (for controlling devices)
-        function publishToTopic(topic, message) {
-            client.publish(topic, message, (err) => {
-                if (err) {
-                    console.error("Publish error", err);
-                } else {
-                    console.log(`Message published to ${topic}: ${message}`);
-                }
-            });
+        client.on('error', function (error) {
+            console.error('Connection error:', error);
+        });
+
+        // Publish a message to a topic
+        function publishToTopic(message) {
+            const topic = 'home/lights'; // Change topic as needed
+            console.log('Publishing message:', message);
+            client.publish(topic, message);
         }
 
-        // Example of publishing to a topic (e.g., turning on lights)
-        // publishToTopic("building/lights", "ON");
+        // Event listeners for button clicks
+        document.getElementById('lightOnButton').addEventListener('click', function () {
+            publishToTopic('on');
+        });
+
+        document.getElementById('lightOffButton').addEventListener('click', function () {
+            publishToTopic('off');
+        });
     </script>
 </body>
 
