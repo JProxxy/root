@@ -96,72 +96,48 @@ o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU
 rqXRfboQnoZsG4q5WTP468SQvvG5
 -----END CERTIFICATE-----`;
 
-        // MQTT connection setup
-        const client = mqtt.connect({
-            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',
-            port: 443,  // WebSocket over TLS port
-            protocol: 'wss',  // WebSocket protocol (wss://)
-            clientId: 'mqtt-client-' + Math.random().toString(36).substr(2, 9),
-            cert: cert,  // Your certificate (if needed)
-            key: key,    // Your private key (if needed)
-            ca: ca,      // Your CA certificate (if needed)
-            debug: console.log,
+          // Create MQTT client using AWS IoT endpoint, WebSocket URL with TLS/SSL (WSS)
+          const client = mqtt.connect(`wss://${endpoint}:443/mqtt`, {
+            clientId: clientId,
+            username: 'AWSIoTUser',  // Optional, your IoT user's username
+            password: 'AWSIoTPassword',  // Optional, password if needed
+            cert: cert,  // Provide the certificate
+            key: key,    // Provide the private key
+            rejectUnauthorized: true, // Ensure authorization validation
+            protocol: 'wss', // Ensures WebSocket over TLS
+            clean: true,   // Clean session
         });
 
-        // Event listeners for client connection and status
+        // When the client connects
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
-            document.getElementById('status').textContent = "Connected";
+            document.getElementById("status").textContent = 'Connected';
             client.subscribe(topicSubscribe, function (err) {
                 if (err) {
-                    console.error("Subscription failed:", err);
-                } else {
-                    console.log(`Subscribed to ${topicSubscribe}`);
+                    console.log('Error subscribing to topic: ' + err);
                 }
             });
         });
 
-        client.on('error', function (err) {
-            console.log('MQTT error:', err);
-            document.getElementById('status').textContent = "Error";
-        });
-
-        client.on('close', function () {
-            console.log('MQTT connection closed');
-            document.getElementById('status').textContent = "Disconnected";
-        });
-
-        client.on('reconnect', function () {
-            console.log('Reconnecting...');
-        });
-
-        client.on('offline', function () {
-            console.log('Client is offline');
-            document.getElementById('status').textContent = "Offline";
-        });
-
+        // Handle incoming messages
         client.on('message', function (topic, message) {
-            console.log(`Message received on ${topic}: ${message.toString()}`);
-            const messagesList = document.getElementById('messages');
-            const newMessage = document.createElement('li');
-            newMessage.textContent = message.toString();
-            messagesList.appendChild(newMessage);
+            const messagesList = document.getElementById("messages");
+            const listItem = document.createElement("li");
+            listItem.textContent = `Received message: ${message.toString()}`;
+            messagesList.appendChild(listItem);
         });
 
-        // Function to publish a message
+        // Publish message
         function publishMessage() {
             const message = document.getElementById('message').value;
             if (message) {
-                console.log('Publishing message:', message);
-                client.publish(topicPublish, JSON.stringify({ message: message }), function (err) {
+                client.publish(topicPublish, message, function (err) {
                     if (err) {
-                        console.error('Publish error:', err);
+                        console.log('Error publishing message: ' + err);
                     } else {
-                        console.log('Message Published');
+                        console.log('Message published successfully');
                     }
                 });
-            } else {
-                console.log('No message entered');
             }
         }
     </script>
