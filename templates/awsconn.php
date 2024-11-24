@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWS IoT MQTT Web Client</title>
-    <script src="../scripts/mqtt.min.js"></script> <!-- Include mqtt.min.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script> <!-- Include mqtt.min.js -->
 </head>
 
 <body>
@@ -22,7 +22,7 @@
 
     <script>
         // AWS IoT MQTT Client details
-        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Replace with your endpoint
+        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Provided endpoint
         const clientId = '1'; // Unique client ID
         const topicPublish = 'esp32/pub';  // Topic for publishing messages (e.g., to send commands)
         const topicSubscribe = 'esp32/sub'; // Topic for subscribing to messages (e.g., to receive data)
@@ -69,35 +69,14 @@ jGgw0QSr5/6hOVXvt0FOBeQJvsrhGKCYXTpKsNZ7Ord0Gm1+4+2XRLWmrBVrl9ox
 tovChvtakjIZfbSF2efA5r0cmdCfHw7H6SGAWOUCgYEAlYEQS6ub4M1jT0tQ76yc
 wIBizJ77XAzSZn9bYoWs8393UJDwv/2w4DCsHNC+kq1uNa98yyq+DrjjSkb1wCiM
 7Te5CE6LBRlvbo0aRJHj0eYz6XSBajD8ILk+4O40JxgvtaYHheuo79In1o0+MnlE
-TVieZcnJlSYzqgfTcplYve8CgYBGhuW9Zx2B5W5nd29/cdpgS5DbUoBxetnqNK0u
-26aR4l07g4m+sgbBjrjNmF10udtEFXwZ1ybmhNYDpb0bGEQIHxFqu75rNJZXOpu5
-O3tI8c3w8eGJeHs5q6GXYztYXzHWeHwwq2JdIrHZM7QyMoV1vSKGVZlpgZ5k46DZ
-eYBpzSOY3gxcFnlYxgTxyQ==
+TVieZcnJlSYzqgfTcplYve8CgYBGhuW9Zx2B5W5nd29/cdpgS5DbUoBx8O9bR58k
+dwCEwGSRNkOCROz4YbZh2xdHV9tRZVZ5tS2e7zL7yVfTiRgcw1f5I+dqdWT1I0N
+kr2HkzQBLHWPK90ODn7XK3bAZauEXzKKdpp+PmcO4Ofnmj1MO1W5pF2D0wwklEwN
+/2OxFnmVuHYREbpWx3HT7Q==
 -----END RSA PRIVATE KEY-----`;
 
-        const ca = `-----BEGIN CERTIFICATE-----
-MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF
-ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6
-b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL
-MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv
-b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj
-ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM
-9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw
-IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6
-VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L
-93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm
-jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC
-AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA
-A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI
-U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs
-N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv
-o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU
-5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy
-rqXRfboQnoZsG4q5WTP468SQvvG5
------END CERTIFICATE-----`;
-
-          // Create MQTT client using AWS IoT endpoint, WebSocket URL with TLS/SSL (WSS)
-          const client = mqtt.connect(`wss://${endpoint}:443/mqtt`, {
+        // Create MQTT client using AWS IoT endpoint, WebSocket URL with TLS/SSL (WSS)
+        const client = mqtt.connect(`wss://${endpoint}:443/mqtt`, {
             clientId: clientId,
             username: 'AWSIoTUser',  // Optional, your IoT user's username
             password: 'AWSIoTPassword',  // Optional, password if needed
