@@ -164,12 +164,7 @@ if (isset($_POST['trigger_mqtt'])) {
                 console.log(`Published: ${payload}`);
             }
 
-            // Example: Listen for state updates (if needed)
-            function subscribeToTopic("esp32/sub", (message) => {
-                console.log("Received message:", message);
-                // Handle updates from AWS IoT here (e.g., update switch states)
-            });
-
+     
             // Toggle air conditioning
             function toggleAirconFF() {
                 const airconSwitch = document.getElementById('airconFFSwitch');
