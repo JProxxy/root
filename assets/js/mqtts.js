@@ -1,6 +1,5 @@
 // mqtts.js
-src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"
-src="https://unpkg.com/mqtt/dist/mqtt.min.js"
+
 
 // AWS IoT endpoint and credentials
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
