@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+const mqtt = require('mqtt');
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQTT.js MQTT Test with Certificates</title>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+// Replace with your actual IoT endpoint
+const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
-</head>
-
-<body>
-    <h1>MQTT.js MQTT Test with Certificates</h1>
-    <button onclick="publishMessage()">Publish Test Message</button>
-    <ul id="messages"></ul>
-
-    <script>
-        // Replace with your actual IoT endpoint
-        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Ensure this is correct
-
-        // Replace with the appropriate Base64-encoded certificate and private key
-        const certificate = `-----BEGIN CERTIFICATE-----
+// Use the certificate and private key you provided
+const certificate = `-----BEGIN CERTIFICATE-----
 MIIDWjCCAkKgAwIBAgIVAL9kt1NGZT8bx7ObKAd6jD2GCCf7MA0GCSqGSIb3DQEB
 CwUAME0xSzBJBgNVBAsMQkFtYXpvbiBXZWIgU2VydmljZXMgTz1BbWF6b24uY29t
 IEluYy4gTD1TZWF0dGxlIFNUPVdhc2hpbmd0b24gQz1VUzAeFw0yNDExMTAwOTU2
@@ -38,10 +23,9 @@ q8vcN810uhPEJvlR0KiKcDkP0yZfszwXmW79m/lQbq7+mvUiWtOguGRy5jmcwN5S
 jyywBF6Mcz0ct4kqIHGhBPaYAaDDqDchSk3UPLOBOIuFV+wYJWbrO4ZwtqgJ3L62
 luVhgDt/sdyLPjpdha3LZv7w0nwrabEX7SzjutnK8wNWjYlMvoJhVE5WY3hWpKr1
 oMrn+kPwvkwCbtO7jq30u4h+qx94rsImAvUyae4eca2ehdOS5bB1MUowlN804g==
------END CERTIFICATE-----
-`;
+-----END CERTIFICATE-----`;
 
-        const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAsRO2Y8EXncsFznZ55F7Rqi0HAEt/GnMvqsnlcXs8PuqndXpi
 bCR3LWEhZXyfqp/vSTuU8X0Wr040BhE/heIX0rfArXbW5q3eREX/NO8K3GPf5f90
 EeV08qPOMcYBhGbYa+/HLt3UDccy6pbECbkWTImbVymzjRCCwQQiwM6HxrYsEGSy
@@ -67,62 +51,55 @@ LjLLXa9cXtOPtXyM87/fSv+ODdZqK0oQqy/T3RBj16h/FD5OIaoeISB+CsSfjdHy
 9ip33QKBgC1gy/0rhOo4rEhiVzrNhxGUrt1yiXlaDUNco4NuoQ5XOF1AXKtNIlaa
 joo4LymDXxzBVZ4WpY9EM5d7FVIhxcDxSJp7aY/R7URMJb7vAPhU5fQAuMTY5tNZ
 mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
------END RSA PRIVATE KEY-----
-`;
+-----END RSA PRIVATE KEY-----`;
 
-        const clientId = 'TestClient';  // Client ID for the MQTT connection
+const clientId = 'TestClient'; // Your client ID
 
-        // Creating the MQTT client with certificates over port 8883 (non-WebSocket MQTT)
-        const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
-            clientId: clientId,
-            clean: true,
-            connectTimeout: 4000,
-            rejectUnauthorized: true,  // Ensures certificate validation
-            protocol: 'mqtts',  // This enforces MQTT over TLS
-            cert: certificate,  // Add certificate
-            key: privateKey,    // Add private key
-        });
+// Create the MQTT client and connect securely (mqtts over port 8883)
+const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
+  clientId: clientId,
+  clean: true,
+  connectTimeout: 4000,
+  rejectUnauthorized: true,  // Ensure valid certificate is required
+  cert: certificate,
+  key: privateKey,
+});
 
+client.on('connect', () => {
+  console.log('Connected to AWS IoT');
+  client.subscribe('esp32/sub', (err) => {
+    if (!err) {
+      console.log('Subscribed to esp32/sub');
+    } else {
+      console.log('Subscription failed:', err);
+    }
+  });
+});
 
-        client.on('connect', () => {
-            console.log('Connected to AWS IoT');
-            client.subscribe('esp32/sub', (err) => {
-                if (!err) {
-                    console.log('Subscribed to esp32/sub');
-                } else {
-                    console.log('Subscription failed:', err);
-                }
-            });
-        });
+client.on('error', (err) => {
+  console.log('Connection failed with error:', err);
+});
 
-        client.on('error', (err) => {
-            console.log('Connection failed with error:', err);
-        });
+client.on('message', (topic, message) => {
+  console.log('Received message:', message.toString());
+});
 
-        client.on('close', () => {
-            console.log('Connection closed');
-        });
+client.on('close', () => {
+  console.log('Connection closed');
+});
 
-        client.on('reconnect', () => {
-            console.log('Attempting to reconnect...');
-        });
+client.on('reconnect', () => {
+  console.log('Attempting to reconnect...');
+});
 
-        client.on('offline', () => {
-            console.log('Client is offline');
-        });
+client.on('offline', () => {
+  console.log('Client is offline');
+});
 
-        client.on('message', (topic, message) => {
-            console.log('Received message:', message.toString());
-            const li = document.createElement('li');
-            li.textContent = message.toString();
-            document.getElementById('messages').appendChild(li);
-        });
+// Publish a test message
+function publishMessage() {
+  client.publish('esp32/pub', 'Hello from Node.js');
+  console.log('Message sent to esp32/pub');
+}
 
-        function publishMessage() {
-            client.publish('esp32/pub', 'Hello from the Web');
-            console.log('Message sent to esp32/pub');
-        }
-    </script>
-</body>
-
-</html>
+publishMessage();
