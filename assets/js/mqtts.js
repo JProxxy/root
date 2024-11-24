@@ -1,4 +1,6 @@
 // mqtts.js
+src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"
+src="https://unpkg.com/mqtt/dist/mqtt.min.js"
 
 // AWS IoT endpoint and credentials
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
@@ -52,7 +54,7 @@ J/zp0U1RmXXlGNCplzD9X5+jqCAghxf7nX6DQUtwY7Vh8j0XZlgqbfpDA0sq5aYB
 0tY=
 -----END RSA PRIVATE KEY-----`;
 
-const iotDevice = AWS.device({
+const client = mqtt.connect('wss://' + endpoint + ':443', {
   keyPath: privateKey,
   certPath: certificate,
   caPath: './root-CA.crt',  // path to the CA certificate
