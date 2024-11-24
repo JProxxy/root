@@ -53,7 +53,7 @@ J/zp0U1RmXXlGNCplzD9X5+jqCAghxf7nX6DQUtwY7Vh8j0XZlgqbfpDA0sq5aYB
 0tY=
 -----END RSA PRIVATE KEY-----`;
 
-const client = mqtt.connect('wss://' + endpoint + ':443', {
+const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
   key: privateKey,
   cert: certificate,
   rejectUnauthorized: true,
