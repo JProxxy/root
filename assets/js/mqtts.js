@@ -95,8 +95,12 @@ client.on('error', (err) => {
 });
 
 client.on('close', () => {
-  console.log("Connection closed");
+  console.log("Connection closed. Retrying...");
+  setTimeout(() => {
+    client.reconnect();
+  }, 5000); // Retry after 5 seconds
 });
+
 
 // Expose the publishMessage function to the global scope for usage in FirstFloor-Garage.php
 window.publishMessage = publishMessage;
