@@ -85,30 +85,23 @@ w90fcb4FCFFIQvljpQHj2Db0QmcNnMkElVWSkt0R2JbCDh+ZTJhK1UET70yx2is8
             clean: true,   // Clean session
         });
 
-        // When the client connects
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
             document.getElementById("status").textContent = 'Connected';
             client.subscribe(topicSubscribe, function (err) {
                 if (err) {
                     console.log('Error subscribing to topic: ' + err);
+                } else {
+                    console.log('Subscribed to topic: ' + topicSubscribe);
                 }
             });
         });
 
-        // Handle incoming messages
-        client.on('message', function (topic, message) {
-            const messagesList = document.getElementById("messages");
-            const listItem = document.createElement("li");
-            listItem.textContent = `Received message: ${message.toString()}`;
-            messagesList.appendChild(listItem);
-        });
-
-        // Log any errors that occur
         client.on('error', function (error) {
             console.log('Error:', error);
             document.getElementById("status").textContent = 'Connection failed';
         });
+
 
         // Publish message
         function publishMessage() {
