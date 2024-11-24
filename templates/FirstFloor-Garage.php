@@ -268,7 +268,7 @@ if (!isset($_SESSION['user_id'])) {
         </script>
 
         <script type="module">
-            import { publishMessage, subscribeToTopic } from "../scripts/mqtts.js";
+            import { publishMessage, subscribeToTopic } from "../assets/js/mqtts.js";
 
             const topicPub = "esp32/pub";
 

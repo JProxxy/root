@@ -115,14 +115,14 @@ client.on("offline", () => {
 });
 
 // Publish a test message
-function publishMessage() {
-  client.publish("esp32/pub", "Hello from Node.js", {
-    properties: {
-      payloadFormatIndicator: 1, // 1 means "UTF-8 encoded payload"
-    },
-  });
+// function publishMessage() {
+//   client.publish("esp32/pub", "Hello from Node.js", {
+//     properties: {
+//       payloadFormatIndicator: 1, // 1 means "UTF-8 encoded payload"
+//     },
+//   });
 
-  console.log("Message sent to esp32/pub");
-}
+//   console.log("Message sent to esp32/pub");
+// }
 
 publishMessage();
