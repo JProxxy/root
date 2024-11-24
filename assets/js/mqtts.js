@@ -62,14 +62,14 @@ const client = mqtt.connect('wss://' + endpoint + ':443', {
 });
 
 // Connect to the AWS IoT MQTT broker
-iotDevice.on('connect', () => {
+client.on('connect', () => {
   console.log('Connected to AWS IoT');
   iotDevice.subscribe('esp32/pub');
   console.log('Subscribed to esp32/pub topic');
 });
 
 // Subscribe to topic and receive messages
-iotDevice.on('message', (topic, payload) => {
+client.on('message', (topic, payload) => {
   console.log('Message received on topic', topic, ':', payload.toString());
 });
 
