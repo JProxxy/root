@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_id'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -28,12 +29,13 @@ if (!isset($_SESSION['user_id'])) {
     <title>First Floor</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-    
+
     <!-- Include the MQTT logic -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script type="module" src="../assets/js/mqtts.js"></script>
 </head>
+
 <body>
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
@@ -53,7 +55,8 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="room">
-                    <button onclick="navigateToGarage()" class="roomButton activeButton" id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton"
+                        id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
 
@@ -79,7 +82,9 @@ if (!isset($_SESSION['user_id'])) {
                             <td class="ffuserLog"><span class="ffuserDid">Access gate was Closed</span></td>
                         </tr>
                         <tr>
-                            <td colspan="2"><div class="line-with-circle"></div></td>
+                            <td colspan="2">
+                                <div class="line-with-circle"></div>
+                            </td>
                         </tr>
                         <tr>
                             <td class="ffuserTime"><span class="fflogTime">10:50 AM</span></td>
@@ -106,13 +111,15 @@ if (!isset($_SESSION['user_id'])) {
 
                             <div class="switch-container" id="switch_lights1">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights1" onchange="toggleLightSwitch('lights1')">
+                                    <input type="checkbox" id="lightSwitch_lights1"
+                                        onchange="toggleLightSwitch('lights1')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="switch-container" id="switch_lights2">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights2" onchange="toggleLightSwitch('lights2')">
+                                    <input type="checkbox" id="lightSwitch_lights2"
+                                        onchange="toggleLightSwitch('lights2')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -153,18 +160,36 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("outdoorButton").classList.add("activeButton");
             }
 
-            // Triggering MQTT message when light state changes
-            function toggleLightSwitch(lightId) {
-                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
-                const isChecked = lightSwitch.checked;
-                const payload = JSON.stringify({ light: lightId, state: isChecked ? "ON" : "OFF" });
+            // Hide all switch containers initially
+            const allSwitches = document.querySelectorAll('.switch-container');
+            allSwitches.forEach(switchContainer => {
+                switchContainer.style.display = 'none';  // Hide all switches initially
+                switchContainer.style.textAlign = 'left';  // Reset alignment
+            });
 
-                // Publish message using mqtts.js
-                publishMessage("esp32/pub", payload);
-                console.log(`Published: ${payload}`);
+            // Show the switch container corresponding to the selected light category
+            const switchToShow = document.getElementById('switch_' + selectedLight);
+            if (switchToShow) {
+                switchToShow.style.display = 'block';  // Show the switch
+                switchToShow.style.textAlign = 'right';  // Align switch to the right
+
+                const switchElement = switchToShow.querySelector('input');
+                switchElement.checked = lightStates[selectedLight];
             }
 
-     
+
+            // Triggering MQTT message when light state changes
+            function toggleLightSwitch(lightId) {
+                // Assuming you have some condition to check
+                const message = "Light is on"; // or "Light is off" depending on your logic
+
+                // Now you can call the globally defined publishMessage function
+                publishMessage("esp32/pub", message); // Adjust topic as needed
+
+                console.log("Toggling light switch...");
+            }
+
+
             // Toggle air conditioning
             function toggleAirconFF() {
                 const airconSwitch = document.getElementById('airconFFSwitch');
@@ -179,4 +204,5 @@ if (!isset($_SESSION['user_id'])) {
         </script>
     </div>
 </body>
+
 </html>

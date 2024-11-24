@@ -61,15 +61,42 @@ const client = mqtt.connect('wss://' + endpoint + ':443', {
   host: endpoint
 });
 
-// Connect to the AWS IoT MQTT broker
 client.on('connect', () => {
-  console.log('Connected to AWS IoT');
-  iotDevice.subscribe('esp32/pub');
-  console.log('Subscribed to esp32/pub topic');
+  console.log("Connected to AWS IoT");
+
+  // Subscribe to a topic
+  client.subscribe('esp32/sub', (err) => {
+    if (err) {
+      console.log("Error subscribing:", err);
+    } else {
+      console.log("Subscribed to topic: esp32/sub");
+    }
+  });
 });
 
-// Subscribe to topic and receive messages
-client.on('message', (topic, payload) => {
-  console.log('Message received on topic', topic, ':', payload.toString());
+// Function to publish a message
+function publishMessage(topic, message) {
+  client.publish(topic, message, (err) => {
+    if (err) {
+      console.log("Publish error:", err);
+    } else {
+      console.log("Message published to", topic);
+    }
+  });
+}
+
+// Handle incoming messages
+client.on('message', (topic, message) => {
+  console.log("Received message from topic", topic, ":", message.toString());
 });
 
+client.on('error', (err) => {
+  console.error("Connection error:", err);
+});
+
+client.on('close', () => {
+  console.log("Connection closed");
+});
+
+// Expose the publishMessage function to the global scope for usage in FirstFloor-Garage.php
+window.publishMessage = publishMessage;
