@@ -160,10 +160,22 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("outdoorButton").classList.add("activeButton");
             }
 
-            const selectedLight = dropdown.value;
-            // Format the light name to "Lights #1", "Lights #2", etc.
-            const formattedLightName = Lights #${ selectedLight.charAt(6)};  // Extracts the number and formats it
+            function updateLightState() {
+                const dropdown = document.getElementById('lightCategory');
+                const selectedLight = dropdown.value;
 
+                // Format the light name to "Lights #1", "Lights #2", etc.
+                const formattedLightName = Lights #${ selectedLight.charAt(6)
+            };  // Extracts the number and formats it
+
+            // Update the <p> tag or element where the light name should appear
+            const lightNameElement = document.querySelector('.lights p');
+            if (lightNameElement) {
+                lightNameElement.textContent = formattedLightName;  // Update text to "Lights #1", "Lights #2", etc.
+            }
+
+            // Load the saved light states
+            const lightStates = loadLightState();
 
             // Hide all switch containers initially
             const allSwitches = document.querySelectorAll('.switch-container');
@@ -181,7 +193,7 @@ if (!isset($_SESSION['user_id'])) {
                 const switchElement = switchToShow.querySelector('input');
                 switchElement.checked = lightStates[selectedLight];
             }
-
+            }
 
             // Triggering MQTT message when light state changes
             function toggleLightSwitch(lightId) {
