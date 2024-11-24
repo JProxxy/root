@@ -83,11 +83,14 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
         // MQTT connection setup
         console.log("Initializing MQTT connection...");
         const client = mqtt.connect({
-            host: endpoint,
-            port: 443,
-            protocol: 'wss',
-            clientId: clientId,
-            version: 4  // MQTT 3.1.1
+            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',
+            port: 8883,  // MQTT over TLS port
+            protocol: 'mqtts',  // MQTT over TLS
+            clientId: 'mqtt-client-' + Math.random().toString(36).substr(2, 9),
+            cert: cert,  // Your certificate
+            key: key,    // Your private key
+            ca: ca,      // Your CA certificate
+            debug: console.log,
         });
 
 
