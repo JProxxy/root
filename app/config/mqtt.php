@@ -97,11 +97,11 @@ cgNkvG6D1oCEJrsF3qS7lZowCg==
         // Event listeners
         mqttClient.on("connect", () => {
             console.log("Connected to AWS IoT");  // Connection successful
-            mqttClient.subscribe("home/+/lights", () => {
-                console.log("Subscribed to topic: home/+/lights");
+            mqttClient.subscribe("esp32/sub", () => {
+                console.log("Subscribed to topic: esp32/sub");
             });
-            mqttClient.subscribe("home/+/aircon", () => {
-                console.log("Subscribed to topic: home/+/aircon");
+            mqttClient.subscribe("esp32/sub", () => {
+                console.log("Subscribed to topic: esp32/sub");
             });
         });
 
