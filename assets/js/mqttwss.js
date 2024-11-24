@@ -1,37 +1,18 @@
 const AWS = require('aws-sdk');
-const mqtt = require('mqtt');
-const url = require('url');
 
-// AWS IoT Core endpoint
+// No need to manually configure credentials if the EC2 instance has an IAM role
+AWS.config.update({ region: 'ap-southeast-1' });
+
+const mqtt = require('mqtt');
+
+// AWS IoT endpoint
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
-// Configure AWS SDK with IAM credentials
-AWS.config.update({
-  accessKeyId: 'AKIATAVAA7JKQAPDC76H',  // Your Access Key
-  secretAccessKey: '+ZJt5LUXkMuqpvgUQe/VTS9fyLvkZe1iVh0n0BcW',  // Your Secret Key
-  region: 'ap-southeast-1'  // Your AWS region
+// Configure MQTT client using IAM role credentials
+const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
+  clientId: 'mqtt-user',  // You can set a unique clientId here
+  rejectUnauthorized: true  // Ensure the connection is secure
 });
-
-// Use AWS SigV4 to sign the MQTT WebSocket connection URL
-const signer = new AWS.Signers.V4(
-  { service: 'iot', region: 'ap-southeast-1', endpoint: endpoint }, 'iot'
-);
-const signedUrl = signer.getSignedUrl({
-  httpMethod: 'GET',
-  requestPath: `/mqtt`,
-  headers: {
-    Host: endpoint
-  }
-});
-
-// Parse the signed URL and set up the MQTT connection
-const mqttOptions = url.parse(signedUrl);
-
-// Set unique clientId
-mqttOptions.clientId = 'mqtt-user'; 
-
-// Now we connect using the signed URL as the WebSocket URL
-const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, mqttOptions);
 
 // MQTT connection handling
 mqttClient.on('connect', () => {
