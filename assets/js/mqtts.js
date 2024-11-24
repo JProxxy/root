@@ -54,17 +54,15 @@ J/zp0U1RmXXlGNCplzD9X5+jqCAghxf7nX6DQUtwY7Vh8j0XZlgqbfpDA0sq5aYB
 -----END RSA PRIVATE KEY-----`;
 
 const client = mqtt.connect('wss://' + endpoint + ':443', {
-  keyPath: privateKey,
-  certPath: certificate,
-  caPath: './root-CA.crt',  // path to the CA certificate
+  key: privateKey,
+  cert: certificate,
+  rejectUnauthorized: true,
   clientId: 'myClientId',
   host: endpoint
 });
 
 client.on('connect', () => {
   console.log("Connected to AWS IoT");
-
-  // Subscribe to a topic
   client.subscribe('esp32/sub', (err) => {
     if (err) {
       console.log("Error subscribing:", err);
@@ -72,6 +70,18 @@ client.on('connect', () => {
       console.log("Subscribed to topic: esp32/sub");
     }
   });
+});
+
+client.on('close', () => {
+  console.log("Connection closed");
+});
+
+client.on('error', (err) => {
+  console.error("Error:", err);
+});
+
+client.on('message', (topic, message) => {
+  console.log("Received message:", topic, message.toString());
 });
 
 // Function to publish a message
