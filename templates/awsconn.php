@@ -76,43 +76,41 @@ leTmD/e5o32Fzlhmv4YvgjDD6ZK73O7Z/F0bjm6EdbycA6jtTqZWz4X/rp4cPS6X
 syhEFwK8gOmdu3r5aIvh4w==
 -----END RSA PRIVATE KEY-----`;
 
-        const mqttClient = mqtt.connect({
-            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',  // Replace with your actual endpoint
-            port: 443,   // Port for WebSocket connections
-            protocol: 'wss',  // WebSocket Secure
+        // Connect to AWS IoT
+        const client = mqtt.connect({
+            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',
+            port: 8883,
+            protocol: 'wss',
             clientId: clientId,
-            username: '',
-            password: '',
-            key: key,
-            cert: cert,
-            rejectUnauthorized: false,
+            username: 'your-username',
+            password: 'your-password',
+            will: {
+                topic: 'esp32/status',
+                payload: 'offline',
+                qos: 0,
+                retain: false
+            }
         });
 
-        mqttClient.on('connect', function () {
-            document.getElementById('status').innerText = 'Connected';
-            mqttClient.subscribe(topicSubscribe);
+        client.on('connect', function () {
             console.log('Connected to AWS IoT');
 
-            mqttClient.publish(topicPublish, 'Client is connected and ready to publish');
+            // Subscribe to the topic
+            client.subscribe('esp32/sub', function (err) {
+                if (!err) {
+                    console.log('Subscribed to esp32/sub');
+                } else {
+                    console.log('Subscription error:', err);
+                }
+            });
+
+            // Publish a message to the topic
+            client.publish('esp32/pub', JSON.stringify({ message: 'Hello from garage-lights' }));
         });
 
-        mqttClient.on('message', function (topic, message) {
-            const messagesList = document.getElementById('messages');
-            const newMessage = document.createElement('li');
-            newMessage.textContent = message.toString();
-            messagesList.appendChild(newMessage);
+        client.on('message', function (topic, message) {
+            console.log('Received message:', topic, message.toString());
         });
-
-        function publishMessage() {
-            const message = document.getElementById('message').value;
-            if (message) {
-                mqttClient.publish(topicPublish, message);
-                console.log('Message sent:', message);
-                document.getElementById('message').value = ''; // Clear the input field
-            } else {
-                console.log('Message cannot be empty');
-            }
-        }
     </script>
 
 </body>
