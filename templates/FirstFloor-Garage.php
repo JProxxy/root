@@ -21,9 +21,9 @@ if (!isset($_SESSION['user_id'])) {
     <title>First Floor</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-
+    
     <!-- Include the MQTT logic -->
-    <script type="module" src="../scripts/mqtts.js"></script>
+    <script type="module" src="../assets/js/mqtts.js"></script>
 </head>
 
 <body>
