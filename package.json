@@ -13,6 +13,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "aws-iot-device-sdk": "^2.2.15"
-  }
+    "aws-iot-device-sdk": "^2.2.15",
+    "mqtt": "^5.10.2"
+  },
+  "type": "module"
 }
