@@ -28,7 +28,6 @@ if (!isset($_SESSION['user_id'])) {
 
 <body>
     <div class="bgMain">
-        <?php include '../app/config/mqtt.php'; ?>
         <?php include '../partials/bgMain.php'; ?>
 
         <div class="dashboardDevider">
