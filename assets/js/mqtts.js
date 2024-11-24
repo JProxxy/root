@@ -1,7 +1,7 @@
-const mqtt = require('mqtt');
+const mqtt = require("mqtt");
 
 // Replace with your actual IoT endpoint
-const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
+const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
 
 // Use the certificate and private key you provided
 const certificate = `-----BEGIN CERTIFICATE-----
@@ -53,55 +53,59 @@ joo4LymDXxzBVZ4WpY9EM5d7FVIhxcDxSJp7aY/R7URMJb7vAPhU5fQAuMTY5tNZ
 mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
 -----END RSA PRIVATE KEY-----`;
 
-const clientId = 'TestClient'; // Your client ID
+const clientId = "TestClient"; // Your client ID
 
 // Create the MQTT client and connect securely (mqtts over port 8883)
-const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
+const client = mqtt.connect("mqtts://" + endpoint + ":8883", {
   clientId: clientId,
   clean: true,
   connectTimeout: 4000,
   rejectUnauthorized: true,
   cert: certificate,
   key: privateKey,
-  keepalive: 60,  // Set keepalive interval to 60 seconds (default is 60 seconds)
+  keepalive: 60, // Set keepalive interval to 60 seconds (default is 60 seconds)
 });
 
-
-client.on('connect', () => {
-  console.log('Connected to AWS IoT');
-  client.subscribe('esp32/sub', (err) => {
+client.on("connect", () => {
+  console.log("Connected to AWS IoT");
+  client.subscribe("esp32/sub", (err) => {
     if (!err) {
-      console.log('Subscribed to esp32/sub');
+      console.log("Subscribed to esp32/sub");
     } else {
-      console.log('Subscription failed:', err);
+      console.log("Subscription failed:", err);
     }
   });
 });
 
-client.on('error', (err) => {
-  console.log('Connection failed with error:', err);
+client.on("error", (err) => {
+  console.log("Connection failed with error:", err);
 });
 
-client.on('message', (topic, message) => {
-  console.log('Received message:', message.toString());
+client.on("message", (topic, message) => {
+  console.log("Received message:", message.toString());
 });
 
-client.on('close', () => {
-  console.log('Connection closed');
+client.on("close", () => {
+  console.log("Connection closed");
 });
 
-client.on('reconnect', () => {
-  console.log('Attempting to reconnect...');
+client.on("reconnect", () => {
+  console.log("Attempting to reconnect...");
 });
 
-client.on('offline', () => {
-  console.log('Client is offline');
+client.on("offline", () => {
+  console.log("Client is offline");
 });
 
 // Publish a test message
 function publishMessage() {
-  client.publish('esp32/pub', 'Hello from Node.js');
-  console.log('Message sent to esp32/pub');
+  client.publish("esp32/pub", "Hello from Node.js", {
+    properties: {
+      contentType: "text/plain",
+    },
+  });
+
+  console.log("Message sent to esp32/pub");
 }
 
 publishMessage();
