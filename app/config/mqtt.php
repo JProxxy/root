@@ -135,7 +135,7 @@ cgNkvG6D1oCEJrsF3qS7lZowCg==
 
         // Publish a message to a topic
         function publishToTopic(message) {
-            const topic = 'home/lights'; // Change topic as needed
+            const topic = 'esp32/pub'; // Change topic as needed
             console.log('Publishing message:', message);
             mqttClient.publish(topic, message, (err) => {
                 if (err) {
