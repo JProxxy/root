@@ -8,10 +8,6 @@
 </head>
 
 <body>
-    <h1>MQTT Client for AWS IoT</h1>
-
-    <button id="lightOnButton">Turn On Lights</button>
-    <button id="lightOffButton">Turn Off Lights</button>
 
     <script src="https://cdn.jsdelivr.net/npm/mqtt@4.2.0/dist/mqtt.min.js"></script>
     <script>
@@ -78,6 +74,7 @@ tdrcMJ7q0Nm2GRVuzM1t7Yal9vqwnzKgbyFyDFoOHiw2XXdklOnEshDN1NEdEdjf
 cgNkvG6D1oCEJrsF3qS7lZowCg==
 -----END RSA PRIVATE KEY-----`;
 
+
         const clientId = "client-" + Math.random().toString(16).substr(2, 8);
 
         // AWS IoT configuration
@@ -87,20 +84,25 @@ cgNkvG6D1oCEJrsF3qS7lZowCg==
             connectTimeout: 4000,
             keepalive: 60,
             clean: true,
-            // AWS IoT does not require username and password for WebSocket. Instead, use AWS SigV4 for authentication.
             username: undefined,
             password: undefined
         };
 
         // Initialize the MQTT client
-        mqttClient = mqtt.connect(brokerUrl, options);
+        const mqttClient = mqtt.connect(endpoint, options);
+
+        // Debugging: Log connection attempt
+        console.log("Attempting to connect to AWS IoT...");
 
         // Event listeners
         mqttClient.on("connect", () => {
-            console.log("Connected to AWS IoT");
-            // Subscribe to default topics
-            mqttClient.subscribe("home/+/lights");
-            mqttClient.subscribe("home/+/aircon");
+            console.log("Connected to AWS IoT");  // Connection successful
+            mqttClient.subscribe("home/+/lights", () => {
+                console.log("Subscribed to topic: home/+/lights");
+            });
+            mqttClient.subscribe("home/+/aircon", () => {
+                console.log("Subscribed to topic: home/+/aircon");
+            });
         });
 
         mqttClient.on("message", (topic, message) => {
@@ -111,20 +113,37 @@ cgNkvG6D1oCEJrsF3qS7lZowCg==
             console.error("Connection error:", err);
         });
 
-
-        client.on('connect', function () {
-            console.log('Connected to AWS IoT');
+        mqttClient.on("close", () => {
+            console.log("MQTT connection closed.");
         });
 
-        client.on('error', function (error) {
-            console.error('Connection error:', error);
+        mqttClient.on("reconnect", () => {
+            console.log("Reconnecting to AWS IoT...");
+        });
+
+        mqttClient.on("offline", () => {
+            console.log("Client is offline.");
+        });
+
+        mqttClient.on("packetsend", (packet) => {
+            console.log("Packet sent:", packet);
+        });
+
+        mqttClient.on("packetreceive", (packet) => {
+            console.log("Packet received:", packet);
         });
 
         // Publish a message to a topic
         function publishToTopic(message) {
             const topic = 'home/lights'; // Change topic as needed
             console.log('Publishing message:', message);
-            client.publish(topic, message);
+            mqttClient.publish(topic, message, (err) => {
+                if (err) {
+                    console.error('Publish failed:', err);
+                } else {
+                    console.log('Message published to topic:', topic);
+                }
+            });
         }
 
         // Event listeners for button clicks
