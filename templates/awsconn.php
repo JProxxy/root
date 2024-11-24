@@ -102,37 +102,21 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
-            document.getElementById('status').textContent = 'Connected';
-
-            client.subscribe(topicSubscribe, function (err) {
-                if (!err) {
-                    console.log('Successfully subscribed to ' + topicSubscribe);
-                } else {
-                    console.log('Subscription error:', err);
-                }
-            });
         });
-
-        client.on('message', function (topic, message) {
-            console.log('Received message:', topic, message.toString());
-            // Add received message to the list
-            const messageList = document.getElementById('messages');
-            const newMessage = document.createElement('li');
-            newMessage.textContent = message.toString();
-            messageList.appendChild(newMessage);
-        });
-
         client.on('error', function (err) {
-            console.log('MQTT Connection Error:', err);
+            console.log('Error:', err);
         });
-
         client.on('close', function () {
             console.log('Connection closed');
-            document.getElementById('status').textContent = 'Disconnected';
         });
-
         client.on('reconnect', function () {
-            console.log('Attempting to reconnect...');
+            console.log('Reconnecting...');
+        });
+        client.on('offline', function () {
+            console.log('Client is offline');
+        });
+        client.on('message', function (topic, message) {
+            console.log('Message received:', topic, message.toString());
         });
 
         // Function to publish a message
