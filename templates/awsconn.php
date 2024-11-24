@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT WebSocket Test</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 </head>
+
 <body>
     <h1>MQTT.js WebSocket Test</h1>
     <button onclick="publishMessage()">Publish Test Message</button>
@@ -17,6 +19,14 @@
             connectTimeout: 4000,
             rejectUnauthorized: false,
             protocol: 'wss', // Secure WebSocket protocol
+            will: {
+                topic: 'esp32/sub',
+                payload: 'Client disconnected unexpectedly',
+                qos: 0,
+                retain: false
+            },
+            username: '', // leave empty
+            password: ''  // leave empty
         });
 
         client.on('connect', () => {
@@ -47,4 +57,5 @@
         }
     </script>
 </body>
+
 </html>
