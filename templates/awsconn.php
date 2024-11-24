@@ -81,6 +81,7 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 -----END CERTIFICATE-----`;
 
         // MQTT connection
+        console.log('Initializing MQTT connection...');
         const client = mqtt.connect({
             host: endpoint,
             port: 443,
@@ -105,7 +106,7 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 
             client.subscribe(topicSubscribe, function (err) {
                 if (!err) {
-                    console.log('Subscribed to ' + topicSubscribe);
+                    console.log('Successfully subscribed to ' + topicSubscribe);
                 } else {
                     console.log('Subscription error:', err);
                 }
@@ -114,7 +115,6 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 
         client.on('message', function (topic, message) {
             console.log('Received message:', topic, message.toString());
-
             // Add received message to the list
             const messageList = document.getElementById('messages');
             const newMessage = document.createElement('li');
@@ -132,13 +132,14 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
         });
 
         client.on('reconnect', function () {
-            console.log('Reconnecting...');
+            console.log('Attempting to reconnect...');
         });
 
         // Function to publish a message
         function publishMessage() {
             const message = document.getElementById('message').value;
             if (message) {
+                console.log('Publishing message:', message);
                 client.publish(topicPublish, JSON.stringify({ message: message }), function (err) {
                     if (err) {
                         console.log('Publish error:', err);
@@ -146,6 +147,8 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
                         console.log('Message Published');
                     }
                 });
+            } else {
+                console.log('No message entered');
             }
         }
     </script>
