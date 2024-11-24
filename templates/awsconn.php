@@ -86,8 +86,10 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
             host: endpoint,
             port: 443,
             protocol: 'wss',
-            clientId: clientId
+            clientId: clientId,
+            version: 4  // MQTT 3.1.1
         });
+
 
         // Event listeners for client connection and status
         client.on('connect', function () {
