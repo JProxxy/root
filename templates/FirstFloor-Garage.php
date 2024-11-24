@@ -160,6 +160,11 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("outdoorButton").classList.add("activeButton");
             }
 
+            const selectedLight = dropdown.value;
+            // Format the light name to "Lights #1", "Lights #2", etc.
+            const formattedLightName = Lights #${ selectedLight.charAt(6)};  // Extracts the number and formats it
+
+
             // Hide all switch containers initially
             const allSwitches = document.querySelectorAll('.switch-container');
             allSwitches.forEach(switchContainer => {
