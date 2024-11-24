@@ -1,5 +1,4 @@
 // mqtts.js
-import mqtt from 'mqtt';
 
 // AWS IoT endpoint and credentials
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
@@ -74,11 +73,11 @@ iotDevice.on('message', (topic, payload) => {
 });
 
 function subscribeToTopic(client, topic) {
-    client.subscribe(topic, function(err) {
-        if (err) {
-            console.error("Subscription error: ", err);
-        } else {
-            console.log("Successfully subscribed to topic:", topic);
-        }
-    });
+  client.subscribe(topic, function(err) {
+      if (err) {
+          console.error("Subscription error: ", err);
+      } else {
+          console.log("Successfully subscribed to topic:", topic);
+      }
+  });
 }
