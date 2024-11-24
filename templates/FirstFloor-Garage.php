@@ -23,6 +23,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
     
     <!-- Include the MQTT logic -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script type="module" src="../assets/js/mqtts.js"></script>
 </head>
 

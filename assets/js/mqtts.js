@@ -1,4 +1,3 @@
-const mqtt = require("mqtt");
 
 // Replace with your actual IoT endpoint
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
