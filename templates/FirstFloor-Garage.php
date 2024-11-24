@@ -143,10 +143,10 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <!-- Button to trigger MQTT publish -->
+        <!-- Button to trigger MQTT publish
         <form method="POST">
             <button type="submit" name="trigger_mqtt">Trigger MQTT Publish</button>
-        </form>
+        </form> -->
 
         <script>
             // Your existing JavaScript logic for toggling devices
