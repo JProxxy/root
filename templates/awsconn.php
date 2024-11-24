@@ -24,8 +24,8 @@
         // AWS IoT MQTT Client details
         const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Provided endpoint
         const clientId = '1'; // Unique client ID
-        const topicPublish = 'esp32/pub';  // Topic for publishing messages (e.g., to send commands)
-        const topicSubscribe = 'esp32/sub'; // Topic for subscribing to messages (e.g., to receive data)
+        const topicPublish = 'esp32/pub';  // Topic for publishing messages
+        const topicSubscribe = 'esp32/sub'; // Topic for subscribing to messages
 
         // Certificates (base64 encoded or served over HTTPS)
         const cert = `-----BEGIN CERTIFICATE-----
@@ -65,21 +65,19 @@ fjBCTYaAqCk3x9GWL4fSN7DKNAj4ttPfbzhVrvKpl7IOh69XaumwxERlFDeIEFkh
 +avLPh5TETCc92W4b8jlOQliASygo5J4R8XADO8va8w7bI5zwRgEGQhc4Lb7E2hZ
 el/7OgthI/sozL+qlVxvSW8D8v+dDYmwf8BBEqLjPEhvo7Ugkeaezd0CgYEAx/Pb
 B/K838v0jmBRMh0PtJeqlDe3AYxoKdrRfS2X51cAEHoKKA2czVp1e1MggIqTXbZA
-jGgw0QSr5/6hOVXvt0FOBeQJvsrhGKCYXTpKsNZ7Ord0Gm1+4+2XRLWmrBVrl9ox
-tovChvtakjIZfbSF2efA5r0cmdCfHw7H6SGAWOUCgYEAlYEQS6ub4M1jT0tQ76yc
-wIBizJ77XAzSZn9bYoWs8393UJDwv/2w4DCsHNC+kq1uNa98yyq+DrjjSkb1wCiM
-7Te5CE6LBRlvbo0aRJHj0eYz6XSBajD8ILk+4O40JxgvtaYHheuo79In1o0+MnlE
-TVieZcnJlSYzqgfTcplYve8CgYBGhuW9Zx2B5W5nd29/cdpgS5DbUoBx8O9bR58k
-dwCEwGSRNkOCROz4YbZh2xdHV9tRZVZ5tS2e7zL7yVfTiRgcw1f5I+dqdWT1I0N
-kr2HkzQBLHWPK90ODn7XK3bAZauEXzKKdpp+PmcO4Ofnmj1MO1W5pF2D0wwklEwN
-/2OxFnmVuHYREbpWx3HT7Q==
+jGgw0QSr5/6hOVXvt0FOBeQJvsrhGKCY0yS9hxaZtbYkvMvBwtZ1l6X99sSOtGna
+7WUzBmyc8omcgytHZuwWpGHxRT8IT5usxuKh1tQRaDch7zwAq9r/8bBUqk6O5rx4
+IMwti2kCgYBa73hBYRLyY4QZm02noQbdwMkqTo7eVuRykETX2mQFE2+RxErY3PZo
+XGbf6wTQ2tRZ5T2oT5dx4Xitj97huvQdeDwvs1TGw7Aew2SvJrFzZr7Hg79gHfjl
+w90fcb4FCFFIQvljpQHj2Db0QmcNnMkElVWSkt0R2JbCDh+ZTJhK1UET70yx2is8
+6klbswKvg0vFA45gSgEmKw==
 -----END RSA PRIVATE KEY-----`;
 
         // Create MQTT client using AWS IoT endpoint, WebSocket URL with TLS/SSL (WSS)
         const client = mqtt.connect(`wss://${endpoint}:443/mqtt`, {
             clientId: clientId,
-            username: 'AWSIoTUser',  // Optional, your IoT user's username
-            password: 'AWSIoTPassword',  // Optional, password if needed
+            username: '',  // Leave empty if not using username/password authentication
+            password: '',  // Leave empty if not using username/password authentication
             cert: cert,  // Provide the certificate
             key: key,    // Provide the private key
             rejectUnauthorized: true, // Ensure authorization validation
@@ -104,6 +102,12 @@ kr2HkzQBLHWPK90ODn7XK3bAZauEXzKKdpp+PmcO4Ofnmj1MO1W5pF2D0wwklEwN
             const listItem = document.createElement("li");
             listItem.textContent = `Received message: ${message.toString()}`;
             messagesList.appendChild(listItem);
+        });
+
+        // Log any errors that occur
+        client.on('error', function (error) {
+            console.log('Error:', error);
+            document.getElementById("status").textContent = 'Connection failed';
         });
 
         // Publish message
