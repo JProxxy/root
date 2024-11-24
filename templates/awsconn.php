@@ -76,14 +76,16 @@ leTmD/e5o32Fzlhmv4YvgjDD6ZK73O7Z/F0bjm6EdbycA6jtTqZWz4X/rp4cPS6X
 syhEFwK8gOmdu3r5aIvh4w==
 -----END RSA PRIVATE KEY-----`;
 
-        // Connect to AWS IoT
         const client = mqtt.connect({
             host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',
-            port: 8883,
+            port: 443, // Use WebSocket port 443
             protocol: 'wss',
-            clientId: clientId,
-            username: 'your-username',
-            password: 'your-password',
+            clientId: '1',  // Your unique client ID
+            username: 'your-username',  // If using AWS IoT, this may be empty
+            password: 'your-password',  // If using AWS IoT, this may be empty
+            cert: cert,  // Your device certificate
+            key: key,    // Your device private key
+            ca: ca,      // Optional: AWS IoT root CA certificate
             will: {
                 topic: 'esp32/status',
                 payload: 'offline',
