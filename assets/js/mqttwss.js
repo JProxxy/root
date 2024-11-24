@@ -1,17 +1,11 @@
-const AWS = require('aws-sdk');
-
-// No need to manually configure credentials if the EC2 instance has an IAM role
-AWS.config.update({ region: 'ap-southeast-1' });
-
-const mqtt = require('mqtt');
-
-// AWS IoT endpoint
+// Include the MQTT.js library directly for the browser
+// Initialize the MQTT client in your JavaScript file
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
-// Configure MQTT client using IAM role credentials
+// Create MQTT client using WebSocket and AWS IoT credentials
 const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
-  clientId: 'mqtt-user',  // You can set a unique clientId here
-  rejectUnauthorized: true  // Ensure the connection is secure
+  clientId: 'mqtt-user',  // Set a unique clientId for the MQTT connection
+  rejectUnauthorized: true,  // Ensure the connection is secure
 });
 
 // MQTT connection handling
