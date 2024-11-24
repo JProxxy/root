@@ -60,10 +60,12 @@ const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
   clientId: clientId,
   clean: true,
   connectTimeout: 4000,
-  rejectUnauthorized: true,  // Ensure valid certificate is required
+  rejectUnauthorized: true,
   cert: certificate,
   key: privateKey,
+  keepalive: 60,  // Set keepalive interval to 60 seconds (default is 60 seconds)
 });
+
 
 client.on('connect', () => {
   console.log('Connected to AWS IoT');
