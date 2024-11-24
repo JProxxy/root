@@ -86,16 +86,7 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
             host: endpoint,
             port: 443,
             protocol: 'wss',
-            clientId: clientId,
-            cert: cert,
-            key: key,
-            ca: ca,
-            will: {
-                topic: 'esp32/status',
-                payload: 'offline',
-                qos: 0,
-                retain: false
-            }
+            clientId: clientId
         });
 
         // Event listeners for client connection and status
