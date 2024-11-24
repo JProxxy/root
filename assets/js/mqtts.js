@@ -1,6 +1,4 @@
 // mqtts.js
-
-import AWS from 'aws-iot-device-sdk';  // Import AWS IoT SDK
 import mqtt from 'mqtt';
 
 // AWS IoT endpoint and credentials
@@ -74,3 +72,13 @@ iotDevice.on('connect', () => {
 iotDevice.on('message', (topic, payload) => {
   console.log('Message received on topic', topic, ':', payload.toString());
 });
+
+function subscribeToTopic(client, topic) {
+    client.subscribe(topic, function(err) {
+        if (err) {
+            console.error("Subscription error: ", err);
+        } else {
+            console.log("Successfully subscribed to topic:", topic);
+        }
+    });
+}

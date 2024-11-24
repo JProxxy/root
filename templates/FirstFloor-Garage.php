@@ -30,6 +30,7 @@ if (isset($_POST['trigger_mqtt'])) {
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
     
     <!-- Include the MQTT logic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script type="module" src="../assets/js/mqtts.js"></script>
 </head>
