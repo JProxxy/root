@@ -22,7 +22,7 @@
 
     <script>
         // AWS IoT MQTT Client details
-        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Example: 'xxxxxxxxxxxxxx.iot.us-west-2.amazonaws.com'
+        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Replace with your endpoint
         const clientId = '1'; // Unique client ID
         const topicPublish = 'esp32/pub';  // Topic for publishing messages (e.g., to send commands)
         const topicSubscribe = 'esp32/sub'; // Topic for subscribing to messages (e.g., to receive data)
@@ -80,7 +80,8 @@ MIIDYTCCAkmgAwIBAgIQAok93eyR8ZVZJz6k5ToUt9A9pFhJrTArs1TUl7j7tNEm
 O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 -----END CERTIFICATE-----`;
 
-        // MQTT connection
+        // MQTT connection setup
+        console.log("Initializing MQTT connection...");
         const client = mqtt.connect({
             host: endpoint,
             port: 443,
@@ -97,23 +98,44 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
             }
         });
 
+        // Event listeners for client connection and status
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
+            document.getElementById('status').textContent = "Connected";
+            client.subscribe(topicSubscribe, function (err) {
+                if (err) {
+                    console.error("Subscription failed:", err);
+                } else {
+                    console.log(`Subscribed to ${topicSubscribe}`);
+                }
+            });
         });
+
         client.on('error', function (err) {
-            console.log('Error:', err);
+            console.log('MQTT error:', err);
+            document.getElementById('status').textContent = "Error";
         });
+
         client.on('close', function () {
-            console.log('Connection closed');
+            console.log('MQTT connection closed');
+            document.getElementById('status').textContent = "Disconnected";
         });
+
         client.on('reconnect', function () {
             console.log('Reconnecting...');
         });
+
         client.on('offline', function () {
             console.log('Client is offline');
+            document.getElementById('status').textContent = "Offline";
         });
+
         client.on('message', function (topic, message) {
-            console.log('Message received:', topic, message.toString());
+            console.log(`Message received on ${topic}: ${message.toString()}`);
+            const messagesList = document.getElementById('messages');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = message.toString();
+            messagesList.appendChild(newMessage);
         });
 
         // Function to publish a message
@@ -123,7 +145,7 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
                 console.log('Publishing message:', message);
                 client.publish(topicPublish, JSON.stringify({ message: message }), function (err) {
                     if (err) {
-                        console.log('Publish error:', err);
+                        console.error('Publish error:', err);
                     } else {
                         console.log('Message Published');
                     }
