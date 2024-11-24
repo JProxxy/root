@@ -165,35 +165,35 @@ if (!isset($_SESSION['user_id'])) {
                 const selectedLight = dropdown.value;
 
                 // Format the light name to "Lights #1", "Lights #2", etc.
-                const formattedLightName = Lights #${ selectedLight.charAt(6)
-            };  // Extracts the number and formats it
+                const formattedLightName = `Lights #${selectedLight.charAt(6)}`;  // Extracts the number and formats it
 
-            // Update the <p> tag or element where the light name should appear
-            const lightNameElement = document.querySelector('.lights p');
-            if (lightNameElement) {
-                lightNameElement.textContent = formattedLightName;  // Update text to "Lights #1", "Lights #2", etc.
+                // Update the <p> tag or element where the light name should appear
+                const lightNameElement = document.querySelector('.lights p');
+                if (lightNameElement) {
+                    lightNameElement.textContent = formattedLightName;  // Update text to "Lights #1", "Lights #2", etc.
+                }
+
+                // Load the saved light states
+                const lightStates = loadLightState();
+
+                // Hide all switch containers initially
+                const allSwitches = document.querySelectorAll('.switch-container');
+                allSwitches.forEach(switchContainer => {
+                    switchContainer.style.display = 'none';  // Hide all switches initially
+                    switchContainer.style.textAlign = 'left';  // Reset alignment
+                });
+
+                // Show the switch container corresponding to the selected light category
+                const switchToShow = document.getElementById('switch_' + selectedLight);
+                if (switchToShow) {
+                    switchToShow.style.display = 'block';  // Show the switch
+                    switchToShow.style.textAlign = 'right';  // Align switch to the right
+
+                    const switchElement = switchToShow.querySelector('input');
+                    switchElement.checked = lightStates[selectedLight];
+                }
             }
 
-            // Load the saved light states
-            const lightStates = loadLightState();
-
-            // Hide all switch containers initially
-            const allSwitches = document.querySelectorAll('.switch-container');
-            allSwitches.forEach(switchContainer => {
-                switchContainer.style.display = 'none';  // Hide all switches initially
-                switchContainer.style.textAlign = 'left';  // Reset alignment
-            });
-
-            // Show the switch container corresponding to the selected light category
-            const switchToShow = document.getElementById('switch_' + selectedLight);
-            if (switchToShow) {
-                switchToShow.style.display = 'block';  // Show the switch
-                switchToShow.style.textAlign = 'right';  // Align switch to the right
-
-                const switchElement = switchToShow.querySelector('input');
-                switchElement.checked = lightStates[selectedLight];
-            }
-            }
 
             // Triggering MQTT message when light state changes
             function toggleLightSwitch(lightId) {
