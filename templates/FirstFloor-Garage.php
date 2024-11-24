@@ -11,12 +11,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Handle action to trigger Node.js script
-if (isset($_POST['trigger_mqtt'])) {
-    // Path to your Node.js script (adjust path if necessary)
-    $output = shell_exec('node ../assets/js/mqtts.js');
-    echo "<pre>$output</pre>";
-}
+// // Handle action to trigger Node.js script
+// if (isset($_POST['trigger_mqtt'])) {
+//     // Path to your Node.js script (adjust path if necessary)
+//     $output = shell_exec('node ../assets/js/mqtts.js');
+//     echo "<pre>$output</pre>";
+// }
 ?>
 
 <!DOCTYPE html>
