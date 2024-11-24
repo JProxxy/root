@@ -9,7 +9,7 @@
 
 <body>
 
-    <script src="https://cdn.jsdelivr.net/npm/mqtt@4.2.0/dist/mqtt.min.js"></script>
+    <script src="../scripts/mqtt.min.js"></script>
     <script>
         // AWS IoT WebSocket URL
         const endpoint = "wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt";

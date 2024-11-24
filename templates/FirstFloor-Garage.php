@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_id'])) {
     <title>First Floor</title>
 
     <!-- MQTT client libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+    <script src="../scripts/mqtt.min.js"></script>
 
     <!-- MQTT CONNECTION -->
     <link rel="stylesheet" href="../assets/css/dashboard.css">
