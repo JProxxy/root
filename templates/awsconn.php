@@ -81,14 +81,11 @@ O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 -----END CERTIFICATE-----`;
 
         // MQTT connection
-        console.log('Initializing MQTT connection...');
         const client = mqtt.connect({
             host: endpoint,
             port: 443,
             protocol: 'wss',
             clientId: clientId,
-            username: 'your-username',
-            password: 'your-password',
             cert: cert,
             key: key,
             ca: ca,
