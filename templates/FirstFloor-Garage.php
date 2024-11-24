@@ -165,7 +165,7 @@ if (isset($_POST['trigger_mqtt'])) {
             }
 
             // Example: Listen for state updates (if needed)
-            subscribeToTopic("esp32/sub", (message) => {
+            function subscribeToTopic("esp32/sub", (message) => {
                 console.log("Received message:", message);
                 // Handle updates from AWS IoT here (e.g., update switch states)
             });
