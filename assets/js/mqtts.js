@@ -1,8 +1,10 @@
+// mqtts.js
 
-// Replace with your actual IoT endpoint
+import AWS from 'aws-iot-device-sdk';  // Import AWS IoT SDK
+import mqtt from 'mqtt';
+
+// AWS IoT endpoint and credentials
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
-
-// Use the certificate and private key you provided
 const certificate = `-----BEGIN CERTIFICATE-----
 MIIDWjCCAkKgAwIBAgIVAL9kt1NGZT8bx7ObKAd6jD2GCCf7MA0GCSqGSIb3DQEB
 CwUAME0xSzBJBgNVBAsMQkFtYXpvbiBXZWIgU2VydmljZXMgTz1BbWF6b24uY29t
@@ -48,80 +50,27 @@ TVqpDvMfytcx19FQIybkPnkCgYAQ75+6wZ2r2wugz5mxA/MjmcESAtIWaH0eJnGe
 B7GZH65atuuLTvPcFPBkfLsBCDvJMTmwatbPrXSeFtwzDgta20Yvi4wjw+1i959Q
 LjLLXa9cXtOPtXyM87/fSv+ODdZqK0oQqy/T3RBj16h/FD5OIaoeISB+CsSfjdHy
 9ip33QKBgC1gy/0rhOo4rEhiVzrNhxGUrt1yiXlaDUNco4NuoQ5XOF1AXKtNIlaa
-joo4LymDXxzBVZ4WpY9EM5d7FVIhxcDxSJp7aY/R7URMJb7vAPhU5fQAuMTY5tNZ
-mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
+joo4LymDXxzBVZ4WpY9EM5d7FVIhxcDxSJp7aY/R7URMJb7vAPhU5f5JpC3kE54C
+J/zp0U1RmXXlGNCplzD9X5+jqCAghxf7nX6DQUtwY7Vh8j0XZlgqbfpDA0sq5aYB
+0tY=
 -----END RSA PRIVATE KEY-----`;
 
-const clientId = "TestClient"; // Your client ID
-
-// Create the MQTT client and connect securely (mqtts over port 8883)
-const client = mqtt.connect("mqtts://" + endpoint + ":8883", {
-  clientId: clientId,
-  clean: true,
-  connectTimeout: 4000,
-  rejectUnauthorized: true,
-  cert: certificate,
-  key: privateKey,
-  keepalive: 60, // Set keepalive interval to 60 seconds (default is 60 seconds)
+const iotDevice = AWS.device({
+  keyPath: privateKey,
+  certPath: certificate,
+  caPath: './root-CA.crt',  // path to the CA certificate
+  clientId: 'myClientId',
+  host: endpoint
 });
 
-client.on("connect", () => {
-  console.log("Connected to AWS IoT");
-  client.subscribe("esp32/sub", (err) => {
-    if (!err) {
-      console.log("Subscribed to esp32/sub");
-    } else {
-      console.log("Subscription failed:", err);
-    }
-  });
+// Connect to the AWS IoT MQTT broker
+iotDevice.on('connect', () => {
+  console.log('Connected to AWS IoT');
+  iotDevice.subscribe('esp32/pub');
+  console.log('Subscribed to esp32/pub topic');
 });
 
-export function publishMessage(topic, message) {
-  client.publish(topic, message, (err) => {
-    if (err) console.error("Publish error:", err);
-  });
-}
-
-export function subscribeToTopic(topic, callback) {
-  client.subscribe(topic, (err) => {
-    if (err) console.error("Subscription error:", err);
-  });
-  client.on("message", (incomingTopic, message) => {
-    if (incomingTopic === topic) {
-      callback(message.toString());
-    }
-  });
-}
-
-client.on("error", (err) => {
-  console.log("Connection failed with error:", err);
+// Subscribe to topic and receive messages
+iotDevice.on('message', (topic, payload) => {
+  console.log('Message received on topic', topic, ':', payload.toString());
 });
-
-client.on("message", (topic, message) => {
-  console.log("Received message:", message.toString());
-});
-
-client.on("close", () => {
-  console.log("Connection closed");
-});
-
-client.on("reconnect", () => {
-  console.log("Attempting to reconnect...");
-});
-
-client.on("offline", () => {
-  console.log("Client is offline");
-});
-
-// Publish a test message
-// function publishMessage() {
-//   client.publish("esp32/pub", "Hello from Node.js", {
-//     properties: {
-//       payloadFormatIndicator: 1, // 1 means "UTF-8 encoded payload"
-//     },
-//   });
-
-//   console.log("Message sent to esp32/pub");
-// }
-
-publishMessage();
