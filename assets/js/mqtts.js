@@ -77,6 +77,23 @@ client.on("connect", () => {
   });
 });
 
+export function publishMessage(topic, message) {
+  client.publish(topic, message, (err) => {
+    if (err) console.error("Publish error:", err);
+  });
+}
+
+export function subscribeToTopic(topic, callback) {
+  client.subscribe(topic, (err) => {
+    if (err) console.error("Subscription error:", err);
+  });
+  client.on("message", (incomingTopic, message) => {
+    if (incomingTopic === topic) {
+      callback(message.toString());
+    }
+  });
+}
+
 client.on("error", (err) => {
   console.log("Connection failed with error:", err);
 });
@@ -101,7 +118,7 @@ client.on("offline", () => {
 function publishMessage() {
   client.publish("esp32/pub", "Hello from Node.js", {
     properties: {
-      contentType: "text/plain",
+      payloadFormatIndicator: 1, // 1 means "UTF-8 encoded payload"
     },
   });
 

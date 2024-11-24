@@ -19,15 +19,11 @@ if (!isset($_SESSION['user_id'])) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>First Floor</title>
-
-    <!-- MQTT client libraries -->
-    <script src="../scripts/mqtt.min.js"></script>
-
-    <!-- MQTT CONNECTION -->
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
 
-
+    <!-- Include the MQTT logic -->
+    <script type="module" src="../scripts/mqtts.js"></script>
 </head>
 
 <body>
@@ -262,19 +258,6 @@ if (!isset($_SESSION['user_id'])) {
                 }
             }
 
-            // Initialize the MQTT client (replace with your actual MQTT logic)
-            function toggleLightSwitch(lightId) {
-                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
-                const isChecked = lightSwitch.checked;
-
-                // Simulate saving state to localStorage
-                const lightStates = loadLightState();
-                lightStates[lightId] = isChecked;
-                saveLightState(lightStates);
-
-                // Handle MQTT logic here...
-            }
-
             // Initialize page when loaded
             document.addEventListener('DOMContentLoaded', () => {
                 const dropdown = document.getElementById('lightCategory');
@@ -282,6 +265,29 @@ if (!isset($_SESSION['user_id'])) {
                     updateLightState();  // Set the initial state of the light name and switches
                     dropdown.addEventListener('change', updateLightState);  // Add event listener for dropdown changes
                 }
+            });
+        </script>
+
+        <script type="module">
+            import { publishMessage, subscribeToTopic } from "../scripts/mqtts.js";
+
+            const topicPub = "esp32/pub";
+
+            // Toggle light state and publish MQTT message
+            function toggleLightSwitch(lightId) {
+                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
+                const isChecked = lightSwitch.checked;
+                const payload = JSON.stringify({ light: lightId, state: isChecked ? "ON" : "OFF" });
+
+                // Publish message using mqtts.js
+                publishMessage(topicPub, payload);
+                console.log(`Published: ${payload}`);
+            }
+
+            // Example: Listen for state updates (if needed)
+            subscribeToTopic("esp32/sub", (message) => {
+                console.log("Received message:", message);
+                // Handle updates from AWS IoT here (e.g., update switch states)
             });
         </script>
 </body>
