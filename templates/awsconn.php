@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQTT.js WebSocket Test with Certificates</title>
+    <title>MQTT.js MQTT Test with Certificates</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
-    <h1>MQTT.js WebSocket Test with Certificates</h1>
+    <h1>MQTT.js MQTT Test with Certificates</h1>
     <button onclick="publishMessage()">Publish Test Message</button>
     <ul id="messages"></ul>
 
     <script>
         // Replace with your actual IoT endpoint
-        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
+        const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com'; // Ensure this is correct
 
         // Replace with the appropriate Base64-encoded certificate and private key
         const certificate = `-----BEGIN CERTIFICATE-----
@@ -69,13 +69,13 @@ mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
 
         const clientId = 'TestClient';  // Client ID for the MQTT connection
 
-        // Creating the MQTT client with certificates
-        const client = mqtt.connect('wss://' + endpoint + ':443/mqtt', {
+        // Creating the MQTT client with certificates over port 8883 (non-WebSocket MQTT)
+        const client = mqtt.connect('mqtts://' + endpoint + ':8883', {
             clientId: clientId,
             clean: true,
             connectTimeout: 4000,
-            rejectUnauthorized: true,  // Enforces secure connection (no skipping certificate validation)
-            protocol: 'wss',  // Secure WebSocket protocol
+            rejectUnauthorized: true,  // Ensures valid certificate is required
+            protocol: 'mqtts',  // Secure MQTT protocol (MQTT over TLS)
             cert: certificate,  // Add certificate
             key: privateKey,    // Add private key
         });
