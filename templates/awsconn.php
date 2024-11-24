@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWS IoT MQTT Web Client</title>
-    <script src="../scripts/mqtt.min.js/mqtt.min.js"></script> <!-- Include mqtt.min.js -->
+    <script src="../scripts/mqtt.min.js"></script> <!-- Include mqtt.min.js -->
 </head>
 
 <body>
