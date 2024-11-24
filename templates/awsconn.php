@@ -49,7 +49,6 @@ luVhgDt/sdyLPjpdha3LZv7w0nwrabEX7SzjutnK8wNWjYlMvoJhVE5WY3hWpKr1
 oMrn+kPwvkwCbtO7jq30u4h+qx94rsImAvUyae4eca2ehdOS5bB1MUowlN804g==
 -----END CERTIFICATE-----`;
 
-
         const key = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAsRO2Y8EXncsFznZ55F7Rqi0HAEt/GnMvqsnlcXs8PuqndXpi
 bCR3LWEhZXyfqp/vSTuU8X0Wr040BhE/heIX0rfArXbW5q3eREX/NO8K3GPf5f90
@@ -71,42 +70,27 @@ tovChvtakjIZfbSF2efA5r0cmdCfHw7H6SGAWOUCgYEAlYEQS6ub4M1jT0tQ76yc
 wIBizJ77XAzSZn9bYoWs8393UJDwv/2w4DCsHNC+kq1uNa98yyq+DrjjSkb1wCiM
 7Te5CE6LBRlvbo0aRJHj0eYz6XSBajD8ILk+4O40JxgvtaYHheuo79In1o0+MnlE
 TVieZcnJlSYzqgfTcplYve8CgYBGhuW9Zx2B5W5nd29/cdpgS5DbUoBxetnqNK0u
-26aR4l07g4m+sgbBjrjNmF10udtEFXwZ1aQOYt9cIFObS4BdB0u3D9p28s9+kJ6D
-leTmD/e5o32Fzlhmv4YvgjDD6ZK73O7Z/F0bjm6EdbycA6jtTqZWz4X/rp4cPS6X
-syhEFwK8gOmdu3r5aIvh4w==
+26aR4l07g4m+sgbBjrjNmF10udtEFXwZ1ybmhNYDpb0bGEQIHxFqu75rNJZXOpu5
+O3tI8c3w8eGJeHs5q6GXYztYXzHWeHwwq2JdIrHZM7QyMoV1vSKGVZlpgZ5k46DZ
+eYBpzSOY3gxcFnlYxgTxyQ==
 -----END RSA PRIVATE KEY-----`;
 
-const ca = `-----BEGIN CERTIFICATE-----
-MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF
-ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6
-b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL
-MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv
-b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj
-ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM
-9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw
-IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6
-VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L
-93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm
-jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC
-AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA
-A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI
-U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs
-N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv
-o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU
-5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy
-rqXRfboQnoZsG4q5WTP468SQvvG5
+        const ca = `-----BEGIN CERTIFICATE-----
+MIIDYTCCAkmgAwIBAgIQAok93eyR8ZVZJz6k5ToUt9A9pFhJrTArs1TUl7j7tNEm
+O/NXVYv7W7Bb/su9Q7+aT+Xs9dJo03Kc8g71jcG0clbLCPH75Tfx9T4DAg==
 -----END CERTIFICATE-----`;
 
+        // MQTT connection
         const client = mqtt.connect({
-            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',
-            port: 443, // Use WebSocket port 443
+            host: endpoint,
+            port: 443,
             protocol: 'wss',
-            clientId: '1',  // Your unique client ID
-            username: 'your-username',  // If using AWS IoT, this may be empty
-            password: 'your-password',  // If using AWS IoT, this may be empty
-            cert: cert,  // Your device certificate
-            key: key,    // Your device private key
-            ca: ca,      // Optional: AWS IoT root CA certificate
+            clientId: clientId,
+            username: 'your-username',
+            password: 'your-password',
+            cert: cert,
+            key: key,
+            ca: ca,
             will: {
                 topic: 'esp32/status',
                 payload: 'offline',
@@ -117,25 +101,54 @@ rqXRfboQnoZsG4q5WTP468SQvvG5
 
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
+            document.getElementById('status').textContent = 'Connected';
 
-            // Subscribe to the topic
-            client.subscribe('esp32/sub', function (err) {
+            client.subscribe(topicSubscribe, function (err) {
                 if (!err) {
-                    console.log('Subscribed to esp32/sub');
+                    console.log('Subscribed to ' + topicSubscribe);
                 } else {
                     console.log('Subscription error:', err);
                 }
             });
-
-            // Publish a message to the topic
-            client.publish('esp32/pub', JSON.stringify({ message: 'Hello from garage-lights' }));
         });
 
         client.on('message', function (topic, message) {
             console.log('Received message:', topic, message.toString());
-        });
-    </script>
 
+            // Add received message to the list
+            const messageList = document.getElementById('messages');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = message.toString();
+            messageList.appendChild(newMessage);
+        });
+
+        client.on('error', function (err) {
+            console.log('MQTT Connection Error:', err);
+        });
+
+        client.on('close', function () {
+            console.log('Connection closed');
+            document.getElementById('status').textContent = 'Disconnected';
+        });
+
+        client.on('reconnect', function () {
+            console.log('Reconnecting...');
+        });
+
+        // Function to publish a message
+        function publishMessage() {
+            const message = document.getElementById('message').value;
+            if (message) {
+                client.publish(topicPublish, JSON.stringify({ message: message }), function (err) {
+                    if (err) {
+                        console.log('Publish error:', err);
+                    } else {
+                        console.log('Message Published');
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 
 </html>
