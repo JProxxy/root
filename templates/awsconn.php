@@ -85,6 +85,8 @@ w90fcb4FCFFIQvljpQHj2Db0QmcNnMkElVWSkt0R2JbCDh+ZTJhK1UET70yx2is8
             clean: true,   // Clean session
         });
 
+        console.log("Attempting to connect to AWS IoT...");
+
         client.on('connect', function () {
             console.log('Connected to AWS IoT');
             document.getElementById("status").textContent = 'Connected';
@@ -98,24 +100,22 @@ w90fcb4FCFFIQvljpQHj2Db0QmcNnMkElVWSkt0R2JbCDh+ZTJhK1UET70yx2is8
         });
 
         client.on('error', function (error) {
-            console.log('Error:', error);
+            console.log('Connection failed:', error);
             document.getElementById("status").textContent = 'Connection failed';
         });
 
+        client.on('close', function () {
+            console.log('Connection closed');
+            document.getElementById("status").textContent = 'Disconnected';
+        });
 
-        // Publish message
-        function publishMessage() {
-            const message = document.getElementById('message').value;
-            if (message) {
-                client.publish(topicPublish, message, function (err) {
-                    if (err) {
-                        console.log('Error publishing message: ' + err);
-                    } else {
-                        console.log('Message published successfully');
-                    }
-                });
-            }
-        }
+        client.on('message', function (topic, message) {
+            console.log('Received message:', topic, message.toString());
+            const li = document.createElement('li');
+            li.textContent = message.toString();
+            document.getElementById('messages').appendChild(li);
+        });
+
     </script>
 </body>
 
