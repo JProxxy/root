@@ -77,9 +77,9 @@ syhEFwK8gOmdu3r5aIvh4w==
 -----END RSA PRIVATE KEY-----`;
 
         const mqttClient = mqtt.connect({
-            host: endpoint,
-            port: 8883,
-            protocol: 'mqtts',
+            host: 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com',  // Replace with your actual endpoint
+            port: 443,   // Port for WebSocket connections
+            protocol: 'wss',  // WebSocket Secure
             clientId: clientId,
             username: '',
             password: '',
@@ -93,12 +93,10 @@ syhEFwK8gOmdu3r5aIvh4w==
             mqttClient.subscribe(topicSubscribe);
             console.log('Connected to AWS IoT');
 
-            // Publish a test message indicating that the connection was successful
             mqttClient.publish(topicPublish, 'Client is connected and ready to publish');
         });
 
         mqttClient.on('message', function (topic, message) {
-            // Handle incoming messages
             const messagesList = document.getElementById('messages');
             const newMessage = document.createElement('li');
             newMessage.textContent = message.toString();
