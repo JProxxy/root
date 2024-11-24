@@ -11,12 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// // Handle action to trigger Node.js script
-// if (isset($_POST['trigger_mqtt'])) {
-//     // Path to your Node.js script (adjust path if necessary)
-//     $output = shell_exec('node ../assets/js/mqtts.js');
-//     echo "<pre>$output</pre>";
-// }
+
 ?>
 
 <!DOCTYPE html>
@@ -31,9 +26,10 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
 
     <!-- Include the MQTT logic -->
+    <script src="../assets/js/mqttwss.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script type="module" src="../assets/js/mqtts.js"></script>
+
 </head>
 
 <body>
@@ -143,10 +139,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <!-- Button to trigger MQTT publish
-        <form method="POST">
-            <button type="submit" name="trigger_mqtt">Trigger MQTT Publish</button>
-        </form> -->
+
 
         <script>
             // Your existing JavaScript logic for toggling devices
@@ -195,27 +188,43 @@ if (!isset($_SESSION['user_id'])) {
             }
 
 
-            // Triggering MQTT message when light state changes
+            // Toggle light state and publish MQTT message
             function toggleLightSwitch(lightId) {
-                // Assuming you have some condition to check
-                const message = "Light is on"; // or "Light is off" depending on your logic
-
-                // Now you can call the globally defined publishMessage function
-                publishMessage("esp32/pub", message); // Adjust topic as needed
-
-                console.log("Toggling light switch...");
+                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
+                const message = lightSwitch.checked ? "Light is ON" : "Light is OFF";
+                publishMessage("esp32/pub", message);
+                console.log(`Toggled ${lightId}: ${message}`);
             }
 
-
-            // Toggle air conditioning
+            // Toggle air conditioning state and publish MQTT message
             function toggleAirconFF() {
                 const airconSwitch = document.getElementById('airconFFSwitch');
-                const isChecked = airconSwitch.checked;
-                const payload = JSON.stringify({ aircon: "FF", state: isChecked ? "ON" : "OFF" });
+                const state = airconSwitch.checked ? "ON" : "OFF";
+                const message = JSON.stringify({ aircon: "FF", state: state });
+                publishMessage("esp32/pub", message);
+                console.log(`Aircon FF: ${state}`);
+            }
 
-                // Publish message using mqtts.js
-                publishMessage("esp32/pub", payload);
-                console.log(`Published: ${payload}`);
+            // Function to update the light state dropdown value
+            function updateLightState() {
+                const selectedLight = document.getElementById('lightCategory').value;
+                console.log(`Selected light: ${selectedLight}`);
+            }
+
+            // Publish message to MQTT topic using mqttwss.js
+            function publishMessage(topic, message) {
+                // Assuming mqttClient is already connected and available globally
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(topic, message, (err) => {
+                        if (err) {
+                            console.error("Publish failed:", err);
+                        } else {
+                            console.log(`Message published to topic ${topic}: ${message}`);
+                        }
+                    });
+                } else {
+                    console.error("MQTT client is not connected!");
+                }
             }
 
         </script>
