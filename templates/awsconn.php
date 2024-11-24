@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT.js MQTT Test with Certificates</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
 </head>
+
 <body>
     <h1>MQTT.js MQTT Test with Certificates</h1>
     <button onclick="publishMessage()">Publish Test Message</button>
@@ -74,11 +76,12 @@ mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
             clientId: clientId,
             clean: true,
             connectTimeout: 4000,
-            rejectUnauthorized: true,  // Ensures valid certificate is required
-            protocol: 'mqtts',  // Secure MQTT protocol (MQTT over TLS)
+            rejectUnauthorized: true,  // Ensure valid certificate is required
+            protocol: 'mqtts',  // Use 'mqtts' for MQTT over TLS
             cert: certificate,  // Add certificate
             key: privateKey,    // Add private key
         });
+
 
         client.on('connect', () => {
             console.log('Connected to AWS IoT');
@@ -120,4 +123,5 @@ mHz4YebGQdNG2NBvPDeK9gJxveHPAtzrT5fiR8R9IMl3ZYSzOaDv
         }
     </script>
 </body>
+
 </html>
