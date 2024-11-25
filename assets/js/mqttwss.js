@@ -1,48 +1,31 @@
-// Include AWS SDK and MQTT.js libraries
-
-
+// Include MQTT.js from CDN (already done in the HTML file)
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
-// AWS SDK will automatically fetch credentials from the instance metadata service
-AWS.config.update({ region: 'ap-southeast-1' });
+// If you need authentication, use AWS Cognito or a different mechanism to get credentials.
+// For this example, assume you are using AWS Cognito or IAM role-based credentials in EC2.
 
-// Use AWS credentials to generate SigV4-signed WebSocket URL
-AWS.config.getCredentials((err) => {
-  if (err) {
-    console.error('Error fetching AWS credentials:', err);
-    return;
-  }
+const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
+  clientId: 'mqtt-user',  // Set a unique clientId for the MQTT connection
+  rejectUnauthorized: false,  // Optional, depending on your server setup
+});
 
-  // Automatically fetched IAM role credentials
-  const { accessKeyId, secretAccessKey, sessionToken } = AWS.config.credentials;
-
-  // Create MQTT client using SigV4-signed WebSocket connection
-  const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
-    clientId: 'mqtt-user', // Unique clientId
-    username: accessKeyId,
-    password: `${secretAccessKey}:${sessionToken || ''}`, // Include sessionToken if available
-    protocol: 'wss',
+// MQTT event handlers
+mqttClient.on('connect', () => {
+  console.log('Connected to AWS IoT Core');
+  mqttClient.subscribe('esp32/sub', (err) => {
+    if (err) {
+      console.error('Subscription failed:', err);
+    } else {
+      console.log('Subscribed to topic: esp32/sub');
+    }
   });
+});
 
-  // MQTT event handlers
-  mqttClient.on('connect', () => {
-    console.log('Connected to AWS IoT Core');
-    mqttClient.subscribe('esp32/sub', (err) => {
-      if (err) {
-        console.error('Subscription failed:', err);
-      } else {
-        console.log('Subscribed to topic: esp32/sub');
-      }
-    });
-  });
-
-  mqttClient.on('message', (topic, message) => {
-    console.log(`Received message from ${topic}: ${message.toString()}`);
-  });
-
-  mqttClient.on('error', (err) => console.error('Error:', err));
-  mqttClient.on('close', () => console.log('Connection closed'));
-  mqttClient.on('reconnect', () => console.log('Reconnecting...'));
-  mqttClient.on('offline', () => console.log('Client is offline'));
-  mqttClient.on('connect_error', (err) => console.error('Connection error:', err));
+// Handle errors, reconnections, etc.
+mqttClient.on('error', (err) => console.error('Error:', err));
+mqttClient.on('close', () => console.log('Connection closed'));
+mqttClient.on('reconnect', () => console.log('Reconnecting...'));
+mqttClient.on('offline', () => console.log('Client is offline'));
+mqttClient.on('message', (topic, message) => {
+  console.log(`Received message from ${topic}: ${message.toString()}`);
 });
