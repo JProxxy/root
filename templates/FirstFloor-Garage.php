@@ -103,9 +103,9 @@ if (!isset($_SESSION['user_id'])) {
                             <p id="lightName">Lights</p>
                             <span>Room 1</span>
 
-                            <div class="switch-container" id="switch_lights1">
+                            <div class="switch-container" id="switch_FFLightOne">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_lights1"
+                                    <input type="checkbox" id="lightSwitch_FFLightOne"
                                         onchange="toggleLightSwitch('FFLightOne')">
                                     <span class="slider"></span>
                                 </label>
@@ -153,28 +153,33 @@ if (!isset($_SESSION['user_id'])) {
             // Function to toggle light state
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById('lightSwitch_' + lightId);
-                const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
+                if (lightSwitch) {
+                    const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
 
-                console.log(lightId + " turned " + status); // Debugging in the console
+                    console.log(lightId + " turned " + status); // Debugging in the console
 
-                // Prepare the data to send to the server
-                const data = new FormData();
-                data.append('device_id', lightId); // Pass the light ID
-                data.append('status', status); // Pass the status (ON/OFF)
+                    // Prepare the data to send to the server
+                    const data = new FormData();
+                    data.append('device_id', lightId); // Pass the light ID
+                    data.append('status', status); // Pass the status (ON/OFF)
 
-                // Make the AJAX request to the update_device_status.php script
-                fetch('../app/update_device_status.php', {
-                    method: 'POST',
-                    body: data
-                })
-                    .then(response => response.text()) // Handle the response from PHP
-                    .then(responseText => {
-                        console.log(responseText); // Display response from the server
+                    // Make the AJAX request to the update_device_status.php script
+                    fetch('../app/update_device_status.php', {
+                        method: 'POST',
+                        body: data
                     })
-                    .catch(error => {
-                        console.error("Error updating device status:", error);
-                    });
+                        .then(response => response.text()) // Handle the response from PHP
+                        .then(responseText => {
+                            console.log(responseText); // Display response from the server
+                        })
+                        .catch(error => {
+                            console.error("Error updating device status:", error);
+                        });
+                } else {
+                    console.error('Light switch for ' + lightId + ' not found');
+                }
             }
+
 
 
             // Function to load light states (could be from backend or local storage)
