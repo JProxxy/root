@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 import AWS from 'aws-sdk';
 import http from 'http';
-import WebSocket from 'ws';  // Import WebSocket correctly
+import { WebSocketServer } from 'ws';  // Use the WebSocketServer export from 'ws'
 
 // Your AWS IoT endpoint
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
@@ -69,7 +69,7 @@ const startMQTTConnection = async () => {
 
 // WebSocket server setup
 const server = http.createServer();
-const wss = new WebSocket.Server({ server });  // Correct WebSocket.Server usage
+const wss = new WebSocketServer({ server });  // Use the correct import and server setup
 
 wss.on('connection', (ws) => {
   console.log('New WebSocket client connected');
