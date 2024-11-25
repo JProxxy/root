@@ -34,7 +34,7 @@ try {
 
             // Execute the query
             if ($stmt->execute()) {
-                echo "Device status updated successfully";
+                echo "Device status updated successfully.";
             } else {
                 echo "Error updating device status.";
             }

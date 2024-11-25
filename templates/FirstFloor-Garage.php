@@ -43,7 +43,8 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="room">
-                    <button onclick="navigateToGarage()" class="roomButton activeButton" id="garageButton">Garage</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton"
+                        id="garageButton">Garage</button>
                     <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
             </div>
@@ -51,7 +52,9 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="searchContainer">
                     <input type="text" id="searchInput" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
-                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
@@ -95,42 +98,48 @@ if (!isset($_SESSION['user_id'])) {
 
                             <div class="switch-container" id="switch_FFLightOne">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightOne" onchange="toggleLightSwitch('FFLightOne')">
+                                    <input type="checkbox" id="lightSwitch_FFLightOne"
+                                        onchange="toggleLightSwitch('FFLightOne')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_FFLightTwo">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightTwo" onchange="toggleLightSwitch('FFLightTwo')">
+                                    <input type="checkbox" id="lightSwitch_FFLightTwo"
+                                        onchange="toggleLightSwitch('FFLightTwo')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_FFLightThree">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightThree" onchange="toggleLightSwitch('FFLightThree')">
+                                    <input type="checkbox" id="lightSwitch_FFLightThree"
+                                        onchange="toggleLightSwitch('FFLightThree')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_FFLightFour">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightFour" onchange="toggleLightSwitch('FFLightFour')">
+                                    <input type="checkbox" id="lightSwitch_FFLightFour"
+                                        onchange="toggleLightSwitch('FFLightFour')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_FFLightFive">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightFive" onchange="toggleLightSwitch('FFLightFive')">
+                                    <input type="checkbox" id="lightSwitch_FFLightFive"
+                                        onchange="toggleLightSwitch('FFLightFive')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <div class="switch-container" id="switch_FFLightSix">
                                 <label class="switch">
-                                    <input type="checkbox" id="lightSwitch_FFLightSix" onchange="toggleLightSwitch('FFLightSix')">
+                                    <input type="checkbox" id="lightSwitch_FFLightSix"
+                                        onchange="toggleLightSwitch('FFLightSix')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -170,25 +179,28 @@ if (!isset($_SESSION['user_id'])) {
                     method: 'POST',
                     body: data
                 })
-                .then(response => response.text()) // Handle the response from PHP
-                .then(responseText => {
-                    console.log(responseText); // Display response from the server
-                })
-                .catch(error => {
-                    console.error("Error updating device status:", error);
-                });
+                    .then(response => response.text()) // Handle the response from PHP
+                    .then(responseText => {
+                        console.log(responseText); // Display response from the server
+                    })
+                    .catch(error => {
+                        console.error("Error updating device status:", error);
+                    });
             }
 
-            // Function to load light states (could be from backend or local storage)
+            // Function to load light states from the backend
             function loadLightState() {
-                return {
-                    "FFLightOne": false,
-                    "FFLightTwo": true,
-                    "FFLightThree": false,
-                    "FFLightFour": true,
-                    "FFLightFive": false,
-                    "FFLightSix": true
-                };
+                // Fetch the current light states from the backend
+                return fetch('../storage/data/load_device_state.php')
+                    .then(response => response.json()) // Parse the JSON response
+                    .then(data => {
+                        // Return the fetched light states
+                        return data;
+                    })
+                    .catch(error => {
+                        console.error("Error loading device states:", error);
+                        return {}; // Return an empty object in case of an error
+                    });
             }
 
             // Function to update the light display based on selected light
