@@ -1,12 +1,33 @@
-// Include MQTT.js from CDN (already done in the HTML file)
+// Include the AWS SDK for JavaScript (v3) in your HTML file or bundle it with Webpack
+import { SigV4Utils } from "@aws-sdk/signature-v4"; // Import AWS SDK signature utility
+
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
+const region = 'ap-southeast-1';
+const clientId = 'mqtt-user';
 
-// If you need authentication, use AWS Cognito or a different mechanism to get credentials.
-// For this example, assume you are using AWS Cognito or IAM role-based credentials in EC2.
+// Assume you are getting temporary credentials from Cognito or an IAM role
+const accessKeyId = 'YOUR_ACCESS_KEY'; // Use Cognito or IAM credentials
+const secretAccessKey = 'YOUR_SECRET_KEY'; // Use Cognito or IAM credentials
+const sessionToken = 'YOUR_SESSION_TOKEN'; // Use Cognito or IAM credentials
 
-const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
-  clientId: 'mqtt-user',  // Set a unique clientId for the MQTT connection
-  rejectUnauthorized: false,  // Optional, depending on your server setup
+// Create the MQTT WebSocket URL with the appropriate signature
+const websocketUrl = `wss://${endpoint}/mqtt`;
+
+// Sign the request using SigV4
+const signer = new SigV4Utils.SigningConfig({
+    region: region,
+    service: 'iot',
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
+    sessionToken: sessionToken, // Use sessionToken if using temporary credentials
+});
+
+const signedUrl = signer.sign(websocketUrl);
+
+// Connect using the signed URL
+const mqttClient = mqtt.connect(signedUrl, {
+  clientId: clientId,
+  rejectUnauthorized: false, // Optional, depending on your server setup
 });
 
 // MQTT event handlers
