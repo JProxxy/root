@@ -10,8 +10,6 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../templates/login.php");
     exit();
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -139,10 +137,8 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-  
-
         <script>
-            // Your existing JavaScript logic for toggling devices
+            // Function to navigate between rooms
             function navigateToOutdoor() {
                 document.getElementById("outdoorButton").classList.remove("activeButton");
                 document.getElementById("garageButton").classList.add("activeButton");
@@ -153,43 +149,20 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("outdoorButton").classList.add("activeButton");
             }
 
-            function updateLightState() {
-                const dropdown = document.getElementById('lightCategory');
-                const selectedLight = dropdown.value;  // e.g., FFLightOne, FFLightTwo, etc.
-
-                // Format the light name to "Lights 1", "Lights 2", etc.
-                const formattedLightName = selectedLight.replace("FFLight", "Lights ").replace("One", "1").replace("Two", "2").replace("Three", "3").replace("Four", "4").replace("Five", "5").replace("Six", "6");
-
-                // Update the <p> tag or element where the light name should appear
-                const lightNameElement = document.querySelector('.lights p');
-                if (lightNameElement) {
-                    lightNameElement.textContent = formattedLightName;  // Update text to "Lights 1", "Lights 2", etc.
-                }
-
-                // Load the saved light states
-                const lightStates = loadLightState();
-
-                // Hide all switch containers initially
-                const allSwitches = document.querySelectorAll('.switch-container');
-                allSwitches.forEach(switchContainer => {
-                    switchContainer.style.display = 'none';  // Hide all switches initially
-                    switchContainer.style.textAlign = 'left';  // Reset alignment
-                });
-
-                // Show the switch container corresponding to the selected light category
-                const switchToShow = document.getElementById('switch_' + selectedLight);
-                if (switchToShow) {
-                    switchToShow.style.display = 'block';  // Show the switch
-                    switchToShow.style.textAlign = 'right';  // Align switch to the right
-
-                    const switchElement = switchToShow.querySelector('input');
-                    switchElement.checked = lightStates[selectedLight];
+            // Function to toggle light state
+            function toggleLightSwitch(lightId) {
+                const lightSwitch = document.getElementById('lightSwitch_' + lightId);
+                if (lightSwitch.checked) {
+                    console.log(lightId + " turned ON");
+                    // You can add MQTT or backend logic here to update the light state
+                } else {
+                    console.log(lightId + " turned OFF");
+                    // Add logic to turn off the light, such as sending an MQTT message
                 }
             }
 
-            // Example function to load the light state (this would come from your backend or session)
+            // Function to load light states (could be from backend or local storage)
             function loadLightState() {
-                // Example, replace this with actual logic to get saved states
                 return {
                     "FFLightOne": false,
                     "FFLightTwo": true,
@@ -198,6 +171,36 @@ if (!isset($_SESSION['user_id'])) {
                     "FFLightFive": false,
                     "FFLightSix": true
                 };
+            }
+
+            // Function to update the light display based on selected light
+            function updateLightState() {
+                const dropdown = document.getElementById('lightCategory');
+                const selectedLight = dropdown.value;
+
+                const formattedLightName = selectedLight.replace("FFLight", "Lights ").replace("One", "1").replace("Two", "2").replace("Three", "3").replace("Four", "4").replace("Five", "5").replace("Six", "6");
+
+                const lightNameElement = document.querySelector('.lights p');
+                if (lightNameElement) {
+                    lightNameElement.textContent = formattedLightName;
+                }
+
+                const lightStates = loadLightState();
+
+                const allSwitches = document.querySelectorAll('.switch-container');
+                allSwitches.forEach(switchContainer => {
+                    switchContainer.style.display = 'none';
+                    switchContainer.style.textAlign = 'left';
+                });
+
+                const switchToShow = document.getElementById('switch_' + selectedLight);
+                if (switchToShow) {
+                    switchToShow.style.display = 'block';
+                    switchToShow.style.textAlign = 'right';
+
+                    const switchElement = switchToShow.querySelector('input');
+                    switchElement.checked = lightStates[selectedLight];
+                }
             }
         </script>
 
