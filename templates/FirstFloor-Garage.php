@@ -139,7 +139,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-
+  
 
         <script>
             // Your existing JavaScript logic for toggling devices
