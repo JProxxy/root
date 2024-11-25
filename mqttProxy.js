@@ -22,4 +22,4 @@ wss.on('connection', ws => {
   });
 });
 
-console.log('WebSocket server running on ws://<EC2_PUBLIC_IP>:8080');
+console.log('WebSocket server running on ws://18.139.255.32:8080');
