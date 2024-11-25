@@ -19,7 +19,7 @@ $status = isset($_POST['status']) ? $_POST['status'] : null;
 // Ensure both device_id and status are provided
 if ($device_id && $status) {
     try {
-        // Update the device status in the database using prepared statements
+        // Prepare the SQL statement to update device status
         $stmt = $conn->prepare("UPDATE Devices SET status = :status WHERE device_id = :device_id");
         $stmt->bindParam(':status', $status);
         $stmt->bindParam(':device_id', $device_id);
@@ -28,23 +28,29 @@ if ($device_id && $status) {
         if ($stmt->execute()) {
             // Optionally log the action (inserting into the Logs table)
             $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
-
             $log_action = "Device status updated"; // Log description
+
+            // Insert log into Logs table
             $stmt_log = $conn->prepare("INSERT INTO Logs (user_id, device_id, action) VALUES (:user_id, :device_id, :action)");
             $stmt_log->bindParam(':user_id', $user_id);
             $stmt_log->bindParam(':device_id', $device_id);
             $stmt_log->bindParam(':action', $log_action);
-            $stmt_log->execute();
 
-            echo "Device status updated successfully";
+            // Execute the log insert query
+            if ($stmt_log->execute()) {
+                echo "Device status updated successfully.";
+            } else {
+                echo "Error logging the action.";
+            }
         } else {
             echo "Error updating device status.";
         }
     } catch (PDOException $e) {
-        error_log($e->getMessage()); // Log the error for debugging
-        echo "Error: " . $e->getMessage(); // Display the error message
+        // Log and display the error message
+        error_log("Error: " . $e->getMessage());
+        echo "An error occurred: " . $e->getMessage();
     }
 } else {
-    echo "Invalid data provided.";
+    echo "Invalid data provided. Please check your input.";
 }
 ?>
