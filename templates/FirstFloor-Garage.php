@@ -192,14 +192,19 @@ if (!isset($_SESSION['user_id'])) {
             function loadLightState() {
                 // Fetch the current light states from the backend
                 return fetch('../storage/data/load_device_state.php')
-                    .then(response => response.json()) // Parse the JSON response
+                    .then(response => response.json()) // Try to parse the JSON response
                     .then(data => {
-                        // Return the fetched light states
-                        return data;
+                        if (data.error) {
+                            // Handle the error returned from PHP (e.g., SQL error)
+                            console.error("Error loading device states:", data.error);
+                            return {}; // Return an empty object if there's an error
+                        }
+                        return data; // If no error, return the device states
                     })
                     .catch(error => {
+                        // Handle network or other fetch errors
                         console.error("Error loading device states:", error);
-                        return {}; // Return an empty object in case of an error
+                        return {}; // Return an empty object if there's an error
                     });
             }
 
