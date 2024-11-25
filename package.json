@@ -17,5 +17,6 @@
     "aws-sdk": "^2.1692.0",
     "aws-signature-v4": "^1.4.0",
     "mqtt": "^5.10.2"
-  }
+  },
+  "type": "module"
 }
