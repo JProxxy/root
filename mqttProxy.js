@@ -8,9 +8,9 @@ import { WebSocketServer } from "ws"; // Use WebSocketServer export from 'ws'
 const endpoint = "a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com";
 
 // Read SSL certificates (replace these paths with your actual cert files)
-const privateKey = fs.readFileSync("../assets/certificates/firstFloor-garage-lights/Private.pem.key", "utf8");
-const certificate = fs.readFileSync("../assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", "utf8");
-const ca = fs.readFileSync("../assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", "utf8");
+const privateKey = fs.readFileSync("/var/www/html/assets/certificates/firstFloor-garage-lights/Private.pem.key", "utf8");
+const certificate = fs.readFileSync("/var/www/html/assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", "utf8");
+const ca = fs.readFileSync("/var/www/html/assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", "utf8");
 
 
 // Create the AWS IoT credentials provider using v3 SDK
