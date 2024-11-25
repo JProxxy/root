@@ -95,7 +95,7 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="lights">
                             <img src="../assets/images/lights.png" alt="Lights" class="lightsImage">
                             <select class="lightDropdown" id="lightCategory">
-                                <option value="FFLightOne">Lights 1</option>
+                                <option value="FFLightOne">Tanginamo 1</option>
                                 <option value="FFLightTwo">Lights 2</option>
                                 <option value="FFLightThree">Lights 3</option>
                                 <option value="FFLightFour">Lights 4</option>
