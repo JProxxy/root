@@ -195,21 +195,21 @@ if (!isset($_SESSION['user_id'])) {
                     .then(response => response.json()) // Try to parse the JSON response
                     .then(data => {
                         if (data.error) {
-                            // Handle the error returned from PHP (e.g., SQL error)
                             console.error("Error loading device states:", data.error);
                             return {}; // Return an empty object if there's an error
                         }
                         return data; // If no error, return the device states
                     })
                     .catch(error => {
-                        // Handle network or other fetch errors
                         console.error("Error loading device states:", error);
                         return {}; // Return an empty object if there's an error
                     });
             }
 
+
             // Function to update the light display based on selected light
-            function updateLightState() {
+            // Modify `updateLightState()` to handle the asynchronous loading of data
+            async function updateLightState() {
                 const dropdown = document.getElementById('lightCategory');
                 const selectedLight = dropdown.value;
 
@@ -220,23 +220,29 @@ if (!isset($_SESSION['user_id'])) {
                     lightNameElement.textContent = formattedLightName;
                 }
 
-                const lightStates = loadLightState();
+                // Wait for the light states to load
+                const lightStates = await loadLightState(); // Wait for the data from the server
 
                 const allSwitches = document.querySelectorAll('.switch-container');
                 allSwitches.forEach(switchContainer => {
-                    switchContainer.style.display = 'none';
+                    switchContainer.style.display = 'none'; // Hide all switches initially
                     switchContainer.style.textAlign = 'left';
                 });
 
+                // Display the selected switch and set its state based on the loaded data
                 const switchToShow = document.getElementById('switch_' + selectedLight);
                 if (switchToShow) {
                     switchToShow.style.display = 'block';
                     switchToShow.style.textAlign = 'right';
 
                     const switchElement = switchToShow.querySelector('input');
-                    switchElement.checked = lightStates[selectedLight];
+                    switchElement.checked = lightStates[selectedLight]; // Set the switch state based on the loaded data
                 }
             }
+
+            // Call the function to load the light states when the page loads
+            updateLightState();
+
 
             // Load the initial state
             updateLightState();
