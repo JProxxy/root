@@ -26,9 +26,9 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
 
     <!-- Include the MQTT logic -->
-    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
     <script src="../assets/js/mqttwss.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script> -->
 
 </head>
 
@@ -95,12 +95,12 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="lights">
                             <img src="../assets/images/lights.png" alt="Lights" class="lightsImage">
                             <select class="lightDropdown" id="lightCategory">
-                                <option value="lights1">Lights 1</option>
-                                <option value="lights2">Lights 2</option>
-                                <option value="lights3">Lights 3</option>
-                                <option value="lights4">Lights 4</option>
-                                <option value="lights5">Lights 5</option>
-                                <option value="lights6">Lights 6</option>
+                                <option value="FFLightOne">Lights 1</option>
+                                <option value="FFLightTwo">Lights 2</option>
+                                <option value="FFLightThree">Lights 3</option>
+                                <option value="FFLightFour">Lights 4</option>
+                                <option value="FFLightFive">Lights 5</option>
+                                <option value="FFLightSix">Lights 6</option>
                             </select>
                             <p id="lightName">Lights</p>
                             <span>Room 1</span>
@@ -155,15 +155,15 @@ if (!isset($_SESSION['user_id'])) {
 
             function updateLightState() {
                 const dropdown = document.getElementById('lightCategory');
-                const selectedLight = dropdown.value;
+                const selectedLight = dropdown.value;  // e.g., FFLightOne, FFLightTwo, etc.
 
-                // Format the light name to "Lights #1", "Lights #2", etc.
-                const formattedLightName = `Lights #${selectedLight.charAt(6)}`;  // Extracts the number and formats it
+                // Format the light name to "Lights 1", "Lights 2", etc.
+                const formattedLightName = selectedLight.replace("FFLight", "Lights ").replace("One", "1").replace("Two", "2").replace("Three", "3").replace("Four", "4").replace("Five", "5").replace("Six", "6");
 
                 // Update the <p> tag or element where the light name should appear
                 const lightNameElement = document.querySelector('.lights p');
                 if (lightNameElement) {
-                    lightNameElement.textContent = formattedLightName;  // Update text to "Lights #1", "Lights #2", etc.
+                    lightNameElement.textContent = formattedLightName;  // Update text to "Lights 1", "Lights 2", etc.
                 }
 
                 // Load the saved light states
@@ -187,47 +187,20 @@ if (!isset($_SESSION['user_id'])) {
                 }
             }
 
-
-            // Toggle light state and publish MQTT message
-            function toggleLightSwitch(lightId) {
-                const lightSwitch = document.getElementById(`lightSwitch_${lightId}`);
-                const message = lightSwitch.checked ? "Light is ON" : "Light is OFF";
-                publishMessage("esp32/pub", message);
-                console.log(`Toggled ${lightId}: ${message}`);
+            // Example function to load the light state (this would come from your backend or session)
+            function loadLightState() {
+                // Example, replace this with actual logic to get saved states
+                return {
+                    "FFLightOne": false,
+                    "FFLightTwo": true,
+                    "FFLightThree": false,
+                    "FFLightFour": true,
+                    "FFLightFive": false,
+                    "FFLightSix": true
+                };
             }
-
-            // Toggle air conditioning state and publish MQTT message
-            function toggleAirconFF() {
-                const airconSwitch = document.getElementById('airconFFSwitch');
-                const state = airconSwitch.checked ? "ON" : "OFF";
-                const message = JSON.stringify({ aircon: "FF", state: state });
-                publishMessage("esp32/pub", message);
-                console.log(`Aircon FF: ${state}`);
-            }
-
-            // Function to update the light state dropdown value
-            function updateLightState() {
-                const selectedLight = document.getElementById('lightCategory').value;
-                console.log(`Selected light: ${selectedLight}`);
-            }
-
-            // Publish message to MQTT topic using mqttwss.js
-            function publishMessage(topic, message) {
-                // Assuming mqttClient is already connected and available globally
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.publish(topic, message, (err) => {
-                        if (err) {
-                            console.error("Publish failed:", err);
-                        } else {
-                            console.log(`Message published to topic ${topic}: ${message}`);
-                        }
-                    });
-                } else {
-                    console.error("MQTT client is not connected!");
-                }
-            }
-
         </script>
+
     </div>
 </body>
 
