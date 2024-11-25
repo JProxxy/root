@@ -22,12 +22,6 @@ if (!isset($_SESSION['user_id'])) {
     <title>First Floor</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
-
-    <!-- Include the MQTT logic -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
-    <script src="../assets/js/mqttwss.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-iot-device-sdk/2.3.3/aws-iot-device-sdk.min.js"></script> -->
-
 </head>
 
 <body>
@@ -160,7 +154,7 @@ if (!isset($_SESSION['user_id'])) {
 
                     // Prepare the data to send to the server
                     const data = new FormData();
-                    data.append('device_id', lightId); // Pass the light ID
+                    data.append('device_name', lightId); // Pass the device name (e.g., FFLightOne)
                     data.append('status', status); // Pass the status (ON/OFF)
 
                     // Make the AJAX request to the update_device_status.php script
@@ -179,6 +173,7 @@ if (!isset($_SESSION['user_id'])) {
                     console.error('Light switch for ' + lightId + ' not found');
                 }
             }
+
 
 
 

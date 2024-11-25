@@ -11,16 +11,16 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Get device_id and status from POST
-$device_id = isset($_POST['device_id']) ? $_POST['device_id'] : null;
+// Get device_name and status from POST
+$device_name = isset($_POST['device_name']) ? $_POST['device_name'] : null;
 $status = isset($_POST['status']) ? $_POST['status'] : null;
 
-if ($device_id && $status) {
+if ($device_name && $status) {
     try {
-        // Prepare the SQL query to update device status
-        $stmt = $conn->prepare("UPDATE Devices SET status = :status WHERE device_id = :device_id");
+        // Prepare the SQL query to update device status using device_name
+        $stmt = $conn->prepare("UPDATE Devices SET status = :status WHERE device_name = :device_name");
         $stmt->bindParam(':status', $status);
-        $stmt->bindParam(':device_id', $device_id);
+        $stmt->bindParam(':device_name', $device_name);
 
         // Execute the query
         if ($stmt->execute()) {
