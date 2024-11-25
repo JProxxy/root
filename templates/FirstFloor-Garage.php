@@ -106,10 +106,11 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="switch-container" id="switch_lights1">
                                 <label class="switch">
                                     <input type="checkbox" id="lightSwitch_lights1"
-                                        onchange="toggleLightSwitch('lights1')">
+                                        onchange="toggleLightSwitch('FFLightOne')">
                                     <span class="slider"></span>
                                 </label>
                             </div>
+
                             <div class="switch-container" id="switch_lights2">
                                 <label class="switch">
                                     <input type="checkbox" id="lightSwitch_lights2"
@@ -152,14 +153,29 @@ if (!isset($_SESSION['user_id'])) {
             // Function to toggle light state
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById('lightSwitch_' + lightId);
-                if (lightSwitch.checked) {
-                    console.log(lightId + " turned ON");
-                    // You can add MQTT or backend logic here to update the light state
-                } else {
-                    console.log(lightId + " turned OFF");
-                    // Add logic to turn off the light, such as sending an MQTT message
-                }
+                const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
+
+                console.log(lightId + " turned " + status); // Debugging in the console
+
+                // Prepare the data to send to the server
+                const data = new FormData();
+                data.append('device_id', lightId); // Pass the light ID
+                data.append('status', status); // Pass the status (ON/OFF)
+
+                // Make the AJAX request to the update_device_status.php script
+                fetch('../app/update_device_status.php', {
+                    method: 'POST',
+                    body: data
+                })
+                    .then(response => response.text()) // Handle the response from PHP
+                    .then(responseText => {
+                        console.log(responseText); // Display response from the server
+                    })
+                    .catch(error => {
+                        console.error("Error updating device status:", error);
+                    });
             }
+
 
             // Function to load light states (could be from backend or local storage)
             function loadLightState() {
