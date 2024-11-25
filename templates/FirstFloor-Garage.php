@@ -164,7 +164,7 @@ if (!isset($_SESSION['user_id'])) {
                     data.append('status', status); // Pass the status (ON/OFF)
 
                     // Make the AJAX request to the update_device_status.php script
-                    fetch('../app/update_device_status.php', {
+                    fetch('../storage/data/update_device_status.php', {
                         method: 'POST',
                         body: data
                     })
