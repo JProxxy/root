@@ -12,7 +12,6 @@ const privateKey = fs.readFileSync("/var/www/html/assets/certificates/firstFloor
 const certificate = fs.readFileSync("/var/www/html/assets/certificates/firstFloor-garage-lights/DeviceCertificate.pem.crt", "utf8");
 const ca = fs.readFileSync("/var/www/html/assets/certificates/firstFloor-garage-lights/AmazonRootCA1.pem", "utf8");
 
-
 // Create the AWS IoT credentials provider using v3 SDK
 const stsClient = new STSClient({ region: "ap-southeast-1" });
 
@@ -25,6 +24,7 @@ const getAWSCredentials = async () => {
   try {
     const data = await stsClient.send(new AssumeRoleCommand(params));
     if (data.Credentials) {
+      console.log("Assumed role credentials:", data.Credentials); // Debug line
       return data.Credentials;
     } else {
       console.error("No credentials returned from sts:assumeRole");
@@ -56,7 +56,7 @@ const startMQTTConnection = async () => {
     username: AccessKeyId, // Using AccessKeyId as the username
     password: SecretAccessKey, // Using SecretAccessKey as the password
     rejectUnauthorized: false, // Optional, depending on your setup
-    connectTimeout: 3000, // Optional, adjust timeout for your needs
+    connectTimeout: 5000, // Timeout after 5 seconds
     protocol: "wss", // Ensuring we're using WebSocket protocol
     headers: {
       "x-amz-security-token": SessionToken, // Using SessionToken for the WebSocket connection
@@ -90,6 +90,8 @@ const startMQTTConnection = async () => {
 
   mqttClient.on("close", () => {
     console.log("MQTT Client connection closed");
+    // Optionally, retry the connection here
+    setTimeout(startMQTTConnection, 5000); // Retry after 5 seconds
   });
 
   return mqttClient;
