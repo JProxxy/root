@@ -4,38 +4,43 @@ const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
 // Create MQTT client using WebSocket and AWS IoT credentials
 const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
-  clientId: 'mqtt-user',  // Set a unique clientId for the MQTT connection
-  rejectUnauthorized: false,  // Ensure the connection is secure
+  clientId: 'mqtt-user', // Set a unique clientId for the MQTT connection
+  rejectUnauthorized: false, // Disable certificate verification (not recommended for production)
 });
 
+// MQTT event handlers
 mqttClient.on('connect', () => {
-    console.log('Connected to AWS IoT Core');
-    mqttClient.subscribe('esp32/sub', (err) => {
-      if (err) {
-        console.error('Subscription failed:', err);
-      } else {
-        console.log('Subscribed to topic: esp32/sub');
-      }
-    });
+  console.log('Connected to AWS IoT Core');
+  mqttClient.subscribe('esp32/sub', (err) => {
+    if (err) {
+      console.error('Subscription failed:', err);
+    } else {
+      console.log('Subscribed to topic: esp32/sub');
+    }
   });
-  
-  mqttClient.on('error', (err) => {
-    console.error('Error:', err);
-  });
-  
-  mqttClient.on('close', () => {
-    console.log('Connection closed');
-  });
-  
-  mqttClient.on('reconnect', () => {
-    console.log('Reconnecting...');
-  });
-  
-  mqttClient.on('offline', () => {
-    console.log('Client is offline');
-  });
-  
-  mqttClient.on('connect_error', (err) => {
-    console.error('Connection error:', err);
-  });
-  
+});
+
+mqttClient.on('error', (err) => {
+  console.error('Error:', err);
+});
+
+mqttClient.on('close', () => {
+  console.log('Connection closed');
+});
+
+mqttClient.on('reconnect', () => {
+  console.log('Reconnecting...');
+});
+
+mqttClient.on('offline', () => {
+  console.log('Client is offline');
+});
+
+mqttClient.on('connect_error', (err) => {
+  console.error('Connection error:', err);
+});
+
+// Handle incoming messages
+mqttClient.on('message', (topic, message) => {
+  console.log(`Received message from ${topic}: ${message.toString()}`);
+});
