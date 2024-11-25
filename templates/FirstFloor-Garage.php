@@ -144,7 +144,7 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById("outdoorButton").classList.remove("activeButton");
                 document.getElementById("garageButton").classList.add("activeButton");
             }
- 
+
             function navigateToGarage() {
                 document.getElementById("garageButton").classList.remove("activeButton");
                 document.getElementById("outdoorButton").classList.add("activeButton");
@@ -179,6 +179,7 @@ if (!isset($_SESSION['user_id'])) {
                     console.error('Light switch for ' + lightId + ' not found');
                 }
             }
+
 
 
 
