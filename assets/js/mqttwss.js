@@ -1,33 +1,11 @@
-// Include the AWS SDK for JavaScript (v3) in your HTML file or bundle it with Webpack
-import { SigV4Utils } from "@aws-sdk/signature-v4"; // Import AWS SDK signature utility
-
+// Include the MQTT.js library directly for the browser
+// Initialize the MQTT client in your JavaScript file
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
-const region = 'ap-southeast-1';
-const clientId = 'mqtt-user';
 
-// Assume you are getting temporary credentials from Cognito or an IAM role
-const accessKeyId = 'YOUR_ACCESS_KEY'; // Use Cognito or IAM credentials
-const secretAccessKey = 'YOUR_SECRET_KEY'; // Use Cognito or IAM credentials
-const sessionToken = 'YOUR_SESSION_TOKEN'; // Use Cognito or IAM credentials
-
-// Create the MQTT WebSocket URL with the appropriate signature
-const websocketUrl = `wss://${endpoint}/mqtt`;
-
-// Sign the request using SigV4
-const signer = new SigV4Utils.SigningConfig({
-    region: region,
-    service: 'iot',
-    accessKeyId: accessKeyId,
-    secretAccessKey: secretAccessKey,
-    sessionToken: sessionToken, // Use sessionToken if using temporary credentials
-});
-
-const signedUrl = signer.sign(websocketUrl);
-
-// Connect using the signed URL
-const mqttClient = mqtt.connect(signedUrl, {
-  clientId: clientId,
-  rejectUnauthorized: false, // Optional, depending on your server setup
+// Create MQTT client using WebSocket and AWS IoT credentials
+const mqttClient = mqtt.connect(`wss://${endpoint}/mqtt`, {
+  clientId: 'mqtt-user', // Set a unique clientId for the MQTT connection
+  rejectUnauthorized: false, // Disable certificate verification (not recommended for production)
 });
 
 // MQTT event handlers
@@ -42,11 +20,27 @@ mqttClient.on('connect', () => {
   });
 });
 
-// Handle errors, reconnections, etc.
-mqttClient.on('error', (err) => console.error('Error:', err));
-mqttClient.on('close', () => console.log('Connection closed'));
-mqttClient.on('reconnect', () => console.log('Reconnecting...'));
-mqttClient.on('offline', () => console.log('Client is offline'));
+mqttClient.on('error', (err) => {
+  console.error('Error:', err);
+});
+
+mqttClient.on('close', () => {
+  console.log('Connection closed');
+});
+
+mqttClient.on('reconnect', () => {
+  console.log('Reconnecting...');
+});
+
+mqttClient.on('offline', () => {
+  console.log('Client is offline');
+});
+
+mqttClient.on('connect_error', (err) => {
+  console.error('Connection error:', err);
+});
+
+// Handle incoming messages
 mqttClient.on('message', (topic, message) => {
   console.log(`Received message from ${topic}: ${message.toString()}`);
 });
