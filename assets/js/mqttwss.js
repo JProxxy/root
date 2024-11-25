@@ -1,6 +1,5 @@
 // Include AWS SDK and MQTT.js libraries
 const AWS = require('aws-sdk');
-const mqtt = require('mqtt');
 
 const endpoint = 'a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com';
 
