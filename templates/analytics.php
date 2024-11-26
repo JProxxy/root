@@ -28,7 +28,7 @@ if (!isset($_SESSION['user_id'])) {
         <?php include '../partials/bgMain.php'; ?>
 
         <div class="firstPart">
-
+            dsds
         </div>
         <div class="secondPart">
 
