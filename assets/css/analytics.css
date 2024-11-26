@@ -7,9 +7,13 @@
   .firstPart,
   .secondPart,
   .thirdPart {
-    flex: 1; /* All sections take equal space */
-    width: 100%; /* Full width of the parent */
-    z-index: 2; /* Adjust z-index as needed */
+    display: flex;
+    width: 92%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 8%;
+    z-index: 2;
   }
   
   /* Optional: Add background colors for visualization */
