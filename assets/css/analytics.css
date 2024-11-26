@@ -1,5 +1,7 @@
 .firstPart{
     width: 100%;
+    padding-top: 0;
+    padding-left: 0;
     background-color: red;
-    
+
 }
