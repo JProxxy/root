@@ -1,15 +1,31 @@
 .bgMain {
-  background-color: #d8151500;
-  position: absolute;
-  z-index: 0;
-}
-
-.firstPart {
-  display: flex;
-  width: 92%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 8%;
-  z-index: 2;
-}
+    background-color: #d8151500; /* Transparent background color */
+    position: absolute;
+    z-index: 0;
+    display: flex; /* Use Flexbox for layout */
+    flex-direction: column; /* Arrange children vertically */
+    width: 100%; /* Ensure full width */
+    height: 100%; /* Ensure full height */
+  }
+  
+  .firstPart,
+  .secondPart,
+  .thirdPart {
+    flex: 1; /* All sections take equal space */
+    width: 100%; /* Full width of the parent */
+    z-index: 1; /* Adjust z-index as needed */
+  }
+  
+  /* Optional: Add background colors for visualization */
+  .firstPart {
+    background-color: rgba(255, 0, 0, 0.3); /* Light red */
+  }
+  
+  .secondPart {
+    background-color: rgba(0, 255, 0, 0.3); /* Light green */
+  }
+  
+  .thirdPart {
+    background-color: rgba(0, 0, 255, 0.3); /* Light blue */
+  }
+  
