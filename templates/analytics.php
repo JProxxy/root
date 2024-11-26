@@ -19,20 +19,15 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/analytics.css">
+
 </head>
 
 <body>
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
 
-        <div class="dashboardDevider">
-         
-            </div>
 
-            <div class="dashboardDeviderRight">
-            
-            </div>
-        </div>
     </div>
 
     <script>
