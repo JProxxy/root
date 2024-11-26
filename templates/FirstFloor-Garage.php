@@ -32,7 +32,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="dashboardDeviderLeft">
                 <!-- Dropdown Menu -->
                 <select id="office-select" class="officeDropdown">
-                    <option value="firstFloor" selected>First Floor</option> <!-- Set as default -->
+                    <option value="firstFloor" selected>First Floor</option>
                     <option value="secondFloor">Second Floor</option>
                     <option value="thirdFloor">Third Floor</option>
                     <option value="roofTop">Roof Top</option>
@@ -192,22 +192,9 @@ if (!isset($_SESSION['user_id'])) {
                     });
             }
 
-            // Function to load light states from the backend
+            // Function to load light state (not needed now, as state can be directly controlled via API)
             // function loadLightState() {
-            //     // Fetch the current light states from the backend via API Gateway
-            //     return fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/getDeviceStates') // Assuming you have an endpoint for this
-            //         .then(response => response.json()) // Try to parse the JSON response
-            //         .then(data => {
-            //             if (data.error) {
-            //                 console.error("Error loading device states:", data.error);
-            //                 return {}; // Return an empty object if there's an error
-            //             }
-            //             return data; // If no error, return the device states
-            //         })
-            //         .catch(error => {
-            //             console.error("Error loading device states:", error);
-            //             return {}; // Return an empty object if there's an error
-            //         });
+            //     // This can be used if you want to load the initial state of lights from the backend
             // }
 
             // Function to update the light display based on selected light
@@ -222,34 +209,46 @@ if (!isset($_SESSION['user_id'])) {
                     lightNameElement.textContent = formattedLightName;
                 }
 
-                // Wait for the light states to load
-                const lightStates = await loadLightState(); // Wait for the data from the server
-
-                const allSwitches = document.querySelectorAll('.switch-container');
-                allSwitches.forEach(switchContainer => {
-                    switchContainer.style.display = 'none'; // Hide all switches initially
-                    switchContainer.style.textAlign = 'left';
-                });
-
-                // Display the selected switch and set its state based on the loaded data
-                const switchToShow = document.getElementById('switch_' + selectedLight);
-                if (switchToShow) {
-                    switchToShow.style.display = 'block';
-                    switchToShow.style.textAlign = 'right';
-
-                    const switchElement = switchToShow.querySelector('input');
-                    switchElement.checked = lightStates[selectedLight]; // Set the switch state based on the loaded data
-                }
+                // Directly control light based on selected light
+                // No need to load or send any extra data if the UI state doesn't require it
             }
 
-            // Call the function to load the light states when the page loads
-            // updateLightState();
+            function toggleAirconFF() {
+                const airconSwitch = document.getElementById('airconFFSwitch');
+                const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
+                console.log('Air Conditioner FF status:', status);
 
-            // Load the initial state
-            updateLightState();
+                // Prepare the data to send to the API Gateway
+                const data = {
+                    airconId: 'FFAircon',
+                    status: status
+                };
+
+                // Send the data to Lambda API via API Gateway
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        console.log('Aircon control response:', responseData);
+                    })
+                    .catch(error => {
+                        console.error("Error updating aircon status:", error);
+                    });
+            }
+
+            function navigateToGarage() {
+                window.location.href = 'FirstFloor-Garage.php';
+            }
+
+            function navigateToOutdoor() {
+                window.location.href = 'FirstFloor-Outdoor.php';
+            }
         </script>
-
-
     </div>
 </body>
 
