@@ -178,7 +178,7 @@ if (!isset($_SESSION['user_id'])) {
                 const selectedSwitch = document.getElementById('switch_' + selectedLight);
                 if (selectedSwitch) {
                     selectedSwitch.style.display = 'block';
-                    selectedSwitch.style.float = 'right';
+                    selectedSwitch.style.textAlign = 'right';
                 }
             }
 
