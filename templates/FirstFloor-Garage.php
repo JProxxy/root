@@ -169,19 +169,23 @@ if (!isset($_SESSION['user_id'])) {
                 const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
                 console.log(lightId + " turned " + status); // Debugging in the console
 
-                // Prepare the data to send to the server
-                const data = new FormData();
-                data.append('device_name', lightId); // Pass the device name (e.g., FFLightOne)
-                data.append('status', status); // Pass the status (ON/OFF)
+                // Prepare the data to send to the Lambda API via API Gateway
+                const data = {
+                    lightId: lightId,
+                    status: status
+                };
 
-                // Make the AJAX request to the update_device_status.php script
-                fetch('../storage/data/update_device_status.php', {
+                // Make the fetch request to the API Gateway endpoint to control the device
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
                     method: 'POST',
-                    body: data
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data) // Send the data as a JSON string
                 })
-                    .then(response => response.text()) // Handle the response from PHP
-                    .then(responseText => {
-                        console.log(responseText); // Display response from the server
+                    .then(response => response.json()) // Handle the response from Lambda
+                    .then(responseData => {
+                        console.log('Device control response:', responseData);
                     })
                     .catch(error => {
                         console.error("Error updating device status:", error);
@@ -190,8 +194,8 @@ if (!isset($_SESSION['user_id'])) {
 
             // Function to load light states from the backend
             function loadLightState() {
-                // Fetch the current light states from the backend
-                return fetch('../storage/data/load_device_state.php')
+                // Fetch the current light states from the backend via API Gateway
+                return fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/getDeviceStates') // Assuming you have an endpoint for this
                     .then(response => response.json()) // Try to parse the JSON response
                     .then(data => {
                         if (data.error) {
@@ -206,9 +210,7 @@ if (!isset($_SESSION['user_id'])) {
                     });
             }
 
-
             // Function to update the light display based on selected light
-            // Modify `updateLightState()` to handle the asynchronous loading of data
             async function updateLightState() {
                 const dropdown = document.getElementById('lightCategory');
                 const selectedLight = dropdown.value;
@@ -243,10 +245,10 @@ if (!isset($_SESSION['user_id'])) {
             // Call the function to load the light states when the page loads
             updateLightState();
 
-
             // Load the initial state
             updateLightState();
         </script>
+
 
     </div>
 </body>
