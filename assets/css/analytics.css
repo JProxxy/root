@@ -13,7 +13,7 @@
   .thirdPart {
     flex: 1; /* All sections take equal space */
     width: 100%; /* Full width of the parent */
-    z-index: 1; /* Adjust z-index as needed */
+    z-index: 2; /* Adjust z-index as needed */
   }
   
   /* Optional: Add background colors for visualization */
