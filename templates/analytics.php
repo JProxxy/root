@@ -27,7 +27,15 @@ if (!isset($_SESSION['user_id'])) {
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
 
+        <div class="firstPart">
 
+        </div>
+        <div class="secondPart">
+
+        </div>
+        <div class="thirdPart">
+
+        </div>
     </div>
 
     <script>
