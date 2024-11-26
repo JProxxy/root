@@ -186,7 +186,7 @@ if (!isset($_SESSION['user_id'])) {
                 updateLightState(); // Hide all light switches initially
             });
 
-            
+
             // Function to toggle light state
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById('lightSwitch_' + lightId);
