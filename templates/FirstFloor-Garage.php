@@ -143,125 +143,126 @@ if (!isset($_SESSION['user_id'])) {
                                     <span class="slider"></span>
                                 </label>
                             </div>
+                        </div>
 
+                        <div class="airConditionFF">
+                            <img src="../assets/images/ac.png" alt="Air Condition" class="airconImage">
+                            <p>Air Condition</p>
+                            <span>Room 1</span>
 
-                            <div class="airConditionFF">
-                                <img src="../assets/images/ac.png" alt="Air Condition" class="airconImage">
-                                <p>Air Condition</p>
-                                <span>Room 1</span>
-
-                                <div class="switch-containerTwo">
-                                    <label class="switchTwo">
-                                        <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
+                            <div class="switch-containerTwo">
+                                <label class="switchTwo">
+                                    <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()">
+                                    <span class="slider"></span>
+                                </label>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <script>
+        <script>
 
-                // Function to update light switch visibility based on the selected light
-                function updateLightState() {
-                    const selectedLight = document.getElementById('lightCategory').value; // Get selected light ID from dropdown
-                    const allLightSwitches = document.querySelectorAll('.switch-container'); // Select all light switches
+            // Function to update light switch visibility based on the selected light
+            function updateLightState() {
+                const selectedLight = document.getElementById('lightCategory').value; // Get selected light ID from dropdown
+                const allLightSwitches = document.querySelectorAll('.switch-container'); // Select all light switches
 
-                    // Hide all light switches
-                    allLightSwitches.forEach(switchContainer => {
-                        switchContainer.style.display = 'none';
-                    });
-
-                    // Show the switch for the selected light
-                    const selectedSwitch = document.getElementById('switch_' + selectedLight);
-                    if (selectedSwitch) {
-                        selectedSwitch.style.display = 'block';
-                    }
-                }
-
-                // Initially hide all light switches when the page loads
-                document.addEventListener('DOMContentLoaded', function () {
-                    updateLightState(); // Hide all light switches initially
+                // Hide all light switches
+                allLightSwitches.forEach(switchContainer => {
+                    switchContainer.style.display = 'none';
                 });
 
+                // Show the switch for the selected light
+                const selectedSwitch = document.getElementById('switch_' + selectedLight);
+                if (selectedSwitch) {
+                    selectedSwitch.style.display = 'block';
+                    selectedSwitch.style.float = 'right';
+                }
+            }
 
-                // Function to toggle light state
-                function toggleLightSwitch(lightId) {
-                    const lightSwitch = document.getElementById('lightSwitch_' + lightId);
-                    const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
-                    console.log(lightId + " turned " + status); // Debugging in the console
+            // Initially hide all light switches when the page loads
+            document.addEventListener('DOMContentLoaded', function () {
+                updateLightState(); // Hide all light switches initially
+            });
 
-                    // Prepare the data to send to the Lambda API via API Gateway in the required format
-                    const requestData = {
-                        body: JSON.stringify({
-                            data: {
-                                deviceName: lightId,  // Sending deviceName
-                                command: status      // Sending the command (ON/OFF)
-                            }
-                        })
-                    };
 
-                    // Make the fetch request to the API Gateway endpoint to control the device
-                    fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(requestData) // Send the data in the required format
+            // Function to toggle light state
+            function toggleLightSwitch(lightId) {
+                const lightSwitch = document.getElementById('lightSwitch_' + lightId);
+                const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
+                console.log(lightId + " turned " + status); // Debugging in the console
+
+                // Prepare the data to send to the Lambda API via API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: lightId,  // Sending deviceName
+                            command: status      // Sending the command (ON/OFF)
+                        }
                     })
-                        .then(response => response.json()) // Handle the response from Lambda
-                        .then(responseData => {
-                            console.log('Device control response:', responseData);
-                        })
-                        .catch(error => {
-                            console.error("Error updating device status:", error);
-                        });
-                }
+                };
 
-                // Function to toggle aircon state
-                function toggleAirconFF() {
-                    const airconSwitch = document.getElementById('airconFFSwitch');
-                    const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
-                    console.log('Air Conditioner FF status:', status);
-
-                    // Prepare the data to send to the API Gateway in the required format
-                    const requestData = {
-                        body: JSON.stringify({
-                            data: {
-                                deviceName: 'AirconFF',  // AirconFF device name
-                                command: status          // Sending the command (ON/OFF)
-                            }
-                        })
-                    };
-
-                    // Send the data to Lambda API via API Gateway
-                    fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(requestData)
+                // Make the fetch request to the API Gateway endpoint to control the device
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData) // Send the data in the required format
+                })
+                    .then(response => response.json()) // Handle the response from Lambda
+                    .then(responseData => {
+                        console.log('Device control response:', responseData);
                     })
-                        .then(response => response.json())
-                        .then(responseData => {
-                            console.log('Aircon control response:', responseData);
-                        })
-                        .catch(error => {
-                            console.error("Error updating aircon status:", error);
-                        });
-                }
+                    .catch(error => {
+                        console.error("Error updating device status:", error);
+                    });
+            }
 
-                function navigateToGarage() {
-                    window.location.href = 'FirstFloor-Garage.php';
-                }
+            // Function to toggle aircon state
+            function toggleAirconFF() {
+                const airconSwitch = document.getElementById('airconFFSwitch');
+                const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
+                console.log('Air Conditioner FF status:', status);
 
-                function navigateToOutdoor() {
-                    window.location.href = 'FirstFloor-Outdoor.php';
-                }
-            </script>
-        </div>
+                // Prepare the data to send to the API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: 'AirconFF',  // AirconFF device name
+                            command: status          // Sending the command (ON/OFF)
+                        }
+                    })
+                };
+
+                // Send the data to Lambda API via API Gateway
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        console.log('Aircon control response:', responseData);
+                    })
+                    .catch(error => {
+                        console.error("Error updating aircon status:", error);
+                    });
+            }
+
+            function navigateToGarage() {
+                window.location.href = 'FirstFloor-Garage.php';
+            }
+
+            function navigateToOutdoor() {
+                window.location.href = 'FirstFloor-Outdoor.php';
+            }
+        </script>
+    </div>
 </body>
 
 </html>
