@@ -163,6 +163,30 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
         <script>
+
+            // Function to update light switch visibility based on the selected light
+            function updateLightState() {
+                const selectedLight = document.getElementById('lightCategory').value; // Get selected light ID from dropdown
+                const allLightSwitches = document.querySelectorAll('.switch-container'); // Select all light switches
+
+                // Hide all light switches
+                allLightSwitches.forEach(switchContainer => {
+                    switchContainer.style.display = 'none';
+                });
+
+                // Show the switch for the selected light
+                const selectedSwitch = document.getElementById('switch_' + selectedLight);
+                if (selectedSwitch) {
+                    selectedSwitch.style.display = 'block';
+                }
+            }
+
+            // Initially hide all light switches when the page loads
+            document.addEventListener('DOMContentLoaded', function () {
+                updateLightState(); // Hide all light switches initially
+            });
+
+            
             // Function to toggle light state
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById('lightSwitch_' + lightId);
