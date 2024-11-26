@@ -193,22 +193,22 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             // Function to load light states from the backend
-            function loadLightState() {
-                // Fetch the current light states from the backend via API Gateway
-                return fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/getDeviceStates') // Assuming you have an endpoint for this
-                    .then(response => response.json()) // Try to parse the JSON response
-                    .then(data => {
-                        if (data.error) {
-                            console.error("Error loading device states:", data.error);
-                            return {}; // Return an empty object if there's an error
-                        }
-                        return data; // If no error, return the device states
-                    })
-                    .catch(error => {
-                        console.error("Error loading device states:", error);
-                        return {}; // Return an empty object if there's an error
-                    });
-            }
+            // function loadLightState() {
+            //     // Fetch the current light states from the backend via API Gateway
+            //     return fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/getDeviceStates') // Assuming you have an endpoint for this
+            //         .then(response => response.json()) // Try to parse the JSON response
+            //         .then(data => {
+            //             if (data.error) {
+            //                 console.error("Error loading device states:", data.error);
+            //                 return {}; // Return an empty object if there's an error
+            //             }
+            //             return data; // If no error, return the device states
+            //         })
+            //         .catch(error => {
+            //             console.error("Error loading device states:", error);
+            //             return {}; // Return an empty object if there's an error
+            //         });
+            // }
 
             // Function to update the light display based on selected light
             async function updateLightState() {
@@ -243,7 +243,7 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             // Call the function to load the light states when the page loads
-            updateLightState();
+            // updateLightState();
 
             // Load the initial state
             updateLightState();
