@@ -2,10 +2,6 @@
     background-color: #d8151500; /* Transparent background color */
     position: absolute;
     z-index: 0;
-    display: flex; /* Use Flexbox for layout */
-    flex-direction: column; /* Arrange children vertically */
-    width: 100%; /* Ensure full width */
-    height: 100%; /* Ensure full height */
   }
   
   .firstPart,
