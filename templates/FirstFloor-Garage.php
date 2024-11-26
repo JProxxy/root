@@ -169,10 +169,14 @@ if (!isset($_SESSION['user_id'])) {
                 const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
                 console.log(lightId + " turned " + status); // Debugging in the console
 
-                // Prepare the data to send to the Lambda API via API Gateway
-                const data = {
-                    lightId: lightId,
-                    status: status
+                // Prepare the data to send to the Lambda API via API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: lightId,  // Sending deviceName
+                            command: status      // Sending the command (ON/OFF)
+                        }
+                    })
                 };
 
                 // Make the fetch request to the API Gateway endpoint to control the device
@@ -181,7 +185,7 @@ if (!isset($_SESSION['user_id'])) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data) // Send the data as a JSON string
+                    body: JSON.stringify(requestData) // Send the data in the required format
                 })
                     .then(response => response.json()) // Handle the response from Lambda
                     .then(responseData => {
@@ -192,36 +196,20 @@ if (!isset($_SESSION['user_id'])) {
                     });
             }
 
-            // Function to load light state (not needed now, as state can be directly controlled via API)
-            // function loadLightState() {
-            //     // This can be used if you want to load the initial state of lights from the backend
-            // }
-
-            // Function to update the light display based on selected light
-            async function updateLightState() {
-                const dropdown = document.getElementById('lightCategory');
-                const selectedLight = dropdown.value;
-
-                const formattedLightName = selectedLight.replace("FFLight", "Lights ").replace("One", "1").replace("Two", "2").replace("Three", "3").replace("Four", "4").replace("Five", "5").replace("Six", "6");
-
-                const lightNameElement = document.querySelector('.lights p');
-                if (lightNameElement) {
-                    lightNameElement.textContent = formattedLightName;
-                }
-
-                // Directly control light based on selected light
-                // No need to load or send any extra data if the UI state doesn't require it
-            }
-
+            // Function to toggle aircon state
             function toggleAirconFF() {
                 const airconSwitch = document.getElementById('airconFFSwitch');
                 const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
                 console.log('Air Conditioner FF status:', status);
 
-                // Prepare the data to send to the API Gateway
-                const data = {
-                    airconId: 'FFAircon',
-                    status: status
+                // Prepare the data to send to the API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: 'AirconFF',  // AirconFF device name
+                            command: status          // Sending the command (ON/OFF)
+                        }
+                    })
                 };
 
                 // Send the data to Lambda API via API Gateway
@@ -230,7 +218,7 @@ if (!isset($_SESSION['user_id'])) {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(requestData)
                 })
                     .then(response => response.json())
                     .then(responseData => {
