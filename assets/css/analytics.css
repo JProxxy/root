@@ -1,14 +1,15 @@
-.bgMain::after {
-    content: "";
-    display: block;
-    clear: both;
+.bgMain {
+  background-color: #d8151500;
+  position: absolute;
+  z-index: 0;
 }
 
-
-.firstPart{
-    width: 100%;
-    padding-top: 0;
-    padding-left: 0;
-    background-color: red;
-
+.firstPart {
+  display: flex;
+  width: 92%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 8%;
+  z-index: 2;
 }
