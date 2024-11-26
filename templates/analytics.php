@@ -23,7 +23,52 @@ if (!isset($_SESSION['user_id'])) {
 
 <body>
     <div class="bgMain">
-   
+        <?php include '../partials/bgMain.php'; ?>
+
+        <div class="dashboardDevider">
+            <div class="dashboardDeviderLeft">
+                <img src="../assets/images/overviewBuilding.png" alt="Overview Building of Rivan" class="mainBuilding">
+            </div>
+
+            <div class="dashboardDeviderRight">
+                <h2>Welcome to Rivan!</h2>
+                <p>Harness our Smart Building Automation System for easy control and comfort</p>
+
+                <div class="forecast">
+                    <div class="forecastLeft">
+                        <div class="temperature">
+                            <span class="tempValue">--</span>
+                            <div class="itemGroup">
+                                <span class="tempUnits">°C</span><br>
+                                <img src="../assets/images/cloud.png" alt="Cloud icon" class="cloudIcon" />
+                            </div>
+                        </div>
+                        <div class="weatherDescription">
+                            <span class="description">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div class="forecastRight">
+                        <div class="weather">
+                            <div class="precipitation">Precipitation: --%</div>
+                            <br>
+                            <div class="humidity">Humidity: --%</div>
+                            <br>
+                            <div class="wind">Wind: -- km/h</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboardLog">
+                    <div class="headerLog">
+                        <p>User Activity Log</p>
+                        <img src="../assets/images/next.png" alt="next icon" class="next" />
+                    </div>
+
+                  
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
