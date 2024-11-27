@@ -64,7 +64,7 @@
 </head>
 
 <body>
-
+  
     <div class="wrapper">
         <div class="circular-bar">
             <div class="percent">0%</div>
