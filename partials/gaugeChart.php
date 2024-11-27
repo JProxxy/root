@@ -27,7 +27,6 @@
             position: relative;
             width: 470px; /* Width of the rectangle */
             height: 200px; /* Height of the rectangle */
-            /* border: 2px solid var(--border-color); Border around the rectangle */
             padding: 10px;
             background-color: var(--white);
             display: flex;
@@ -119,17 +118,34 @@
     </div>
 
     <script>
-        // Adjust this percentage for the needle position
-        let percentage = 100; // Needle position (between 0 and 100)
+        // Function to fetch the latest WaterPercentage
+        async function getWaterPercentage() {
+            try {
+                const response = await fetch('getWaterPercentage.php'); // Fetch data from PHP script
+                const data = await response.json();
+                const waterPercentage = data.WaterPercentage;
 
-        const bar = document.querySelector('.bar');
-        const needle = document.querySelector('.needle');
+                // Update the gauge based on the fetched WaterPercentage
+                updateGauge(waterPercentage);
+            } catch (error) {
+                console.error('Error fetching water percentage:', error);
+            }
+        }
 
-        // Rotate the progress bar according to the percentage
-        bar.style.transform = `rotate(${percentage * 1.8 - 90}deg)`; // Rotate bar from 0 to 180 degrees
+        // Update the gauge chart based on the WaterPercentage
+        function updateGauge(percentage) {
+            const bar = document.querySelector('.bar');
+            const needle = document.querySelector('.needle');
 
-        // Rotate the needle based on the percentage
-        needle.style.transform = `rotate(${percentage * 1.8 - 90}deg)`; // Adjust needle position
+            // Rotate the progress bar according to the percentage
+            bar.style.transform = `rotate(${percentage * 1.8 - 90}deg)`; // Rotate bar from 0 to 180 degrees
+
+            // Rotate the needle based on the percentage
+            needle.style.transform = `rotate(${percentage * 1.8 - 90}deg)`; // Adjust needle position
+        }
+
+        // Fetch and update the gauge on page load
+        getWaterPercentage();
     </script>
 </body>
 
