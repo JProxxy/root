@@ -98,64 +98,8 @@
     }
     ?>
 
-    <script>
-        // Pass the temperature value fetched from PHP to JavaScript
-        let currentTemperature = <?php echo $temperature; ?>;
-        let previousTemperature = currentTemperature; // Store initial temperature
+       
 
-        console.log("Latest Temperature: " + currentTemperature);
-
-        // Set up initial values for the progress bar
-        let CircularBar = document.querySelector(".circular-bar");
-        let DegreeValue = document.querySelector(".degree");
-
-        let InitialValue = 0;  // Starting value
-        let targetValue = currentTemperature; // Set the initial target value to the fetched temperature
-        let speed = 30;  // Speed of value change (milliseconds)
-        let transitionSpeed = 0.5; // Speed of transition (higher is slower)
-
-        // Function to smoothly update the circular progress bar
-        function updateBar() {
-            // Check if the temperature has changed before updating
-            if (currentTemperature !== previousTemperature) {
-                targetValue = currentTemperature;
-                previousTemperature = currentTemperature; // Update the previous temperature value
-            }
-
-            // Gradually update InitialValue towards the target value
-            if (Math.abs(InitialValue - targetValue) > transitionSpeed) {
-                if (InitialValue < targetValue) {
-                    InitialValue += transitionSpeed; // Increase gradually
-                } else if (InitialValue > targetValue) {
-                    InitialValue -= transitionSpeed; // Decrease gradually
-                }
-            } else {
-                // Once close enough to the target, set it exactly to avoid overshooting
-                InitialValue = targetValue;
-            }
-
-            // Map the temperature directly to a portion of the circular progress bar
-            // Adjust the angle (for example, 100°C corresponds to a full circle)
-            let angle = (InitialValue / 100) * 360;
-            CircularBar.style.background = `conic-gradient(#4285f4 ${angle}deg, #e8f0f7 0deg)`;
-
-            // Update the temperature displayed in the center
-            DegreeValue.innerHTML = Math.round(InitialValue) + "°C";
-        }
-
-        // Set an interval to fetch the latest temperature from the server and update the progress bar
-        setInterval(() => {
-            // Simulating fetching the latest temperature (in a real scenario, you'd fetch new data via AJAX or similar)
-            // Update `currentTemperature` dynamically based on your backend API or data source
-            fetch('/path/to/your/temperature/api')  // Update with your actual API path
-                .then(response => response.json())
-                .then(data => {
-                    currentTemperature = data.temperature; // Update current temperature
-                    updateBar(); // Only update the bar if the temperature has changed
-                })
-                .catch(error => console.error('Error fetching temperature:', error));
-        }, 5000); // Update every 5 seconds or based on your preferred interval
-    </script>
 
 </body>
 

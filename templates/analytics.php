@@ -65,6 +65,7 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="roomTemp">
                         <?php include '../partials/roomTempBar.php'; ?>
                     </div>
+
                     <div class="roomHum">
                         <?php include '../partials/roomHumBar.php'; ?>
                     </div>
@@ -84,36 +85,6 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     </div>
-
-    <script>
-        // Set the percentages for humidity and temperature
-        const humidityPercentage = 45; // Example value
-        const temperaturePercentage = 26; // Example value
-
-        // Get the chart elements
-        const humidityChart = document.getElementById('humidityChart');
-        const temperatureChart = document.getElementById('temperatureChart');
-
-        // Update the humidity chart
-        humidityChart.style.setProperty('--chart-color', '#3498db'); // Blue for humidity
-        humidityChart.style.setProperty('--bg-color', '#e6e6e6');
-        humidityChart.style.background = `conic-gradient(
-        #3498db ${humidityPercentage * 3.6}deg,
-        #e6e6e6 ${humidityPercentage * 3.6}deg 360deg
-    )`;
-
-        // Update the temperature chart
-        temperatureChart.style.setProperty('--chart-color', '#e74c3c'); // Red for temperature
-        temperatureChart.style.setProperty('--bg-color', '#e6e6e6');
-        temperatureChart.style.background = `conic-gradient(
-        #e74c3c ${temperaturePercentage * 3.6}deg,
-        #e6e6e6 ${temperaturePercentage * 3.6}deg 360deg
-    )`;
-
-        // Update the circle values
-        document.getElementById('humidityValue').textContent = `${humidityPercentage}%`;
-        document.getElementById('temperatureValue').textContent = `${temperaturePercentage}°C`;
-    </script>
 
 </body>
 
