@@ -1,6 +1,34 @@
 <?php
-// Simple humidity value for demonstration
-$humidity = 75;  // Replace this with the actual humidity value you want to display
+// Simple database connection using MySQLi
+$host = '18.139.255.32';
+$dbname = 'rivan_iot';
+$username = 'root';
+$password = 'Pa$$word1';
+
+// Create the MySQL connection
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// Check for connection error
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Query to fetch the latest humidity value
+$query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-humidity' ORDER BY timestamp DESC LIMIT 1";
+$result = $conn->query($query);
+
+// Check if there is any data returned
+if ($result->num_rows > 0) {
+    // Fetch the row data and get the humidity value
+    $row = $result->fetch_assoc();
+    $humidity = $row['humidity'];
+} else {
+    // Default value if no data is found
+    $humidity = 0;
+}
+
+// Close the database connection
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -81,9 +109,9 @@ $humidity = 75;  // Replace this with the actual humidity value you want to disp
 </div>
 
 <script>
-    // Get the humidity value (this would be from PHP or any other source)
+    // Get the humidity value passed from PHP
     let humidity = <?php echo $humidity; ?>;
-    console.log("Humidity: ", humidity); // Check the value passed from PHP
+    console.log("Humidity: ", humidity); // Debugging to check if the correct humidity is passed
 
     let circularBar = document.getElementById('circular-bar');
     let percentDisplay = document.getElementById('percent');
