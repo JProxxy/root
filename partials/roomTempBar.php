@@ -95,60 +95,43 @@
         $temperature = $row['temperature'];
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
+        exit;
     }
     ?>
 
     <script>
+        // Pass the temperature value directly from PHP to JavaScript
+        let currentTemperature = <?php echo $temperature; ?>;
+
         // Set up initial values for the progress bar
         let CircularBar = document.querySelector(".circular-bar");
         let DegreeValue = document.querySelector(".degree");
 
-        let InitialValue = 0; // Starting value
-        let targetValue = currentTemperature; // Set the initial target value to the fetched temperature
-        let speed = 30; // Speed of value change (milliseconds)
-        let transitionSpeed = 1; // Higher speed will make the transition smoother
-
         // Function to smoothly update the circular progress bar
         function updateBar() {
-            // Check if the temperature has changed before updating
-            if (currentTemperature !== previousTemperature) {
-                targetValue = currentTemperature;
-                previousTemperature = currentTemperature; // Update the previous temperature value
-            }
-
-            // Gradually update InitialValue towards the target value
-            if (Math.abs(InitialValue - targetValue) > transitionSpeed) {
-                if (InitialValue < targetValue) {
-                    InitialValue += transitionSpeed; // Increase gradually
-                } else if (InitialValue > targetValue) {
-                    InitialValue -= transitionSpeed; // Decrease gradually
-                }
-            } else {
-                // Once close enough to the target, set it exactly to avoid overshooting
-                InitialValue = targetValue;
-            }
-
             // Map the temperature directly to a portion of the circular progress bar
-            // Adjust the angle to map the temperature directly (e.g., 100°C = 360 degrees)
-            let angle = InitialValue * 3.6; // Map temperature directly (1°C = 3.6 degrees)
+            // Adjust the angle (e.g., 100°C = 360 degrees)
+            let angle = currentTemperature * 3.6; // 1°C = 3.6 degrees
             CircularBar.style.background = `conic-gradient(#4285f4 ${angle}deg, #e8f0f7 0deg)`;
 
             // Update the temperature displayed in the center
-            DegreeValue.innerHTML = Math.round(InitialValue) + "°C";
+            DegreeValue.innerHTML = Math.round(currentTemperature) + "°C";
         }
+
+        // Call updateBar once to display the temperature initially
+        updateBar();
 
         // Set an interval to fetch the latest temperature from the server and update the progress bar
         setInterval(() => {
-            // Simulating fetching the latest temperature (in a real scenario, you'd fetch new data via AJAX or similar)
-            // Update `currentTemperature` dynamically based on your backend API or data source
-            fetch('../storage/data/roomTempBackend.php') // Update with your actual API path
+            // Simulating fetching the latest temperature (in a real scenario, you would fetch new data via AJAX or similar)
+            fetch('..storage/data/roomTempBackend.php') // Update with your actual PHP script path for fetching data
                 .then(response => response.json())
                 .then(data => {
                     currentTemperature = data.temperature; // Update current temperature
-                    updateBar(); // Only update the bar if the temperature has changed
+                    updateBar(); // Update the bar only if the temperature has changed
                 })
                 .catch(error => console.error('Error fetching temperature:', error));
-        }, 5000); // Update every 5 seconds or based on your preferred interval
+        }, 5000); // Update every 5 seconds (or adjust as needed)
     </script>
 
 </body>
