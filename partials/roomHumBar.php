@@ -1,33 +1,6 @@
 <?php
-// Simple database connection
-$host = '18.139.255.32';
-$dbname = 'rivan_iot';
-$username = 'root';
-$password = 'Pa$$word1';
-
-try {
-    // Create a PDO instance
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    // Set PDO error mode to exception
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Fetch the latest humidity for the device 'ffRoom-humidity'
-    $query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-humidity' ORDER BY timestamp DESC LIMIT 1";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute();
-
-    // Get the result
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if ($row) {
-        $humidity = $row['humidity'];  // If data exists, set humidity
-    } else {
-        $humidity = 0;  // If no data is returned, set humidity to 0
-    }
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-    $humidity = 0;  // Default to 0 if there's an error
-}
+// Simple humidity value for demonstration
+$humidity = 75;  // Replace this with the actual humidity value you want to display
 ?>
 
 <!DOCTYPE html>
@@ -108,7 +81,7 @@ try {
 </div>
 
 <script>
-    // Get the humidity value from PHP
+    // Get the humidity value (this would be from PHP or any other source)
     let humidity = <?php echo $humidity; ?>;
     console.log("Humidity: ", humidity); // Check the value passed from PHP
 
