@@ -61,10 +61,7 @@ if (!isset($_SESSION['user_id'])) {
                     </select>
                 </div>
 
-                <div class="chartRoomCont">
-                    <div class="roomTemp">
-                        <?php include '../partials/roomTempBar.php'; ?>
-                    </div>
+   
 
                     <div class="roomHum">
                         <?php include '../partials/roomHumBar.php'; ?>
