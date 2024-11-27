@@ -78,7 +78,7 @@
 <script>
     // Function to fetch humidity data from the PHP file
     function fetchHumidity() {
-        fetch('../storage/data/getHumidity.php')
+        fetch('../storage/data/roomHumidityBackend.php')
             .then(response => response.json())
             .then(data => {
                 let humidity = data.humidity;
