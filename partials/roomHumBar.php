@@ -17,10 +17,7 @@ try {
 
     // Get the result
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $humidity = isset($row['humidity']) ? $row['humidity'] : 0;  // Default to 0 if humidity is NULL
-
-    // Debugging: print the humidity to confirm it is fetched correctly
-    echo "Humidity fetched: " . $humidity;
+    $humidity = isset($row['humidity']) ? $row['humidity'] : 0;  // Use the raw humidity value from the database
 
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
@@ -110,9 +107,10 @@ try {
         let PercentValueTemp = document.querySelector(".percent-temp");
 
         let InitialValueTemp = 0;
-        let finaleValueTemp = humidity;  // Set the final target to the humidity fetched from the database
-        let speedTemp = 10;  // Speed of progress
+        let finaleValueTemp = humidity;  // Use the raw humidity percentage as the target value
+        let speedTemp = 10;  // Speed of progress (adjust as needed)
 
+        // Progress bar animation
         let timerTemp = setInterval(() => {
             InitialValueTemp += 1;
 
