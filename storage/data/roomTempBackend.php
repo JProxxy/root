@@ -17,12 +17,15 @@ try {
 
     // Get the result
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $temperature = $row['temperature'];
+    $temperature = isset($row['temperature']) ? $row['temperature'] : null;
 
     // Return the temperature as a JSON response
+    header('Content-Type: application/json');
     echo json_encode(['temperature' => $temperature]);
 
 } catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+    // Handle connection errors or query issues
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Connection failed: ' . $e->getMessage()]);
 }
 ?>
