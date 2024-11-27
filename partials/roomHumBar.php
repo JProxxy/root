@@ -21,6 +21,7 @@ try {
 
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
+    $humidity = 0;  // Default to 0 if there's an error
 }
 ?>
 
@@ -101,7 +102,7 @@ try {
     <script>
         // Get the PHP variable for humidity passed from the backend
         let humidity = <?php echo $humidity; ?>;
-        console.log(humidity);  // Debugging the humidity value
+        console.log("Humidity from PHP: ", humidity);  // Debugging the humidity value
 
         let CircularBarTemp = document.querySelector(".circular-bar-temp");
         let PercentValueTemp = document.querySelector(".percent-temp");
@@ -112,7 +113,9 @@ try {
 
         // Progress bar animation
         let timerTemp = setInterval(() => {
-            InitialValueTemp += 1;
+            if (InitialValueTemp < finaleValueTemp) {
+                InitialValueTemp += 1; // Increment by 1% for each interval
+            }
 
             // Update circular bar with conic gradient
             CircularBarTemp.style.background = `conic-gradient(#34a853 ${InitialValueTemp / 100 * 360}deg, #e8f0f7 0deg)`;
