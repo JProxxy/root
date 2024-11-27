@@ -1,4 +1,5 @@
 <?php
+// Simple database connection
 $host = '18.139.255.32';
 $dbname = 'rivan_iot';
 $username = 'root';
@@ -18,7 +19,6 @@ try {
     // Get the result
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Debugging: Output the fetched data
     if ($row) {
         $humidity = $row['humidity'];  // If data exists, set humidity
     } else {
@@ -32,109 +32,111 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circular Progress Bar for Humidity</title>
+    <title>Humidity Circular Progress Bar</title>
     <style>
         * {
-            padding: 0;
             margin: 0;
-            font-family: 'Poppins', Arial;
+            padding: 0;
             box-sizing: border-box;
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
         .wrapper {
-            box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
-            width: 240px;
-            padding: 30px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            border-radius: 7px;
-            background-color: #e8f0f7;
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .circular-bar-temp {
-            width: 160px;
-            height: 160px;
-            background: conic-gradient(#4285f4 1.5deg, #e8f0f7 0deg);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
-            margin-bottom: 30px;
+        .circular-bar {
             position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#34a853 0%, #e8f0f7 0%);
+            margin-bottom: 20px;
         }
 
-        .circular-bar-temp::before {
+        .circular-bar::before {
             content: "";
             position: absolute;
-            width: 140px;
-            height: 140px;
-            background: #e8f0f7;
+            top: 15px;
+            left: 15px;
+            width: 120px;
+            height: 120px;
+            background-color: #fff;
             border-radius: 50%;
-            box-shadow: inset 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                inset -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .percent-temp {
-            z-index: 10;
-            font-size: 20px;
+        .percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
         }
 
         label {
             font-size: 16px;
+            color: #333;
         }
     </style>
 </head>
-
 <body>
 
-    <div class="wrapper">
-        <div class="circular-bar-temp">
-            <div class="percent-temp">0%</div>
-        </div>
-        <label>Humidity</label>
+<div class="wrapper">
+    <div class="circular-bar" id="circular-bar">
+        <div class="percent" id="percent">0%</div>
     </div>
+    <label>Humidity</label>
+</div>
 
-    <script>
-        // Get the PHP variable for humidity passed from the backend
-        let humidity = <?php echo $humidity; ?>;
-        console.log("Humidity from PHP: ", humidity);  // Debugging the humidity value
+<script>
+    // Get the humidity value from PHP
+    let humidity = <?php echo $humidity; ?>;
+    console.log("Humidity: ", humidity); // Check the value passed from PHP
 
-        let CircularBarTemp = document.querySelector(".circular-bar-temp");
-        let PercentValueTemp = document.querySelector(".percent-temp");
+    let circularBar = document.getElementById('circular-bar');
+    let percentDisplay = document.getElementById('percent');
 
-        let InitialValueTemp = 0;
-        let finaleValueTemp = humidity;  // Use the raw humidity percentage as the target value
-        let speedTemp = 10;  // Speed of progress (adjust as needed)
+    let initialValue = 0;
+    let finalValue = humidity;  // Target humidity value
+    let speed = 10;  // Speed of the progress animation
 
-        // Progress bar animation
-        let timerTemp = setInterval(() => {
-            if (InitialValueTemp < finaleValueTemp) {
-                InitialValueTemp += 1; // Increment by 1% for each interval
-            }
+    // Update the circular bar and percentage
+    let interval = setInterval(() => {
+        if (initialValue < finalValue) {
+            initialValue += 1; // Increment by 1% each interval
+        }
 
-            // Update circular bar with conic gradient
-            CircularBarTemp.style.background = `conic-gradient(#34a853 ${InitialValueTemp / 100 * 360}deg, #e8f0f7 0deg)`;
+        // Update the circular progress bar with a conic gradient
+        circularBar.style.background = `conic-gradient(#34a853 ${initialValue / 100 * 360}deg, #e8f0f7 0deg)`;
 
-            // Update percentage displayed in the center
-            PercentValueTemp.innerHTML = InitialValueTemp + "%";
+        // Display the percentage in the center
+        percentDisplay.innerText = initialValue + '%';
 
-            // Stop when target value is reached
-            if (InitialValueTemp >= finaleValueTemp) {
-                clearInterval(timerTemp);
-            }
-        }, speedTemp);
-    </script>
+        // Stop the interval when the target is reached
+        if (initialValue >= finalValue) {
+            clearInterval(interval);
+        }
+    }, speed);
+</script>
 
 </body>
-
 </html>
