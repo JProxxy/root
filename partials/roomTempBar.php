@@ -99,20 +99,28 @@
 
     <script>
         // Pass the temperature value fetched from PHP to JavaScript
-        let temperature = <?php echo $temperature; ?>;
-        console.log("Latest Temperature: " + temperature);
+        let currentTemperature = <?php echo $temperature; ?>;
+        let previousTemperature = currentTemperature; // Store initial temperature
+
+        console.log("Latest Temperature: " + currentTemperature);
 
         // Set up initial values for the progress bar
         let CircularBar = document.querySelector(".circular-bar");
         let PercentValue = document.querySelector(".percent");
 
         let InitialValue = 0;  // Starting value
-        let targetValue = temperature; // Set the initial target value to the fetched temperature
+        let targetValue = currentTemperature; // Set the initial target value to the fetched temperature
         let speed = 30;  // Speed of value change (milliseconds)
         let transitionSpeed = 0.5; // Speed of transition (higher is slower)
 
         // Function to smoothly update the circular progress bar
         function updateBar() {
+            // Check if the temperature has changed before updating
+            if (currentTemperature !== previousTemperature) {
+                targetValue = currentTemperature;
+                previousTemperature = currentTemperature; // Update the previous temperature value
+            }
+
             // Gradually update InitialValue towards the target value
             if (Math.abs(InitialValue - targetValue) > transitionSpeed) {
                 if (InitialValue < targetValue) {
@@ -132,8 +140,18 @@
             PercentValue.innerHTML = Math.round(InitialValue) + "%";
         }
 
-        // Update the progress bar every 'speed' milliseconds
-        setInterval(updateBar, speed);
+        // Set an interval to fetch the latest temperature from the server and update the progress bar
+        setInterval(() => {
+            // Simulating fetching the latest temperature (in a real scenario, you'd fetch new data via AJAX or similar)
+            // Update `currentTemperature` dynamically based on your backend API or data source
+            fetch('/path/to/your/temperature/api')  // Update with your actual API path
+                .then(response => response.json())
+                .then(data => {
+                    currentTemperature = data.temperature; // Update current temperature
+                    updateBar(); // Only update the bar if the temperature has changed
+                })
+                .catch(error => console.error('Error fetching temperature:', error));
+        }, 5000); // Update every 5 seconds or based on your preferred interval
     </script>
 
 </body>
