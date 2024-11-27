@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // Query to fetch the latest humidity value
-$query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-humidity' ORDER BY timestamp DESC LIMIT 1";
+$query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
 $result = $conn->query($query);
 
 // Check if there is any data returned
