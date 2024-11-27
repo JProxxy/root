@@ -89,7 +89,7 @@
         $query = "SELECT temperature FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
         $stmt = $pdo->prepare($query);
         $stmt->execute();
-        
+
         // Get the result
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $temperature = $row['temperature'];
@@ -99,20 +99,14 @@
     ?>
 
     <script>
-        // Pass the temperature value fetched from PHP to JavaScript
-        let currentTemperature = <?php echo $temperature; ?>;
-        let previousTemperature = currentTemperature; // Store initial temperature
-
-        console.log("Latest Temperature: " + currentTemperature);
-
         // Set up initial values for the progress bar
         let CircularBar = document.querySelector(".circular-bar");
         let DegreeValue = document.querySelector(".degree");
 
-        let InitialValue = 0;  // Starting value
+        let InitialValue = 0; // Starting value
         let targetValue = currentTemperature; // Set the initial target value to the fetched temperature
-        let speed = 30;  // Speed of value change (milliseconds)
-        let transitionSpeed = 0.5; // Speed of transition (higher is slower)
+        let speed = 30; // Speed of value change (milliseconds)
+        let transitionSpeed = 1; // Higher speed will make the transition smoother
 
         // Function to smoothly update the circular progress bar
         function updateBar() {
@@ -135,8 +129,8 @@
             }
 
             // Map the temperature directly to a portion of the circular progress bar
-            // Adjust the angle (for example, 100°C corresponds to a full circle)
-            let angle = (InitialValue / 100) * 360;
+            // Adjust the angle to map the temperature directly (e.g., 100°C = 360 degrees)
+            let angle = InitialValue * 3.6; // Map temperature directly (1°C = 3.6 degrees)
             CircularBar.style.background = `conic-gradient(#4285f4 ${angle}deg, #e8f0f7 0deg)`;
 
             // Update the temperature displayed in the center
@@ -147,7 +141,7 @@
         setInterval(() => {
             // Simulating fetching the latest temperature (in a real scenario, you'd fetch new data via AJAX or similar)
             // Update `currentTemperature` dynamically based on your backend API or data source
-            fetch('../storage/data/roomTempBackend.php')  // Update with your actual API path
+            fetch('../storage/data/roomTempBackend.php') // Update with your actual API path
                 .then(response => response.json())
                 .then(data => {
                     currentTemperature = data.temperature; // Update current temperature
