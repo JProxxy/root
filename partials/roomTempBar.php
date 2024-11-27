@@ -134,8 +134,10 @@
                 InitialValue = targetValue;
             }
 
-            // Update the circular progress bar with a smooth transition
-            CircularBar.style.background = `conic-gradient(#4285f4 ${InitialValue / 100 * 360}deg, #e8f0f7 0deg)`;
+            // Map the temperature directly to a portion of the circular progress bar
+            // Adjust the angle (for example, 100°C corresponds to a full circle)
+            let angle = (InitialValue / 100) * 360;
+            CircularBar.style.background = `conic-gradient(#4285f4 ${angle}deg, #e8f0f7 0deg)`;
 
             // Update the temperature displayed in the center
             DegreeValue.innerHTML = Math.round(InitialValue) + "°C";
