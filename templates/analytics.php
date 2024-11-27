@@ -27,49 +27,94 @@ if (!isset($_SESSION['user_id'])) {
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
 
-        <div class="firstPart">
-            dsds
-        </div>
-        <div class="secondPart">
+        <div class="containerPart">
+            <h2>Analytics</h2>
 
-        </div>
-        <div class="thirdPart">
+            <div class="firstPart">
+                <p>Water Tank Level</p>
+                <div class="textContainer">
+                    <div class="weekWater">
+                        <div class="noteWeek"></div>
+                        <p>Ave. Weekly Water Usage</p>
+                        <span>500 L</span>
+                    </div>
 
+                    <div class="monthWater">
+                        <div class="noteMonth"></div>
+                        <p>Ave. Monthly Water Usage</p>
+                        <span>3,500 L</span>
+                    </div>
+                </div>
+                <div class="waterGauge">
+                    <?php include '../partials/gaugeChart.php'; ?>
+                </div>
+
+                <div class="deviderFirst"> </div>
+
+                <div class="roomTempSelect">
+                    <span class="roomTitle">Select Room Temperature:</span>
+                    <select id="roomTempDropdown" class="dropdown">
+                        <option value="1stFloor">Room Temp - 1st Floor</option>
+                        <option value="2ndFloor">Room Temp - 2nd Floor</option>
+                        <option value="3rdFloor">Room Temp - 3rd Floor</option>
+                        <option value="4thFloor">Room Temp - 4th Floor</option>
+                    </select>
+                </div>
+
+                <div class="chartRoomCont">
+                    <div class="roomTemp">
+                        <?php include '../partials/roomTempBar.php'; ?>
+                    </div>
+                    <div class="roomHum">
+                        <?php include '../partials/roomHumBar.php'; ?>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="secondPart">
+
+            </div>
+            <div class="thirdPart">
+
+            </div>
         </div>
     </div>
 
+    </div>
+
     <script>
-        async function fetchWeatherData() {
-            try {
-                const apiKey = 'f75719d97895581d48b332dfc95e479b';
-                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Makati&appid=${apiKey}&units=metric`);
+        // Set the percentages for humidity and temperature
+        const humidityPercentage = 45; // Example value
+        const temperaturePercentage = 26; // Example value
 
-                // Check if the response is OK (status code 200)
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+        // Get the chart elements
+        const humidityChart = document.getElementById('humidityChart');
+        const temperatureChart = document.getElementById('temperatureChart');
 
-                const data = await response.json();
+        // Update the humidity chart
+        humidityChart.style.setProperty('--chart-color', '#3498db'); // Blue for humidity
+        humidityChart.style.setProperty('--bg-color', '#e6e6e6');
+        humidityChart.style.background = `conic-gradient(
+        #3498db ${humidityPercentage * 3.6}deg,
+        #e6e6e6 ${humidityPercentage * 3.6}deg 360deg
+    )`;
 
-                // Update HTML only if data is defined and in the expected format
-                if (data.main && data.weather) {
-                    document.querySelector(".tempValue").textContent = data.main.temp;
-                    document.querySelector(".description").textContent = data.weather[0].description;
-                    document.querySelector(".humidity").textContent = `Humidity: ${data.main.humidity}%`;
-                    document.querySelector(".wind").textContent = `Wind: ${data.wind.speed} km/h`;
-                    document.querySelector(".precipitation").textContent = `Precipitation: ${data.clouds.all}%`;
-                } else {
-                    console.error("Unexpected data format:", data);
-                }
-            } catch (error) {
-                console.error("Error fetching weather data:", error);
-            }
-        }
+        // Update the temperature chart
+        temperatureChart.style.setProperty('--chart-color', '#e74c3c'); // Red for temperature
+        temperatureChart.style.setProperty('--bg-color', '#e6e6e6');
+        temperatureChart.style.background = `conic-gradient(
+        #e74c3c ${temperaturePercentage * 3.6}deg,
+        #e6e6e6 ${temperaturePercentage * 3.6}deg 360deg
+    )`;
 
-        // Call function on page load
-        fetchWeatherData();
-
+        // Update the circle values
+        document.getElementById('humidityValue').textContent = `${humidityPercentage}%`;
+        document.getElementById('temperatureValue').textContent = `${temperaturePercentage}°C`;
     </script>
+
 </body>
 
 </html>

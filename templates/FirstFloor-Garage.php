@@ -50,7 +50,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="dashboardDeviderRight">
                 <div class="searchContainer">
-                    <input type="text" id="searchInput" placeholder=" " class="searchInput">
+                    <input type="text" id="searchInputX" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
                         <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

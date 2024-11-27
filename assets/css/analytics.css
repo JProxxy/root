@@ -1,31 +1,171 @@
 .bgMain {
-    background-color: #d8151500; /* Transparent background color */
-    position: absolute;
-    z-index: 0;
-  }
-  
-  .firstPart,
-  .secondPart,
-  .thirdPart {
+  background-color: #ffffff00; /* Transparent background color */
+  position: absolute;
+  z-index: 0;
+}
+
+.containerPart {
+  background-color: #ffffff;
+  display: flex;
+  width: 89.5%;
+  height: 95%;
+  position: absolute;
+  top: 2%;
+  left: 9.3%;
+  z-index: 2;
+  border-radius: 20px;
+}
+
+.containerPart h2 {
+  position: absolute;
+  top: 1%;
+  left: 2%;
+  font-family: "Kodchasan", sans-serif;
+}
+.firstPart,
+.secondPart,
+.thirdPart {
+  flex: 1;
+  padding: 20px;
+  font-family: "Kodchasan", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.firstPart::after,
+.secondPart::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  height: 90%;
+  width: 2px;
+  background-color: #979797;
+}
+
+/* Optional: Add background colors for visualization */
+.firstPart {
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.secondPart {
+  background-color: rgba(0, 255, 0, 0);
+}
+
+.thirdPart {
+  background-color: rgba(0, 0, 255, 0);
+}
+
+.firstPart p {
+  margin-top: 12%;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0b3236;
+  text-align: center;
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* Styling for textContainer to display children side by side */
+.textContainer {
+  display: flex; /* Make the container a flexbox */
+  justify-content: space-between; /* Space out the children (weekWater and monthWater) */
+  width: 100%; /* Ensure the container takes full width */
+}
+
+/* Styling for individual sections */
+.weekWater,
+.monthWater {
+  display: flex;
+  flex-direction: column; /* Stack content inside each section */
+  justify-content: flex-start;
+  width: 47%; /* Ensure both divs fit within the container side by side */
+}
+
+/* Optional: Background colors for visualization */
+.weekWater {
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.monthWater {
+  background-color: rgba(191, 243, 3, 0);
+}
+
+.noteWeek {
+  position: absolute;
+  height: 25px;
+  width: 25px;
+  background-color: #39b09e;
+  margin-top: 5.5%;
+}
+
+.noteMonth {
+  position: absolute;
+  height: 25px;
+  width: 25px;
+  background-color: #045660;
+  margin-top: 5.5%;
+}
+
+.weekWater p,
+.monthWater p {
+  font-size: 0.8rem;
+  margin-left: 13%;
+}
+
+.weekWater p,
+.monthWater p {
+  margin-top: 15%; /* Add margin for better spacing */
+}
+
+.weekWater span,
+.monthWater span {
+  text-align: center;
+  font-weight: 700;
+  margin-top: 2%;
+}
+
+.waterGauge{
+    position: relative;
+   padding-top: 5%;
+}
+
+.deviderFirst {
+    border: 0; /* Remove the default border */
+    border-top: 3px solid #ccc; /* Light gray divider */
+    margin: 10px 0; /* Add space above and below */
+    width: 100%; /* Ensure it spans the full width */
+}
+
+.roomTempSelect {
     display: flex;
-    width: 92%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 8%;
-    z-index: 2;
-  }
-  
-  /* Optional: Add background colors for visualization */
-  .firstPart {
-    background-color: rgba(255, 0, 0, 0.3); /* Light red */
-  }
-  
-  .secondPart {
-    background-color: rgba(0, 255, 0, 0.3); /* Light green */
-  }
-  
-  .thirdPart {
-    background-color: rgba(0, 0, 255, 0.3); /* Light blue */
-  }
-  
+    align-items: center; /* Vertically align items */
+    gap: 10px; /* Adds spacing between the span and the select element */
+    margin-bottom: 2%;
+}
+
+.roomTitle {
+    font-size: 16px;
+    margin-right: 10px; /* Space between text and dropdown */
+   
+}
+
+.dropdown {
+    padding: 5px;
+    font-size: 14px;
+}
+
+.chartRoomCont {
+    display: flex;
+    justify-content: space-between; /* Ensures space between the two divs */
+    gap: 10px; /* Optional: Adds space between the two elements */
+}
+
+.roomTemp {
+    margin-top: 0%;
+    flex: 1; /* Ensures both elements take up equal width */
+}
+
+.roomHum {
+    flex: 1; /* Ensures both elements take up equal width */
+}
