@@ -64,7 +64,7 @@
 </head>
 
 <body>
-  
+
     <div class="wrapper">
         <div class="circular-bar">
             <div class="percent">0%</div>
@@ -108,16 +108,21 @@
 
         let InitialValue = 0;  // Starting value
         let targetValue = temperature; // Set the initial target value to the fetched temperature
-        let speed = 50;  // Speed of value change (milliseconds)
-        let transitionSpeed = 1; // Speed of transition (higher is slower)
+        let speed = 30;  // Speed of value change (milliseconds)
+        let transitionSpeed = 0.5; // Speed of transition (higher is slower)
 
         // Function to smoothly update the circular progress bar
         function updateBar() {
             // Gradually update InitialValue towards the target value
-            if (InitialValue < targetValue) {
-                InitialValue += transitionSpeed; // Increase gradually
-            } else if (InitialValue > targetValue) {
-                InitialValue -= transitionSpeed; // Decrease gradually
+            if (Math.abs(InitialValue - targetValue) > transitionSpeed) {
+                if (InitialValue < targetValue) {
+                    InitialValue += transitionSpeed; // Increase gradually
+                } else if (InitialValue > targetValue) {
+                    InitialValue -= transitionSpeed; // Decrease gradually
+                }
+            } else {
+                // Once close enough to the target, set it exactly to avoid overshooting
+                InitialValue = targetValue;
             }
 
             // Update the circular progress bar with a smooth transition
