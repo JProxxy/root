@@ -124,7 +124,7 @@
         // Set an interval to fetch the latest temperature from the server and update the progress bar
         setInterval(() => {
             // Simulating fetching the latest temperature (in a real scenario, you would fetch new data via AJAX or similar)
-            fetch('..storage/data/roomTempBackend.php') // Update with your actual PHP script path for fetching data
+            fetch('../storage/data/roomTempBackend.php') // Update with your actual PHP script path for fetching data
                 .then(response => response.json())
                 .then(data => {
                     currentTemperature = data.temperature; // Update current temperature
