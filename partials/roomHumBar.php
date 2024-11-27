@@ -1,36 +1,3 @@
-<?php
-// Simple database connection using MySQLi
-$host = '18.139.255.32';
-$dbname = 'rivan_iot';
-$username = 'root';
-$password = 'Pa$$word1';
-
-// Create the MySQL connection
-$conn = new mysqli($host, $username, $password, $dbname);
-
-// Check for connection error
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Query to fetch the latest humidity value
-$query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-humidity' ORDER BY timestamp DESC LIMIT 1";
-$result = $conn->query($query);
-
-// Check if there is any data returned
-if ($result->num_rows > 0) {
-    // Fetch the row data and get the humidity value
-    $row = $result->fetch_assoc();
-    $humidity = $row['humidity'];
-} else {
-    // Default value if no data is found
-    $humidity = 0;
-}
-
-// Close the database connection
-$conn->close();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,34 +76,46 @@ $conn->close();
 </div>
 
 <script>
-    // Get the humidity value passed from PHP
-    let humidity = <?php echo $humidity; ?>;
-    console.log("Humidity: ", humidity); // Debugging to check if the correct humidity is passed
+    // Function to fetch humidity data from the PHP file
+    function fetchHumidity() {
+        fetch('../storage/data/getHumidity.php')
+            .then(response => response.json())
+            .then(data => {
+                let humidity = data.humidity;
+                console.log("Humidity from PHP:", humidity);  // Debugging
 
-    let circularBar = document.getElementById('circular-bar');
-    let percentDisplay = document.getElementById('percent');
+                let circularBar = document.getElementById('circular-bar');
+                let percentDisplay = document.getElementById('percent');
 
-    let initialValue = 0;
-    let finalValue = humidity;  // Target humidity value
-    let speed = 10;  // Speed of the progress animation
+                let initialValue = 0;
+                let finalValue = humidity;  // Target humidity value
+                let speed = 10;  // Speed of the progress animation
 
-    // Update the circular bar and percentage
-    let interval = setInterval(() => {
-        if (initialValue < finalValue) {
-            initialValue += 1; // Increment by 1% each interval
-        }
+                // Update the circular bar and percentage
+                let interval = setInterval(() => {
+                    if (initialValue < finalValue) {
+                        initialValue += 1; // Increment by 1% each interval
+                    }
 
-        // Update the circular progress bar with a conic gradient
-        circularBar.style.background = `conic-gradient(#34a853 ${initialValue / 100 * 360}deg, #e8f0f7 0deg)`;
+                    // Update the circular progress bar with a conic gradient
+                    circularBar.style.background = `conic-gradient(#34a853 ${initialValue / 100 * 360}deg, #e8f0f7 0deg)`;
 
-        // Display the percentage in the center
-        percentDisplay.innerText = initialValue + '%';
+                    // Display the percentage in the center
+                    percentDisplay.innerText = initialValue + '%';
 
-        // Stop the interval when the target is reached
-        if (initialValue >= finalValue) {
-            clearInterval(interval);
-        }
-    }, speed);
+                    // Stop the interval when the target is reached
+                    if (initialValue >= finalValue) {
+                        clearInterval(interval);
+                    }
+                }, speed);
+            })
+            .catch(error => {
+                console.error("Error fetching humidity data:", error);
+            });
+    }
+
+    // Fetch humidity on page load
+    window.onload = fetchHumidity;
 </script>
 
 </body>
