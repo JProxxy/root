@@ -14,7 +14,8 @@
             --lightblue: rgb(0, 151, 178);
             --white: rgb(253, 251, 252);
             --transparent: rgba(255, 255, 255, 0);
-            --border-color: rgb(200, 200, 200); /* Border color for the rectangle */
+            --border-color: rgb(200, 200, 200);
+            /* Border color for the rectangle */
         }
 
         * {
@@ -25,8 +26,10 @@
 
         .rectangle-container {
             position: relative;
-            width: 470px; /* Width of the rectangle */
-            height: 200px; /* Height of the rectangle */
+            width: 470px;
+            /* Width of the rectangle */
+            height: 200px;
+            /* Height of the rectangle */
             padding: 10px;
             background-color: var(--white);
             display: flex;
@@ -125,6 +128,9 @@
                 const data = await response.json();
                 const waterPercentage = data.WaterPercentage;
 
+                // Log the waterPercentage to the console
+                console.log('Water Percentage:', waterPercentage);
+
                 // Update the gauge based on the fetched WaterPercentage
                 updateGauge(waterPercentage);
             } catch (error) {
@@ -147,6 +153,7 @@
         // Fetch and update the gauge on page load
         getWaterPercentage();
     </script>
+
 </body>
 
 </html>
