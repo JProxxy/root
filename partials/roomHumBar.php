@@ -17,7 +17,10 @@ try {
 
     // Get the result
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $humidity = $row['humidity'];
+    $humidity = isset($row['humidity']) ? $row['humidity'] : 0;  // Default to 0 if humidity is NULL
+
+    // Debugging: print the humidity to confirm it is fetched correctly
+    echo "Humidity fetched: " . $humidity;
 
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
@@ -101,6 +104,7 @@ try {
     <script>
         // Get the PHP variable for humidity passed from the backend
         let humidity = <?php echo $humidity; ?>;
+        console.log(humidity);  // Debugging the humidity value
 
         let CircularBarTemp = document.querySelector(".circular-bar-temp");
         let PercentValueTemp = document.querySelector(".percent-temp");
