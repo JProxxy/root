@@ -1,3 +1,29 @@
+<?php
+$host = '18.139.255.32';
+$dbname = 'rivan_iot';
+$username = 'root';
+$password = 'Pa$$word1';
+
+try {
+    // Create a PDO instance
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    // Set PDO error mode to exception
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Fetch the latest humidity for the device 'ffRoom-humidity'
+    $query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-humidity' ORDER BY timestamp DESC LIMIT 1";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+
+    // Get the result
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $humidity = $row['humidity'];
+
+} catch (PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,9 +44,7 @@
             box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
                 -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
             width: 240px;
-            /* Reduced width */
             padding: 30px 0;
-            /* Adjusted padding */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -31,9 +55,7 @@
 
         .circular-bar-temp {
             width: 160px;
-            /* Reduced size */
             height: 160px;
-            /* Reduced size */
             background: conic-gradient(#4285f4 1.5deg, #e8f0f7 0deg);
             border-radius: 50%;
             display: flex;
@@ -42,7 +64,6 @@
             box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
                 -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
             margin-bottom: 30px;
-            /* Adjusted margin */
             position: relative;
         }
 
@@ -50,9 +71,7 @@
             content: "";
             position: absolute;
             width: 140px;
-            /* Reduced inner circle size */
             height: 140px;
-            /* Reduced inner circle size */
             background: #e8f0f7;
             border-radius: 50%;
             box-shadow: inset 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
@@ -62,12 +81,10 @@
         .percent-temp {
             z-index: 10;
             font-size: 20px;
-            /* Reduced font size */
         }
 
         label {
             font-size: 16px;
-            /* Reduced font size */
         }
     </style>
 </head>
@@ -82,11 +99,14 @@
     </div>
 
     <script>
+        // Get the PHP variable for humidity passed from the backend
+        let humidity = <?php echo $humidity; ?>;
+
         let CircularBarTemp = document.querySelector(".circular-bar-temp");
         let PercentValueTemp = document.querySelector(".percent-temp");
 
         let InitialValueTemp = 0;
-        let finaleValueTemp = 65;  // Target value for humidity
+        let finaleValueTemp = humidity;  // Set the final target to the humidity fetched from the database
         let speedTemp = 10;  // Speed of progress
 
         let timerTemp = setInterval(() => {
