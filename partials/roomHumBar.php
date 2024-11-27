@@ -17,8 +17,13 @@ try {
 
     // Get the result
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $humidity = isset($row['humidity']) ? $row['humidity'] : 0;  // Use the raw humidity value from the database
-
+    
+    // Debugging: Output the fetched data
+    if ($row) {
+        $humidity = $row['humidity'];  // If data exists, set humidity
+    } else {
+        $humidity = 0;  // If no data is returned, set humidity to 0
+    }
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
     $humidity = 0;  // Default to 0 if there's an error
