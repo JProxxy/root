@@ -72,19 +72,44 @@
         <label>Temperature</label>
     </div>
 
+    <?php
+    $host = '18.139.255.32';
+    $dbname = 'rivan_iot';
+    $username = 'root';
+    $password = 'Pa$$word1';
+
+    try {
+        // Create a PDO instance
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+        // Set PDO error mode to exception
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Fetch the latest temperature for the device 'ffRoom-temp'
+        $query = "SELECT temperature FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        
+        // Get the result
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $temperature = $row['temperature'];
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }
+    ?>
+
     <script>
+        // Pass the temperature value fetched from PHP to JavaScript
+        let temperature = <?php echo $temperature; ?>;
+        console.log("Latest Temperature: " + temperature);
+
+        // Set up initial values for the progress bar
         let CircularBar = document.querySelector(".circular-bar");
         let PercentValue = document.querySelector(".percent");
 
         let InitialValue = 0;  // Starting value
-        let targetValue = getRandomValue(); // Initial target value
+        let targetValue = temperature; // Set the initial target value to the fetched temperature
         let speed = 50;  // Speed of value change (milliseconds)
         let transitionSpeed = 1; // Speed of transition (higher is slower)
-
-        // Function to generate a random value between 0 and 100
-        function getRandomValue() {
-            return Math.floor(Math.random() * 101); // Random number between 0 and 100
-        }
 
         // Function to smoothly update the circular progress bar
         function updateBar() {
@@ -100,11 +125,6 @@
 
             // Update the percentage displayed in the center
             PercentValue.innerHTML = Math.round(InitialValue) + "%";
-
-            // If the value has reached the target value, generate a new random target value
-            if (Math.abs(InitialValue - targetValue) < transitionSpeed) {
-                targetValue = getRandomValue();
-            }
         }
 
         // Update the progress bar every 'speed' milliseconds
