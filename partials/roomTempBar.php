@@ -52,9 +52,10 @@
                 inset -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
         }
 
-        .percent {
+        .degree {
             z-index: 10;
             font-size: 20px;
+            font-weight: bold;
         }
 
         label {
@@ -67,7 +68,7 @@
 
     <div class="wrapper">
         <div class="circular-bar">
-            <div class="percent">0%</div>
+            <div class="degree">0°C</div>
         </div>
         <label>Temperature</label>
     </div>
@@ -106,7 +107,7 @@
 
         // Set up initial values for the progress bar
         let CircularBar = document.querySelector(".circular-bar");
-        let PercentValue = document.querySelector(".percent");
+        let DegreeValue = document.querySelector(".degree");
 
         let InitialValue = 0;  // Starting value
         let targetValue = currentTemperature; // Set the initial target value to the fetched temperature
@@ -136,8 +137,8 @@
             // Update the circular progress bar with a smooth transition
             CircularBar.style.background = `conic-gradient(#4285f4 ${InitialValue / 100 * 360}deg, #e8f0f7 0deg)`;
 
-            // Update the percentage displayed in the center
-            PercentValue.innerHTML = Math.round(InitialValue) + "%";
+            // Update the temperature displayed in the center
+            DegreeValue.innerHTML = Math.round(InitialValue) + "°C";
         }
 
         // Set an interval to fetch the latest temperature from the server and update the progress bar
