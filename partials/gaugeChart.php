@@ -121,7 +121,7 @@
         // Function to fetch the latest WaterPercentage
         async function getWaterPercentage() {
             try {
-                const response = await fetch('getWaterPercentage.php'); // Fetch data from PHP script
+                const response = await fetch('../storage/data/waterPercentage.php'); // Fetch data from PHP script
                 const data = await response.json();
                 const waterPercentage = data.WaterPercentage;
 
