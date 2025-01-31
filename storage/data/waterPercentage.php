@@ -1,16 +1,10 @@
 <?php
-$host = '18.139.255.32';
-$dbname = 'rivan_iot';
-$username = 'root';
-$password = 'Pa$$word1';
+// Include the connection.php file to use the existing database connection
+require '../app/config/connection.php'; // Make sure the path to connection.php is correct
 
-// Create a new PDO connection
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     // Fetch the latest WaterPercentage from the water_tank table
-    $stmt = $pdo->query("SELECT WaterPercentage FROM water_tank ORDER BY timestamp DESC LIMIT 1");
+    $stmt = $conn->query("SELECT WaterPercentage FROM water_tank ORDER BY timestamp DESC LIMIT 1");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Check if the result is not empty and output the WaterPercentage
@@ -19,8 +13,11 @@ try {
     } else {
         echo json_encode(["WaterPercentage" => 0]); // If no data found, return 0
     }
-    
 } catch (PDOException $e) {
-    echo json_encode(["error" => "Database connection failed: " . $e->getMessage()]);
+    // Handle any errors that occur during the query execution
+    error_log($e->getMessage()); // Log the error for debugging
+    echo json_encode(["error" => "Database query failed: " . $e->getMessage()]);
 }
+
+// No need to close the connection explicitly with PDO, as it is automatically closed when the script ends
 ?>

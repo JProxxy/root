@@ -1,34 +1,28 @@
 <?php
-// Database connection parameters
-$host = '18.139.255.32';
-$dbname = 'rivan_iot';
-$username = 'root';
-$password = 'Pa$$word1';
+// Include the connection.php file to use the existing database connection
+require '../app/config/connection.php'; // Make sure the path to connection.php is correct
 
-// Create MySQL connection
-$conn = new mysqli($host, $username, $password, $dbname);
+try {
+    // Query to fetch the latest humidity value
+    $query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
+    $stmt = $conn->query($query); // Execute the query
 
-// Check for connection error
-if ($conn->connect_error) {
-    die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));
+    // Check if there is any data returned
+    if ($stmt->rowCount() > 0) {
+        // Fetch the row data and get the humidity value
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $humidity = $row['humidity'];
+        // Return the humidity value as a JSON response
+        echo json_encode(["humidity" => $humidity]);
+    } else {
+        // If no data found, return a default value of 0
+        echo json_encode(["humidity" => 0]);
+    }
+} catch (PDOException $e) {
+    // Handle any errors that occur during the query execution
+    error_log($e->getMessage()); // Log the error for debugging
+    echo json_encode(["error" => "Database query failed: " . $e->getMessage()]);
 }
 
-// Query to fetch the latest humidity value
-$query = "SELECT humidity FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
-$result = $conn->query($query);
-
-// Check if there is any data returned
-if ($result->num_rows > 0) {
-    // Fetch the row data and get the humidity value
-    $row = $result->fetch_assoc();
-    $humidity = $row['humidity'];
-    // Return the humidity value as a JSON response
-    echo json_encode(["humidity" => $humidity]);
-} else {
-    // If no data found, return a default value of 0
-    echo json_encode(["humidity" => 0]);
-}
-
-// Close the database connection
-$conn->close();
+// No need to close the connection explicitly with PDO, as it is automatically closed when the script ends
 ?>

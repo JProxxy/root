@@ -46,7 +46,7 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                 </div>
                 <div class="waterGauge">
-                    <?php include '../partials/gaugeChart.php'; ?>
+                    <?php  include '../partials/gaugeChart.php';  ?>
                 </div>
 
                 <div class="deviderFirst"> </div>
@@ -63,14 +63,14 @@ if (!isset($_SESSION['user_id'])) {
 
                 <div class="chartRoomCont">
                     <div class="roomTemp">
-                        <?php include '../partials/roomTempBar.php'; ?>
+                        <?php include '../partials/roomTempBar.php';   ?>
                     </div>
                     
                     <div class="roomHum">
                         <?php include '../partials/roomHumBar.php'; ?>
                     </div>
                 </div>
-            </div>
+            </div> 
 
 
 

@@ -1,6 +1,6 @@
 <?php
 // Database configuration on AWS
-$host = '18.139.255.32';
+$host = '52.221.180.50';
 $dbname = 'rivan_iot';
 $username = 'root';
 $password = 'Pa$$word1';
