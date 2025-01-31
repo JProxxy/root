@@ -29,6 +29,13 @@ if (!isset($_SESSION['user_id'])) {
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer();
             const container = document.querySelector('.dashboardDeviderLeft');
+            // Add lights to the scene
+            const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100); // Point light
+            pointLight.position.set(5, 5, 5); // Position of the light
+            scene.add(pointLight);
 
             // Ensure the container is found
             if (!container) {
