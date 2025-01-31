@@ -24,78 +24,79 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    const container = document.querySelector('.dashboardDeviderLeft');
+        document.addEventListener('DOMContentLoaded', () => {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            const container = document.querySelector('.dashboardDeviderLeft');
 
-    // Add lights to the scene
-    const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
-    scene.add(ambientLight);
+            // Add lights to the scene
+            const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
+            scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1, 100); // Point light
-    pointLight.position.set(5, 5, 5); // Position of the light
-    scene.add(pointLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100); // Point light
+            pointLight.position.set(5, 5, 5); // Position of the light
+            scene.add(pointLight);
 
-    // Ensure the container is found
-    if (!container) {
-        console.error("Container element not found");
-        return;
-    }
+            // Ensure the container is found
+            if (!container) {
+                console.error("Container element not found");
+                return;
+            }
 
-    // Resize renderer to fit the container size
-    const containerWidth = container.offsetWidth;
-    const containerHeight = container.offsetHeight;
-    renderer.setSize(containerWidth, containerHeight);
-    container.appendChild(renderer.domElement);
+            // Resize renderer to fit the container size
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            renderer.setSize(containerWidth, containerHeight);
+            container.appendChild(renderer.domElement);
 
-    // Check if GLTFLoader is loaded and accessible
-    if (typeof THREE.GLTFLoader === 'undefined') {
-        console.error("GLTFLoader is not available");
-        return;
-    }
+            // Check if GLTFLoader is loaded and accessible
+            if (typeof THREE.GLTFLoader === 'undefined') {
+                console.error("GLTFLoader is not available");
+                return;
+            }
 
-    // Load a 3D model (e.g., .glb or .gltf)
-    const loader = new THREE.GLTFLoader();
-    loader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
-        scene.add(gltf.scene);
-    }, undefined, (error) => {
-        console.error("Error loading 3D model:", error);
-    });
+            // Load a 3D model (e.g., .glb or .gltf)
+            const loader = new THREE.GLTFLoader();
+            loader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
+                scene.add(gltf.scene);
+            }, undefined, (error) => {
+                console.error("Error loading 3D model:", error);
+            });
 
-    // Adjust camera's position to move it further back from the object
-    camera.position.z = 50;  // Move the camera back
+            // Adjust camera's position to move it further back from the object
+            camera.position.z = 10;  // Move the camera back
 
-    // Animation loop
-    function animate() {
-        requestAnimationFrame(animate);
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
 
-        // Rotate the model for better visualization
-        scene.rotation.x += 0.01;
-        scene.rotation.y += 0.01;
+                // Commented out rotation to stop the model from rotating
+                // scene.rotation.x += 0.01;
+                // scene.rotation.y += 0.01;
 
-        renderer.render(scene, camera);
-    }
+                renderer.render(scene, camera);
+            }
 
-    animate();
+            animate();
 
-    // Adjust the renderer size when the window is resized
-    window.addEventListener('resize', () => {
-        const containerWidth = container.offsetWidth;
-        const containerHeight = container.offsetHeight;
-        renderer.setSize(containerWidth, containerHeight);
-        camera.aspect = containerWidth / containerHeight;
-        camera.updateProjectionMatrix();
-    });
+            // Adjust the renderer size when the window is resized
+            window.addEventListener('resize', () => {
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                renderer.setSize(containerWidth, containerHeight);
+                camera.aspect = containerWidth / containerHeight;
+                camera.updateProjectionMatrix();
+            });
 
-    // Optional: Add OrbitControls for better interaction
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;  // Smooth movement
-    controls.dampingFactor = 0.25;  // Adjust damping speed
-    controls.screenSpacePanning = false;  // Disable panning
-    controls.maxPolarAngle = Math.PI / 2;  // Limit vertical rotation
-});
+            // Optional: Add OrbitControls for better interaction
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;  // Smooth movement
+            controls.dampingFactor = 0.25;  // Adjust damping speed
+            controls.screenSpacePanning = false;  // Disable panning
+            controls.maxPolarAngle = Math.PI / 2;  // Limit vertical rotation
+        });
+
     </script>
 
 
