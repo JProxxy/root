@@ -1,3 +1,24 @@
+<?php
+// Include the connection.php file to use the existing database connection
+require '../app/config/connection.php'; // Make sure the path to connection.php is correct
+
+try {
+    // Fetch the latest temperature for the device 'ffRoom-temp'
+    $query = "SELECT temperature FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
+    $stmt = $conn->prepare($query); // Use the $conn object from connection.php
+    $stmt->execute();
+
+    // Get the result
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $temperature = isset($row['temperature']) ? $row['temperature'] : null;
+
+} catch (PDOException $e) {
+    // Handle connection errors or query issues
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Database query failed: ' . $e->getMessage()]);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,36 +89,10 @@
 
     <div class="wrapper">
         <div class="circular-bar">
-            <div class="degree">0°C</div>
+            <div class="degree"><?php echo isset($temperature) ? $temperature : '0'; ?>°C</div>
         </div>
         <label>Temperature</label>
     </div>
-
-    <?php
-    $host = '18.139.255.32';
-    $dbname = 'rivan_iot';
-    $username = 'root';
-    $password = 'Pa$$word1';
-
-    try {
-        // Create a PDO instance
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-        // Set PDO error mode to exception
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Fetch the latest temperature for the device 'ffRoom-temp'
-        $query = "SELECT temperature FROM room_data WHERE deviceName = 'ffRoom-temp' ORDER BY timestamp DESC LIMIT 1";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute();
-
-        // Get the result
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        $temperature = $row['temperature'];
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-        exit;
-    }
-    ?>
 
     <script>
         // Pass the temperature value directly from PHP to JavaScript
@@ -123,15 +118,15 @@
 
         // Set an interval to fetch the latest temperature from the server and update the progress bar
         setInterval(() => {
-            // Simulating fetching the latest temperature (in a real scenario, you would fetch new data via AJAX or similar)
-            fetch('../storage/data/roomTempBackend.php') // Update with your actual PHP script path for fetching data
+            // Fetch the latest temperature using AJAX from the server-side PHP script
+            fetch('../storage/data/roomTempBackend.php') // Ensure this path is correct
                 .then(response => response.json())
                 .then(data => {
                     currentTemperature = data.temperature; // Update current temperature
                     updateBar(); // Update the bar only if the temperature has changed
                 })
                 .catch(error => console.error('Error fetching temperature:', error));
-        }, 5000); // Update every 5 seconds (or adjust as needed)
+        }, 5000); // Update every 5 seconds
     </script>
 
 </body>
