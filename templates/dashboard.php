@@ -63,7 +63,7 @@ if (!isset($_SESSION['user_id'])) {
                 console.error("Error loading 3D model:", error);
             });
 
-            camera.position.z = 5;
+            camera.position.z = 20;
 
             // Animation loop
             function animate() {
