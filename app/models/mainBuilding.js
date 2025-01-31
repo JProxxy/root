@@ -1,14 +1,17 @@
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+const container = document.querySelector('.dashboardDeviderLeft');
 
-// Target the container div to insert the 3D canvas
-document.querySelector('.dashboardDeviderLeft').appendChild(renderer.domElement);
+// Resize renderer to fit the container size
+const containerWidth = container.offsetWidth;
+const containerHeight = container.offsetHeight;
+renderer.setSize(containerWidth, containerHeight);
+container.appendChild(renderer.domElement);
 
 // Load a 3D model (e.g., .glb or .gltf)
 const loader = new THREE.GLTFLoader();
-loader.load('..assets/models/rivanMainBuilding.glb', (gltf) => {
+loader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
     scene.add(gltf.scene);
 });
 
@@ -26,3 +29,12 @@ function animate() {
 }
 
 animate();
+
+// Adjust the renderer size when the window is resized
+window.addEventListener('resize', () => {
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    renderer.setSize(containerWidth, containerHeight);
+    camera.aspect = containerWidth / containerHeight;
+    camera.updateProjectionMatrix();
+});

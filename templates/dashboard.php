@@ -33,7 +33,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <div class="dashboardDevider">
             <div class="dashboardDeviderLeft">
-               
+                <!-- 3D Model will be rendered here -->
             </div>
 
             <div class="dashboardDeviderRight">
