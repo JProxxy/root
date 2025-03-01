@@ -1,0 +1,144 @@
+@font-face {
+    font-family: 'Kodchasan';
+    src: url('../assets/fonts/kodchasan/Kodchasan-Regular.woff2') format('woff2'),
+         url('../assets/fonts/kodchasan/Kodchasan-Regular.woff') format('woff'),
+         url('../assets/fonts/kodchasan/Kodchasan-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Apply the font to the entire page */
+body {
+    font-family: 'Kodchasan', sans-serif;
+    color: #0B3236 !important;
+}
+
+/* Apply the font only to the sidebar */
+.sidepanel {
+    font-family: 'Kodchasan', sans-serif;
+    color: #0B3236 !important;
+}
+
+
+.containerPart {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    top: 11%;
+    left: 14%;
+    z-index: 2;
+    border-radius: 20px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.headbackCont {
+    background-color: #ff070700;
+    display: flex;
+    width: 100%;
+    height: 12%;
+    align-items: center;
+    padding: 10px;
+    /* border-bottom: 1px solid #ccc; */
+}
+
+.contentWrapper {
+    display: flex;
+    flex: 1; /* Take up remaining space */
+    width: 100%;
+}
+
+
+.imgBack{
+    background-color: rgba(255, 166, 0, 0);
+    width: 4%;
+    height: 8%;
+    margin-top: -2.5%;
+    margin-left: 5%;
+    margin-right: 2%;
+}
+.backIcon{
+    width: 40px;
+    height: 40px;
+}
+
+.headerText{
+    font-size: 2rem;
+}
+
+
+.sidepanel {
+    background-color: #07ff3000;
+    display: flex;
+    flex-direction: column; /* Ensure content stacks properly */
+    width: 20%;
+    height: 100%;
+    align-items: center;
+    overflow: hidden; /* Prevent content from overflowing */
+    flex-shrink: 0; /* Prevents the sidepanel from shrinking */
+     /* border-right: 1px solid #ccc; */
+}
+
+.d-flex.flex-column.flex-shrink-0.p-3.bg-body-tertiary {
+    background-color: #2d8b9600 !important;
+    height: 100%;
+}
+
+.nav.nav-pills.flex-column.mb-auto{
+    margin-top: 25%;
+}
+
+.nav.nav-pills {
+    position: relative;
+}
+
+.nav.nav-pills::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 3px; /* Adjust to shift the border */
+    width: 2px;
+    height: 100%;
+    background-color: gray;
+}
+
+
+ul.nav.nav-pills.flex-column.mb-auto li {
+    margin-bottom: 4%;
+}
+
+.nav-link.active {
+    background-color: #DEEBED !important; /* Background color */
+    color: rgb(0, 0, 0) !important; /* Text color */
+    position: relative; /* Needed for absolute positioning of ::after */
+}
+
+.nav-link.active::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 8px; /* Thickness of the right border */
+    height: 100%;
+    background-color: #2D8B96; /* Right border color */
+    border-top-left-radius: 10px; /* Curve on the upper left */
+    border-top-right-radius: 10px; /* Curve on the upper left */
+    border-bottom-left-radius: 10px; /* Curve on the lower left */
+    border-bottom-right-radius: 10px; /* Curve on the lower left */
+    z-index: 1 !important; 
+    
+}
+
+.nav-link {
+    color: black !important; /* Default text color */
+
+}
+
+.nav-link:hover {
+    background-color: #DEEBED !important; /* Hover color */
+    color: rgb(0, 0, 0) !important; /* Change text color on hover */
+}
+

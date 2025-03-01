@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Hash the password
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 
-                // Define a default role ID (e.g., 1)
-                $defaultRoleId = 1;
+                // Define a default role ID (e.g., 12 = pending_user)
+                $defaultRoleId = 12;
 
                 // Insert new user into the database with the correct column name and default role ID
                 $stmt = $conn->prepare("INSERT INTO users (username, email, phoneNumber, password, role_id) VALUES (:username, :email, :phoneNumber, :password, :role_id)");

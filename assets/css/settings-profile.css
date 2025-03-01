@@ -1,0 +1,215 @@
+.profile-main {
+  background-color: #b8841400;
+  display: flex;
+
+  width: 100%;
+  height: 95%;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.myProf {
+  margin-top: 3%;
+  margin-left: 35%;
+}
+
+.flex-containerOne {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px; /* Adds spacing between grid items */
+  width: 10%;
+  height: 100%; /* Full height of the viewport */
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.left-up {
+  grid-row: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-picture {
+  margin-top: 7%;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  position: relative;
+  border: 3px solid white;
+}
+
+.profile-picture img {
+  margin-left: 0.5%;
+  margin-top: 0.5%;
+  width: 95%;
+  height: 95%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Fix: Position edit icon slightly outside */
+.edit-icon {
+  width: 35px;
+  height: 35px;
+  background-color: #e1e1e1;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  border: 2px solid #ccc;
+}
+
+.edit-icon img {
+  height: 20px;
+  object-fit: contain;
+}
+
+.left-down {
+  grid-row: 2 / span 2;
+  background-color: rgb(14, 78, 161);
+  padding: 10px;
+  margin-top: 7%;
+  margin-left: 2%;
+  font-weight: 700;
+
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(14, 78, 161, 0);
+  padding: 10px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  width: 100%;
+}
+
+/* Right Side Sections */
+
+.flex-containerTwo {
+  display: flex;
+  flex-direction: column;
+  flex: 3.5;
+  gap: 10px; /* Adds spacing between grid items */
+  width: 70%;
+  height: 100%; /* Full height of the viewport */
+  background-color: rgba(0, 128, 0, 0);
+}
+
+.top-right {
+  margin-top: 5%;
+  grid-column: 2;
+  grid-row: 1;
+  background-color: rgba(240, 128, 128, 0);
+  padding: 10px;
+
+  font-weight: 500;
+  font-size: 1.5rem;
+  height: 80px;
+}
+
+.middle-right {
+  grid-column: 2;
+  grid-row: 2;
+
+  background-color: rgba(144, 238, 144, 0);
+  height: 40%;
+  padding: 5px;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.bottom-right {
+  grid-column: 2;
+  grid-row: 3;
+  height: 40%;
+  background-color: rgba(255, 160, 122, 0);
+  padding: 5px;
+  padding-top: 0;
+}
+
+/* RightSide */
+
+.headerPIA {
+    display: flex; /* Use Flexbox to align items side by side */
+    justify-content: space-between; /* Spread the items apart */
+    align-items: center; /* Vertically center the items */
+}
+
+.personalInfoAdd {
+  margin-top: 0;
+  margin-left: 10%;
+}
+
+.edit-btn {
+  width: 85px;
+  height: 30px;
+  margin-right: 3%;
+  cursor: pointer;
+}
+
+.styled-table {
+  margin-left: 15%;
+  width: 85%;
+  border-collapse: collapse; /* Ensures borders are merged between cells */
+  border: 1px solid rgba(0, 0, 0, 0); /* Adds a border around the whole table */
+
+  font-size: 1rem;
+}
+
+.styled-table td {
+  border: 1px solid rgba(0, 0, 0, 0); /* Adds borders to each cell */
+  padding: 5px; /* Adds space inside the cells */
+  text-align: center; /* Centers text inside each cell */
+  text-align: left;
+}
+
+.tr-title {
+  color: #595959;
+  font-size: 1rem;
+}
+
+.tr-content {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Make the inputs invisible but keep text visible */
+input[type="text"],
+input[type="email"],
+select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit; /* Inherit text color from parent or default */
+  font-size: 1rem; /* Keep the text legible */
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+  border: none;
+  outline: none; /* Remove the outline on focus for a cleaner look */
+}
+
+/* Style the text within the input */
+input[type="text"],
+input[type="email"],
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+
+/* Style for when the form is editable */
+.editable input, .editable select {
+    border-bottom: 1px solid #595959; /* Adds bottom border when editable */
+}
+
+/* Optional: You can also change the cursor to indicate it's editable */
+.editable input, .editable select {
+    cursor: text;
+}

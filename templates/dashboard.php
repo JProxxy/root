@@ -19,83 +19,120 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+   <!-- Load three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer();
-            const container = document.querySelector('.dashboardDeviderLeft');
+<!-- Load necessary additional files (GLTFLoader, OrbitControls, RGBELoader) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
 
-            // Add lights to the scene
-            const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
-            scene.add(ambientLight);
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    const container = document.querySelector('.dashboardDeviderLeft');
 
-            const pointLight = new THREE.PointLight(0xffffff, 1, 100); // Point light
-            pointLight.position.set(5, 5, 5); // Position of the light
-            scene.add(pointLight);
+    if (!container) {
+        console.error("Container element not found");
+        return;
+    }
 
-            // Ensure the container is found
-            if (!container) {
-                console.error("Container element not found");
-                return;
-            }
+    // Set renderer size and append it to the container
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    renderer.setSize(containerWidth, containerHeight);
+    container.appendChild(renderer.domElement);
 
-            // Resize renderer to fit the container size
-            const containerWidth = container.offsetWidth;
-            const containerHeight = container.offsetHeight;
-            renderer.setSize(containerWidth, containerHeight);
-            container.appendChild(renderer.domElement);
+    // Set background to transparent
+    renderer.setClearColor(0x000000, 0); // Transparent background (alpha = 0)
 
-            // Check if GLTFLoader is loaded and accessible
-            if (typeof THREE.GLTFLoader === 'undefined') {
-                console.error("GLTFLoader is not available");
-                return;
-            }
+    // Load HDRI texture using RGBELoader
+    const rgbeLoader = new THREE.RGBELoader();
+    rgbeLoader.load('../assets/models/HDRI/venice_dawn_1_4k.hdr', (texture) => {
+        texture.mapping = THREE.EquirectangularRefractionMapping;
 
-            // Load a 3D model (e.g., .glb or .gltf)
-            const loader = new THREE.GLTFLoader();
-            loader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
-                scene.add(gltf.scene);
-            }, undefined, (error) => {
-                console.error("Error loading 3D model:", error);
+        // Use the HDRI for reflections and lighting, but don't set it as the scene background
+        scene.environment = texture;
+
+        // Adjust model material properties for environment map
+        if (model) {
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.envMap = texture; // Apply the environment map to materials
+                }
             });
+        }
+    });
 
-            // Adjust camera's position to move it further back from the object
-            camera.position.z = 10;  // Move the camera back
+    // Add lights to the scene with reduced intensity
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Lower intensity of ambient light
+    scene.add(ambientLight);
 
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
+    const pointLight = new THREE.PointLight(0xffffff, 0.5, 100); // Lower intensity of point light
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
 
-                // Commented out rotation to stop the model from rotating
-                // scene.rotation.x += 0.01;
-                // scene.rotation.y += 0.01;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Lower intensity of directional light
+    directionalLight.position.set(0, 10, 10).normalize(); // Position it above and pointing down
+    scene.add(directionalLight);
 
-                renderer.render(scene, camera);
+    // Load GLTF model using GLTFLoader
+    const gltfLoader = new THREE.GLTFLoader();
+    let model;
+    gltfLoader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
+        model = gltf.scene;
+        scene.add(model);
+
+        // Move the model down and adjust scale and position
+        model.position.y = -22;
+        model.scale.x = 1.7;
+        model.position.x = 0;
+
+        // Traverse through the model's children and adjust the material properties
+        model.traverse((child) => {
+            if (child.isMesh) {
+                // Keep the original material, but adjust roughness and metalness
+                child.material.roughness = 0.5;
+                child.material.metalness = 0.1;
             }
-
-            animate();
-
-            // Adjust the renderer size when the window is resized
-            window.addEventListener('resize', () => {
-                const containerWidth = container.offsetWidth;
-                const containerHeight = container.offsetHeight;
-                renderer.setSize(containerWidth, containerHeight);
-                camera.aspect = containerWidth / containerHeight;
-                camera.updateProjectionMatrix();
-            });
-
-            // Optional: Add OrbitControls for better interaction
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;  // Smooth movement
-            controls.dampingFactor = 0.25;  // Adjust damping speed
-            controls.screenSpacePanning = false;  // Disable panning
-            controls.maxPolarAngle = Math.PI / 2;  // Limit vertical rotation
         });
+    }, undefined, (error) => {
+        console.error("Error loading 3D model:", error);
+    });
+
+    // Set camera position and focus on the model
+    camera.position.set(-11.34, 2.14, 20);
+    camera.lookAt(0, 0, 0);
+
+    // Enable OrbitControls for navigation
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 2;
+    controls.maxDistance = 300;
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        renderer.setSize(containerWidth, containerHeight);
+        camera.aspect = containerWidth / containerHeight;
+        camera.updateProjectionMatrix();
+    });
+});
+
 
     </script>
 
