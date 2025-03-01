@@ -96,12 +96,69 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="left-up">
 
                             <div class="profile-picture">
-                                <img id="profile-img" src="" alt="Profile Picture"
-                                    onerror="setDefaultProfile()">
+                                <!-- Profile image that will display the uploaded image -->
+                                <img id="profile-img" src="" alt="Profile Picture" onerror="setDefaultProfile()">
+
+                                <!-- Camera icon for editing the profile picture -->
                                 <div class="edit-icon">
-                                    <img src="../assets/images/camera-emoji.png" alt="Edit" onerror="setDefaultProfile()"> 
+                                    <img src="../assets/images/camera-emoji.png" alt="Edit"
+                                        onclick="triggerFileInput()">
                                 </div>
+
+                                <!-- Hidden file input for selecting the profile picture -->
+                                <input type="file" id="file-input" style="display: none;" accept="image/*"
+                                    onchange="uploadFile(event)">
                             </div>
+
+                            <script>
+                                // Function to trigger the file input when the camera icon is clicked
+                                function triggerFileInput() {
+                                    document.getElementById('file-input').click();
+                                }
+
+                                // Function to upload the selected file
+                                function uploadFile(event) {
+                                    const file = event.target.files[0];
+
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            document.getElementById('profile-img').src = e.target.result;
+                                        }
+                                        reader.readAsDataURL(file);
+
+                                        // Create FormData to send file via POST request
+                                        const formData = new FormData();
+                                        formData.append('file', file);
+
+                                        // Send the file to the PHP backend (s3_upload.php)
+                                        fetch('../scripts/s3_upload.php', {
+                                            method: 'POST',
+                                            body: formData
+                                        })
+                                            .then(response => response.json()) // Expecting JSON response with file URL
+                                            .then(data => {
+                                                if (data.url) {
+                                                    // Successfully uploaded; set profile image
+                                                    document.getElementById('profile-img').src = data.url;
+                                                } else {
+                                                    alert('Error uploading file');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Error uploading file:', error);
+                                                alert('Error uploading file');
+                                            });
+                                    }
+                                }
+
+
+                                // Default profile picture (in case of an error or no image)
+                                function setDefaultProfile() {
+                                    document.getElementById('profile-img').src = '../assets/images/default-profile.png';
+                                }
+                            </script>
+
                         </div>
 
                         <div class="left-down">
@@ -266,76 +323,76 @@ if (!isset($_SESSION['user_id'])) {
         document.getElementById("profile-img").src = "../assets/images/defaultProfile.png";
     }
 
-   // Toggle edit/save for Personal Info
-function toggleEditPersonalInfo() {
-    // Get the form elements
-    const inputs = document.querySelectorAll('.middle-right input');
-    const selects = document.querySelectorAll('.middle-right select');
-    const editBtn = document.getElementById('editPI-btn');
-    const form = document.querySelector('.middle-right form');
+    // Toggle edit/save for Personal Info
+    function toggleEditPersonalInfo() {
+        // Get the form elements
+        const inputs = document.querySelectorAll('.middle-right input');
+        const selects = document.querySelectorAll('.middle-right select');
+        const editBtn = document.getElementById('editPI-btn');
+        const form = document.querySelector('.middle-right form');
 
-    // Check if the form is already editable
-    const isEditable = inputs[0].disabled;
+        // Check if the form is already editable
+        const isEditable = inputs[0].disabled;
 
-    // Toggle disabled state
-    inputs.forEach(input => input.disabled = !isEditable);
-    selects.forEach(select => select.disabled = !isEditable);
+        // Toggle disabled state
+        inputs.forEach(input => input.disabled = !isEditable);
+        selects.forEach(select => select.disabled = !isEditable);
 
-    // Toggle the button image
-    if (isEditable) {
-        // Change to "Save" button
-        editBtn.src = '../assets/images/button-confirm.png';
-        editBtn.setAttribute('onclick', 'savePersonalInfo()');
-    } else {
-        // Change back to "Edit" button
-        editBtn.src = '../assets/images/button-edit.png';
-        editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
+        // Toggle the button image
+        if (isEditable) {
+            // Change to "Save" button
+            editBtn.src = '../assets/images/button-confirm.png';
+            editBtn.setAttribute('onclick', 'savePersonalInfo()');
+        } else {
+            // Change back to "Edit" button
+            editBtn.src = '../assets/images/button-edit.png';
+            editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
+        }
     }
-}
 
-// Save Personal Info
-function savePersonalInfo() {
-    // Add save functionality here (submit form or send AJAX request)
-    alert('Personal info has been saved.');
-    
-    // After saving, switch back to edit mode
-    toggleEditPersonalInfo();
-}
+    // Save Personal Info
+    function savePersonalInfo() {
+        // Add save functionality here (submit form or send AJAX request)
+        alert('Personal info has been saved.');
 
-
-// Toggle edit/save for Address
-function toggleEditAddress() {
-    // Get the form elements
-    const inputs = document.querySelectorAll('.bottom-right input');
-    const editBtn = document.getElementById('editAdd-btn');
-    const form = document.querySelector('.bottom-right form');
-
-    // Check if the form is already editable
-    const isEditable = inputs[0].disabled;
-
-    // Toggle disabled state
-    inputs.forEach(input => input.disabled = !isEditable);
-
-    // Toggle the button image
-    if (isEditable) {
-        // Change to "Save" button
-        editBtn.src = '../assets/images/button-confirm.png';
-        editBtn.setAttribute('onclick', 'saveAddress()');
-    } else {
-        // Change back to "Edit" button
-        editBtn.src = '../assets/images/button-edit.png';
-        editBtn.setAttribute('onclick', 'toggleEditAddress()');
+        // After saving, switch back to edit mode
+        toggleEditPersonalInfo();
     }
-}
 
-// Save Address Info
-function saveAddress() {
-    // Add save functionality here (submit form or send AJAX request)
-    alert('Address info has been saved.');
 
-    // After saving, switch back to edit mode
-    toggleEditAddress();
-}
+    // Toggle edit/save for Address
+    function toggleEditAddress() {
+        // Get the form elements
+        const inputs = document.querySelectorAll('.bottom-right input');
+        const editBtn = document.getElementById('editAdd-btn');
+        const form = document.querySelector('.bottom-right form');
+
+        // Check if the form is already editable
+        const isEditable = inputs[0].disabled;
+
+        // Toggle disabled state
+        inputs.forEach(input => input.disabled = !isEditable);
+
+        // Toggle the button image
+        if (isEditable) {
+            // Change to "Save" button
+            editBtn.src = '../assets/images/button-confirm.png';
+            editBtn.setAttribute('onclick', 'saveAddress()');
+        } else {
+            // Change back to "Edit" button
+            editBtn.src = '../assets/images/button-edit.png';
+            editBtn.setAttribute('onclick', 'toggleEditAddress()');
+        }
+    }
+
+    // Save Address Info
+    function saveAddress() {
+        // Add save functionality here (submit form or send AJAX request)
+        alert('Address info has been saved.');
+
+        // After saving, switch back to edit mode
+        toggleEditAddress();
+    }
 
 
 </script>
