@@ -1,4 +1,5 @@
 <?php
+
 // Start the session
 session_start();
 
@@ -8,8 +9,32 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../templates/login.php");
     exit();
 }
-?>
 
+// Include the database connection
+require_once '../app/config/connection.php';
+
+// Fetch user data
+$user_id = $_SESSION['user_id']; // Assuming you are storing the user_id in session
+$query = "SELECT first_name, last_name, phoneNumber, email, role_id, gender FROM users WHERE user_id = :user_id";
+$stmt = $conn->prepare($query); // Use $conn here instead of $pdo
+
+// Use bindValue to bind the user_id
+$stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+
+// Execute the query
+$stmt->execute();
+
+// Fetch user data
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Fallback for null values
+$first_name = isset($user_data['first_name']) ? $user_data['first_name'] : 'N/A';
+$last_name = isset($user_data['last_name']) ? $user_data['last_name'] : 'N/A';
+$phoneNumber = isset($user_data['phoneNumber']) ? htmlspecialchars(trim($user_data['phoneNumber'])) : 'N/A';
+$email = isset($user_data['email']) ? $user_data['email'] : 'N/A';
+$role = isset($user_data['role_id']) ? $user_data['role_id'] : 'N/A';
+$gender = isset($user_data['gender']) ? $user_data['gender'] : 'N/A';
+?>
 
 
 <!DOCTYPE html>
@@ -110,54 +135,8 @@ if (!isset($_SESSION['user_id'])) {
                                     onchange="uploadFile(event)">
                             </div>
 
-                            <script>
-                                // Function to trigger the file input when the camera icon is clicked
-                                function triggerFileInput() {
-                                    document.getElementById('file-input').click();
-                                }
-
-                                // Function to upload the selected file
-                                function uploadFile(event) {
-                                    const file = event.target.files[0];
-
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = function (e) {
-                                            document.getElementById('profile-img').src = e.target.result;
-                                        }
-                                        reader.readAsDataURL(file);
-
-                                        // Create FormData to send file via POST request
-                                        const formData = new FormData();
-                                        formData.append('file', file);
-
-                                        // Send the file to the PHP backend (s3_upload.php)
-                                        fetch('../scripts/s3_upload.php', {
-                                            method: 'POST',
-                                            body: formData
-                                        })
-                                            .then(response => response.json()) // Expecting JSON response with file URL
-                                            .then(data => {
-                                                if (data.url) {
-                                                    // Successfully uploaded; set profile image
-                                                    document.getElementById('profile-img').src = data.url;
-                                                } else {
-                                                    alert('Error uploading file');
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error uploading file:', error);
-                                                alert('Error uploading file');
-                                            });
-                                    }
-                                }
 
 
-                                // Default profile picture (in case of an error or no image)
-                                function setDefaultProfile() {
-                                    document.getElementById('profile-img').src = '../assets/images/default-profile.png';
-                                }
-                            </script>
 
                         </div>
 
@@ -187,8 +166,7 @@ if (!isset($_SESSION['user_id'])) {
 
                         <!-- MIDDLE RIGHT -->
                         <div class="middle-right">
-                            <form action="update_profile.php" method="post">
-
+                            <form id="personalInfoForm" action="update_profile.php" method="post">
                                 <div class="headerPIA">
                                     <h6 class="personalInfoAdd">Personal Information</h6>
                                     <!-- Image button for Edit -->
@@ -204,19 +182,12 @@ if (!isset($_SESSION['user_id'])) {
                                     </tr>
                                     <tr class="tr-content">
                                         <td><input type="text" name="first_name"
-                                                value="<?php echo isset($user_data['first_name']) ? $user_data['first_name'] : 'N/A'; ?>"
-                                                disabled />
-                                        </td>
+                                                value="<?php echo htmlspecialchars($first_name); ?>" disabled /></td>
                                         <td><input type="text" name="last_name"
-                                                value="<?php echo isset($user_data['last_name']) ? $user_data['last_name'] : 'N/A'; ?>"
-                                                disabled />
-                                        </td>
+                                                value="<?php echo htmlspecialchars($last_name); ?>" disabled /></td>
                                         <td><input type="text" name="role"
-                                                value="<?php echo isset($user_data['role']) ? $user_data['role'] : 'N/A'; ?>"
-                                                disabled />
-                                        </td>
+                                                value="<?php echo htmlspecialchars($role); ?>" disabled /></td>
                                     </tr>
-
                                     <tr class="tr-title">
                                         <td>Email Address</td>
                                         <td>Phone</td>
@@ -224,27 +195,22 @@ if (!isset($_SESSION['user_id'])) {
                                     </tr>
                                     <tr class="tr-content">
                                         <td><input type="email" name="email"
-                                                value="<?php echo isset($user_data['email']) ? $user_data['email'] : 'N/A'; ?>"
-                                                disabled />
-                                        </td>
-                                        <td><input type="text" name="phone"
-                                                value="<?php echo isset($user_data['phone']) ? $user_data['phone'] : 'N/A'; ?>"
-                                                disabled />
-                                        </td>
+                                                value="<?php echo htmlspecialchars($email); ?>" disabled /></td>
+                                        <td><input type="text" name="phoneNumber"
+                                                value="<?php echo htmlspecialchars($phoneNumber); ?>" disabled /></td>
                                         <td>
                                             <select name="gender" disabled>
-                                                <option value="N/A" <?php echo (isset($user_data['gender']) && $user_data['gender'] == 'N/A') ? 'selected' : ''; ?>>N/A</option>
-                                                <option value="Male" <?php echo (isset($user_data['gender']) && $user_data['gender'] == 'Male') ? 'selected' : ''; ?>>Male</option>
-                                                <option value="Female" <?php echo (isset($user_data['gender']) && $user_data['gender'] == 'Female') ? 'selected' : ''; ?>>Female
-                                                </option>
-                                                <option value="Other" <?php echo (isset($user_data['gender']) && $user_data['gender'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                                                <option value="N/A" <?php echo ($gender == 'N/A') ? 'selected' : ''; ?>>
+                                                    N/A</option>
+                                                <option value="Male" <?php echo ($gender == 'Male') ? 'selected' : ''; ?>>
+                                                    Male</option>
+                                                <option value="Female" <?php echo ($gender == 'Female') ? 'selected' : ''; ?>>Female</option>
+                                                <option value="Other" <?php echo ($gender == 'Other') ? 'selected' : ''; ?>>Other</option>
                                             </select>
                                         </td>
                                     </tr>
                                 </table>
-
                             </form>
-
                         </div>
                         <hr style="margin-left: 10%; width: 87%;">
 
@@ -319,6 +285,63 @@ if (!isset($_SESSION['user_id'])) {
 </html>
 
 <script>
+    // Function to trigger the file input when the camera icon is clicked
+    function triggerFileInput() {
+        document.getElementById('file-input').click();
+    }
+
+    // Function to upload the selected file
+    function uploadFile(event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            // Check if the file is an image (basic client-side check)
+            const fileType = file.type;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+            if (!allowedTypes.includes(fileType)) {
+                alert('Only JPG, PNG, and JPEG images are allowed.');
+                return; // Stop if the file type is not allowed
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('profile-img').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+
+            // Create FormData to send file via POST request
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Send the file to the PHP backend (uploadPP.php)
+            fetch('../scripts/uploadPP.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json()) // Expecting JSON response with file URL
+                .then(data => {
+                    if (data.url) {
+                        // Successfully uploaded; set profile image
+                        document.getElementById('profile-img').src = data.url;
+                    } else {
+                        alert('Error uploading file');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    alert('Error uploading file');
+                });
+        }
+    }
+
+    // Default profile picture (in case of an error or no image)
+    function setDefaultProfile() {
+        document.getElementById('profile-img').src = '../assets/images/default-profile.png';
+    }
+</script>
+
+<script>
     function setDefaultProfile() {
         document.getElementById("profile-img").src = "../assets/images/defaultProfile.png";
     }
@@ -352,11 +375,25 @@ if (!isset($_SESSION['user_id'])) {
 
     // Save Personal Info
     function savePersonalInfo() {
-        // Add save functionality here (submit form or send AJAX request)
-        alert('Personal info has been saved.');
+        // Collect form data
+        const form = document.getElementById('personalInfoForm');
+        const formData = new FormData(form);
 
-        // After saving, switch back to edit mode
-        toggleEditPersonalInfo();
+        // Use AJAX to send data to the server
+        fetch('../scripts/update_profile.php', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Personal info has been saved.');
+                    toggleEditPersonalInfo();
+                } else {
+                    alert('There was an error saving the info.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
 
 
