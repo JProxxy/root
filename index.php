@@ -1,35 +1,20 @@
 <?php
+// Start session to manage user login status
 session_start();
 
-// Define route mappings with hashed folder names
-$routes = [
-    hash('sha256', 'login') => 'templates/login.php',
-    hash('sha256', 'dashboard') => 'templates/dashboard.php',
-];
+// Function to generate a hashed URL
+function hashed_url($file) {
+    return $file . "?v=" . hash("sha256", $file);
+}
 
-// Get the requested page from URL, or default to an empty string
-$page = $_GET['page'] ?? '';
-
-// If user is not logged in, redirect to the login page only if not already there
+// Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    $loginHash = array_search('templates/login.php', $routes);
-    if ($page !== $loginHash) {
-        header("Location: index.php?page=" . $loginHash);
-        exit();
-    }
-} else {
-    // If logged in, redirect to the dashboard only if not already there
-    $dashboardHash = array_search('templates/dashboard.php', $routes);
-    if ($page === '' || $page !== $dashboardHash) {
-        header("Location: index.php?page=" . $dashboardHash);
-        exit();
-    }
+    // If not logged in, redirect to login page with a hashed URL
+    header("Location: " . hashed_url("templates/login.php"));
+    exit();
 }
 
-// Serve the requested page if it exists
-if (isset($routes[$page])) {
-    include $routes[$page];
-} else {
-    echo "404 Not Found";
-}
+// If logged in, redirect to the dashboard (or main app page) with a hashed URL
+header("Location: " . hashed_url("templates/dashboard.php"));
+exit();
 ?>
