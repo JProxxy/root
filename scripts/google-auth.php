@@ -10,7 +10,8 @@ if (!isset($postData->token)) {
     exit;
 }
 
-$client = new Client(['client_id' => "YOUR_CLIENT_ID"]);
+$client = new Client(['client_id' => "
+460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"]);
 
 $payload = $client->verifyIdToken($postData->token);
 
