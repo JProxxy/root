@@ -1,5 +1,5 @@
 <?php
-Include the database connection
+// Include the database connection
 require_once '../app/config/connection.php';
 if ($conn) {
     // echo "Database connection established.<br>";
