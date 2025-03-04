@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/signup.css">
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>User Login</title>
 </head>
@@ -84,6 +85,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
                         </div>
                     </div>
+
+                    <div id="g_id_onload" data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup"
+                        data-callback="handleCredentialResponse" data-auto_prompt="false">
+                    </div>
+
+                    <div class="g_id_signin" data-type="standard"></div>
+
+                    <script>
+                        function handleCredentialResponse(response) {
+                            console.log("Encoded JWT ID token: " + response.credential);
+
+                            // Send token to backend for verification
+                            fetch('/google-auth.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ token: response.credential })
+                            })
+                                .then(res => res.json())
+                                .then(data => console.log(data));
+                        }
+                    </script>
                 </form>
             </div>
 
