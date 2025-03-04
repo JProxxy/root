@@ -1,11 +1,11 @@
 <?php
-// Include the database connection
-// require_once '../app/config/connection.php';
-// if ($conn) {
-//     // echo "Database connection established.<br>";
-// } else {
-//     echo "Database connection failed.<br>";
-// }
+Include the database connection
+require_once '../app/config/connection.php';
+if ($conn) {
+    // echo "Database connection established.<br>";
+} else {
+    echo "Database connection failed.<br>";
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
