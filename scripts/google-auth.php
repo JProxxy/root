@@ -1,4 +1,9 @@
 <?php
+
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
+header("Cross-Origin-Embedder-Policy: require-corp");
+header("Cross-Origin-Resource-Policy: cross-origin");
+
 require 'vendor/autoload.php'; // This loads the Google API Client
 
 use Google\Client;
