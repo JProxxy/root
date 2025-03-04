@@ -1,8 +1,9 @@
 <?php
 
+// In google-auth.php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -96,39 +97,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div id="g_id_onload"
-     data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-     data-context="signin"
-     data-ux_mode="popup"
-     data-callback="handleCredentialResponse"
-     data-auto_prompt="false">
-</div>
+                        data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
+                        data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                        data-auto_prompt="false">
+                    </div>
 
-<div class="g_id_signin" data-type="standard"></div>
+                    <div class="g_id_signin" data-type="standard"></div>
 
-<script>
-    function handleCredentialResponse(response) {
-        console.log("Encoded JWT ID token: " + response.credential);
-
-        // Send token to backend for verification
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: response.credential })
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Server returned an error: ' + res.status);
-            }
-            return res.json();
-        })
-        .then(data => {
-            console.log("Success:", data);
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
-    }
-</script>
+                    <script>
+                        function handleCredentialResponse(response) {
+                            fetch('../scripts/google-auth.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ token: response.credential })
+                            })
+                                .then(async res => {
+                                    if (!res.ok) {
+                                        const text = await res.text();
+                                        throw new Error(`Server error: ${text}`);
+                                    }
+                                    return res.json();
+                                })
+                                .then(data => {
+                                    console.log("Success:", data);
+                                    // Redirect or handle success here
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                });
+                        }
+                    </script>
                 </form>
             </div>
 
