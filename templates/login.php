@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Verify if user exists and check password (assuming passwords are hashed)
+        // Verify if user exists and check password (passwords are hashed)
         if ($user && password_verify($password, $user['password'])) {
             // Start the session and set user data
             session_start();

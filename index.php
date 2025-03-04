@@ -1,15 +1,17 @@
 <?php
-// Start session to manage user login status
 session_start();
+
+// Get the current domain dynamically
+$baseURL = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . "/templates/";
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to login page
-    header("Location: templates/login.php");
+    // Redirect to login page if not authenticated
+    header("Location: " . $baseURL . "login");
     exit();
 }
 
-// If logged in, redirect to the dashboard (or main app page)
-header("Location: templates/dashboard.php");
+// Redirect to dashboard if logged in
+header("Location: " . $baseURL . "dashboard");
 exit();
 ?>
