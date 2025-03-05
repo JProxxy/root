@@ -1,88 +1,93 @@
 <?php
 session_start();
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN'] ?? '*');
+header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
+header("Vary: Origin");
 
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
+$response = ['success' => false];
+$errorCode = 400;
+
 try {
-    // Validate input
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception("Invalid request method");
+        throw new RuntimeException("Invalid request method", 405);
+    }
+
+    if (!isset($_SERVER['CONTENT_TYPE']) || stripos($_SERVER['CONTENT_TYPE'], 'application/json') === false) {
+        throw new RuntimeException("Invalid content type", 415);
     }
 
     $rawInput = file_get_contents("php://input");
     if (empty($rawInput)) {
-        throw new Exception("No authentication data received");
+        throw new RuntimeException("Empty request body", 400);
     }
 
-    $postData = json_decode($rawInput);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("Invalid request format: " . json_last_error_msg());
+    $postData = json_decode($rawInput, true, 512, JSON_THROW_ON_ERROR);
+    if (!isset($postData['token']) || !is_string($postData['token'])) {
+        throw new RuntimeException("Missing or invalid token parameter", 400);
     }
 
-    if (!isset($postData->token) || !is_string($postData->token)) {
-        throw new Exception("Invalid token format");
-    }
-
-    // Verify dependencies
     if (!file_exists(__DIR__.'/vendor/autoload.php')) {
-        throw new Exception("System configuration error");
+        throw new RuntimeException("System configuration error", 500);
     }
-    require_once 'vendor/autoload.php';
+    require_once __DIR__.'/vendor/autoload.php';
 
-    // Configure Google Client
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
-            'verify' => '/etc/ssl/certs/ca-certificates.crt' // SSL verification
+            'verify' => '/etc/ssl/certs/ca-certificates.crt'
         ]
     ]);
 
-    // Validate token
-    $payload = $client->verifyIdToken($postData->token);
+    $payload = $client->verifyIdToken($postData['token']);
     if (!$payload || $payload['aud'] !== $client->getClientId()) {
-        throw new Exception("Invalid authentication token");
+        throw new RuntimeException("Invalid authentication token", 401);
     }
 
-    // Session configuration
     session_regenerate_id(true);
     $_SESSION = [
-        'user_id'    => $payload['sub'],
-        'username'   => $payload['name'] ?? 'Google User',
-        'email'      => $payload['email'],
-        'auth_type'  => 'google',
-        'ip_address' => $_SERVER['REMOTE_ADDR'],
-        'user_agent' => $_SERVER['HTTP_USER_AGENT']
+        'user_id' => $payload['sub'],
+        'username' => $payload['name'] ?? 'Google User',
+        'email' => $payload['email'],
+        'auth_type' => 'google',
+        'ip' => $_SERVER['REMOTE_ADDR'],
+        'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+        'created' => time()
     ];
 
-    // Secure cookie parameters
+    $cookieParams = session_get_cookie_params();
     session_set_cookie_params([
-        'lifetime'  => 3600 * 24 * 7, // 1 week
-        'path'      => '/',
-        'domain'    => parse_url($_SERVER['HTTP_ORIGIN'], PHP_URL_HOST),
-        'secure'    => true,
-        'httponly'  => true,
-        'samesite'  => 'Lax'
+        'lifetime' => 86400 * 7,
+        'path' => $cookieParams['path'],
+        'domain' => parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST),
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax'
     ]);
 
-    // Response
-    echo json_encode([
+    $response = [
         'success' => true,
         'redirect' => '/templates/dashboard.php',
         'session_id' => session_id()
-    ]);
+    ];
+    $errorCode = 200;
 
+} catch (JsonException $e) {
+    $response['error'] = "Invalid JSON format";
+    $errorCode = 400;
+} catch (RuntimeException $e) {
+    $response['error'] = $e->getMessage();
+    $errorCode = $e->getCode() ?: 400;
 } catch (Throwable $e) {
-    error_log('Authentication Error: ' . $e->getMessage());
-    http_response_code(401);
-    echo json_encode([
-        'error' => 'Authentication Failed',
-        'message' => $e->getMessage(),
-        'error_code' => 'AUTH_ERR_001'
-    ]);
+    error_log("Critical Error: " . $e->getMessage());
+    $response['error'] = "Internal server error";
+    $errorCode = 500;
+} finally {
+    http_response_code($errorCode);
+    echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
