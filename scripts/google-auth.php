@@ -30,10 +30,11 @@ try {
         throw new RuntimeException("Missing or invalid token parameter", 400);
     }
 
-    if (!file_exists(__DIR__.'/vendor/autoload.php')) {
+    if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
         throw new RuntimeException("System configuration error", 500);
     }
-    require_once __DIR__.'/vendor/autoload.php';
+    require_once __DIR__ . '/../vendor/autoload.php';
+
 
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
