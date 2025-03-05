@@ -25,7 +25,6 @@ try {
     if (empty($rawInput)) {
         throw new RuntimeException("Empty request body", 400);
     }
-
     $postData = json_decode($rawInput, true, 512, JSON_THROW_ON_ERROR);
     if (!isset($postData['token']) || !is_string($postData['token'])) {
         throw new RuntimeException("Missing or invalid token parameter", 400);
