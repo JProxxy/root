@@ -18,7 +18,7 @@
         }
 
         function handleLogout() {
-            window.location.href = 'logout.php';
+            window.location.href = '../scripts/logout.php';
         }
     </script>
 </head>
