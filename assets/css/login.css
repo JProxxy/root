@@ -221,12 +221,12 @@ body {
   align-items: center !important;
   text-align: center !important;
   align-self: center !important;
-  margin-left: 25%;
   width: 67%;
-  background-color: #2e7d7a00;
+  background-color: #2e7d7a;
 }
 
 .g_id_signin {
+  margin-left: 17%;
   min-width: 67% !important;
   max-width: 67% !important;
   background-color: #2d8b9600;
