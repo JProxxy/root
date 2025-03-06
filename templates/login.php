@@ -261,7 +261,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     first_name: decoded.given_name || '', // First name
                     last_name: decoded.family_name || '', // Last name
                     profile_picture: decoded.picture || '', // Profile image URL
-                    locale: decoded.locale || '', // User's locale (e.g., "en-US")
                 };
 
                 console.log("Extracted User Info:", userInfo);
