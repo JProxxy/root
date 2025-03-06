@@ -3,8 +3,8 @@ session_start();
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Cross-Origin-Opener-Policy: unsafe-none");
-header("Cross-Origin-Embedder-Policy: unsafe-none");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -259,26 +259,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     });
 
     function handleCredentialResponse(response) {
-        // Send the ID token to your server for validation
         fetch('../scripts/google-auth.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                token: response.credential
-            })
+            body: JSON.stringify({ token: response.credential })
         })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Redirect or handle successful login
-                    console.log('User authenticated');
-                } else {
-                    console.error('Authentication failed');
+            .then(async res => {
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    throw new Error(`Invalid JSON: ${text}`);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .then(data => {
+                if (data.success) {
+                    // Handle successful login
+                    window.location.href = '../templates/dashboard.php';
+                } else {
+                    showError(data.message || 'Authentication failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(error.message || 'Login process failed');
+            });
     }
 
 

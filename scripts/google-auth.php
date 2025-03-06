@@ -1,5 +1,14 @@
 <?php
-require_once 'vendor/autoload.php';  // Adjust path to your Composer autoload
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Credentials: true");
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $client = new Google_Client();
 $client->setClientId('460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com'); // Your client ID
@@ -9,22 +18,31 @@ $data = json_decode(file_get_contents('php://input'), true);
 $token = $data['token'];
 
 try {
-    // Verify the token
-    $payload = $client->verifyIdToken($token);
-
-    if ($payload) {
-        // User is authenticated, you can now create a session or handle the user
-        $email = $payload['email'];
-        $name = $payload['name'];
-        $sub = $payload['sub'];
-
-        // Here you could insert the user into the database or do other operations
-        echo json_encode(['success' => true, 'message' => 'User authenticated successfully']);
-    } else {
-        // Invalid token
-        echo json_encode(['success' => false, 'message' => 'Invalid token']);
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!$data || !isset($data['token'])) {
+        throw new Exception('Invalid request format');
     }
+
+    $client = new Google_Client();
+    $client->setClientId('460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com');
+    
+    $payload = $client->verifyIdToken($data['token']);
+    if (!$payload) {
+        throw new Exception('Invalid ID token');
+    }
+
+    // Add your user handling logic here
+    error_log("Google authentication successful for: " . $payload['email']);
+    
+    echo json_encode([
+        'success' => true,
+        'email' => $payload['email'],
+        'name' => $payload['name'] ?? '',
+        'google_id' => $payload['sub']
+    ]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Authentication failed: ' . $e->getMessage()]);
+    error_log('Google Auth Error: ' . $e->getMessage());
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
