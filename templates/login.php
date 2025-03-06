@@ -185,45 +185,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         </div>
     </div>
 
-    <script>
-        // Initialize Google Identity Services
-        google.accounts.id.initialize({
-            client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
-            callback: handleCredentialResponse, // Your callback function to handle the response
-            ux_mode: "popup"
-        });
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  // Initialize Google Identity Services
+  google.accounts.id.initialize({
+    client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
+    callback: handleCredentialResponse, // Your callback function to process the response
+    ux_mode: "popup"
+  });
 
-        // Attach click event to the custom button
-        document.getElementById("customGoogleBtn").addEventListener("click", function () {
-            // Trigger the sign-in prompt (this shows the One Tap prompt)
-            google.accounts.id.prompt();
-        });
+  // Add click event listener for the custom button
+  document.getElementById("customGoogleBtn").addEventListener("click", function() {
+    // Trigger the sign-in popup
+    google.accounts.id.prompt(); // This should show the Google sign-in popup
+  });
 
-        // Example callback function (replace with your actual implementation)
-        function handleCredentialResponse(response) {
-            console.log("Encoded JWT ID token: " + response.credential);
-            // You can now send this token to your backend for verification and further processing.
-            // For example, using fetch:
-            fetch('../scripts/google-auth.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: response.credential })
-            })
-                .then(async res => {
-                    if (!res.ok) throw await res.json();
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.redirect) {
-                        window.location.href = data.redirect;
-                    }
-                })
-                .catch(error => {
-                    console.error("Authentication Error:", error);
-                    // Handle errors here, e.g., display a message to the user.
-                });
-        }
-    </script>
+  function handleCredentialResponse(response) {
+    // Process the response credential (token)
+    console.log("Encoded JWT ID token: " + response.credential);
+    // Example: send the token to your backend for verification
+    fetch('scripts/google-auth.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: response.credential })
+    })
+    .then(async res => {
+      if (!res.ok) throw await res.json();
+      return res.json();
+    })
+    .then(data => {
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      }
+    })
+    .catch(error => {
+      console.error("Authentication Error:", error);
+      // Display error messages if needed
+    });
+  }
+</script>
 
     <script>
         function toggleContainers() {
