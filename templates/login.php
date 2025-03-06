@@ -257,34 +257,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             document.getElementById('retype_password').focus();
         }
     });
-    function handleCredentialResponse(response) {
-        try {
-            // Decode the JWT token from Google sign-in response
-            const data = jwt_decode(response.credential);  // This will decode the JWT
-            const token = response.credential; // The token directly from Google
-
-            // Send the token to backend for authentication
-            fetch('../scripts/google-auth.php', {
-                method: 'POST',
-                body: JSON.stringify({ token: token }), // Send the token to the backend
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        // Redirect to the dashboard if login is successful
-                        window.location.href = result.redirect;
-                    } else {
-                        alert('Authentication failed. Please try again.');
-                    }
-                })
-                .catch(err => console.error('Error:', err));
-        } catch (error) {
-            console.error('Error in Google Sign-In:', error);
-        }
-    }
+    const data = jwt_decode(response.credential); // Decoding the credential
+    fetch('../scripts/google-auth.php', {
+        method: 'POST',
+        body: JSON.stringify({ token: response.credential }), // Send token directly
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                window.location.href = '../templates/dashboard.php'; // Redirect to dashboard
+            } else {
+                alert('Authentication failed. Please try again.');
+            }
+        })
+        .catch(err => console.error('Error:', err));
 
 
 
