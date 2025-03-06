@@ -4,6 +4,9 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
 header("Vary: Origin");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
 
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
