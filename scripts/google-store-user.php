@@ -1,4 +1,3 @@
-<?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -31,13 +30,13 @@ try {
             $next_user_id = ($row['max_user_id'] ?? 0) + 1; // If NULL, start from 1
             $next_google_id = $next_user_id; // Make google_id the same as user_id
             $username = $email; // Set username as email
+            $password = ""; // Empty password
 
-            // Insert new user with default values for unspecified columns
-            $stmt = $conn->prepare("INSERT INTO users 
-                (user_id, google_id, email, username, first_name, last_name, profile_picture, other_column1, other_column2, other_column3) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, '', '', '')");
+            // Insert new user
+            $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, username, password, first_name, last_name, profile_picture) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
-            if (!$stmt->execute([$next_user_id, $next_google_id, $email, $username, $first_name, $last_name, $profile_picture])) {
+            if (!$stmt->execute([$next_user_id, $next_google_id, $email, $username, $password, $first_name, $last_name, $profile_picture])) {
                 throw new Exception("Insert failed: " . json_encode($stmt->errorInfo()));
             }
 
@@ -51,4 +50,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
 }
-?>
