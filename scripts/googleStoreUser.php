@@ -6,7 +6,7 @@ header("Access-Control-Allow-Headers: Content-Type");
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-header('Content-Type: application/json'); // Ensure JSON response
+
 
 require_once '../app/config/connection.php';
 
