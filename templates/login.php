@@ -248,41 +248,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         });
 
         function handleCredentialResponse(response) {
-            // Decode JWT
             const jwt = response.credential;
-            const decoded = JSON.parse(atob(jwt.split('.')[1])); // Decode JWT Payload
 
-            console.log("Decoded Google Sign-In Data:", decoded); // Logs JWT data
+            try {
+                // Decode JWT safely
+                const decoded = JSON.parse(atob(jwt.split('.')[1]));
+                console.log("Decoded Google Sign-In Data:", decoded); // Log to see all data
 
-            // Extract email
-            const userEmail = decoded.email; // Make sure 'email' exists
+                // Extract relevant fields
+                const userInfo = {
+                    email: decoded.email || '',
+                    full_name: decoded.name || '',  // Full name
+                    first_name: decoded.given_name || '', // First name
+                    last_name: decoded.family_name || '', // Last name
+                    profile_picture: decoded.picture || '', // Profile image URL
+                    sub: decoded.sub || '', // Unique Google ID
+                    locale: decoded.locale || '', // User's locale (e.g., "en-US")
+                };
 
-            // Send JWT to backend for authentication
-            fetch('../scripts/google-auth.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: jwt })
-            })
-                .then(async response => {
-                    if (!response.ok) throw await response.json();
-                    return response.json();
+                console.log("Extracted User Info:", userInfo);
+
+                // Send token to backend for authentication
+                fetch('../scripts/google-auth.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: jwt })
                 })
-                .then(data => {
-                    if (data.redirect) {
-                        window.location.href = data.redirect; // Redirect if needed
-                    }
-                })
-                .catch(error => {
-                    console.error("Authentication Error:", error);
-                    showError(error.message);
-                });
+                    .then(async response => {
+                        if (!response.ok) throw await response.json();
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.redirect) {
+                            window.location.href = data.redirect; // Redirect if needed
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Authentication Error:", error);
+                        showError(error.message);
+                    });
 
-            // **Ensure userEmail is defined before sending to store in database**
-            if (userEmail) {
+                // **Send full user data to store in the database**
                 fetch('../scripts/google-store-user.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: userEmail }) // Use the extracted email
+                    body: JSON.stringify(userInfo) // Send all user details
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -291,10 +301,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     .catch(error => {
                         console.error("Error storing user:", error);
                     });
-            } else {
-                console.error("User email is undefined.");
+
+            } catch (err) {
+                console.error("Error decoding JWT:", err);
             }
         }
+
 
 
         function showError(message) {
