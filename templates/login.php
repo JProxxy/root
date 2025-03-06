@@ -107,50 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
 
                         <!-- Custom Google Sign-In Button -->
-                        <button id="customGoogleBtn" class="custom-google-btn">
-                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" />
-                            <span>Sign in with Google</span>
+                        <button type="submit" formnovalidate id="customGoogleBtn" class="custom-google-btn">
+                            Sign in with Google
                         </button>
 
-                        <script>
-  // Initialize Google Identity Services
-  google.accounts.id.initialize({
-    client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
-    callback: handleCredentialResponse, // Your callback function to handle the response
-    ux_mode: "popup"
-  });
 
-  // Attach click event to the custom button
-  document.getElementById("customGoogleBtn").addEventListener("click", function() {
-    // Trigger the sign-in prompt (this shows the One Tap prompt)
-    google.accounts.id.prompt();
-  });
 
-  // Example callback function (replace with your actual implementation)
-  function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
-    // You can now send this token to your backend for verification and further processing.
-    // For example, using fetch:
-    fetch('../scripts/google-auth.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: response.credential })
-    })
-    .then(async res => {
-      if (!res.ok) throw await res.json();
-      return res.json();
-    })
-    .then(data => {
-      if (data.redirect) {
-        window.location.href = data.redirect;
-      }
-    })
-    .catch(error => {
-      console.error("Authentication Error:", error);
-      // Handle errors here, e.g., display a message to the user.
-    });
-  }
-</script>
+
 
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
@@ -226,6 +189,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             <div class="frontImg"></div>
         </div>
     </div>
+
+    <script>
+        // Initialize Google Identity Services
+        google.accounts.id.initialize({
+            client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
+            callback: handleCredentialResponse, // Your callback function to handle the response
+            ux_mode: "popup"
+        });
+
+        // Attach click event to the custom button
+        document.getElementById("customGoogleBtn").addEventListener("click", function () {
+            // Trigger the sign-in prompt (this shows the One Tap prompt)
+            google.accounts.id.prompt();
+        });
+
+        // Example callback function (replace with your actual implementation)
+        function handleCredentialResponse(response) {
+            console.log("Encoded JWT ID token: " + response.credential);
+            // You can now send this token to your backend for verification and further processing.
+            // For example, using fetch:
+            fetch('../scripts/google-auth.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            })
+                .then(async res => {
+                    if (!res.ok) throw await res.json();
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch(error => {
+                    console.error("Authentication Error:", error);
+                    // Handle errors here, e.g., display a message to the user.
+                });
+        }
+    </script>
 
     <script>
         function toggleContainers() {
