@@ -48,16 +48,6 @@ try {
         throw new RuntimeException("Invalid authentication token", 401);
     }
 
-    session_regenerate_id(true);
-    $_SESSION = [
-        'user_id' => $payload['sub'],
-        'username' => $payload['name'] ?? 'Google User',
-        'email' => $payload['email'],
-        'auth_type' => 'google',
-        'ip' => $_SERVER['REMOTE_ADDR'],
-        'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-        'created' => time()
-    ];
 
     $cookieParams = session_get_cookie_params();
     session_set_cookie_params([
