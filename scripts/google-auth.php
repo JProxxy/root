@@ -10,6 +10,7 @@ session_set_cookie_params([
 ]);
 
 session_start(); // Start the session after setting the cookie params
+require_once '../app/config/connection.php';
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
