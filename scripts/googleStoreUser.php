@@ -19,10 +19,10 @@ try {
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Extract and sanitize inputs
-    $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $first_name = filter_var($data['first_name'] ?? '', FILTER_SANITIZE_STRING);
-    $last_name = filter_var($data['last_name'] ?? '', FILTER_SANITIZE_STRING);
-    $profile_picture = filter_var($data['profile_picture'] ?? '', FILTER_SANITIZE_URL);
+    $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $first_name = filter_var($data['first_name'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $last_name = filter_var($data['last_name'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $profile_picture = filter_var($data['profile_picture'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
     if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         // Check if email already exists
