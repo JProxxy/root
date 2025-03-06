@@ -17,7 +17,7 @@ try {
     // Verify required fields
     $required = ['token', 'google_id', 'email'];
     foreach ($required as $field) {
-        if (!isset($_POST[$field]) {
+        if (!isset($_POST[$field])) {  // Fixed this line
             throw new Exception("Missing required field: $field");
         }
     }
