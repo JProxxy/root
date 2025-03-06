@@ -5,6 +5,7 @@ header("Content-Security-Policy: default-src 'self'");
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
 
+// Validate POST method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("HTTP/1.1 405 Method Not Allowed");
     exit('Invalid request method');
@@ -16,8 +17,13 @@ require_once __DIR__ . '/../app/config/connection.php';
 
 $client = new Google_Client(['client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com']);
 $token = $_POST['token'] ?? '';
-$payload = $client->verifyIdToken($token);
 
+if (empty($token)) {
+    header("HTTP/1.1 400 Bad Request");
+    exit('Missing authentication token');
+}
+
+$payload = $client->verifyIdToken($token);
 if (!$payload) {
     header("HTTP/1.1 401 Unauthorized");
     exit('Invalid Google token');
@@ -26,7 +32,7 @@ if (!$payload) {
 /* [3] VALIDATE DATA INTEGRITY */
 $required = ['google_id', 'email', 'first_name', 'last_name', 'profile_picture'];
 foreach ($required as $field) {
-    if (!isset($_POST[$field]) {
+    if (!isset($_POST[$field])) {  // Fixed missing parenthesis
         error_log("Missing field: $field");
         header("Location: ../templates/login.php?error=invalid_data");
         exit();
@@ -57,6 +63,7 @@ try {
     $stmt->execute([$clean['google_id'], $clean['email']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    $user_id = null;
     if (!$user) {
         // Create new user
         $username = preg_replace('/[^a-z0-9_]/', '', strtolower(explode('@', $clean['email'])[0]));
