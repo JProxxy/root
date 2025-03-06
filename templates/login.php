@@ -4,9 +4,9 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+header('Content-Type: application/json'); // Ensure JSON response
 
 require_once '../app/config/connection.php';
 
@@ -297,10 +297,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     });
 
                 // **Send full user data to store in the database**
-                fetch('../scripts/googleStoreUser.php', {
+                fetch('https://rivaniot.online/googleStoreUser.php', {  // Change to full URL
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userInfo) // Send all user details
+                    body: JSON.stringify(userInfo)
                 })
                     .then(response => response.json())
                     .then(data => {

@@ -5,9 +5,9 @@ header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SER
 header("Access-Control-Allow-Credentials: true");
 header("Vary: Origin");
 
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
 error_reporting(E_ALL);
+ini_set('display_errors', 1);
+header('Content-Type: application/json'); // Ensure JSON response
 
 $response = ['success' => false];
 $errorCode = 400;
