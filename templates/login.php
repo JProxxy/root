@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../templates/login.php");
+    exit();
+}
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../app/config/connection.php';
 
