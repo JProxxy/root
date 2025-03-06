@@ -1,8 +1,5 @@
 <?php
 session_start();
-
-require_once '../app/config/connection.php'; // Ensure this file properly connects to your MySQL database.
-
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
@@ -38,6 +35,7 @@ try {
     }
     require_once __DIR__ . '/../vendor/autoload.php';
 
+
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
@@ -71,24 +69,6 @@ try {
         'samesite' => 'Lax'
     ]);
 
-    // **Database Connection**
-    try {
-        $pdo = new PDO("mysql:host=YOUR_DB_HOST;dbname=rivan_iot;charset=utf8mb4", "YOUR_DB_USER", "YOUR_DB_PASSWORD", [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]);
-    } catch (PDOException $e) {
-        throw new RuntimeException("Database connection failed: " . $e->getMessage(), 500);
-    }
-
-    // **Insert user_id into the users table (if it doesn't exist)**
-    try {
-        $stmt = $pdo->prepare("INSERT INTO users (user_id) VALUES (:user_id) ON DUPLICATE KEY UPDATE user_id=user_id");
-        $stmt->execute([':user_id' => $payload['sub']]);
-    } catch (PDOException $e) {
-        throw new RuntimeException("Database insert failed: " . $e->getMessage(), 500);
-    }
-
     $response = [
         'success' => true,
         'redirect' => '/templates/dashboard.php',
@@ -111,5 +91,3 @@ try {
     echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
-
-?>
