@@ -39,7 +39,7 @@ try {
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
-            'verify' => '/../etc/ssl/certs/ca-certificates.crt'
+            'verify' => '/etc/ssl/certs/ca-certificates.crt'
         ]
     ]);
 
@@ -71,7 +71,7 @@ try {
 
     $response = [
         'success' => true,
-        'redirect' => '../templates/dashboard.php',
+        'redirect' => '/templates/dashboard.php',
         'session_id' => session_id()
     ];
     $errorCode = 200;
