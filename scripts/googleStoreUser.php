@@ -24,7 +24,7 @@ try {
     $last_name = filter_var($data['last_name'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $profile_picture = filter_var($data['profile_picture'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-    if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (!empty($email) && filter_var($email, FILTER_SANITIZE_FULL_SPECIAL_CHARS)) {
         // Check if email already exists
         $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $stmt->execute([$email]);
