@@ -2,22 +2,22 @@
 require_once '../app/config/connection.php';
 
 try {
-    if (!isset($pdo)) {
+    if (!isset($conn)) {
         throw new Exception("Database connection is not established.");
     }
     file_put_contents("debug.log", print_r($data, true)); // Log request dat
-    
+
     $data = json_decode(file_get_contents("php://input"), true);
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL); // Sanitize input
 
     if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         // Check if email already exists
-        $stmt = $pdo->prepare("SELECT user_id FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $stmt->execute([$email]);
 
         if ($stmt->rowCount() == 0) {
             // Insert new user
-            $stmt = $pdo->prepare("INSERT INTO users (email) VALUES (?)");
+            $stmt = $conn->prepare("INSERT INTO users (email) VALUES (?)");
             if (!$stmt->execute([$email])) {
                 die(json_encode(["success" => false, "message" => "Insert failed", "error" => $stmt->errorInfo()]));
             }
