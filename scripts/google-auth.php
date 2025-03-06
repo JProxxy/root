@@ -15,8 +15,8 @@ require_once '../app/config/connection.php';
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
-header("Cross-Origin-Opener-Policy: same-origin");
-header("Cross-Origin-Embedder-Policy: require-corp");
+header("Cross-Origin-Opener-Policy: unsafe-none");
+header("Cross-Origin-Embedder-Policy: unsafe-none");
 header("Vary: Origin");
 
 error_reporting(E_ALL);
