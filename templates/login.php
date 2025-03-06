@@ -1,60 +1,88 @@
 <?php
 session_start();
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../app/config/connection.php';
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Error handling
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
 
-require_once '../app/config/connection.php';
-
-$errorMessage = '';
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
-
-    try {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
-        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            // Verify authentication method
-            $validLogin = false;
-            $authMethod = 'password';
-
-            if (!empty($user['google_id'])) {
-                // Google-authenticated user (password not required)
-                $validLogin = true;
-                $authMethod = 'google';
-            } elseif (password_verify($password, $user['password'])) {
-                // Password-authenticated user
-                $validLogin = true;
-                $authMethod = 'password';
-            }
-
-            if ($validLogin) {
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['auth_method'] = $authMethod;
-                $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
-                $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
-
-                header("Location: ../templates/dashboard.php");
-                exit();
-            } else {
-                $errorMessage = "Invalid username or password.";
-            }
-        } else {
-            $errorMessage = "Account not found.";
-        }
-    } catch (PDOException $e) {
-        error_log('Database Error: ' . $e->getMessage());
-        $errorMessage = "System error. Please try again later.";
+try {
+    // Validate POST request
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception("Invalid request method");
     }
+
+    // Verify required fields
+    $required = ['token', 'google_id', 'email'];
+    foreach ($required as $field) {
+        if (!isset($_POST[$field]) {
+            throw new Exception("Missing required field: $field");
+        }
+    }
+
+    // Initialize Google Client
+    $client = new Google_Client([
+        'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com'
+    ]);
+    
+    // Verify token
+    $payload = $client->verifyIdToken($_POST['token']);
+    if (!$payload) {
+        throw new Exception("Invalid Google token");
+    }
+
+    // Validate data consistency
+    if ($_POST['email'] !== $payload['email'] || $_POST['google_id'] !== $payload['sub']) {
+        throw new Exception("Data mismatch detected");
+    }
+
+    // Database operations
+    $conn->beginTransaction();
+    
+    try {
+        // Check existing user
+        $stmt = $conn->prepare("SELECT user_id FROM users WHERE google_id = ? OR email = ?");
+        $stmt->execute([$_POST['google_id'], $_POST['email']]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            // Create new user
+            $stmt = $conn->prepare("
+                INSERT INTO users 
+                (google_id, email, username, created_at)
+                VALUES (?, ?, ?, NOW())
+            ");
+            $stmt->execute([
+                $_POST['google_id'],
+                $_POST['email'],
+                $_POST['email'] // Username = Email
+            ]);
+            $user_id = $conn->lastInsertId();
+        } else {
+            $user_id = $user['user_id'];
+        }
+
+        $conn->commit();
+
+        // Create session
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['email'] = $_POST['email'];
+        $_SESSION['auth_method'] = 'google';
+
+        header("Location: ../templates/dashboard.php");
+        exit();
+
+    } catch(PDOException $e) {
+        $conn->rollBack();
+        throw new Exception("Database error: " . $e->getMessage());
+    }
+
+} catch (Exception $e) {
+    error_log("[Google Auth] " . $e->getMessage());
+    header("Location: ../templates/login.php?error=system_error");
+    exit();
 }
 ?>
 <!DOCTYPE html>
