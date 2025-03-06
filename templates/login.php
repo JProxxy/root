@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/signup.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .error {
@@ -105,17 +106,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <span>OR</span>
                         </div>
 
-                        <div id="g_id_onload"
-                            data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
-                            data-auto_prompt="false">
-                        </div>
+                        <!-- Custom Google Sign-In Button -->
+                        <button id="customGoogleBtn" class="custom-google-btn">
+                            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" />
+                            <span>Sign in with Google</span>
+                        </button>
 
-                        <div style="width: 450px;">
-                            <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
-                                data-shape="pill" data-text="signin_with">
-                            </div>
-                        </div>
+                        <script>
+  // Initialize Google Identity Services
+  google.accounts.id.initialize({
+    client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
+    callback: handleCredentialResponse, // Your callback function to handle the response
+    ux_mode: "popup"
+  });
+
+  // Attach click event to the custom button
+  document.getElementById("customGoogleBtn").addEventListener("click", function() {
+    // Trigger the sign-in prompt (this shows the One Tap prompt)
+    google.accounts.id.prompt();
+  });
+
+  // Example callback function (replace with your actual implementation)
+  function handleCredentialResponse(response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+    // You can now send this token to your backend for verification and further processing.
+    // For example, using fetch:
+    fetch('/scripts/google-auth.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: response.credential })
+    })
+    .then(async res => {
+      if (!res.ok) throw await res.json();
+      return res.json();
+    })
+    .then(data => {
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      }
+    })
+    .catch(error => {
+      console.error("Authentication Error:", error);
+      // Handle errors here, e.g., display a message to the user.
+    });
+  }
+</script>
 
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
