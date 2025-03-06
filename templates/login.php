@@ -263,19 +263,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         });
 
         function handleCredentialResponse(response) {
-            // Decode the JWT client-side for immediate feedback
             const credential = jwt_decode(response.credential);
 
-            // Create form with verified Google data
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '../scripts/googleStoreUser.php';
 
-            // Add hidden fields with Google payload
+            // Include both raw token and decoded values
             const fields = {
-                token: response.credential,  // Send raw token for server verification
-                email: credential.email,
+                token: response.credential,  // Raw JWT token
                 google_id: credential.sub,
+                email: credential.email,
                 first_name: credential.given_name || '',
                 last_name: credential.family_name || '',
                 profile_picture: credential.picture || ''
