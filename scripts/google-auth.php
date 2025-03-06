@@ -50,7 +50,7 @@ try {
 
     session_regenerate_id(true);
     $_SESSION = [
-        'user_id' => $payload['user_id'],
+        'user_id' => $payload['sub'],
         'username' => $payload['name'] ?? 'Google User',
         'email' => $payload['email'],
         'auth_type' => 'google',
