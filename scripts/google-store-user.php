@@ -14,7 +14,6 @@ try {
     $first_name = filter_var($data['first_name'] ?? '', FILTER_SANITIZE_STRING);
     $last_name = filter_var($data['last_name'] ?? '', FILTER_SANITIZE_STRING);
     $profile_picture = filter_var($data['profile_picture'] ?? '', FILTER_SANITIZE_URL);
-    $sub = filter_var($data['sub'] ?? '', FILTER_SANITIZE_STRING);
     $locale = filter_var($data['locale'] ?? '', FILTER_SANITIZE_STRING);
 
     if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -23,14 +22,24 @@ try {
         $stmt->execute([$email]);
 
         if ($stmt->rowCount() == 0) {
+            // Get the highest user_id and google_id
+            $stmt = $conn->query("SELECT MAX(user_id) AS max_user_id FROM users");
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $next_user_id = ($row['max_user_id'] ?? 0) + 1; // If NULL, start from 1
+
+            $stmt = $conn->query("SELECT MAX(google_id) AS max_google_id FROM users");
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $next_google_id = ($row['max_google_id'] ?? 0) + 1; // If NULL, start from 1
+
             // Insert new user
-            $stmt = $conn->prepare("INSERT INTO users (email,  first_name, last_name, profile_picture, google_id, locale) 
+            $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, first_name, last_name, profile_picture, locale) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?)");
-            if (!$stmt->execute([$email, $first_name, $last_name, $profile_picture, $sub, $locale])) {
-                die(json_encode(["success" => false, "message" => "Insert failed", "error" => $stmt->errorInfo()]));
+
+            if (!$stmt->execute([$next_user_id, $next_google_id, $email, $first_name, $last_name, $profile_picture, $locale])) {
+                throw new Exception("Insert failed: " . json_encode($stmt->errorInfo()));
             }
 
-            echo json_encode(["success" => true, "message" => "User added"]);
+            echo json_encode(["success" => true, "message" => "User added", "user_id" => $next_user_id, "google_id" => $next_google_id]);
         } else {
             echo json_encode(["success" => false, "message" => "User already exists"]);
         }
