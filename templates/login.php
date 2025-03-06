@@ -259,26 +259,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     });
 
     function handleCredentialResponse(response) {
-        const data = jwt_decode(response.credential); // Decoding the JWT token
-
-        // Now send the token to your PHP script to authenticate the user
+        // Send the ID token to your server for validation
         fetch('../scripts/google-auth.php', {
             method: 'POST',
-            body: JSON.stringify({ token: response.credential }),
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
+            body: JSON.stringify({
+                token: response.credential
+            })
         })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    window.location.href = '../templates/dashboard.php'; // Redirect to dashboard
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect or handle successful login
+                    console.log('User authenticated');
                 } else {
-                    alert('Authentication failed. Please try again.');
+                    console.error('Authentication failed');
                 }
             })
-            .catch(err => console.error('Error:', err));
+            .catch(error => console.error('Error:', error));
     }
+
 
 
 
