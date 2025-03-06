@@ -194,142 +194,108 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         </div>
     </div>
 
-    <script>
-        function toggleContainers() {
-            const login = document.getElementById('logInContainer');
-            const signup = document.getElementById('signUpContainer');
-            login.style.display = login.style.display === 'none' ? 'flex' : 'none';
-            signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
-        }
 
-        function checkPasswordStrength(password) {
-            const strengthBar = document.querySelector('.strength-bar');
-            const hasNumber = /\d/.test(password);
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const strength = Math.min((
-                (password.length >= 8 ? 25 : 0) +
-                (hasNumber ? 25 : 0) +
-                (hasUpper ? 25 : 0) +
-                (hasLower ? 25 : 0)
-            ), 100);
-
-            strengthBar.style.width = strength + '%';
-            strengthBar.style.backgroundColor =
-                strength >= 75 ? '#28a745' :
-                    strength >= 50 ? '#ffc107' :
-                        '#dc3545';
-        }
-
-        function validatePasswordMatch() {
-            const password = document.getElementById('password').value;
-            const retype = document.getElementById('retype_password').value;
-            const errorSpan = document.querySelector('.password-match-error');
-            errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
-        }
-
-        function togglePasswordVisibility(inputId, icon) {
-            const input = document.getElementById(inputId);
-            input.type = input.type === 'password' ? 'text' : 'password';
-            icon.classList.toggle('fa-eye-slash');
-        }
-
-        document.getElementById('showLoginPassword').addEventListener('change', function () {
-            const passwordField = document.getElementById('loginpassword');
-            passwordField.type = this.checked ? 'text' : 'password';
-        });
-
-        document.getElementById('signupForm').addEventListener('submit', function (e) {
-            const password = document.getElementById('password').value;
-            const retype = document.getElementById('retype_password').value;
-            if (password !== retype) {
-                e.preventDefault();
-                alert('Error: Passwords do not match!');
-                document.getElementById('retype_password').focus();
-            }
-        });
-
-        function handleCredentialResponse(response) {
-
-
-
-            console.log("Google Response:", response);
-            if (!response || !response.credential) {
-                console.error("Google sign-in failed or blocked.");
-                return;
-            }
-
-            const jwt = response.credential;
-
-            try {
-                // Decode JWT safely
-                const decoded = JSON.parse(atob(jwt.split('.')[1]));
-                console.log("Decoded Google Sign-In Data:", decoded); // Log to see all data
-
-                // Extract relevant fields
-                const userInfo = {
-                    email: decoded.email || '',
-                    first_name: decoded.given_name || '', // First name
-                    last_name: decoded.family_name || '', // Last name
-                    profile_picture: decoded.picture || '', // Profile image URL
-                };
-
-                console.log("Extracted User Info:", userInfo);
-
-                // Send token to backend for authentication
-                fetch('../scripts/google-auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: jwt })
-                })
-                    .then(async response => {
-                        if (!response.ok) throw await response.json();
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.redirect) {
-                            window.location.href = data.redirect; // Redirect if needed
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Authentication Error:", error);
-                        showError(error.message);
-                    });
-
-                // **Send full user data to store in the database**
-                fetch('../scripts/googleStoreUser.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userInfo)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("User stored:", data);
-                    })
-                    .catch(error => {
-                        console.error("Error storing user:", error);
-                        alert('There was an error storing the user data. Please try again.');
-                    });
-
-            } catch (err) {
-                console.error("Error decoding JWT:", err);
-            }
-        }
-
-
-
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.innerHTML = `
-        <strong>Authentication Error:</strong><br>
-        ${message || 'Unknown error occurred'}
-    `;
-            document.querySelector('.logInContainer').prepend(errorDiv);
-        }
-
-
-    </script>
 </body>
 
 </html>
+
+
+<script>
+    function toggleContainers() {
+        const login = document.getElementById('logInContainer');
+        const signup = document.getElementById('signUpContainer');
+        login.style.display = login.style.display === 'none' ? 'flex' : 'none';
+        signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function checkPasswordStrength(password) {
+        const strengthBar = document.querySelector('.strength-bar');
+        const hasNumber = /\d/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const strength = Math.min((
+            (password.length >= 8 ? 25 : 0) +
+            (hasNumber ? 25 : 0) +
+            (hasUpper ? 25 : 0) +
+            (hasLower ? 25 : 0)
+        ), 100);
+
+        strengthBar.style.width = strength + '%';
+        strengthBar.style.backgroundColor =
+            strength >= 75 ? '#28a745' :
+                strength >= 50 ? '#ffc107' :
+                    '#dc3545';
+    }
+
+    function validatePasswordMatch() {
+        const password = document.getElementById('password').value;
+        const retype = document.getElementById('retype_password').value;
+        const errorSpan = document.querySelector('.password-match-error');
+        errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
+    }
+
+    function togglePasswordVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    document.getElementById('showLoginPassword').addEventListener('change', function () {
+        const passwordField = document.getElementById('loginpassword');
+        passwordField.type = this.checked ? 'text' : 'password';
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const retype = document.getElementById('retype_password').value;
+        if (password !== retype) {
+            e.preventDefault();
+            alert('Error: Passwords do not match!');
+            document.getElementById('retype_password').focus();
+        }
+    });
+    function handleCredentialResponse(response) {
+    try {
+        // Decode the JWT token from Google sign-in response
+        const data = jwt_decode(response.credential);  // This will decode the JWT
+        const token = response.credential; // The token directly from Google
+
+        // Send the token to backend for authentication
+        fetch('../scripts/google-auth.php', {
+            method: 'POST',
+            body: JSON.stringify({ token: token }), // Send the token to the backend
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Redirect to the dashboard if login is successful
+                window.location.href = result.redirect;
+            } else {
+                alert('Authentication failed. Please try again.');
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    } catch (error) {
+        console.error('Error in Google Sign-In:', error);
+    }
+}
+
+
+
+
+
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error';
+        errorDiv.innerHTML = `
+        <strong>Authentication Error:</strong><br>
+        ${message || 'Unknown error occurred'}
+    `;
+        document.querySelector('.logInContainer').prepend(errorDiv);
+    }
+
+
+</script>
