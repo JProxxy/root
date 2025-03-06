@@ -3,6 +3,8 @@ session_start();
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Cross-Origin-Opener-Policy: same-origin");
+header("Cross-Origin-Embedder-Policy: require-corp");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -52,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     <title>User Login</title>
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/signup.css">
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -255,33 +258,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         }
     });
     function handleCredentialResponse(response) {
-    try {
-        // Decode the JWT token from Google sign-in response
-        const data = jwt_decode(response.credential);  // This will decode the JWT
-        const token = response.credential; // The token directly from Google
+        try {
+            // Decode the JWT token from Google sign-in response
+            const data = jwt_decode(response.credential);  // This will decode the JWT
+            const token = response.credential; // The token directly from Google
 
-        // Send the token to backend for authentication
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            body: JSON.stringify({ token: token }), // Send the token to the backend
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                // Redirect to the dashboard if login is successful
-                window.location.href = result.redirect;
-            } else {
-                alert('Authentication failed. Please try again.');
-            }
-        })
-        .catch(err => console.error('Error:', err));
-    } catch (error) {
-        console.error('Error in Google Sign-In:', error);
+            // Send the token to backend for authentication
+            fetch('../scripts/google-auth.php', {
+                method: 'POST',
+                body: JSON.stringify({ token: token }), // Send the token to the backend
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Redirect to the dashboard if login is successful
+                        window.location.href = result.redirect;
+                    } else {
+                        alert('Authentication failed. Please try again.');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        } catch (error) {
+            console.error('Error in Google Sign-In:', error);
+        }
     }
-}
 
 
 
