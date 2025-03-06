@@ -1,8 +1,9 @@
 <?php
 session_start();
+
+require_once '../app/config/connection.php';
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Access-Control-Allow-Credentials: true");
 header("Vary: Origin");
 
@@ -35,7 +36,7 @@ try {
         throw new RuntimeException("System configuration error", 500);
     }
     require_once __DIR__ . '/../vendor/autoload.php';
-    require_once '../app/config/connection.php'; // PDO Connection
+
 
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
@@ -49,34 +50,11 @@ try {
         throw new RuntimeException("Invalid authentication token", 401);
     }
 
-    $userId = $payload['sub'];
-    $username = $payload['name'] ?? 'Google User';
-    $email = $payload['email'];
-
-    // Check if the user already exists
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE google_id = :google_id");
-    $stmt->execute(['google_id' => $userId]);
-    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$existingUser) {
-        // Insert new user
-        $stmt = $pdo->prepare("INSERT INTO users (google_id, name, email) VALUES (:google_id, :name, :email)");
-        $stmt->execute([
-            'google_id' => $userId,
-            'name' => $username,
-            'email' => $email
-        ]);
-        $userId = $pdo->lastInsertId();
-    } else {
-        $userId = $existingUser['id'];
-    }
-
-    // Store user in session
     session_regenerate_id(true);
     $_SESSION = [
-        'user_id' => $userId,
-        'username' => $username,
-        'email' => $email,
+        'user_id' => $payload['sub'],
+        'username' => $payload['name'] ?? 'Google User',
+        'email' => $payload['email'],
         'auth_type' => 'google',
         'ip' => $_SERVER['REMOTE_ADDR'],
         'user_agent' => $_SERVER['HTTP_USER_AGENT'],
