@@ -74,7 +74,7 @@ try {
     $response = [
         'success' => true,
         'redirect' => '../templates/dashboard.php', 
-        'session_id' => session_id()
+  
     ];
     
     $errorCode = 200;
