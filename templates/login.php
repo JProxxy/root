@@ -252,7 +252,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             const jwt = response.credential;
             const decoded = JSON.parse(atob(jwt.split('.')[1])); // Decode JWT Payload
 
-            const userEmail = decoded.email; // Extract email
+            console.log("Decoded Google Sign-In Data:", decoded); // Logs JWT data
+
+            // Extract email
+            const userEmail = decoded.email; // Make sure 'email' exists
 
             // Send JWT to backend for authentication
             fetch('../scripts/google-auth.php', {
@@ -274,20 +277,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     showError(error.message);
                 });
 
-            // Send email to another PHP script to store in the database
-            fetch('../scripts/google-store-user.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("User stored:", data);
+            // **Ensure userEmail is defined before sending to store in database**
+            if (userEmail) {
+                fetch('../scripts/google-store-user.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail }) // Use the extracted email
                 })
-                .catch(error => {
-                    console.error("Error storing user:", error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("User stored:", data);
+                    })
+                    .catch(error => {
+                        console.error("Error storing user:", error);
+                    });
+            } else {
+                console.error("User email is undefined.");
+            }
         }
+
 
         function showError(message) {
             const errorDiv = document.createElement('div');
