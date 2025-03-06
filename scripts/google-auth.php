@@ -9,9 +9,6 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/../vendor/autoload.php'; // Composer autoload
-require_once '../app/config/connection.php';
-
 $response = ['success' => false];
 $errorCode = 400;
 
@@ -33,6 +30,12 @@ try {
         throw new RuntimeException("Missing or invalid token parameter", 400);
     }
 
+    if (!file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        throw new RuntimeException("System configuration error", 500);
+    }
+    require_once __DIR__ . '/../vendor/autoload.php';
+
+
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
@@ -45,43 +48,26 @@ try {
         throw new RuntimeException("Invalid authentication token", 401);
     }
 
-    // Extract user details from Google payload
-    $googleId = $payload['sub'];
-    $name = $payload['name'] ?? 'Google User';
-    $email = $payload['email'];
-
-    // Connect to MySQL
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-    if ($conn->connect_error) {
-        throw new RuntimeException("Database connection failed", 500);
-    }
-
-    // Check if user exists in database
-    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows === 0) {
-        // User does not exist, insert new record
-        $stmt = $conn->prepare("INSERT INTO users (google_id, name, email, created_at) VALUES (?, ?, ?, NOW())");
-        $stmt->bind_param("sss", $googleId, $name, $email);
-        $stmt->execute();
-    }
-    $stmt->close();
-    $conn->close();
-
-    // Start user session
     session_regenerate_id(true);
     $_SESSION = [
-        'user_id' => $googleId,
-        'username' => $name,
-        'email' => $email,
+        'user_id' => $payload['sub'],
+        'username' => $payload['name'] ?? 'Google User',
+        'email' => $payload['email'],
         'auth_type' => 'google',
         'ip' => $_SERVER['REMOTE_ADDR'],
         'user_agent' => $_SERVER['HTTP_USER_AGENT'],
         'created' => time()
     ];
+
+    $cookieParams = session_get_cookie_params();
+    session_set_cookie_params([
+        'lifetime' => 86400 * 7,
+        'path' => $cookieParams['path'],
+        'domain' => parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST),
+        'secure' => true,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
 
     $response = [
         'success' => true,
