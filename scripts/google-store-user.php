@@ -33,7 +33,7 @@ try {
 
             // Insert new user
             $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, first_name, last_name, profile_picture, ) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?)");
+                                    VALUES (?, ?, ?, ?, ?, ?)");
 
             if (!$stmt->execute([$next_user_id, $next_google_id, $email, $first_name, $last_name, $profile_picture])) {
                 throw new Exception("Insert failed: " . json_encode($stmt->errorInfo()));
