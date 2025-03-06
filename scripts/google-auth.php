@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once '../app/config/connection.php'; // Ensure this file correctly initializes $pdo
+require_once '../app/config/connection.php'; // Ensure this file properly connects to your MySQL database.
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
@@ -50,7 +50,6 @@ try {
         throw new RuntimeException("Invalid authentication token", 401);
     }
 
-    // Secure session
     session_regenerate_id(true);
     $_SESSION = [
         'user_id' => $payload['sub'],
@@ -72,14 +71,20 @@ try {
         'samesite' => 'Lax'
     ]);
 
-    // **Insert or update user in database**
+    // **Database Connection**
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (google_id, email) VALUES (:google_id, :email)
-                               ON DUPLICATE KEY UPDATE email = VALUES(email)");
-        $stmt->execute([
-            ':google_id' => $payload['sub'],
-            ':email' => $payload['email']
+        $pdo = new PDO("mysql:host=YOUR_DB_HOST;dbname=rivan_iot;charset=utf8mb4", "YOUR_DB_USER", "YOUR_DB_PASSWORD", [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
+    } catch (PDOException $e) {
+        throw new RuntimeException("Database connection failed: " . $e->getMessage(), 500);
+    }
+
+    // **Insert user_id into the users table (if it doesn't exist)**
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (user_id) VALUES (:user_id) ON DUPLICATE KEY UPDATE user_id=user_id");
+        $stmt->execute([':user_id' => $payload['sub']]);
     } catch (PDOException $e) {
         throw new RuntimeException("Database insert failed: " . $e->getMessage(), 500);
     }
@@ -106,3 +111,5 @@ try {
     echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
+
+?>
