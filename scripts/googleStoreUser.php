@@ -48,18 +48,22 @@ try {
 
     // Sanitize inputs (PHP 8.1+ compatible)
     $clean = [
-        'google_id' => filter_var($_POST['google_id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS),
-        'email' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL),
-        'first_name' => substr(filter_var($_POST['first_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS), 0, 50),
-        'last_name' => isset($_POST['last_name']) ? 
-            substr(filter_var($_POST['last_name'], FILTER_SANITIZE_FULL_SPECIAL_CHARS), 0, 50) : '',
-        'profile_picture' => filter_var($_POST['profile_picture'], FILTER_SANITIZE_URL),
-        'username' => filter_var($_POST['email'], FILTER_SANITIZE_EMAIL) // Username = Email
+        'google_id' => htmlspecialchars($_POST['google_id'], ENT_QUOTES, 'UTF-8'),
+        'email' => filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) ? $_POST['email'] : '',
+        'first_name' => htmlspecialchars(substr($_POST['first_name'], 0, 50), ENT_QUOTES, 'UTF-8'),
+        'last_name' => isset($_POST['last_name']) ?
+            htmlspecialchars(substr($_POST['last_name'], 0, 50), ENT_QUOTES, 'UTF-8') : '',
+        'profile_picture' => filter_var($_POST['profile_picture'], FILTER_VALIDATE_URL) ? $_POST['profile_picture'] : '',
+        'username' => filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) ? $_POST['email'] : ''
     ];
 
+    // Ensure required fields are valid
+    if (empty($clean['email']) || empty($clean['google_id']) || empty($clean['profile_picture'])) {
+        throw new Exception("Invalid input data");
+    }
     // Database operations
     $conn->beginTransaction();
-    
+
     try {
         // Check existing user
         $stmt = $conn->prepare("
@@ -80,7 +84,7 @@ try {
                 (google_id, email, username, first_name, last_name, profile_picture, created_at)
                 VALUES (:google_id, :email, :username, :first_name, :last_name, :profile_picture, NOW())
             ");
-            
+
             $stmt->execute([
                 ':google_id' => $clean['google_id'],
                 ':email' => $clean['email'],
@@ -124,7 +128,7 @@ try {
         header("Location: ../templates/dashboard.php");
         exit();
 
-    } catch(PDOException $e) {
+    } catch (PDOException $e) {
         $conn->rollBack();
         throw new Exception("Database error: " . $e->getMessage());
     }
