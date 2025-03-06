@@ -252,9 +252,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             const jwt = response.credential;
             const decoded = JSON.parse(atob(jwt.split('.')[1])); // Decode JWT Payload
 
-            console.log("Decoded Google Sign-In Data:", decoded); // Logs JWT data
+            const userEmail = decoded.email; // Extract email
 
-            // Send JWT to backend
+            // Send JWT to backend for authentication
             fetch('../scripts/google-auth.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -270,18 +270,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     }
                 })
                 .catch(error => {
-                    console.error("Authentication Error:", error); // Log error to console
+                    console.error("Authentication Error:", error);
+                    showError(error.message);
+                });
 
-                    // Show error message in UI
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'error';
-                    errorDiv.innerHTML = `
-            <strong>Authentication Error:</strong><br>
-            ${error.message || 'Unknown error occurred'}
-        `;
-                    document.querySelector('.logInContainer').prepend(errorDiv);
+            // Send email to another PHP script to store in the database
+            fetch('../scripts/google-store-user.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("User stored:", data);
+                })
+                .catch(error => {
+                    console.error("Error storing user:", error);
                 });
         }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `
+        <strong>Authentication Error:</strong><br>
+        ${message || 'Unknown error occurred'}
+    `;
+            document.querySelector('.logInContainer').prepend(errorDiv);
+        }
+
 
     </script>
 </body>
