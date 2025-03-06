@@ -111,8 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             data-auto_prompt="false">
                         </div>
 
-                        <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
-                            data-shape="pill" data-text="signin_with">
+                        <div style="width: 450px;">
+                            <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
+                                data-shape="pill" data-text="signin_with">
+                            </div>
                         </div>
 
                         <div class="input-container">
