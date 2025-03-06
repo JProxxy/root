@@ -250,6 +250,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         });
 
         function handleCredentialResponse(response) {
+
+
+
+            console.log("Google Response:", response);
+            if (!response || !response.credential) {
+                console.error("Google sign-in failed or blocked.");
+                return;
+            }
+
             const jwt = response.credential;
 
             try {
