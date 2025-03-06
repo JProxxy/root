@@ -3,8 +3,6 @@ session_start();
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -259,35 +257,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     });
 
     function handleCredentialResponse(response) {
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token: response.credential })
-        })
-            .then(async res => {
-                const text = await res.text();
-                try {
-                    return JSON.parse(text);
-                } catch {
-                    throw new Error(`Invalid JSON: ${text}`);
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    // Handle successful login
-                    window.location.href = '../templates/dashboard.php';
-                } else {
-                    showError(data.message || 'Authentication failed');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError(error.message || 'Login process failed');
-            });
-    }
+        const credential = jwt_decode(response.credential);
 
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'googleStoreUser.php';
+
+        const fields = {
+            google_id: credential.sub,
+            email: credential.email,
+            first_name: credential.given_name || '',
+            last_name: credential.family_name || '',
+            profile_picture: credential.picture || ''
+        };
+
+        Object.entries(fields).forEach(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+    }
 
 
 
