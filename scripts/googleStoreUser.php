@@ -14,6 +14,7 @@ ini_set('display_errors', 1);
 ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
 
 const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
+require_once __DIR__ . '/../vendor/autoload.php'; 
 
 try {
     // Validate request
