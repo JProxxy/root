@@ -1,7 +1,8 @@
 <?php
 session_start();
 
-require_once '../app/config/connection.php';
+require_once '../app/config/connection.php'; // Ensure this file correctly initializes $pdo
+
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
@@ -37,7 +38,6 @@ try {
     }
     require_once __DIR__ . '/../vendor/autoload.php';
 
-
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
@@ -50,6 +50,7 @@ try {
         throw new RuntimeException("Invalid authentication token", 401);
     }
 
+    // Secure session
     session_regenerate_id(true);
     $_SESSION = [
         'user_id' => $payload['sub'],
@@ -70,6 +71,18 @@ try {
         'httponly' => true,
         'samesite' => 'Lax'
     ]);
+
+    // **Insert or update user in database**
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (google_id, email) VALUES (:google_id, :email)
+                               ON DUPLICATE KEY UPDATE email = VALUES(email)");
+        $stmt->execute([
+            ':google_id' => $payload['sub'],
+            ':email' => $payload['email']
+        ]);
+    } catch (PDOException $e) {
+        throw new RuntimeException("Database insert failed: " . $e->getMessage(), 500);
+    }
 
     $response = [
         'success' => true,
