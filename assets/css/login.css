@@ -113,7 +113,7 @@ body {
 .loginButton {
   font-size: 1rem;
   font-family: "Kodchasan", sans-serif;
-  margin-top: 15%;
+  margin-top: 10%;
   padding: 10px 10px 10px 0px;
   width: 100%;
   color: #fff;
@@ -168,12 +168,12 @@ body {
   display: block;
   color: #2d8b96;
   cursor: pointer;
-  margin-top: 15px !important;
+  margin-top: 7px !important;
   text-align: center;
   font-weight: 800;
   font-family: "Kodchasan", sans-serif !important;
   width: 100%;
-  font-size: 1.05rem;
+  font-size: 1rem;
   text-decoration: none;
 }
 
