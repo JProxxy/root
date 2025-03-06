@@ -73,9 +73,10 @@ try {
 
     $response = [
         'success' => true,
-        'redirect' => '../templates/dashboard.php', // Send redirect URL back to JS
+        'redirect' => '../templates/dashboard.php', 
         'session_id' => session_id()
     ];
+    
     $errorCode = 200;
 
 } catch (JsonException $e) {
