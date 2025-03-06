@@ -1,3 +1,4 @@
+<?php
 session_cache_limiter('nocache'); // Disable caching to ensure proper session handling
 session_set_cookie_params([
     'lifetime' => 86400 * 7,
@@ -89,3 +90,4 @@ try {
     echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
+?>
