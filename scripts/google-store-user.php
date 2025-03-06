@@ -1,5 +1,9 @@
 <?php
-require '../app/config/connection.php'; // Ensure the correct path
+require '../app/config/connection.php'; 
+
+if (!$pdo) {
+    die(json_encode(["success" => false, "message" => "Database connection failed"]));
+}
 
 $data = json_decode(file_get_contents("php://input"), true);
 $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL); // Sanitize input
