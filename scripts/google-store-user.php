@@ -26,12 +26,13 @@ try {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $next_user_id = ($row['max_user_id'] ?? 0) + 1; // If NULL, start from 1
             $next_google_id = $next_user_id; // Make google_id the same as user_id
+            $username = $email; // Set username as email
 
             // Insert new user
-            $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, first_name, last_name, profile_picture) 
-                                    VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, username, first_name, last_name, profile_picture) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?)");
 
-            if (!$stmt->execute([$next_user_id, $next_google_id, $email, $first_name, $last_name, $profile_picture])) {
+            if (!$stmt->execute([$next_user_id, $next_google_id, $email, $username, $first_name, $last_name, $profile_picture])) {
                 throw new Exception("Insert failed: " . json_encode($stmt->errorInfo()));
             }
 
