@@ -22,10 +22,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // Check if the user has a Google ID (Skip password verification)
-            if (!empty($user['google_id']) || password_verify($password, $user['password'])) {
+            // Verify authentication method
+            $validLogin = false;
+            $authMethod = 'password';
+
+            if (!empty($user['google_id'])) {
+                // Google-authenticated user (password not required)
+                $validLogin = true;
+                $authMethod = 'google';
+            } elseif (password_verify($password, $user['password'])) {
+                // Password-authenticated user
+                $validLogin = true;
+                $authMethod = 'password';
+            }
+
+            if ($validLogin) {
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['auth_method'] = $authMethod;
                 $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
                 $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 
@@ -96,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
                         <div class="input-container">
                             <i class="fas fa-lock lock-icon"></i>
-                            <input type="password" id="loginpassword" name="password" placeholder="Password" required
+                            <input type="password" id="loginpassword" name="password" placeholder="Password"
                                 autocomplete="current-password" minlength="8">
                         </div>
                         <div class="showPasswordLabel">
@@ -131,9 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
                         </div>
                     </div>
-
-
-
                 </form>
             </div>
 
@@ -196,105 +207,110 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     </div>
 
 
-</body>
-
-</html>
-
-
-<script>
-    function toggleContainers() {
-        const login = document.getElementById('logInContainer');
-        const signup = document.getElementById('signUpContainer');
-        login.style.display = login.style.display === 'none' ? 'flex' : 'none';
-        signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
-    }
-
-    function checkPasswordStrength(password) {
-        const strengthBar = document.querySelector('.strength-bar');
-        const hasNumber = /\d/.test(password);
-        const hasUpper = /[A-Z]/.test(password);
-        const hasLower = /[a-z]/.test(password);
-        const strength = Math.min((
-            (password.length >= 8 ? 25 : 0) +
-            (hasNumber ? 25 : 0) +
-            (hasUpper ? 25 : 0) +
-            (hasLower ? 25 : 0)
-        ), 100);
-
-        strengthBar.style.width = strength + '%';
-        strengthBar.style.backgroundColor =
-            strength >= 75 ? '#28a745' :
-                strength >= 50 ? '#ffc107' :
-                    '#dc3545';
-    }
-
-    function validatePasswordMatch() {
-        const password = document.getElementById('password').value;
-        const retype = document.getElementById('retype_password').value;
-        const errorSpan = document.querySelector('.password-match-error');
-        errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
-    }
-
-    function togglePasswordVisibility(inputId, icon) {
-        const input = document.getElementById(inputId);
-        input.type = input.type === 'password' ? 'text' : 'password';
-        icon.classList.toggle('fa-eye-slash');
-    }
-
-    document.getElementById('showLoginPassword').addEventListener('change', function () {
-        const passwordField = document.getElementById('loginpassword');
-        passwordField.type = this.checked ? 'text' : 'password';
-    });
-
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
-        const password = document.getElementById('password').value;
-        const retype = document.getElementById('retype_password').value;
-        if (password !== retype) {
-            e.preventDefault();
-            alert('Error: Passwords do not match!');
-            document.getElementById('retype_password').focus();
+    <script>
+        function toggleContainers() {
+            const login = document.getElementById('logInContainer');
+            const signup = document.getElementById('signUpContainer');
+            login.style.display = login.style.display === 'none' ? 'flex' : 'none';
+            signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
         }
-    });
 
-    function handleCredentialResponse(response) {
-        const credential = jwt_decode(response.credential);
+        function checkPasswordStrength(password) {
+            const strengthBar = document.querySelector('.strength-bar');
+            const hasNumber = /\d/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const strength = Math.min((
+                (password.length >= 8 ? 25 : 0) +
+                (hasNumber ? 25 : 0) +
+                (hasUpper ? 25 : 0) +
+                (hasLower ? 25 : 0)
+            ), 100);
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '../scripts/googleStoreUser.php';
+            strengthBar.style.width = strength + '%';
+            strengthBar.style.backgroundColor =
+                strength >= 75 ? '#28a745' :
+                    strength >= 50 ? '#ffc107' :
+                        '#dc3545';
+        }
 
-        const fields = {
-            google_id: credential.sub,
-            email: credential.email,
-            first_name: credential.given_name || '',
-            last_name: credential.family_name || '',
-            profile_picture: credential.picture || ''
-        };
+        function validatePasswordMatch() {
+            const password = document.getElementById('password').value;
+            const retype = document.getElementById('retype_password').value;
+            const errorSpan = document.querySelector('.password-match-error');
+            errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
+        }
 
-        Object.entries(fields).forEach(([name, value]) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
+        function togglePasswordVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('fa-eye-slash');
+        }
+
+        document.getElementById('showLoginPassword').addEventListener('change', function () {
+            const passwordField = document.getElementById('loginpassword');
+            passwordField.type = this.checked ? 'text' : 'password';
         });
 
-        document.body.appendChild(form);
-        form.submit();
-    }
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const retype = document.getElementById('retype_password').value;
+            if (password !== retype) {
+                e.preventDefault();
+                alert('Error: Passwords do not match!');
+                document.getElementById('retype_password').focus();
+            }
+        });
+
+        function handleCredentialResponse(response) {
+            const credential = jwt_decode(response.credential);
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '../scripts/googleStoreUser.php';
+
+            const fields = {
+                google_id: credential.sub,
+                email: credential.email,
+                first_name: credential.given_name || '',
+                last_name: credential.family_name || '',
+                profile_picture: credential.picture || ''
+            };
+
+            Object.entries(fields).forEach(([name, value]) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `
+                <strong>Authentication Error:</strong><br>
+                ${message || 'Unknown error occurred'}
+            `;
+            document.querySelector('.logInContainer').prepend(errorDiv);
+        }
 
 
 
 
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.innerHTML = `
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `
         <strong>Authentication Error:</strong><br>
         ${message || 'Unknown error occurred'}
     `;
-        document.querySelector('.logInContainer').prepend(errorDiv);
-    }
+            document.querySelector('.logInContainer').prepend(errorDiv);
+        }
 
 
-</script>
+    </script>
