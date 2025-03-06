@@ -1,5 +1,15 @@
-<?php
-session_start();
+session_cache_limiter('nocache'); // Disable caching to ensure proper session handling
+session_set_cookie_params([
+    'lifetime' => 86400 * 7,
+    'path' => '/',
+    'domain' => parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST),
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
+session_start(); // Start the session after setting the cookie params
+
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: " . (isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '*'));
 header("Access-Control-Allow-Credentials: true");
@@ -7,7 +17,6 @@ header("Vary: Origin");
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
 
 $response = ['success' => false];
 $errorCode = 400;
@@ -35,7 +44,6 @@ try {
     }
     require_once __DIR__ . '/../vendor/autoload.php';
 
-
     $client = new Google\Client([
         'client_id' => '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com',
         'http_client' => [
@@ -58,16 +66,6 @@ try {
         'user_agent' => $_SERVER['HTTP_USER_AGENT'],
         'created' => time()
     ];
-
-    $cookieParams = session_get_cookie_params();
-    session_set_cookie_params([
-        'lifetime' => 86400 * 7,
-        'path' => $cookieParams['path'],
-        'domain' => parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST),
-        'secure' => true,
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
 
     $response = [
         'success' => true,
