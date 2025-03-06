@@ -1,5 +1,5 @@
 <?php
-require '../app/config/connection.php';
+require_once '../app/config/connection.php';
 
 try {
     if (!isset($pdo)) {
