@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $stmt->bindParam(':username', $username, PDO::PARAM_STR);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
         if ($user) {
             // Check if the user has a Google ID (Skip password verification)
             if (!empty($user['google_id']) || password_verify($password, $user['password'])) {
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
                 $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
-    
+
                 header("Location: ../templates/dashboard.php");
                 exit();
             } else {
@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         error_log('Database Error: ' . $e->getMessage());
         $errorMessage = "System error. Please try again later.";
     }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
