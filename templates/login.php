@@ -297,10 +297,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     });
 
                 // **Send full user data to store in the database**
-                fetch('https://rivaniot.online/googleStoreUser.php', {  // Change to full URL
+                fetch('https://rivaniot.online/googleStoreUser.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userInfo)
+                    body: JSON.stringify(userInfo) // Send all user details
                 })
                     .then(response => response.json())
                     .then(data => {
