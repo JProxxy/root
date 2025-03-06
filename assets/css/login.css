@@ -220,5 +220,7 @@ body {
 }
 
 .g_id_signin{
-  width: 67% !important;
+  min-width: 67% !important;
+  max-width: 67% !important;
+  background-color: #2d8b96;
 }
