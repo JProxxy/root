@@ -300,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 fetch('../scripts/googleStoreUser.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userInfo) // Send all user details
+                    body: JSON.stringify(userInfo)
                 })
                     .then(response => response.json())
                     .then(data => {
@@ -308,6 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     })
                     .catch(error => {
                         console.error("Error storing user:", error);
+                        alert('There was an error storing the user data. Please try again.');
                     });
 
             } catch (err) {

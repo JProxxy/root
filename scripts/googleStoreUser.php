@@ -17,6 +17,9 @@ try {
 
     // Get POST data
     $data = json_decode(file_get_contents("php://input"), true);
+    // googleStoreUser.php
+    error_log("Received data: " . json_encode(file_get_contents('php://input'))); // Log incoming request data
+
 
     // Extract and sanitize inputs
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
