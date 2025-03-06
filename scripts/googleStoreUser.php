@@ -9,8 +9,8 @@ header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 require_once __DIR__ . '/../app/config/connection.php';
 
 // Error handling
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
 
 const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
