@@ -261,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'googleStoreUser.php';
+        form.action = '../scripts/googleStoreUser.php';
 
         const fields = {
             google_id: credential.sub,
