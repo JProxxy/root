@@ -11,7 +11,6 @@ try {
 
     // Extract and sanitize inputs
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL);
-    $full_name = filter_var($data['full_name'] ?? '', FILTER_SANITIZE_STRING);
     $first_name = filter_var($data['first_name'] ?? '', FILTER_SANITIZE_STRING);
     $last_name = filter_var($data['last_name'] ?? '', FILTER_SANITIZE_STRING);
     $profile_picture = filter_var($data['profile_picture'] ?? '', FILTER_SANITIZE_URL);
@@ -25,9 +24,9 @@ try {
 
         if ($stmt->rowCount() == 0) {
             // Insert new user
-            $stmt = $conn->prepare("INSERT INTO users (email, full_name, first_name, last_name, profile_picture, google_id, locale) 
+            $stmt = $conn->prepare("INSERT INTO users (email,  first_name, last_name, profile_picture, google_id, locale) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?)");
-            if (!$stmt->execute([$email, $full_name, $first_name, $last_name, $profile_picture, $sub, $locale])) {
+            if (!$stmt->execute([$email, $first_name, $last_name, $profile_picture, $sub, $locale])) {
                 die(json_encode(["success" => false, "message" => "Insert failed", "error" => $stmt->errorInfo()]));
             }
 

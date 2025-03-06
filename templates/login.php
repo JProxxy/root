@@ -258,7 +258,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 // Extract relevant fields
                 const userInfo = {
                     email: decoded.email || '',
-                    full_name: decoded.name || '',  // Full name
                     first_name: decoded.given_name || '', // First name
                     last_name: decoded.family_name || '', // Last name
                     profile_picture: decoded.picture || '', // Profile image URL
