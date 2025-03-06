@@ -1,15 +1,4 @@
-<?php
-session_cache_limiter('nocache'); // Disable caching to ensure proper session handling
-session_set_cookie_params([
-    'lifetime' => 86400 * 7,
-    'path' => '/',
-    'domain' => parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST),
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-
-session_start(); // Start the session after setting the cookie params
+<?php 
 require_once '../app/config/connection.php';
 
 header("Content-Type: application/json");
@@ -73,8 +62,8 @@ try {
 
     $response = [
         'success' => true,
-        'redirect' => '../templates/dashboard.php', 
-  
+        'redirect' => 'http://' . $_SERVER['HTTP_HOST'] . '/templates/dashboard.php',  // Absolute URL
+        'session_id' => session_id()
     ];
     
     $errorCode = 200;
