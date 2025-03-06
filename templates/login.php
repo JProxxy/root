@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 data-shape="pill" data-text="signin_with">
                             </div>
                         </div>
-                        
+
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -248,10 +248,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         });
 
         function handleCredentialResponse(response) {
+            // Decode JWT
+            const jwt = response.credential;
+            const decoded = JSON.parse(atob(jwt.split('.')[1])); // Decode JWT Payload
+
+            console.log("Decoded Google Sign-In Data:", decoded); // Logs JWT data
+
+            // Send JWT to backend
             fetch('../scripts/google-auth.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: response.credential })
+                body: JSON.stringify({ token: jwt })
             })
                 .then(async response => {
                     if (!response.ok) throw await response.json();
@@ -259,19 +266,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 })
                 .then(data => {
                     if (data.redirect) {
-                        window.location.href = data.redirect;
+                        window.location.href = data.redirect; // Redirect if needed
                     }
                 })
                 .catch(error => {
+                    console.error("Authentication Error:", error); // Log error to console
+
+                    // Show error message in UI
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'error';
                     errorDiv.innerHTML = `
-                    <strong>Authentication Error:</strong><br>
-                    ${error.message || 'Unknown error occurred'}
-                `;
+            <strong>Authentication Error:</strong><br>
+            ${error.message || 'Unknown error occurred'}
+        `;
                     document.querySelector('.logInContainer').prepend(errorDiv);
                 });
         }
+
     </script>
 </body>
 
