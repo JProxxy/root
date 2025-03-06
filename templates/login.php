@@ -3,6 +3,7 @@ session_start();
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
