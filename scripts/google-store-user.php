@@ -3,7 +3,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-
 require_once '../app/config/connection.php';
 
 try {
@@ -33,9 +32,10 @@ try {
             $next_google_id = $next_user_id; // Make google_id the same as user_id
             $username = $email; // Set username as email
 
-            // Insert new user
-            $stmt = $conn->prepare("INSERT INTO users (user_id, google_id, email, username, first_name, last_name, profile_picture) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?)");
+            // Insert new user with default values for unspecified columns
+            $stmt = $conn->prepare("INSERT INTO users 
+                (user_id, google_id, email, username, first_name, last_name, profile_picture, other_column1, other_column2, other_column3) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, '', '', '')");
 
             if (!$stmt->execute([$next_user_id, $next_google_id, $email, $username, $first_name, $last_name, $profile_picture])) {
                 throw new Exception("Insert failed: " . json_encode($stmt->errorInfo()));
