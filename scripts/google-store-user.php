@@ -17,7 +17,9 @@ try {
         if ($stmt->rowCount() == 0) {
             // Insert new user
             $stmt = $pdo->prepare("INSERT INTO users (email) VALUES (?)");
-            $stmt->execute([$email]);
+            if (!$stmt->execute([$email])) {
+                die(json_encode(["success" => false, "message" => "Insert failed", "error" => $stmt->errorInfo()]));
+            }
 
             echo json_encode(["success" => true, "message" => "User added"]);
         } else {
