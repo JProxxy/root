@@ -6,7 +6,7 @@ $email = $data['email'] ?? '';
 
 if (!empty($email)) {
     // Check if email already exists
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->execute([$email]);
     
     if ($stmt->rowCount() == 0) {
