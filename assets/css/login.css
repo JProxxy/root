@@ -219,25 +219,8 @@ body {
   margin: 0 10px;
 }
 
-.custom-google-btn {
-  display: inline-flex;
-  align-items: center;
-  background-color: #4285f4;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.custom-google-btn:hover {
-  background-color: #357ae8;
-}
-
-.custom-google-btn img {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
+.g_id_signin{
+  min-width: 67% !important;
+  max-width: 67% !important;
+  background-color: #2d8b96;
 }

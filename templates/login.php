@@ -51,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/signup.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .error {
@@ -106,6 +105,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <span>OR</span>
                         </div>
 
+                        <div id="g_id_onload"
+                            data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
+                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                            data-auto_prompt="false">
+                        </div>
+
+                        <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
+                            data-shape="pill" data-text="signin_with">
+                        </div>
+
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -121,10 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
                 </form>
-                <!-- Custom Google Sign-In Button -->
-                <button type="submit" formnovalidate id="customGoogleBtn" class="custom-google-btn">
-                    Sign in with Google
-                </button>
             </div>
 
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
@@ -184,47 +189,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             <div class="frontImg"></div>
         </div>
     </div>
-
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
-  // Initialize Google Identity Services
-  google.accounts.id.initialize({
-    client_id: "460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com",
-    callback: handleCredentialResponse, // Your callback function to process the response
-    ux_mode: "popup"
-  });
-
-  // Add click event listener for the custom button
-  document.getElementById("customGoogleBtn").addEventListener("click", function() {
-    // Trigger the sign-in popup
-    google.accounts.id.prompt(); // This should show the Google sign-in popup
-  });
-
-  function handleCredentialResponse(response) {
-    // Process the response credential (token)
-    console.log("Encoded JWT ID token: " + response.credential);
-    // Example: send the token to your backend for verification
-    fetch('scripts/google-auth.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: response.credential })
-    })
-    .then(async res => {
-      if (!res.ok) throw await res.json();
-      return res.json();
-    })
-    .then(data => {
-      if (data.redirect) {
-        window.location.href = data.redirect;
-      }
-    })
-    .catch(error => {
-      console.error("Authentication Error:", error);
-      // Display error messages if needed
-    });
-  }
-</script>
-
 
     <script>
         function toggleContainers() {
