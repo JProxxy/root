@@ -257,24 +257,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             document.getElementById('retype_password').focus();
         }
     });
-    const data = jwt_decode(response.credential); // Decoding the credential
-    fetch('../scripts/google-auth.php', {
-        method: 'POST',
-        body: JSON.stringify({ token: response.credential }), // Send token directly
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                window.location.href = '../templates/dashboard.php'; // Redirect to dashboard
-            } else {
-                alert('Authentication failed. Please try again.');
-            }
-        })
-        .catch(err => console.error('Error:', err));
 
+    function handleCredentialResponse(response) {
+        const data = jwt_decode(response.credential); // Decoding the JWT token
+
+        // Now send the token to your PHP script to authenticate the user
+        fetch('../scripts/google-auth.php', {
+            method: 'POST',
+            body: JSON.stringify({ token: response.credential }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    window.location.href = '../templates/dashboard.php'; // Redirect to dashboard
+                } else {
+                    alert('Authentication failed. Please try again.');
+                }
+            })
+            .catch(err => console.error('Error:', err));
+    }
 
 
 
