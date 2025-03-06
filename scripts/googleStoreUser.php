@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../templates/login.php");
+    exit();
+}
 header("Content-Security-Policy: default-src 'self'");
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
