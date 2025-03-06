@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once '../app/config/connection.php';
 
 header("Content-Type: application/json");
@@ -62,7 +62,7 @@ try {
 
     $response = [
         'success' => true,
-        'redirect' => 'http://' . $_SERVER['HTTP_HOST'] . '/templates/dashboard.php',  // Absolute URL
+        'redirect' => '../templates/dashboard.php', 
         'session_id' => session_id()
     ];
     
