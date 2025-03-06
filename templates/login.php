@@ -106,15 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <span>OR</span>
                         </div>
 
-                        <!-- Custom Google Sign-In Button -->
-                        <button type="submit" formnovalidate id="customGoogleBtn" class="custom-google-btn">
-                            Sign in with Google
-                        </button>
-
-
-
-
-
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -130,6 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
                 </form>
+                <!-- Custom Google Sign-In Button -->
+                <button type="submit" formnovalidate id="customGoogleBtn" class="custom-google-btn">
+                    Sign in with Google
+                </button>
             </div>
 
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
