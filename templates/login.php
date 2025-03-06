@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     console.log("Encoded JWT ID token: " + response.credential);
     // You can now send this token to your backend for verification and further processing.
     // For example, using fetch:
-    fetch('/scripts/google-auth.php', {
+    fetch('../scripts/google-auth.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: response.credential })
