@@ -5,7 +5,8 @@ try {
     if (!isset($pdo)) {
         throw new Exception("Database connection is not established.");
     }
-
+    file_put_contents("debug.log", print_r($data, true)); // Log request dat
+    
     $data = json_decode(file_get_contents("php://input"), true);
     $email = filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL); // Sanitize input
 
