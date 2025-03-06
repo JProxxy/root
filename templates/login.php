@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,11 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             border-radius: 4px;
             background-color: #f8d7da;
         }
+
         .password-strength {
             height: 4px;
             background: #eee;
             margin: 8px 0;
         }
+
         .strength-bar {
             height: 100%;
             width: 0;
@@ -72,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         }
     </style>
 </head>
+
 <body>
     <div class="whiteBG">
         <div class="gridContainer">
@@ -84,37 +88,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <h2 class="loginTitle">USER LOGIN</h2>
                         <div class="input-container">
                             <i class="fas fa-user user-icon"></i>
-                            <input type="text" id="username" name="username" placeholder="Username" required 
-                                   autocomplete="username" minlength="3" maxlength="30">
+                            <input type="text" id="username" name="username" placeholder="Username" required
+                                autocomplete="username" minlength="3" maxlength="30">
                         </div>
                         <div class="input-container">
                             <i class="fas fa-lock lock-icon"></i>
                             <input type="password" id="loginpassword" name="password" placeholder="Password" required
-                                   autocomplete="current-password" minlength="8">
+                                autocomplete="current-password" minlength="8">
                         </div>
                         <div class="showPasswordLabel">
                             <input type="checkbox" id="showLoginPassword" onclick="toggleLoginPassword()">
                             <label for="showLoginPassword">Show Password</label>
                         </div>
+
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
+                        <div id="g_id_onload"
+                            data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
+                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                            data-auto_prompt="false">
+                        </div>
+
+                        <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
+                            data-shape="pill" data-text="signin_with">
+                        </div>
+
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
                         <div class="link-container">
-                            <a href="javascript:void(0);" onclick="toggleContainers()" class="createAcc">Create Account</a>
+                            <a href="javascript:void(0);" onclick="toggleContainers()" class="createAcc">Create
+                                Account</a>
                         </div>
                         <div class="link-container">
                             <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
                         </div>
                     </div>
 
-                    <div id="g_id_onload"
-                        data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-                        data-context="signin"
-                        data-ux_mode="popup"
-                        data-callback="handleCredentialResponse"
-                        data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin" data-type="standard" data-theme="filled_blue" data-size="large"></div>
+
+
                 </form>
             </div>
 
@@ -126,38 +140,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <div class="inputsign-container">
                             <i class="fas fa-user"></i>
                             <input type="text" name="username" placeholder="Username" required
-                                   pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
+                                pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
                         </div>
                         <div class="inputsign-container">
                             <i class="fas fa-envelope"></i>
                             <input type="email" name="email" placeholder="Email" required
-                                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
                         </div>
                         <div class="inputsign-container">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" name="phoneNumber" placeholder="Phone Number" required
-                                   pattern="[0-9]{10}" title="10-digit phone number">
+                            <input type="tel" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]{10}"
+                                title="10-digit phone number">
                         </div>
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" name="password" placeholder="Password" required
-                                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                                   title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
-                                   oninput="checkPasswordStrength(this.value)">
+                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
+                                oninput="checkPasswordStrength(this.value)">
                             <div class="password-strength">
                                 <div class="strength-bar"></div>
                             </div>
                             <div class="eyePosition">
-                                <i class="fas fa-eye password-eye-icon" onclick="togglePasswordVisibility('password', this)"></i>
+                                <i class="fas fa-eye password-eye-icon"
+                                    onclick="togglePasswordVisibility('password', this)"></i>
                             </div>
                         </div>
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="retype_password" name="retype_password" 
-                                   placeholder="Retype Password" required
-                                   oninput="validatePasswordMatch()">
+                            <input type="password" id="retype_password" name="retype_password"
+                                placeholder="Retype Password" required oninput="validatePasswordMatch()">
                             <div class="eyePosition">
-                                <i class="fas fa-eye password-eye-icon" onclick="togglePasswordVisibility('retype_password', this)"></i>
+                                <i class="fas fa-eye password-eye-icon"
+                                    onclick="togglePasswordVisibility('retype_password', this)"></i>
                             </div>
                             <span class="password-match-error" style="display:none;color:red;font-size:0.9em;">
                                 Passwords do not match
@@ -165,7 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
                         <button type="submit" class="signupButton">SIGN UP</button>
                         <div class="link-container">
-                            <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In Account</a>
+                            <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In
+                                Account</a>
                         </div>
                     </div>
                 </form>
@@ -193,12 +209,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 (hasUpper ? 25 : 0) +
                 (hasLower ? 25 : 0)
             ), 100);
-            
+
             strengthBar.style.width = strength + '%';
-            strengthBar.style.backgroundColor = 
+            strengthBar.style.backgroundColor =
                 strength >= 75 ? '#28a745' :
-                strength >= 50 ? '#ffc107' : 
-                '#dc3545';
+                    strength >= 50 ? '#ffc107' :
+                        '#dc3545';
         }
 
         function validatePasswordMatch() {
@@ -214,12 +230,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             icon.classList.toggle('fa-eye-slash');
         }
 
-        document.getElementById('showLoginPassword').addEventListener('change', function() {
+        document.getElementById('showLoginPassword').addEventListener('change', function () {
             const passwordField = document.getElementById('loginpassword');
             passwordField.type = this.checked ? 'text' : 'password';
         });
 
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
             const password = document.getElementById('password').value;
             const retype = document.getElementById('retype_password').value;
             if (password !== retype) {
@@ -235,25 +251,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: response.credential })
             })
-            .then(async response => {
-                if (!response.ok) throw await response.json();
-                return response.json();
-            })
-            .then(data => {
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                }
-            })
-            .catch(error => {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.innerHTML = `
+                .then(async response => {
+                    if (!response.ok) throw await response.json();
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch(error => {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.innerHTML = `
                     <strong>Authentication Error:</strong><br>
                     ${error.message || 'Unknown error occurred'}
                 `;
-                document.querySelector('.logInContainer').prepend(errorDiv);
-            });
+                    document.querySelector('.logInContainer').prepend(errorDiv);
+                });
         }
     </script>
 </body>
+
 </html>

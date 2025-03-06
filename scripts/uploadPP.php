@@ -1,4 +1,6 @@
 <?php
+include '../app/config/connection.php';
+
 // Define the directory for storing profile pictures
 $uploadDir = '../storage/user/profile_picture/';
 
@@ -10,13 +12,12 @@ $file = $_FILES['file'];
 
 // Check if the file is an image by checking its MIME type
 $fileMimeType = mime_content_type($file['tmp_name']);
-
 if (!in_array($fileMimeType, $allowedMimeTypes)) {
     echo json_encode(['error' => 'Only JPG, PNG, and JPEG images are allowed.']);
-    exit; // Stop further execution
+    exit;
 }
 
-// Assuming you have a way to get the current logged-in user's ID, for example, using session
+// Start session
 session_start();
 
 // Check if user_id exists in the session
@@ -27,31 +28,73 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id']; // Get the logged-in user's ID
 
-// You can retrieve first name and last name from the session or any other way if required, but for now, using a placeholder
-$firstName = "User";  // Replace with actual first name retrieval logic
-$lastName = "Name";   // Replace with actual last name retrieval logic
+// Retrieve the user's email from the session, or fetch it from the database if not set
+if (!isset($_SESSION['email'])) {
+    // Fetch email from the database using the user_id (using PDO)
+    $stmtEmail = $conn->prepare("SELECT email FROM users WHERE user_id = :user_id");
+    $stmtEmail->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmtEmail->execute();
+    $rowEmail = $stmtEmail->fetch(PDO::FETCH_ASSOC);
+    if ($rowEmail && isset($rowEmail['email'])) {
+        $email = $rowEmail['email'];
+        $_SESSION['email'] = $email; // store it in session for future use
+    } else {
+        echo json_encode(['error' => 'User email not found.']);
+        exit;
+    }
+    $stmtEmail = null;
+} else {
+    $email = $_SESSION['email'];
+}
 
-// Get the file extension
-$fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+// Get the first three letters of the email (lowercase)
+$emailPrefix = strtolower(substr($email, 0, 3));
 
-// Generate the new filename using first name, last name, and profilePic suffix
-$newFileName = strtolower($firstName . '_' . $lastName . '_profilePic.' . $fileExtension);
+// Get the file extension (lowercase)
+$fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+// Generate the new filename using user_id and first 3 letters of email
+$newFileName = $userId . '-' . $emailPrefix . '.' . $fileExtension;
 
 // Define the file path
-$filePath = $uploadDir . $newFileName; // Complete path for the file
+$filePath = $uploadDir . $newFileName;
 
-// Check if the directory exists, create it if it doesn't
+// Create the directory if it doesn't exist
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
-// Check if the file is uploaded successfully
+// Move the uploaded file
 if (move_uploaded_file($file['tmp_name'], $filePath)) {
-    // Send the file URL back to the front end
-    echo json_encode(['url' => '/storage/user/profile_picture/' . $newFileName]);
+    // Determine the URL for the new profile picture
+    $profilePicUrl = '../storage/user/profile_picture/' . $newFileName;
+    
+    // Fetch the current profile picture URL from the database
+    $stmtSelect = $conn->prepare("SELECT profile_picture FROM users WHERE user_id = :user_id");
+    $stmtSelect->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmtSelect->execute();
+    $row = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+    $stmtSelect = null;
+    
+    // Delete the old file only if it's different from the new file URL
+    if ($row && !empty($row['profile_picture']) && $row['profile_picture'] !== $profilePicUrl) {
+        $oldFilePath = $row['profile_picture'];
+        if (file_exists($oldFilePath)) {
+            unlink($oldFilePath);
+        }
+    }
+    
+    // Update the user's profile_picture column in the database using PDO
+    $stmtUpdate = $conn->prepare("UPDATE users SET profile_picture = :profile_picture WHERE user_id = :user_id");
+    $stmtUpdate->bindValue(':profile_picture', $profilePicUrl, PDO::PARAM_STR);
+    $stmtUpdate->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmtUpdate->execute();
+    
+    echo json_encode(['url' => $profilePicUrl]);
+
 } else {
     echo json_encode(['error' => 'Error uploading file.']);
 }
+
+$conn = null;
 ?>
-
-
