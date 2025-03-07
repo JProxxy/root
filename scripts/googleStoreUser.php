@@ -136,9 +136,8 @@ try {
         ];
 
         // Redirect to dashboard
-        header("Location: ../templates/dashboard.php");
+        echo json_encode(['success' => true, 'redirect' => '../templates/dashboard.php']);
         exit();
-
     } catch (PDOException $e) {
         $conn->rollBack();
         throw new Exception("Database error: " . $e->getMessage());
