@@ -1,12 +1,10 @@
 <?php
 session_start();
-session_regenerate_id(true); // Security: Prevent session fixation attacks
-
-// Secure headers
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Access-Control-Allow-Origin: https://rivaniot.online"); // Restrict origin
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Cross-Origin-Opener-Policy: unsafe-none");
+header("Cross-Origin-Embedder-Policy: unsafe-none");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -15,66 +13,35 @@ error_reporting(E_ALL);
 require_once '../app/config/connection.php';
 
 $errorMessage = '';
-
-// Rate-limit failed login attempts
-if (!isset($_SESSION['login_attempts'])) {
-    $_SESSION['login_attempts'] = 0;
-}
-if ($_SESSION['login_attempts'] >= 5) {
-    die("Too many login attempts. Try again later.");
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    // Ensure a valid username format
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
-        $errorMessage = "Invalid username format.";
-    } else {
-        try {
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
-            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
+        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user) {
-                // Verify authentication method
-                $validLogin = false;
-                $authMethod = 'password';
+        if ($user) {
+            // Check if the user has a Google ID (Skip password verification)
+            if (!empty($user['google_id']) || password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = $user['user_id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
 
-                if (!empty($user['google_id'])) {
-                    $validLogin = true;
-                    $authMethod = 'google';
-                } elseif (password_verify($password, $user['password'])) {
-                    $validLogin = true;
-                    $authMethod = 'password';
-                }
-
-                if ($validLogin) {
-                    // Reset login attempts
-                    $_SESSION['login_attempts'] = 0;
-
-                    $_SESSION['user_id'] = $user['user_id'];
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['auth_method'] = $authMethod;
-                    $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
-                    $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
-
-                    header("Location: ../templates/dashboard.php");
-                    exit();
-                } else {
-                    $_SESSION['login_attempts']++;
-                    $errorMessage = "Invalid username or password.";
-                }
+                header("Location: ../templates/dashboard.php");
+                exit();
             } else {
-                $_SESSION['login_attempts']++;
-                $errorMessage = "Account not found.";
+                $errorMessage = "Invalid username or password.";
             }
-        } catch (PDOException $e) {
-            error_log('Database Error: ' . $e->getMessage());
-            $errorMessage = "System error. Please try again later.";
+        } else {
+            $errorMessage = "Account not found.";
         }
+    } catch (PDOException $e) {
+        error_log('Database Error: ' . $e->getMessage());
+        $errorMessage = "System error. Please try again later.";
     }
 }
 ?>
@@ -87,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     <title>User Login</title>
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/signup.css">
-    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -132,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
                         <div class="input-container">
                             <i class="fas fa-lock lock-icon"></i>
-                            <input type="password" id="loginpassword" name="password" placeholder="Password"
+                            <input type="password" id="loginpassword" name="password" placeholder="Password" required
                                 autocomplete="current-password" minlength="8">
                         </div>
                         <div class="showPasswordLabel">
@@ -167,6 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
                         </div>
                     </div>
+
+
+
                 </form>
             </div>
 
@@ -229,120 +198,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     </div>
 
 
-    <script>
-        function toggleContainers() {
-            const login = document.getElementById('logInContainer');
-            const signup = document.getElementById('signUpContainer');
-            login.style.display = login.style.display === 'none' ? 'flex' : 'none';
-            signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
+</body>
+
+</html>
+
+
+<script>
+    function toggleContainers() {
+        const login = document.getElementById('logInContainer');
+        const signup = document.getElementById('signUpContainer');
+        login.style.display = login.style.display === 'none' ? 'flex' : 'none';
+        signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function checkPasswordStrength(password) {
+        const strengthBar = document.querySelector('.strength-bar');
+        const hasNumber = /\d/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+        const strength = Math.min((
+            (password.length >= 8 ? 25 : 0) +
+            (hasNumber ? 25 : 0) +
+            (hasUpper ? 25 : 0) +
+            (hasLower ? 25 : 0)
+        ), 100);
+
+        strengthBar.style.width = strength + '%';
+        strengthBar.style.backgroundColor =
+            strength >= 75 ? '#28a745' :
+                strength >= 50 ? '#ffc107' :
+                    '#dc3545';
+    }
+
+    function validatePasswordMatch() {
+        const password = document.getElementById('password').value;
+        const retype = document.getElementById('retype_password').value;
+        const errorSpan = document.querySelector('.password-match-error');
+        errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
+    }
+
+    function togglePasswordVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    document.getElementById('showLoginPassword').addEventListener('change', function () {
+        const passwordField = document.getElementById('loginpassword');
+        passwordField.type = this.checked ? 'text' : 'password';
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const retype = document.getElementById('retype_password').value;
+        if (password !== retype) {
+            e.preventDefault();
+            alert('Error: Passwords do not match!');
+            document.getElementById('retype_password').focus();
         }
+    });
 
-        function checkPasswordStrength(password) {
-            const strengthBar = document.querySelector('.strength-bar');
-            const hasNumber = /\d/.test(password);
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const strength = Math.min((
-                (password.length >= 8 ? 25 : 0) +
-                (hasNumber ? 25 : 0) +
-                (hasUpper ? 25 : 0) +
-                (hasLower ? 25 : 0)
-            ), 100);
-
-            strengthBar.style.width = strength + '%';
-            strengthBar.style.backgroundColor =
-                strength >= 75 ? '#28a745' :
-                    strength >= 50 ? '#ffc107' :
-                        '#dc3545';
-        }
-
-        function validatePasswordMatch() {
-            const password = document.getElementById('password').value;
-            const retype = document.getElementById('retype_password').value;
-            const errorSpan = document.querySelector('.password-match-error');
-            errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
-        }
-
-        function togglePasswordVisibility(inputId, icon) {
-            const input = document.getElementById(inputId);
-            input.type = input.type === 'password' ? 'text' : 'password';
-            icon.classList.toggle('fa-eye-slash');
-        }
-
-        document.getElementById('showLoginPassword').addEventListener('change', function () {
-            const passwordField = document.getElementById('loginpassword');
-            passwordField.type = this.checked ? 'text' : 'password';
-        });
-
-        document.getElementById('signupForm').addEventListener('submit', function (e) {
-            const password = document.getElementById('password').value;
-            const retype = document.getElementById('retype_password').value;
-            if (password !== retype) {
-                e.preventDefault();
-                alert('Error: Passwords do not match!');
-                document.getElementById('retype_password').focus();
-            }
-        });
-
-        function handleCredentialResponse(response) {
-            const credential = jwt_decode(response.credential);
-
-            // Data to send to the server
-            const formData = {
-                token: response.credential,  // Raw JWT token
-                google_id: credential.sub,
-                email: credential.email,
-                first_name: credential.given_name || '',
-                last_name: credential.family_name || '',
-                profile_picture: credential.picture || ''
-            };
-
-            // Convert object to URL-encoded string
-            let formData = new URLSearchParams({
-                google_id: user.googleId,
-                email: user.email,
-                first_name: user.firstName,
-                last_name: user.lastName,
-                profile_picture: user.profilePicture,
-                token: googleToken
-            }).toString();
-
-
-            // Send data using fetch
-            fetch('../scripts/googleStoreUser.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
+    function handleCredentialResponse(response) {
+        // Send the ID token to your server for validation
+        fetch('../scripts/google-auth.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: response.credential
             })
-                .then(response => response.text())  // Expecting plain text response
-                .then(data => {
-                    console.log("Server Response:", data);
-                })
-                .catch(error => console.error("Fetch error:", error));
-
-
-            function showError(message) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.innerHTML = `
-                <strong>Authentication Error:</strong><br>
-                ${message || 'Unknown error occurred'}
-            `;
-                document.querySelector('.logInContainer').prepend(errorDiv);
-            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect or handle successful login
+                    console.log('User authenticated');
+                } else {
+                    console.error('Authentication failed');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
 
 
 
-            function showError(message) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.innerHTML = `
+
+    function showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error';
+        errorDiv.innerHTML = 
         <strong>Authentication Error:</strong><br>
         ${message || 'Unknown error occurred'}
-    `;
-                document.querySelector('.logInContainer').prepend(errorDiv);
-            }
+    ;
+        document.querySelector('.logInContainer').prepend(errorDiv);
+    }
 
 
-    </script>
+</script>
