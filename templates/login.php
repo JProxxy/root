@@ -4,7 +4,7 @@ session_regenerate_id(true); // Security: Prevent session fixation attacks
 
 // Secure headers
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Access-Control-Allow-Origin: https://yourwebsite.com"); // Restrict origin
+header("Access-Control-Allow-Origin: https://rivaniot.online"); // Restrict origin
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
