@@ -1,6 +1,6 @@
 <?php
 session_start();
-header("Content-Security-Policy: default-src 'self' https://accounts.google.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com;");
+header("Content-Security-Policy: default-src 'self' https://accounts.google.com; script-src 'self' https://accounts.google.com 'nonce-XYZ123';");
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
@@ -57,6 +57,7 @@ try {
             htmlspecialchars(substr($_POST['last_name'], 0, 50), ENT_QUOTES, 'UTF-8') : '',
         'profile_picture' => filter_var($_POST['profile_picture'], FILTER_VALIDATE_URL) ? $_POST['profile_picture'] : '',
         'username' => filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) ? $_POST['email'] : ''
+
     ];
 
     // Ensure required fields are valid
@@ -67,6 +68,10 @@ try {
     $test = $conn->query("SELECT 1");
     if (!$test) {
         die("Database connection failed.");
+    }
+
+    if (!$conn) {
+        throw new Exception("Database connection failed.");
     }
     // Database operations
     $conn->beginTransaction();
@@ -136,8 +141,12 @@ try {
         ];
 
         // Redirect to dashboard
-        echo json_encode(['success' => true, 'redirect' => '../templates/dashboard.php']);
+        $allowed_redirects = ['../templates/dashboard.php', '../templates/home.php'];
+        $redirect = in_array($_GET['redirect'] ?? '', $allowed_redirects) ? $_GET['redirect'] : '../templates/dashboard.php';
+
+        header("Location: $redirect");
         exit();
+
     } catch (PDOException $e) {
         $conn->rollBack();
         throw new Exception("Database error: " . $e->getMessage());

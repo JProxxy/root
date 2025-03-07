@@ -267,12 +267,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         function handleCredentialResponse(response) {
             const credential = jwt_decode(response.credential);
 
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '../scripts/googleStoreUser.php';
-
-            // Include both raw token and decoded values
-            const fields = {
+            // Data to send to the server
+            const formData = {
                 token: response.credential,  // Raw JWT token
                 google_id: credential.sub,
                 email: credential.email,
@@ -281,17 +277,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 profile_picture: credential.picture || ''
             };
 
-            Object.entries(fields).forEach(([name, value]) => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = value;
-                form.appendChild(input);
-            });
-
-            document.body.appendChild(form);
-            form.submit();
+            // Send data using fetch
+            fetch('../scripts/googleStoreUser.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())  // Expecting JSON response from PHP
+                .then(data => {
+                    if (data.success) {
+                        console.log("User saved successfully:", data);
+                        // Redirect or update UI if needed
+                    } else {
+                        console.error("Error saving user:", data.message);
+                    }
+                })
+                .catch(error => console.error("Fetch error:", error));
         }
+
 
         function showError(message) {
             const errorDiv = document.createElement('div');
