@@ -1,8 +1,11 @@
 <?php
 session_start();
+session_regenerate_id(true); // Security: Prevent session fixation attacks
+
+// Secure headers
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Origin: https://yourwebsite.com"); // Restrict origin
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 ini_set('display_errors', 1);
@@ -12,47 +15,67 @@ error_reporting(E_ALL);
 require_once '../app/config/connection.php';
 
 $errorMessage = '';
+
+// Rate-limit failed login attempts
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+}
+if ($_SESSION['login_attempts'] >= 5) {
+    die("Too many login attempts. Try again later.");
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    try {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
-        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Ensure a valid username format
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $errorMessage = "Invalid username format.";
+    } else {
+        try {
+            $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
+            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            // Verify authentication method
-            $validLogin = false;
-            $authMethod = 'password';
-
-            if (!empty($user['google_id'])) {
-                // Google-authenticated user (password not required)
-                $validLogin = true;
-                $authMethod = 'google';
-            } elseif (password_verify($password, $user['password'])) {
-                // Password-authenticated user
-                $validLogin = true;
+            if ($user) {
+                // Verify authentication method
+                $validLogin = false;
                 $authMethod = 'password';
-            }
 
-            if ($validLogin) {
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['auth_method'] = $authMethod;
-                $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
-                $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+                if (!empty($user['google_id'])) {
+                    $validLogin = true;
+                    $authMethod = 'google';
+                } elseif (password_verify($password, $user['password'])) {
+                    $validLogin = true;
+                    $authMethod = 'password';
+                }
 
-                header("Location: ../templates/dashboard.php");
-                exit();
+                if ($validLogin) {
+                    // Reset login attempts
+                    $_SESSION['login_attempts'] = 0;
+
+                    $_SESSION['user_id'] = $user['user_id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['auth_method'] = $authMethod;
+                    $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
+                    $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+
+                    header("Location: ../templates/dashboard.php");
+                    exit();
+                } else {
+                    $_SESSION['login_attempts']++;
+                    $errorMessage = "Invalid username or password.";
+                }
             } else {
-                $errorMessage = "Invalid username or password.";
+                $_SESSION['login_attempts']++;
+                $errorMessage = "Account not found.";
             }
-        } else {
-            $errorMessage = "Account not found.";
+        } catch (PDOException $e) {
+            error_log('Database Error: ' . $e->getMessage());
+            $errorMessage = "System error. Please try again later.";
         }
-
+    }
 }
 ?>
 <!DOCTYPE html>
