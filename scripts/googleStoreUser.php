@@ -14,7 +14,7 @@ ini_set('display_errors', 1);
 ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
 
 const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
-require_once __DIR__ . '/../vendor/autoload.php'; 
+require_once __DIR__ . '/../vendor/autoload.php';
 
 try {
     // Validate request
@@ -63,6 +63,11 @@ try {
     if (empty($clean['email']) || empty($clean['google_id']) || empty($clean['profile_picture'])) {
         throw new Exception("Invalid input data");
     }
+
+    $test = $conn->query("SELECT 1");
+    if (!$test) {
+        die("Database connection failed.");
+    }
     // Database operations
     $conn->beginTransaction();
 
@@ -96,6 +101,10 @@ try {
                 ':profile_picture' => $clean['profile_picture']
             ]);
             $user_id = $conn->lastInsertId();
+            if (!$user_id) {
+                die("Failed to get last inserted ID.");
+            }
+
         } else {
             // Update existing user
             $user_id = $user['user_id'];
