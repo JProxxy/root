@@ -298,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             };
 
             // Convert object to URL-encoded string
-            const formData = new URLSearchParams({
+            let formData = new URLSearchParams({
                 google_id: user.googleId,
                 email: user.email,
                 first_name: user.firstName,
@@ -306,6 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 profile_picture: user.profilePicture,
                 token: googleToken
             }).toString();
+
 
             // Send data using fetch
             fetch('../scripts/googleStoreUser.php', {
