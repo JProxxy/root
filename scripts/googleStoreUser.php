@@ -132,7 +132,7 @@ try {
         ];
 
         // Redirect to dashboard
-        $allowed_redirects = ['../templates/dashboard.php', '../templates/home.php'];
+        $allowed_redirects = ['../templates/dashboard.php'];
         $redirect = in_array($_GET['redirect'] ?? '', $allowed_redirects) ? $_GET['redirect'] : '../templates/dashboard.php';
 
         header("Location: $redirect");
