@@ -297,47 +297,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 profile_picture: credential.picture || ''
             };
 
+            // Convert object to URL-encoded string
+            const formData = new URLSearchParams({
+                google_id: user.googleId,
+                email: user.email,
+                first_name: user.firstName,
+                last_name: user.lastName,
+                profile_picture: user.profilePicture,
+                token: googleToken
+            }).toString();
+
             // Send data using fetch
             fetch('../scripts/googleStoreUser.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
             })
-                .then(response => response.json())  // Expecting JSON response from PHP
+                .then(response => response.text())  // Expecting plain text response
                 .then(data => {
-                    if (data.success) {
-                        console.log("User saved successfully:", data);
-                        // Redirect or update UI if needed
-                    } else {
-                        console.error("Error saving user:", data.message);
-                    }
+                    console.log("Server Response:", data);
                 })
                 .catch(error => console.error("Fetch error:", error));
-        }
 
 
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.innerHTML = `
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.innerHTML = `
                 <strong>Authentication Error:</strong><br>
                 ${message || 'Unknown error occurred'}
             `;
-            document.querySelector('.logInContainer').prepend(errorDiv);
-        }
+                document.querySelector('.logInContainer').prepend(errorDiv);
+            }
 
 
 
 
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.innerHTML = `
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.innerHTML = `
         <strong>Authentication Error:</strong><br>
         ${message || 'Unknown error occurred'}
     `;
-            document.querySelector('.logInContainer').prepend(errorDiv);
-        }
+                document.querySelector('.logInContainer').prepend(errorDiv);
+            }
 
 
     </script>

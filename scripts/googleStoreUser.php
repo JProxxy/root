@@ -17,15 +17,22 @@ const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.goo
 require_once __DIR__ . '/../vendor/autoload.php';
 
 try {
-    // Validate request
+    // Validate request method
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception("Invalid request method");
     }
 
-    // Get and validate token
+    // Retrieve POST data from URL-encoded string
     $token = $_POST['token'] ?? '';
-    if (empty($token)) {
-        throw new Exception("Missing authentication token");
+    $google_id = $_POST['google_id'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $first_name = $_POST['first_name'] ?? '';
+    $last_name = $_POST['last_name'] ?? '';
+    $profile_picture = $_POST['profile_picture'] ?? '';
+
+    // Validate required fields
+    if (empty($token) || empty($google_id) || empty($email) || empty($profile_picture)) {
+        throw new Exception("Missing required fields");
     }
 
     // Verify Google token
@@ -35,57 +42,41 @@ try {
         throw new Exception("Invalid Google token");
     }
 
-    // Validate required fields
-    $required = ['google_id', 'email', 'first_name', 'profile_picture'];
-    foreach ($required as $field) {
-        if (empty($_POST[$field])) {
-            throw new Exception("Missing required field: $field");
-        }
-    }
-
-    // Data consistency check
-    if ($_POST['email'] !== $payload['email'] || $_POST['google_id'] !== $payload['sub']) {
+    // Ensure data consistency
+    if ($email !== $payload['email'] || $google_id !== $payload['sub']) {
         throw new Exception("Data tampering detected");
     }
 
-    // Sanitize inputs (PHP 8.1+ compatible)
-    $clean = [
-        'google_id' => htmlspecialchars($_POST['google_id'], ENT_QUOTES, 'UTF-8'),
-        'email' => filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) ? $_POST['email'] : '',
-        'first_name' => htmlspecialchars(substr($_POST['first_name'], 0, 50), ENT_QUOTES, 'UTF-8'),
-        'last_name' => isset($_POST['last_name']) ?
-            htmlspecialchars(substr($_POST['last_name'], 0, 50), ENT_QUOTES, 'UTF-8') : '',
-        'profile_picture' => filter_var($_POST['profile_picture'], FILTER_VALIDATE_URL) ? $_POST['profile_picture'] : '',
-        'username' => filter_var($_POST['email'], FILTER_VALIDATE_EMAIL) ? $_POST['email'] : ''
+    // Sanitize inputs
+    $google_id = htmlspecialchars($google_id, ENT_QUOTES, 'UTF-8');
+    $email = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '';
+    $first_name = htmlspecialchars(substr($first_name, 0, 50), ENT_QUOTES, 'UTF-8');
+    $last_name = htmlspecialchars(substr($last_name, 0, 50), ENT_QUOTES, 'UTF-8');
+    $profile_picture = filter_var($profile_picture, FILTER_VALIDATE_URL) ? $profile_picture : '';
+    $username = $email; // Use email as username
 
-    ];
-
-    // Ensure required fields are valid
-    if (empty($clean['email']) || empty($clean['google_id']) || empty($clean['profile_picture'])) {
+    if (empty($email) || empty($google_id) || empty($profile_picture)) {
         throw new Exception("Invalid input data");
     }
 
-    $test = $conn->query("SELECT 1");
-    if (!$test) {
-        die("Database connection failed.");
-    }
-
+    // Check database connection
     if (!$conn) {
         throw new Exception("Database connection failed.");
     }
-    // Database operations
+
+    // Begin database transaction
     $conn->beginTransaction();
 
     try {
-        // Check existing user
+        // Check if the user already exists
         $stmt = $conn->prepare("
             SELECT user_id, google_id 
             FROM users 
             WHERE google_id = :google_id OR email = :email
         ");
         $stmt->execute([
-            ':google_id' => $clean['google_id'],
-            ':email' => $clean['email']
+            ':google_id' => $google_id,
+            ':email' => $email
         ]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -98,20 +89,19 @@ try {
             ");
 
             $stmt->execute([
-                ':google_id' => $clean['google_id'],
-                ':email' => $clean['email'],
-                ':username' => $clean['username'],
-                ':first_name' => $clean['first_name'],
-                ':last_name' => $clean['last_name'],
-                ':profile_picture' => $clean['profile_picture']
+                ':google_id' => $google_id,
+                ':email' => $email,
+                ':username' => $username,
+                ':first_name' => $first_name,
+                ':last_name' => $last_name,
+                ':profile_picture' => $profile_picture
             ]);
             $user_id = $conn->lastInsertId();
             if (!$user_id) {
-                die("Failed to get last inserted ID.");
+                throw new Exception("Failed to get last inserted ID.");
             }
-
         } else {
-            // Update existing user
+            // Update existing user if necessary
             $user_id = $user['user_id'];
             if (empty($user['google_id'])) {
                 $stmt = $conn->prepare("
@@ -120,20 +110,21 @@ try {
                     WHERE user_id = :user_id
                 ");
                 $stmt->execute([
-                    ':google_id' => $clean['google_id'],
+                    ':google_id' => $google_id,
                     ':user_id' => $user_id
                 ]);
             }
         }
 
+        // Commit transaction
         $conn->commit();
 
         // Session management
         session_regenerate_id(true);
         $_SESSION = [
             'user_id' => $user_id,
-            'email' => $clean['email'],
-            'username' => $clean['username'],
+            'email' => $email,
+            'username' => $username,
             'auth_method' => 'google',
             'ip' => $_SERVER['REMOTE_ADDR'],
             'agent' => $_SERVER['HTTP_USER_AGENT'],
