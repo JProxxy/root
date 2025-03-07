@@ -52,10 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         } else {
             $errorMessage = "Account not found.";
         }
-    } catch (PDOException $e) {
-        error_log('Database Error: ' . $e->getMessage());
-        $errorMessage = "System error. Please try again later.";
-    }
+
 }
 ?>
 <!DOCTYPE html>
