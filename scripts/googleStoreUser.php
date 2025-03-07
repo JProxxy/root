@@ -1,6 +1,6 @@
 <?php
 session_start();
-header("Content-Security-Policy: default-src 'self'");
+header("Content-Security-Policy: default-src 'self' https://accounts.google.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com;");
 header("X-Content-Type-Options: nosniff");
 header("X-Frame-Options: DENY");
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
