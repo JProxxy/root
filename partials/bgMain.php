@@ -70,7 +70,7 @@ if (!empty($user_data['profile_picture'])) {
 
                 <div class="middleItems">
                     <div class="middleItem" onclick="window.location.href='../templates/FirstFloor-Outdoor.php'">
-                        <img src="../assets/images/OfficeSpace.png" alt="Office Space" class="icon" />
+                        <img src="../assets/images/officeSpace.png" alt="Office Space" class="icon" />
                         <span>Office<br>Space</span>
                     </div>
 
