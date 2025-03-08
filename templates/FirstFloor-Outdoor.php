@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/officeSpace.css">
+    <link rel="stylesheet" href="../assets/css/FirstFloor-Outdoor.css">
 
 
 </head>
@@ -27,17 +27,77 @@ if (!isset($_SESSION['user_id'])) {
 <body>
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
-
+   
         <div class="dashboardDevider">
             <div class="dashboardDeviderLeft">
-                <!-- Dropdown Menu -->
-                <select id="office-select" class="officeDropdown">
-                    <option value="firstFloor" selected>First Floor</option> <!-- Set as default -->
-                    <option value="secondFloor">Second Floor</option>
-                    <option value="thirdFloor">Third Floor</option>
-                    <option value="roofTop">Roof Top</option>
-                </select>
+                <div class="dropdownCont">
 
+
+                    <div class="custom-dropdown">
+                        <div class="dropdown-btn">
+                            <span id="dropdownText">First Floor</span>
+                            <div class="iconddcont">
+                                <img src="../assets/images/icon-dropdown.png" alt="IconDropDown" class="IconDropDown">
+                            </div>
+                        </div>
+                        <div class="dropdown-list">
+                            <div class="dropdown-item" data-value="firstFloor">
+                                First Floor
+                            </div>
+                            <div class="dropdown-item" data-value="secondFloor">
+                                Second Floor
+                            </div>
+                            <div class="dropdown-item" data-value="thirdFloor">
+                                Third Floor
+                            </div>
+                            <div class="dropdown-item" data-value="fourthFloor">
+                                Fourth Floor
+                            </div>
+                            <div class="dropdown-item" data-value="fifthFloor">
+                                Fifth Floor
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        // Toggle dropdown visibility
+                        document.querySelector('.dropdown-btn').addEventListener('click', function () {
+                            this.parentElement.classList.toggle('open');
+                        });
+
+                        // Handle item selection and update text dynamically
+                        document.querySelectorAll('.dropdown-item').forEach(function (item) {
+                            item.addEventListener('click', function () {
+                                var selectedValue = this.getAttribute('data-value');
+                                var floorLinks = {
+                                    "firstFloor": "../templates/FirstFloor-Outdoor.php",
+                                    "secondFloor": "../templates/secondFloor.php",
+                                    "thirdFloor": "../templates/thirdFloor.php",
+                                    "fourthFloor": "../templates/fourthFloor.php",
+                                    "fifthFloor": "../templates/fifthFloor.php"
+                                };
+
+                                // Update dropdown text with the selected floor name
+                                var dropdownText = {
+                                    "firstFloor": "First Floor",
+                                    "secondFloor": "Second Floor",
+                                    "thirdFloor": "Third Floor",
+                                    "fourthFloor": "Fourth Floor",
+                                    "fifthFloor": "Fifth Floor"
+                                };
+
+                                // Set the selected floor text in the dropdown
+                                document.getElementById("dropdownText").innerText = dropdownText[selectedValue] || "Select Floor";
+
+                                // Redirect to the corresponding URL
+                                if (floorLinks[selectedValue]) {
+                                    window.location.href = floorLinks[selectedValue];
+                                }
+                            });
+                        });
+                    </script>
+
+                </div>
                 <div class="firstFloor">
                     <img src="../assets/images/firstFloor.png" alt="firstFloor" class="firstFloor">
                 </div>
@@ -93,14 +153,29 @@ if (!isset($_SESSION['user_id'])) {
                                 <div class="line-with-circle"></div>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="ffuserTime">
+                                <span class="fflogTime">10:50 AM</span>
+                            </td>
+                            <td class="ffuserLog">
+                                <span class="ffuserDid">Camera was Closed</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="line-with-circle"></div>
+                            </td>
+                        </tr>
                     </table>
                 </div>
 
                 <div class="deviceControl">
-                    <p>Devices</p>
+                    <p class="devTitle">Devices</p>
                     <div class="devices">
                         <div class="accessGate">
-                            <img src="../assets/images/accessGate.png" alt="Access Gate" class="accessGateImage">
+                            
+                        <img src="../assets/images/accessGate.png" alt="Access Gate" class="accessGateImage">
+                            
                             <p>Access Gate</p>
                             <span>Outdoor</span>
 

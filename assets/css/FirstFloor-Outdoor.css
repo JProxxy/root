@@ -1,91 +1,137 @@
+.formatter img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensures the image maintains aspect ratio */
+  opacity: 0.5;
+}
+
 .dashboardDevider {
   display: flex;
   width: 92%;
   height: 100%;
-  position: absolute;
-  top: 0;
-  left: 8%;
-  z-index: 2;
-  background-color: rgba(55, 55, 55, 0);
-}
-
-.dashboardDeviderLeft {
-  position: relative;
-  flex: 1.57;
-  padding: 20px;
-  font-family: "Kodchasan", sans-serif;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 255, 0);
+  background-color: rgba(162, 162, 162, 0);
 }
 
 .dashboardDeviderRight {
   display: flex;
-  flex-direction: column;
+  flex: 1;
   align-items: flex-start;
   justify-content: flex-start;
-  flex: 1;
   padding: 20px;
-  background-color: rgba(0, 128, 0, 0);
+  background-color: rgba(6, 148, 6, 0);
 }
 
-.officeDropdown {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: none;
-  background: none;
-  outline: none;
-  padding: 10px 30px 10px 10px;
+.dashboardDeviderLeft {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-family: "Kodchasan", sans-serif;
-  font-size: 2rem;
+  background-color: rgba(255, 0, 0, 0);
+  width: 100%;
+  height: 100%;
+}
+
+.dropdownCont {
+  position: relative;
+  width: 100%;
+  height: auto;
+  background-color: rgba(23, 219, 30, 0);
+  display: flex;
+  padding-top: 3%;
+}
+
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 250px;
+  background-color: rgba(0, 123, 255, 0);
+  width: 30%;
+  padding-left: 5%;
+}
+
+.dropdown-btn {
+  background-color: rgba(255, 255, 255, 0);
+  padding: 10px;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
   cursor: pointer;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 25%;
-  margin-top: 3%;
-  margin-left: 5%;
-  background-color: rgba(255, 0, 0, 0);
+  border-radius: 8px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 2rem;
+}
+.iconddcont {
+  width: 20%;
+  background-color: rgba(0, 0, 255, 0);
+  text-align: right;
+}
+.IconDropDown {
+  padding-top: 7%;
+  width: 25px;
+  height: 25px;
 }
 
-.officeDropdown::after {
-  content: "";
+.dropdown-list {
+  display: none;
   position: absolute;
-  right: 10px; /* Adjust as needed */
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px; /* Size of the icon */
-  height: 20px; /* Size of the icon */
-  background-image: url("../images/dropdown.png"); /* Ensure the path is correct */
-  background-size: contain; /* Ensure it fits well */
-  background-repeat: no-repeat;
-  pointer-events: none; /* Clicks go through to the dropdown */
-  z-index: 1; /* Make sure it's above other elements */
+  top: 100%;
+  left: 0;
+  margin-left: 5.5%;
+  background-color: rgb(255, 255, 255);
+  border: 2px solid #0077ff00;
+  width: 100%;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: #2d8b96;
+  border-radius: 5px;
+}
+
+.custom-dropdown.open .dropdown-list {
+  display: block;
 }
 
 .firstFloor {
-  width: 95%;
-  height: auto;
+  width: 100%;
+  height: 76%;
   border-radius: 8px;
+  background-color: #2d444600;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  margin-top: 2%;
-  margin-left: 3%;
+}
+
+.firstFloor img {
+  width: 80%;
+  height: 85%;
 }
 
 .room {
-  display: block; /* Use block display to stack items */
-  padding: 10px; /* Optional padding for aesthetics */
-  background-color: rgba(255, 0, 0, 0);
+  display: block;
+  background-color: rgba(23, 214, 228, 0);
   width: 100%;
-  margin-left: 10%;
+}
+
+.room button:first-child {
+  margin-left: 5%;
 }
 
 .roomButton {
-  display: inline-block; /* Keeps buttons in a line */
+  display: inline-block;
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 400;
@@ -118,7 +164,7 @@
 }
 
 .searchInput {
-  width: 63%;
+  width: 59%;
   padding: 10px 10px 10px 40px; /* Space for icon on the left */
   font-size: 1rem;
   border: 1px solid #3d3d3d;
@@ -148,7 +194,7 @@
 
 .firstFloorLog {
   width: 77%;
-  height: 30%;
+  height: 25%;
   display: flex;
   flex-direction: column;
   background-color: #f3f3f3;
@@ -156,7 +202,8 @@
   border-radius: 25px;
   padding: 20px;
   margin-top: 7%;
-  margin-left: 5%; /* Optional: ensure no extra margin */
+  margin-left: 5%;
+  padding-top: 5%;
 }
 
 .ffLogTable {
@@ -184,7 +231,7 @@
   position: relative;
   width: 85%; /* Adjust the width of the line */
   margin: 0 auto; /* Center the line */
-  height: 2px;
+  height: 1px;
   background-color: #2d8b96;
 }
 
@@ -192,8 +239,8 @@
   content: "";
   position: absolute;
   left: 0; /* Position the circle at the start of the line */
-  width: 8px; /* Circle diameter */
-  height: 8px;
+  width: 4px; /* Circle diameter */
+  height: 4px;
   background-color: #2d8b96;
   border-radius: 50%; /* Make it a circle */
 }
@@ -213,15 +260,16 @@
 
 .deviceControl {
   background-color: rgba(165, 73, 73, 0);
-  width: 80%;
+  width: 83%;
   height: 35%;
   border-radius: 25px;
-  padding: 20px;
-  margin-top: 1%;
+  padding: 5px;
+  padding-top: 10px;
   margin-left: 5%;
   display: flex;
   flex-direction: column;
 }
+
 
 .deviceControl p {
   font-family: "Kodchasan", sans-serif;
@@ -230,16 +278,20 @@
   text-align: left;
 }
 
+.devTitle{
+  margin-left: 2% !important;
+}
+
 .devices {
   display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping for horizontal scrolling */
-  gap: 20px; /* Space between columns */
+  flex-wrap: nowrap;
   background-color: transparent;
   width: 100%;
-  height: 95%;
-  overflow-x: auto; /* Enable horizontal scrolling */
+  height: 100%;
+  overflow-x: none; 
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: #c4c4c4 transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 /* For Webkit Browsers (Chrome, Safari) */
@@ -255,51 +307,21 @@
 .accessGate,
 .cameraFF {
   flex: 0 0 auto; /* Prevent flex items from shrinking */
-  width: 41%; /* Maintain consistent width */
-  height: 86%;
+  width: 40%; /* Maintain consistent width */
+  height: 77%;
   border-radius: 20px;
   background-color: rgb(255, 255, 255);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  margin-top: 6%;
+  margin-top: 1%;
   overflow: hidden;
-  padding: 10px;
   box-sizing: border-box;
+  margin-left: 5%;
 }
 
-@media screen and (max-width: 768px) {
-  .devices {
-    flex-wrap: nowrap; /* Keep horizontal scrolling */
-    gap: 10px; /* Reduce gap for smaller screens */
-  }
 
-  .accessGate,
-  .cameraFF {
-    width: 70%; /* Increase width for better visibility on smaller screens */
-    height: auto;
-    margin: 5% auto;
-  }
-
-  .accessGateImage,
-  .cameraImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .accessGate p,
-  .accessGate span,
-  .cameraFF p,
-  .cameraFF span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}
-
-.accessGate {
-  margin-left: 8%;
-  margin-right: 4%;
-}
 
 .accessGateImage,
 .cameraImage {
@@ -310,9 +332,18 @@
   object-fit: contain; /* Ensure the image scales properly */
 }
 
+.accessGateImage,
+.cameraImage{
+ width: 55px;
+ height: 55px;
+
+}
+.accessGate p{
+  margin-top: 5%;
+}
 .accessGate p,
 .accessGate span {
-  margin-top: 5%;
+
   padding-left: 10%;
   font-family: "Poppins", sans-serif;
   font-size: 1.2rem;
@@ -328,62 +359,25 @@
   align-self: center;
 }
 
-@media screen and (max-width: 768px) {
-  .accessGate,
-  .cameraFF {
-    width: 90%; /* Adjust width on smaller screens */
-    height: auto; /* Allow height to adjust */
-    margin: 5% auto;
-  }
-
-  .accessGateImage,
-  .cameraImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .accessGate p,
-  .accessGate span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}
-
 /* Camera */
 
-.cameraFF {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 41%;
-  height: 86%;
-  border-radius: 20px;
-  background-color: rgb(255, 255, 255);
-  justify-content: flex-start;
-  margin-top: 6%;
-  overflow: hidden; /* Prevent content overflow */
-  padding: 10px; /* Add padding for spacing */
-  box-sizing: border-box; /* Include padding in width/height */
+.cameraFF p{
+  margin-top: 5%;
 }
 
 .cameraFF p,
 .cameraFF span {
-  margin-top: 5%;
   padding-left: 10%;
   font-family: "Poppins", sans-serif;
-  font-size: 1rem;
-  word-wrap: break-word; /* Wrap text if needed */
-  overflow: hidden; /* Prevent text overflow */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
-  white-space: nowrap; /* Prevent wrapping */
+  font-size: 1.2rem;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.cameraImage {
-  margin-top: 5%;
-  margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
-}
+
+
 
 .switch-container {
   margin-top: auto;
@@ -426,6 +420,7 @@
   content: "";
   height: 17px;
   width: 17px;
+  top: 8px;
   left: 4px;
   bottom: 6.5px;
   background-color: white;
@@ -440,23 +435,6 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(24px);
+  transform: translateX(20px);
 }
 
-@media screen and (max-width: 768px) {
-  .cameraFF {
-    width: 90%; /* Adjust width on smaller screens */
-    height: auto; /* Allow height to adjust */
-    margin: 5% auto;
-  }
-
-  .cameraImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .cameraFF p,
-  .cameraFF span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}

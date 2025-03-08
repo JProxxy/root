@@ -1,0 +1,685 @@
+.formatter img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensures the image maintains aspect ratio */
+  opacity: 0.5;
+}
+
+.dashboardDevider {
+  display: flex;
+  width: 92%;
+  height: 100%;
+  background-color: rgba(162, 162, 162, 0);
+}
+
+.dashboardDeviderRight {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  background-color: rgba(6, 148, 6, 0);
+}
+
+.dashboardDeviderLeft {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Kodchasan", sans-serif;
+  background-color: rgba(255, 0, 0, 0);
+  width: 100%;
+  height: 100%;
+}
+
+.dropdownCont {
+  position: relative;
+  width: 100%;
+  height: auto;
+  background-color: rgba(23, 219, 30, 0);
+  display: flex;
+  padding-top: 3%;
+}
+
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  width: 250px;
+  background-color: rgba(0, 123, 255, 0);
+  width: 30%;
+  padding-left: 5%;
+}
+
+.dropdown-btn {
+  background-color: rgba(255, 255, 255, 0);
+  padding: 10px;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 2rem;
+}
+.iconddcont {
+  width: 20%;
+  background-color: rgba(0, 0, 255, 0);
+  text-align: right;
+}
+.IconDropDown {
+  padding-top: 7%;
+  width: 25px;
+  height: 25px;
+}
+
+.dropdown-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-left: 5.5%;
+  background-color: rgb(255, 255, 255);
+  border: 2px solid #0077ff00;
+  width: 100%;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: #2d8b96;
+  border-radius: 5px;
+}
+
+.custom-dropdown.open .dropdown-list {
+  display: block;
+}
+
+.firstFloor {
+  width: 100%;
+  height: 76%;
+  border-radius: 8px;
+  background-color: #2d444600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.firstFloor img {
+  width: 80%;
+  height: 85%;
+}
+
+.room {
+  display: block;
+  background-color: rgba(23, 214, 228, 0);
+  width: 100%;
+}
+
+.room button:first-child {
+  margin-left: 5%;
+}
+
+.roomButton {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #000000;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: "Kodchasan", sans-serif;
+  margin-right: 10px; /* Space between buttons */
+}
+
+.roomButton:hover {
+  background-color: #aef0f9;
+}
+
+.activeButton {
+  background-color: #eaf8fa; /* Light blue color */
+}
+
+/* LEFT SIDE */
+
+.searchContainer {
+  position: relative;
+  width: 100%; /* Adjust width as needed */
+  background-color: rgba(255, 0, 0, 0);
+  margin-top: 3%;
+  margin-left: 5%;
+}
+
+.searchInput {
+  width: 59%;
+  padding: 10px 10px 10px 40px; /* Space for icon on the left */
+  font-size: 1rem;
+  border: 1px solid #3d3d3d;
+  border-radius: 25px;
+  outline: none;
+}
+
+.searchButton {
+  position: absolute;
+  left: 15px; /* Position inside input */
+  top: 53%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  color: #555; /* Adjust icon color */
+  pointer-events: none;
+}
+
+/* FIRST FLOOR LOG */
+
+.firstFloorLog {
+  width: 77%;
+  height: 25%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f3f3;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 25px;
+  padding: 20px;
+  margin-top: 7%;
+  margin-left: 5%;
+  padding-top: 5%;
+}
+
+.ffLogTable {
+  width: 100%;
+  height: auto;
+  border-collapse: collapse;
+  color: #0b3236;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.ffLogTable td {
+  text-align: center; /* Center the content horizontally */
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 200;
+  padding: 1%;
+  padding-bottom: 3%;
+  vertical-align: middle; /* Centers content vertically if needed */
+}
+
+.line-with-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 85%; /* Adjust the width of the line */
+  margin: 0 auto; /* Center the line */
+  height: 1px;
+  background-color: #2d8b96;
+}
+
+.line-with-circle::before {
+  content: "";
+  position: absolute;
+  left: 0; /* Position the circle at the start of the line */
+  width: 4px; /* Circle diameter */
+  height: 4px;
+  background-color: #2d8b96;
+  border-radius: 50%; /* Make it a circle */
+}
+
+.fflogTime {
+  color: #0b3236;
+  font-weight: 400;
+  margin-left: 20%;
+  padding-left: 16%;
+}
+
+.ffuserLog {
+  color: #0b3236;
+  margin-left: 5%;
+  padding-left: 16%;
+}
+
+.deviceControl {
+  background-color: rgba(165, 73, 73, 0);
+  width: 83%;
+  height: 35%;
+  border-radius: 25px;
+  padding: 5px;
+  padding-top: 10px;
+  margin-left: 5%;
+  display: flex;
+  flex-direction: column;
+}
+
+.deviceControl p {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.devTitle {
+  margin-left: 2% !important;
+}
+
+.devices {
+  display: flex;
+  flex-wrap: nowrap;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  overflow-x: none;
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #c4c4c4 transparent;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+/* For Webkit Browsers (Chrome, Safari) */
+.devices::-webkit-scrollbar {
+  height: 10px;
+}
+
+.devices::-webkit-scrollbar-thumb {
+  background-color: #c4c4c4;
+  border-radius: 10px;
+}
+
+.accessGate,
+.cameraFF {
+  flex: 0 0 auto; /* Prevent flex items from shrinking */
+  width: 40%; /* Maintain consistent width */
+  height: 77%;
+  border-radius: 20px;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-top: 1%;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-left: 5%;
+}
+
+.accessGateImage,
+.cameraImage {
+  margin-top: 5%;
+  margin-left: 5%;
+  width: 40px;
+  height: 40px;
+  object-fit: contain; /* Ensure the image scales properly */
+}
+
+.accessGateImage,
+.cameraImage {
+  width: 55px;
+  height: 55px;
+}
+.accessGate p {
+  margin-top: 5%;
+}
+.accessGate p,
+.accessGate span {
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  word-wrap: break-word; /* Wrap text if needed */
+  overflow: hidden; /* Prevent text overflow */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.switch-container {
+  margin-top: auto;
+  margin-bottom: 5%;
+  align-self: center;
+}
+
+/* Camera */
+
+.cameraFF p {
+  margin-top: 5%;
+}
+
+.cameraFF p,
+.cameraFF span {
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.switch-container {
+  margin-top: auto;
+  margin-bottom: 5%;
+  align-self: center;
+  background-color: rgba(255, 0, 0, 0);
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 35px;
+  margin-right: 7%;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #c4c4c4;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  top: 8px;
+  left: 4px;
+  bottom: 6.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+  background: linear-gradient(180deg, #6fa6ac 0%, #598489 47.5%, #2d4446 100%);
+  border-radius: 40px;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.ACRMain {
+  position: relative;
+  width: 100%; /* Keep as it is */
+  height: 100%; /* Keep as it is */
+  background-color: rgba(255, 0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.remote-container {
+  position: relative;
+  width: 50vw; /* Scales based on viewport width */
+  height: 50vw; /* Keeps aspect ratio */
+  max-width: 900px; /* Prevents it from growing too large */
+  max-height: 900px;
+  background-color: rgba(0, 0, 255, 0);
+}
+
+.remote-container img {
+  position: absolute;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.bgRem {
+  width: 70% !important;
+  height: 70% !important;
+  top: 15%;
+  left: 13%;
+}
+
+.timer {
+  width: 18% !important;
+  height: 18% !important;
+  top: 39%;
+  left: 39%;
+}
+
+.fan {
+  width: 20% !important;
+  height: 20% !important;
+  top: 17.5%;
+  left: 38%;
+}
+
+.fanLow {
+  width: 10% !important;
+  height: 10% !important;
+  top: 8%;
+  left: 52%;
+}
+
+.fanHigh{
+    width: 10% !important;
+    height: 10% !important;
+    top: 9%;
+    left: 33%;
+}
+
+.mode {
+  width: 20% !important;
+  height: 20% !important;
+  top: 40.8%;
+  left: 15.5%;
+}
+
+.modeCool{
+    width: 10% !important;
+    height: 10% !important;
+    top: 33%;
+    left: 9%;
+}
+
+.modeDry{
+    width: 10% !important;
+    height: 10% !important;
+    top: 45%;
+    left: 2%;
+}
+
+.modeFan{
+    width: 10% !important;
+    height: 10% !important;
+    top: 57.5%;
+    left: 10%;
+}
+
+.swingOn{
+    width: 10% !important;
+    height: 10% !important;
+    top: 81.5%;
+    left: 35%
+}
+
+.swingOff{
+    width: 10% !important;
+    height: 10% !important;
+    top: 81%;
+    left: 52%
+}
+
+.swing {
+  width: 20% !important;
+  height: 20% !important;
+  top: 63%;
+  left: 38%;
+}
+
+.sleep {
+  width: 20% !important;
+  height: 20% !important;
+  top: 40.8%;
+  left: 61%;
+}
+
+.tempbar {
+  width: 30% !important;
+  height: 60% !important;
+  top: 20%;
+  left: 79%;
+}
+
+.tempbarLow {
+  width: 15% !important;
+  height: 15% !important;
+  top: 69%;
+  left: 75%;
+}
+
+.tempbarHigh {
+  width: 15% !important;
+  height: 15% !important;
+  top: 17%;
+  left: 75%;
+}
+
+
+.remote-container img {
+    position: absolute;
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.remote-container img {
+   
+    user-select: none; /* Prevent text selection */
+    -webkit-user-drag: none; /* For Safari */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: auto; /* Ensure click events still work */
+}
+/* Tap effect */
+/* Default state */
+.remote-container img {
+    transition: transform 0.2s ease-out, filter 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+/* Tap effect */
+/* Default state */
+.remote-container img {
+    transition: transform 0.2s ease-out, filter 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+/* Tap effect - ONLY triggers on quick taps */
+.remote-container img:active {
+    animation: none; /* Prevents animation if held */
+}
+
+.remote-container img.tapped {
+    animation: tapBounce 0.3s ease-out, ripple 0.4s ease-out;
+}
+
+/* Bounce-back effect */
+@keyframes tapBounce {
+    0% { transform: scale(1.15) rotate(2deg); }
+    30% { transform: scale(1.05) rotate(-2deg); }
+    60% { transform: scale(1.08) rotate(1deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+
+/* Ice flakes effect */
+.ice-flake {
+    position: absolute;
+    font-size: 20px;
+    opacity: 1;
+    animation: fall 1.5s ease-out forwards;
+    pointer-events: none; /* Ignore clicks */
+}
+
+@keyframes fall {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(100px) scale(0.5); opacity: 0; }
+}
+
+/* Insane Blizzard Effect ❄️ */
+.snowstorm-flake {
+    position: fixed;
+    font-size: 24px;
+    opacity: 1;
+    animation: snowfall 3s ease-in-out forwards;
+    pointer-events: none; /* Ignore clicks */
+    z-index: 9999; /* On top of everything */
+}
+
+/* Ultra-Smooth Snowfall ❄️ */
+@keyframes snowfall {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    1% { transform: translateY(1vh) rotate(1deg) scale(1.01); opacity: 0.995; }
+    2% { transform: translateY(2vh) rotate(-1deg) scale(1.02); opacity: 0.99; }
+    3% { transform: translateY(3vh) rotate(2deg) scale(1.03); opacity: 0.985; }
+    4% { transform: translateY(4vh) rotate(-2deg) scale(1.04); opacity: 0.98; }
+    5% { transform: translateY(5vh) rotate(3deg) scale(1.05); opacity: 0.975; }
+    6% { transform: translateY(6vh) rotate(-3deg) scale(1.06); opacity: 0.97; }
+    7% { transform: translateY(7vh) rotate(4deg) scale(1.07); opacity: 0.965; }
+    8% { transform: translateY(8vh) rotate(-4deg) scale(1.08); opacity: 0.96; }
+    9% { transform: translateY(9vh) rotate(5deg) scale(1.09); opacity: 0.955; }
+    10% { transform: translateY(10vh) rotate(-5deg) scale(1.1); opacity: 0.95; }
+    11% { transform: translateY(11vh) rotate(6deg) scale(1.09); opacity: 0.945; }
+    12% { transform: translateY(12vh) rotate(-6deg) scale(1.08); opacity: 0.94; }
+    13% { transform: translateY(13vh) rotate(7deg) scale(1.07); opacity: 0.935; }
+    14% { transform: translateY(14vh) rotate(-7deg) scale(1.06); opacity: 0.93; }
+    15% { transform: translateY(15vh) rotate(8deg) scale(1.05); opacity: 0.925; }
+    16% { transform: translateY(16vh) rotate(-8deg) scale(1.04); opacity: 0.92; }
+    17% { transform: translateY(17vh) rotate(9deg) scale(1.03); opacity: 0.915; }
+    18% { transform: translateY(18vh) rotate(-9deg) scale(1.02); opacity: 0.91; }
+    19% { transform: translateY(19vh) rotate(10deg) scale(1.01); opacity: 0.905; }
+    20% { transform: translateY(20vh) rotate(-10deg) scale(1); opacity: 0.9; }
+    21% { transform: translateY(21vh) rotate(9deg) scale(0.99); opacity: 0.895; }
+    22% { transform: translateY(22vh) rotate(-8deg) scale(0.98); opacity: 0.89; }
+    23% { transform: translateY(23vh) rotate(7deg) scale(0.97); opacity: 0.885; }
+    24% { transform: translateY(24vh) rotate(-6deg) scale(0.96); opacity: 0.88; }
+    25% { transform: translateY(25vh) rotate(5deg) scale(0.95); opacity: 0.875; }
+    26% { transform: translateY(26vh) rotate(-4deg) scale(0.94); opacity: 0.87; }
+    27% { transform: translateY(27vh) rotate(3deg) scale(0.93); opacity: 0.865; }
+    28% { transform: translateY(28vh) rotate(-2deg) scale(0.92); opacity: 0.86; }
+    29% { transform: translateY(29vh) rotate(1deg) scale(0.91); opacity: 0.855; }
+    30% { transform: translateY(30vh) rotate(-1deg) scale(0.9); opacity: 0.85; }
+    31% { transform: translateY(31vh) rotate(2deg) scale(0.89); opacity: 0.845; }
+    32% { transform: translateY(32vh) rotate(-3deg) scale(0.88); opacity: 0.84; }
+    33% { transform: translateY(33vh) rotate(4deg) scale(0.87); opacity: 0.835; }
+    34% { transform: translateY(34vh) rotate(-5deg) scale(0.86); opacity: 0.83; }
+    35% { transform: translateY(35vh) rotate(6deg) scale(0.85); opacity: 0.825; }
+    36% { transform: translateY(36vh) rotate(-7deg) scale(0.84); opacity: 0.82; }
+    37% { transform: translateY(37vh) rotate(8deg) scale(0.83); opacity: 0.815; }
+    38% { transform: translateY(38vh) rotate(-9deg) scale(0.82); opacity: 0.81; }
+    39% { transform: translateY(39vh) rotate(10deg) scale(0.81); opacity: 0.805; }
+    40% { transform: translateY(40vh) rotate(-10deg) scale(0.8); opacity: 0.8; }
+    100% { transform: translateY(100vh) rotate(-20deg) scale(0.5); opacity: 0; }
+}

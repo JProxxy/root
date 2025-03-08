@@ -1,13 +1,5 @@
 <?php
-// Start the session
-session_start();
-
-// Check if the user is logged in
-if (!isset($_SESSION['user_id'])) {
-    // Redirect to login page if not logged in
-    header("Location: ../templates/login.php");
-    exit();
-}
+session_start(); // Must be at the very top
 ?>
 
 <!DOCTYPE html>
@@ -19,119 +11,120 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-   <!-- Load three.js -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <!-- Load three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 
-<!-- Load necessary additional files (GLTFLoader, OrbitControls, RGBELoader) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+    <!-- Load necessary additional files (GLTFLoader, OrbitControls, RGBELoader) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
- document.addEventListener('DOMContentLoaded', () => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    const container = document.querySelector('.dashboardDeviderLeft');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            const container = document.querySelector('.dashboardDeviderLeft');
 
-    if (!container) {
-        console.error("Container element not found");
-        return;
-    }
+            if (!container) {
+                console.error("Container element not found");
+                return;
+            }
 
-    // Set renderer size and append it to the container
-    const containerWidth = container.offsetWidth;
-    const containerHeight = container.offsetHeight;
-    renderer.setSize(containerWidth, containerHeight);
-    container.appendChild(renderer.domElement);
+            // Set renderer size and append it to the container
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            renderer.setSize(containerWidth, containerHeight);
+            container.appendChild(renderer.domElement);
 
-    // Set background to transparent
-    renderer.setClearColor(0x000000, 0); // Transparent background (alpha = 0)
+            // Set background to transparent
+            renderer.setClearColor(0x000000, 0); // Transparent background (alpha = 0)
 
-    // Load HDRI texture using RGBELoader
-    const rgbeLoader = new THREE.RGBELoader();
-    rgbeLoader.load('../assets/models/HDRI/venice_dawn_1_4k.hdr', (texture) => {
-        texture.mapping = THREE.EquirectangularRefractionMapping;
+            // Load HDRI texture using RGBELoader
+            const rgbeLoader = new THREE.RGBELoader();
+            rgbeLoader.load('../assets/models/HDRI/venice_dawn_1_4k.hdr', (texture) => {
+                texture.mapping = THREE.EquirectangularRefractionMapping;
 
-        // Use the HDRI for reflections and lighting, but don't set it as the scene background
-        scene.environment = texture;
+                // Use the HDRI for reflections and lighting, but don't set it as the scene background
+                scene.environment = texture;
 
-        // Adjust model material properties for environment map
-        if (model) {
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.envMap = texture; // Apply the environment map to materials
+                // Adjust model material properties for environment map
+                if (model) {
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material.envMap = texture; // Apply the environment map to materials
+                        }
+                    });
                 }
             });
-        }
-    });
 
-    // Add lights to the scene with reduced intensity
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Lower intensity of ambient light
-    scene.add(ambientLight);
+            // Add lights to the scene with reduced intensity
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Lower intensity of ambient light
+            scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 0.5, 100); // Lower intensity of point light
-    pointLight.position.set(5, 5, 5);
-    scene.add(pointLight);
+            const pointLight = new THREE.PointLight(0xffffff, 0.5, 100); // Lower intensity of point light
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Lower intensity of directional light
-    directionalLight.position.set(0, 10, 10).normalize(); // Position it above and pointing down
-    scene.add(directionalLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Lower intensity of directional light
+            directionalLight.position.set(0, 10, 10).normalize(); // Position it above and pointing down
+            scene.add(directionalLight);
 
-    // Load GLTF model using GLTFLoader
-    const gltfLoader = new THREE.GLTFLoader();
-    let model;
-    gltfLoader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
-        model = gltf.scene;
-        scene.add(model);
+            // Load GLTF model using GLTFLoader
+            const gltfLoader = new THREE.GLTFLoader();
+            let model;
+            gltfLoader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
+                model = gltf.scene;
+                scene.add(model);
 
-        // Move the model down and adjust scale and position
-        model.position.y = -22;
-        model.scale.x = 1.7;
-        model.position.x = 0;
+                // Move the model down and adjust scale and position
+                model.position.y = -22;
+                model.scale.x = 1.7;
+                model.position.x = 0;
 
-        // Traverse through the model's children and adjust the material properties
-        model.traverse((child) => {
-            if (child.isMesh) {
-                // Keep the original material, but adjust roughness and metalness
-                child.material.roughness = 0.5;
-                child.material.metalness = 0.1;
+                // Traverse through the model's children and adjust the material properties
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        // Keep the original material, but adjust roughness and metalness
+                        child.material.roughness = 0.5;
+                        child.material.metalness = 0.1;
+                    }
+                });
+            }, undefined, (error) => {
+                console.error("Error loading 3D model:", error);
+            });
+
+            // Set camera position and focus on the model
+            camera.position.set(-11.34, 2.14, 20);
+            camera.lookAt(0, 0, 0);
+
+            // Enable OrbitControls for navigation
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 2;
+            controls.maxDistance = 300;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
             }
+
+            animate();
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                renderer.setSize(containerWidth, containerHeight);
+                camera.aspect = containerWidth / containerHeight;
+                camera.updateProjectionMatrix();
+            });
         });
-    }, undefined, (error) => {
-        console.error("Error loading 3D model:", error);
-    });
-
-    // Set camera position and focus on the model
-    camera.position.set(-11.34, 2.14, 20);
-    camera.lookAt(0, 0, 0);
-
-    // Enable OrbitControls for navigation
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.screenSpacePanning = false;
-    controls.minDistance = 2;
-    controls.maxDistance = 300;
-
-    // Animation loop
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-    }
-
-    animate();
-
-    // Resize handler
-    window.addEventListener('resize', () => {
-        const containerWidth = container.offsetWidth;
-        const containerHeight = container.offsetHeight;
-        renderer.setSize(containerWidth, containerHeight);
-        camera.aspect = containerWidth / containerHeight;
-        camera.updateProjectionMatrix();
-    });
-});
 
 
     </script>
@@ -152,84 +145,103 @@ if (!isset($_SESSION['user_id'])) {
                 <h2>Welcome to Rivan!</h2>
                 <p>Harness our Smart Building Automation System for easy control and comfort</p>
 
-                <div class="forecast">
-                    <div class="forecastLeft">
-                        <div class="temperature">
-                            <span class="tempValue">--</span>
-                            <div class="itemGroup">
-                                <span class="tempUnits">°C</span><br>
-                                <img src="../assets/images/cloud.png" alt="Cloud icon" class="cloudIcon" />
+                <div class="scrollable" id="style-2">
+                    <div class="forecast">
+                        <div class="forecastLeft">
+                            <div class="temperature">
+                                <span class="tempValue">--</span>
+                                <div class="itemGroup">
+                                    <span class="tempUnits">°C</span><br>
+                                    <img src="../assets/images/cloud.png" alt="Cloud icon" class="cloudIcon" />
+                                </div>
+                            </div>
+                            <div class="weatherDescription">
+                                <span class="description">Loading...</span>
                             </div>
                         </div>
-                        <div class="weatherDescription">
-                            <span class="description">Loading...</span>
+
+                        <div class="forecastRight">
+                            <div class="weather">
+                                <div class="precipitation">Precipitation: --%</div>
+                                <br>
+                                <div class="humidity">Humidity: --%</div>
+                                <br>
+                                <div class="wind">Wind: -- km/h</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="forecastRight">
-                        <div class="weather">
-                            <div class="precipitation">Precipitation: --%</div>
-                            <br>
-                            <div class="humidity">Humidity: --%</div>
-                            <br>
-                            <div class="wind">Wind: -- km/h</div>
+                    <div class="notifPage">
+                        <h3>Notification</h3>
+
+                        <div class="notifCont">
+
                         </div>
+
+                    </div>
+
+                    <div class="dashboardLog">
+                        <div class="headerLog">
+                            <p>User Activity Log</p>
+                            <img src="../assets/images/next.png" alt="next icon" class="next" />
+                        </div>
+
+                        <table class="userLogTable">
+                            <tr>
+                                <th>User Name</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            <tr>
+                                <td class="userLog">
+                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
+                                    <span class="userName">John Doe</span>
+                                </td>
+                                <td class="userTime">
+                                    <span class="logTime">10:45 AM</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="userLog">
+                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
+                                    <span class="userName">Jane Smith</span>
+                                </td>
+                                <td class="userTime">
+                                    <span class="logTime">10:50 AM</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="userLog">
+                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
+                                    <span class="userName">Michael Johnson</span>
+                                </td>
+                                <td class="userTime">
+                                    <span class="logTime">10:55 AM</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="userLog">
+                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
+                                    <span class="userName">Emily Davis</span>
+                                </td>
+                                <td class="userTime">
+                                    <span class="logTime">11:00 AM</span>
+                                </td>
+                            </tr>
+                            <!-- Add more rows as needed -->
+                        </table>
                     </div>
                 </div>
 
-                <div class="dashboardLog">
-                    <div class="headerLog">
-                        <p>User Activity Log</p>
-                        <img src="../assets/images/next.png" alt="next icon" class="next" />
-                    </div>
-
-                    <table class="userLogTable">
-                        <tr>
-                            <th>User Name</th>
-                            <th>Timestamp</th>
-                        </tr>
-                        <tr>
-                            <td class="userLog">
-                                <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                <span class="userName">John Doe</span>
-                            </td>
-                            <td class="userTime">
-                                <span class="logTime">10:45 AM</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="userLog">
-                                <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                <span class="userName">Jane Smith</span>
-                            </td>
-                            <td class="userTime">
-                                <span class="logTime">10:50 AM</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="userLog">
-                                <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                <span class="userName">Michael Johnson</span>
-                            </td>
-                            <td class="userTime">
-                                <span class="logTime">10:55 AM</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="userLog">
-                                <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                <span class="userName">Emily Davis</span>
-                            </td>
-                            <td class="userTime">
-                                <span class="logTime">11:00 AM</span>
-                            </td>
-                        </tr>
-                        <!-- Add more rows as needed -->
-                    </table>
-                </div>
             </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function () {
+            if (!$.browser.webkit) {
+                $('.wrapper').html('<p>Sorry! Non webkit users. :(</p>');
+            }
+        });
+    </script>
 
     <script>
         async function fetchWeatherData() {
@@ -263,6 +275,72 @@ if (!isset($_SESSION['user_id'])) {
         fetchWeatherData();
 
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+$(document).ready(function () {
+    function loadNotifications() {
+        $.ajax({
+            url: '../scripts/fetch_notifs.php', // Ensure correct PHP file path
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (!response || response.length === 0) {
+                    return;
+                }
+
+                response.reverse().forEach((notif) => { // Reverse to maintain order
+                    let notifClass = `notif-item ${notif.type}`;
+                    let notifHtml = `
+                        <div class="${notifClass}" style="display: none;"> 
+                            <span class="close-btn">&times;</span> 
+                            <strong>${notif.title}</strong>
+                            <p>${notif.message}</p>
+                        </div>
+                    `;
+
+                    // **Check if notification already exists**
+                    if (!$('.notifCont').find(`.notif-item:contains("${notif.message}")`).length) {
+                        let $newNotif = $(notifHtml);
+
+                        // **Add new notification on top**
+                        $('.notifCont').prepend($newNotif);
+
+                        // **Animate only if it’s a new notification**
+                        if (!$newNotif.is(':visible')) {
+                            $newNotif.slideDown(400); // **Smooth slide-in animation**
+                        }
+                    }
+                });
+
+                // **Keep only the latest 10 notifications**
+                $('.notif-item').slice(10).fadeOut(300, function () { $(this).remove(); });
+            },
+            error: function () {
+                console.error("Failed to load notifications.");
+            }
+        });
+    }
+
+    // **Close button animation**
+    $('.notifCont').on('click', '.close-btn', function () {
+        $(this).parent().fadeOut(300, function () {
+            $(this).remove();
+        });
+    });
+
+    // **Initial load without animation**
+    loadNotifications();
+
+    // **Fetch new notifications every 10 seconds**
+    setInterval(loadNotifications, 10000);
+});
+
+
+    </script>
+    
+
+
 </body>
 
 </html>

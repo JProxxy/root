@@ -64,23 +64,27 @@ if (!empty($user_data['profile_picture'])) {
     <div class="mainContainer">
         <div class="sidePanel">
             <div class="topBar">
-                <div class="topBarItem" onclick="window.location.href='dashboard.php'">
+                <div class="topBarItem" onclick="window.location.href='../templates/dashboard.php'">
                     <img src="../assets/images/rivanLogo.png" alt="Logo" class="iconLogo" />
                 </div>
 
                 <div class="middleItems">
-                    <div class="middleItem" onclick="window.location.href='officeSpace.php'">
-                        <img src="../assets/images/officeSpace.png" alt="Office Space" class="icon" />
+                    <div class="middleItem" onclick="window.location.href='../templates/FirstFloor-Outdoor.php'">
+                        <img src="../assets/images/OfficeSpace.png" alt="Office Space" class="icon" />
                         <span>Office<br>Space</span>
                     </div>
 
-                    <div class="middleItem" onclick="handleButtonClick('Analytics')">
+                    <div class="middleItem" onclick="window.location.href='../templates/analytics.php'">
                         <img src="../assets/images/analytics.png" alt="Analytics" class="icon" />
                         <span>Analytics</span>
                     </div>
-                    <div class="middleItem" onclick="handleButtonClick('Members')">
+                    <div class="middleItem" onclick="window.location.href='../templates/members.php'">
                         <img src="../assets/images/members.png" alt="Members" class="icon" />
                         <span>Members</span>
+                    </div>
+                    <div class="middleItem" onclick="window.location.href='../templates/customize.php'">
+                        <img src="../assets/images/customize.png" alt="Members" class="icon" />
+                        <span>Customize</span>
                     </div>
                 </div>
                 <div class="lowerBarItem" onclick="handleLogout()">
