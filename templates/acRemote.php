@@ -1,4 +1,6 @@
 <?php
+// FirstFloor-Garage.php
+
 // Start the session
 session_start();
 
@@ -17,9 +19,11 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>First Floor</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/acRemote.css">
+
 
 
 </head>
@@ -30,6 +34,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <div class="dashboardDevider">
             <div class="dashboardDeviderLeft">
+
                 <div class="dropdownCont">
 
 
@@ -54,7 +59,7 @@ if (!isset($_SESSION['user_id'])) {
                                 Fourth Floor
                             </div>
                             <div class="dropdown-item" data-value="fifthFloor">
-                                Fifth Floor
+                                Roof Top
                             </div>
                         </div>
                     </div>
@@ -98,12 +103,18 @@ if (!isset($_SESSION['user_id'])) {
                     </script>
 
                 </div>
-                <div class="firstFloor">
-
+                <div class="firstFloor" id="firstfloor3d">
                     <div class="ACRMain">
                         <div class="remote-container">
+                            <!-- Non-interactive design images -->
                             <img class="bgRem" src="../assets/images/ac/bgRem.png">
-                            <img class="timer" src="../assets/images/ac/timer.png">
+
+                            <img class="tempbar" src="../assets/images/ac/tempbar.png">
+
+                            <!-- Interactive images -->
+                            <img class="tempbarLow" src="../assets/images/ac/tempbarLow.png">
+                            <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
+
                             <img class="fan" src="../assets/images/ac/fan.png">
                             <img class="fanLow" src="../assets/images/ac/fanLow.png">
                             <img class="fanHigh" src="../assets/images/ac/fanHigh.png">
@@ -115,123 +126,44 @@ if (!isset($_SESSION['user_id'])) {
                             <img class="swingOn" src="../assets/images/ac/swingOn.png">
                             <img class="swingOff" src="../assets/images/ac/swingOff.png">
                             <img class="sleep" src="../assets/images/ac/sleep.png">
-                            <img class="tempbar" src="../assets/images/ac/tempbar.png">
-                            <img class="tempbarLow" src="../assets/images/ac/tempbarLow.png">
-                            <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
+
+                            <img class="timer" id="timer" src="../assets/images/ac/timer.png">
+                            <!-- Timer Donut -->
+                            <div class="container">
+                                <div class="progress-wrapper">
+                                    <svg class="progress-circle" id="progress-circle" width="225" height="300">
+                                        <defs>
+                                            <linearGradient class="progress-gradient" id="progress-gradient" x1="0%"
+                                                y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" style="stop-color: #2D4446; stop-opacity: 1" />
+                                                <stop offset="24.4%" style="stop-color: #497A80; stop-opacity: 1" />
+                                                <stop offset="51.48%" style="stop-color: #3E8B94; stop-opacity: 1" />
+                                                <stop offset="59.41%" style="stop-color: #3796A2; stop-opacity: 1" />
+                                                <stop offset="65.02%" style="stop-color: #5EA3AB; stop-opacity: 1" />
+                                                <stop offset="71.79%" style="stop-color: #65B1BA; stop-opacity: 1" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="progress-background" cx="120" cy="120" r="95" />
+                                        <circle class="progress-bar" cx="120" cy="120" r="95" />
+                                    </svg>
+                                    <div class="time-left" id="time-left">--:--</div>
+                                    <span class="hrs">hrs</span>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
-                    <script>
-                        document.querySelectorAll(".remote-container img").forEach(img => {
-                            img.addEventListener("mousedown", (e) => {
-                                e.preventDefault(); // Prevents dragging
-
-                                img.classList.add("tapped");
-
-                                setTimeout(() => {
-                                    img.classList.remove("tapped");
-                                }, 300); // Remove effect after animation
-                            });
-                        });
-                        document.querySelectorAll(".remote-container img").forEach(img => {
-                            img.addEventListener("mousedown", (e) => {
-                                e.preventDefault(); // Prevents dragging
-
-                                img.classList.add("tapped");
-
-                                // Create ice flakes ❄️
-                                for (let i = 0; i < 10; i++) {
-                                    let flake = document.createElement("div");
-                                    flake.innerHTML = "❄️"; // Ice flake emoji
-                                    flake.classList.add("ice-flake");
-
-                                    // Random start position near tap point
-                                    let x = e.clientX + (Math.random() * 50 - 25);
-                                    let y = e.clientY + (Math.random() * 30 - 15);
-                                    flake.style.left = `${x}px`;
-                                    flake.style.top = `${y}px`;
-
-                                    document.body.appendChild(flake);
-
-                                    // Remove flakes after animation
-                                    setTimeout(() => {
-                                        flake.remove();
-                                    }, 1500);
-                                }
-
-                                setTimeout(() => {
-                                    img.classList.remove("tapped");
-                                }, 300); // Remove tap effect
-                            });
-                        });
-
-
-                        document.querySelector(".remote-container").addEventListener("click", (e) => {
-                            if (e.target.tagName === "IMG") { // Only trigger when clicking images inside remote-container
-                                triggerSnowstorm();
-                            }
-                        });
-
-                        function triggerSnowstorm() {
-                            let numFlakes = 1000; // More flakes for a real snowstorm!
-
-                            for (let i = 0; i < numFlakes; i++) {
-                                let flake = document.createElement("div");
-                                flake.innerHTML = "❄️"; // Ice flake emoji
-                                flake.classList.add("snowstorm-flake");
-
-                                // Random start position across the whole screen
-                                flake.style.left = `${Math.random() * window.innerWidth}px`;
-                                flake.style.top = `-${Math.random() * 1000}px`; // Start from slightly above the screen
-
-                                document.body.appendChild(flake);
-
-                                // Remove flakes after animation to keep performance smooth
-                                setTimeout(() => {
-                                    flake.remove();
-                                }, 11000); // Snow lasts longer for max chaos
-                            }
-                        }
-
-
-
-
-
-
-
-
-
-
-                        // serious part
-                        function scaleRemote() {
-                            let container = document.querySelector(".remote-container");
-                            let parent = document.querySelector(".ACRMain");
-
-                            let scale = Math.min(
-                                parent.clientWidth / 400,  // Scale width based on `.ACRMain`
-                                parent.clientHeight / 800  // Scale height based on `.ACRMain`
-                            );
-
-                            container.style.transform = `scale(${scale})`;
-                        }
-
-                        window.addEventListener("resize", scaleRemote);
-                        scaleRemote(); // Run once on page load
-                    </script>
                 </div>
 
                 <div class="room">
-                    <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage('../templates/FirstFloor-Garage.php')" class="roomButton"
-                        id="garageButton">Room 1</button>
-                    <button onclick="navigateToOutdoor()" class="roomButton activeButton" id="outdoorButton">Room
-                        2</button>
+                    <button onclick="navigateToGarage()" class="roomButton activeButton"
+                        id="garageButton">Garage</button>
+                    <button onclick="navigateToOutdoor()" class="roomButton" id="outdoorButton">Outdoor</button>
                 </div>
-
             </div>
             <div class="dashboardDeviderRight">
-                <!-- Search Bar with Icon Inside -->
-                <div class="searchContainer">
-                    <input type="text" id="searchInput" placeholder=" " class="searchInput">
+                <!-- <div class="searchContainer">
+                    <input type="text" id="searchInputX" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
                         <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -240,37 +172,151 @@ if (!isset($_SESSION['user_id'])) {
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </button>
+                </div> -->
+                <div class="acLog">
+                    <div class="firstPartLog">
+                        <div class="logItem">
+                            <div class="titleCommand">Power</div>
+                            <div class="outputCommand">On</div>
+                        </div>
+
+                        <div class="line-with-circleR"></div>
+
+                        <div class="logItem">
+                            <div class="titleCommand">Temp</div>
+                            <div class="outputCommand">16°C</div>
+                        </div>
+
+                        <div class="line-with-circleR"></div>
+
+                        <div class="logItem">
+                            <div class="titleCommand">Timer</div>
+                            <div class="outputCommand">8 hrs</div>
+                        </div>
+                        <div class="line-with-circleR"></div>
+                    </div>
+
+                    <!-- Vertical Divider -->
+                    <div class="divider"></div>
+
+                    <div class="secondPartLog">
+                        <div class="logItem">
+                            <div class="titleCommand">Mode</div>
+                            <div class="outputCommand">Fan</div>
+                        </div>
+
+                        <div class="line-with-circleL"></div>
+
+                        <div class="logItem">
+                            <div class="titleCommand">Fan</div>
+                            <div class="outputCommand">High</div>
+                        </div>
+
+                        <div class="line-with-circleL"></div>
+
+                        <div class="logItem">
+                            <div class="titleCommand">Swing</div>
+                            <div class="outputCommand">Off</div>
+                        </div>
+                        <div class="line-with-circleL"></div>
+                    </div>
                 </div>
 
-                <div class="firstFloorLog">
 
-                </div>
+
+
+
 
                 <div class="deviceControl">
                     <p class="devTitle">Devices</p>
                     <div class="devices">
-                        <div class="accessGate">
+                        <div class="lights">
+                            <div class="imageandlightscont">
+                                <img src="../assets/images/lights.png" alt="Lights" class="lightsImage">
+                                <select class="lightDropdown" id="lightCategory" onchange="updateLightState()">
+                                    <option value="FFLightOne">Front Gate</option>
+                                    <option value="FFLightTwo">Front Garage</option>
+                                    <option value="FFLightThree">Rear Garage</option>
+                                    <option value="FFLightFour">Kitchen Wet</option>
+                                    <option value="FFLightFive">Fridge Space</option>
+                                    <option value="FFLightSix">Bath Area</option>
+                                </select>
+                            </div>
+                            <p id="lightName">Lights</p>
+                            <span>Room 1</span>
 
-                            <img src="../assets/images/accessGate.png" alt="Access Gate" class="accessGateImage">
+                            <div class="switch-containerTwo">
+                                <div class="switch-container" id="switch_FFLightOne">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightOne"
+                                            onchange="toggleLightSwitch('FFLightOne')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
 
-                            <p>Access Gate</p>
-                            <span>Outdoor</span>
+                                <div class="switch-container" id="switch_FFLightTwo">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightTwo"
+                                            onchange="toggleLightSwitch('FFLightTwo')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
 
-                            <div class="switch-container">
-                                <label class="switch">
-                                    <input type="checkbox" id="accessGateSwitch" onchange="toggleAccessGate()">
+                                <div class="switch-container" id="switch_FFLightThree">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightThree"
+                                            onchange="toggleLightSwitch('FFLightThree')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="switch-container" id="switch_FFLightFour">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightFour"
+                                            onchange="toggleLightSwitch('FFLightFour')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="switch-container" id="switch_FFLightFive">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightFive"
+                                            onchange="toggleLightSwitch('FFLightFive')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="switch-container" id="switch_FFLightSix">
+                                    <label class="switch">
+                                        <input type="checkbox" id="lightSwitch_FFLightSix"
+                                            onchange="toggleLightSwitch('FFLightSix')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="airConditionFF">
+                            <a href="../templates/acRemote.php">
+                                <img src="../assets/images/ac.png" alt="Air Condition" class="airconImage">
+                            </a>
+                            <p>Air Condition</p>
+                            <span>Room 1</span>
+
+                            <div class="switch-containerTwo">
+                                <label class="switchTwo">
+                                    <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                         </div>
-
 
                         <div class="cameraFF">
                             <img src="../assets/images/camera.png" alt="Camera" class="cameraImage">
                             <p>Camera</p>
                             <span>Outdoor</span>
 
-                            <div class="switch-container">
+                            <div class="switch-containerTwo">
                                 <label class="switch">
                                     <input type="checkbox">
                                     <span class="slider"></span>
@@ -282,76 +328,263 @@ if (!isset($_SESSION['user_id'])) {
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
-
-
         <script>
-            function navigateToOutdoor() {
-                // Change background color of Outdoor button
-                document.getElementById("outdoorButton").classList.add("activeButton");
-                document.getElementById("garageButton").classList.remove("activeButton");
+
+            // Function to update light switch visibility based on the selected light
+            function updateLightState() {
+                const selectedLight = document.getElementById('lightCategory').value; // Get selected light ID from dropdown
+                const allLightSwitches = document.querySelectorAll('.switch-container'); // Select all light switches
+
+                // Hide all light switches
+                allLightSwitches.forEach(switchContainer => {
+                    switchContainer.style.display = 'none';
+                });
+
+                // Show the switch for the selected light
+                const selectedSwitch = document.getElementById('switch_' + selectedLight);
+                if (selectedSwitch) {
+                    selectedSwitch.style.display = 'block';
+                    selectedSwitch.style.textAlign = 'right';
+                }
+            }
+
+            // Initially hide all light switches when the page loads
+            document.addEventListener('DOMContentLoaded', function () {
+                updateLightState(); // Hide all light switches initially
+            });
+
+
+            // Function to toggle light state
+            function toggleLightSwitch(lightId) {
+                const lightSwitch = document.getElementById('lightSwitch_' + lightId);
+                const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
+                console.log(lightId + " turned " + status); // Debugging in the console
+
+                // Prepare the data to send to the Lambda API via API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: lightId,  // Sending deviceName
+                            command: status      // Sending the command (ON/OFF)
+                        }
+                    })
+                };
+
+                // Make the fetch request to the API Gateway endpoint to control the device
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData) // Send the data in the required format
+                })
+                    .then(response => response.json()) // Handle the response from Lambda
+                    .then(responseData => {
+                        console.log('Device control response:', responseData);
+                    })
+                    .catch(error => {
+                        console.error("Error updating device status:", error);
+                    });
+            }
+
+            // Function to toggle aircon state
+            function toggleAirconFF() {
+                const airconSwitch = document.getElementById('airconFFSwitch');
+                const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
+                console.log('Air Conditioner FF status:', status);
+
+                // Prepare the data to send to the API Gateway in the required format
+                const requestData = {
+                    body: JSON.stringify({
+                        data: {
+                            deviceName: 'AirconFF',  // AirconFF device name
+                            command: status          // Sending the command (ON/OFF)
+                        }
+                    })
+                };
+
+                // Send the data to Lambda API via API Gateway
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                    .then(response => response.json())
+                    .then(responseData => {
+                        console.log('Aircon control response:', responseData);
+                    })
+                    .catch(error => {
+                        console.error("Error updating aircon status:", error);
+                    });
             }
 
             function navigateToGarage() {
-                // Reset Outdoor button and change background for Garage button
-                document.getElementById("garageButton").classList.add("activeButton");
-                document.getElementById("outdoorButton").classList.remove("activeButton");
+                window.location.href = 'FirstFloor-Garage.php';
             }
 
-            function navigateToGarage(url) {
-                window.location.href = "../templates/FirstFloor-Garage.php";
+            function navigateToOutdoor() {
+                window.location.href = '../templates/FirstFloor-Outdoor.php';
             }
+        </script>
 
+        <!-- TIMER AC REMOTE -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const progressBar = document.querySelector('.progress-bar');
+                const timeLeftText = document.getElementById('time-left');
+                const progressCircle = document.getElementById('progress-circle');
 
+                let totalTime = 0;  // Start with 0 seconds (0:00)
+                let countdownInterval;
+                let isRunning = false;  // Track if the countdown is running
 
-            // Set MQTT connection parameters
-            const endpoint = 'wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt';  // Replace with your IoT endpoint
-            const client = mqtt.connect(endpoint, {
-                clientId: 'webClient_' + Math.floor(Math.random() * 1000),  // Ensure unique client ID
-                clean: true,
-                reconnectPeriod: 1000,
-                username: '',  // Optional if using Cognito
-                password: '',  // Optional if using Cognito
-                ca: '../assets/certificate/AmazonRootCA1.pem',  // Path to your root certificate
-                cert: '../assets/certificate/Device Certificate.crt',  // Path to your device certificate
-                key: '../assets/certificate/Private Key.key',  // Path to your private key
+                const maxTime = 12 * 60 * 60;  // Maximum time of 12 hours in seconds (43200 seconds)
+                const circleCircumference = 2 * Math.PI * 95;  // Circumference of the circle
+
+                // Function to update the progress bar and time left
+                function updateTimer() {
+                    const hours = Math.floor(totalTime / 3600); // Total hours
+                    const minutes = Math.floor((totalTime % 3600) / 60); // Remaining minutes
+
+                    // Ensure hours and minutes are always 2 digits (e.g., 01:09, 05:09, 11:00)
+                    const formattedHours = String(hours).padStart(2, '0');
+                    const formattedMinutes = String(minutes).padStart(2, '0');
+
+                    // Display the time with 2 digits for hours and minutes
+                    timeLeftText.textContent = `${formattedHours}:${formattedMinutes}`;
+
+                    // Calculate strokeDashoffset based on the remaining time
+                    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
+                    progressBar.style.strokeDashoffset = dashoffset;
+                }
+
+                // Function to start the countdown
+                function startCountdown() {
+                    clearInterval(countdownInterval);  // Clear any existing intervals
+                    countdownInterval = setInterval(function () {
+                        if (totalTime > 0) {
+                            totalTime--;  // Decrease by 1 second
+                            updateTimer();
+                        } else {
+                            // Reset everything when it reaches 0:00
+                            clearInterval(countdownInterval);  // Clear the countdown interval
+                            totalTime = 0;  // Reset the timer to 0
+                            updateTimer();  // Reset the progress bar
+                            isRunning = false;  // Stop the countdown
+                        }
+                    }, 1000);
+                }
+
+                // Click event to add 1 hour or reset the timer
+                progressCircle.addEventListener("click", function () {
+                    if (!isRunning) {
+                        // If the countdown is not already running, start it
+                        isRunning = true;
+                        startCountdown();
+                    }
+
+                    // Add 1 hour (3600 seconds) if the time is less than 12 hours
+                    totalTime += 60 * 60;  // Add 1 hour (3600 seconds)
+
+                    // If the time exceeds 12 hours, reset it to 0
+                    if (totalTime >= maxTime) {
+                        totalTime = 0;  // Reset the time to 0 seconds (0:00)
+                    }
+
+                    // Update the progress bar and timer immediately
+                    updateTimer();
+                });
+
+                // Initial setup for the timer
+                updateTimer();
             });
+        </script>
 
-            // Connect to the broker
-            client.on('connect', function () {
-                console.log('Connected to MQTT broker');
-            });
+        <!-- AC REMOTE EFFECTS -->
+        <script>
+            // Only apply interactive behavior to images that should be interactive
+            document.querySelectorAll(".remote-container img").forEach(img => {
+                // Exclude bgRem and tempbar from interaction
+                if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
+                    img.addEventListener("mousedown", (e) => {
+                        e.preventDefault(); // Prevents dragging
 
-            // Subscribe to a topic (optional, if you want to receive updates)
-            const topic = 'home/office/accessGate';  // The topic ESP32 is subscribed to
-            client.subscribe(topic, function (err) {
-                if (err) {
-                    console.error('Failed to subscribe:', err);
+                        img.classList.add("tapped");
+
+                        // Create ice flakes ❄️
+                        for (let i = 0; i < 10; i++) {
+                            let flake = document.createElement("div");
+                            flake.innerHTML = "❄️"; // Ice flake emoji
+                            flake.classList.add("ice-flake");
+
+                            // Random start position near tap point
+                            let x = e.clientX + (Math.random() * 50 - 25);
+                            let y = e.clientY + (Math.random() * 30 - 15);
+                            flake.style.left = `${x}px`;
+                            flake.style.top = `${y}px`;
+
+                            document.body.appendChild(flake);
+
+                            // Remove flakes after animation
+                            setTimeout(() => {
+                                flake.remove();
+                            }, 1500);
+                        }
+
+                        setTimeout(() => {
+                            img.classList.remove("tapped");
+                        }, 300); // Remove tap effect
+                    });
                 }
             });
 
-            // Listen for messages on the topic
-            client.on('message', function (topic, message) {
-                console.log('Received message:', topic, message.toString());
-                // You can update the UI or trigger events based on the message
+            // Handle click event for interactive images only
+            document.querySelector(".remote-container").addEventListener("click", (e) => {
+                if (e.target.tagName === "IMG" && !e.target.classList.contains("bgRem") && !e.target.classList.contains("tempbar")) {
+                    triggerSnowstorm();
+                }
             });
 
-            // Function to publish state change when the access gate switch is toggled
-            async function toggleAccessGate() {
-                const accessGateSwitch = document.getElementById('accessGateSwitch');
-                const newState = accessGateSwitch.checked ? 1 : 0;
+            // Snowstorm effect function for interactive images
+            function triggerSnowstorm() {
+                let numFlakes = 50; // More flakes for a real snowstorm!
 
-                // Publish the state change to the MQTT topic
-                client.publish('home/office/accessGate', JSON.stringify({ state: newState }));
+                for (let i = 0; i < numFlakes; i++) {
+                    let flake = document.createElement("div");
+                    flake.innerHTML = "❄️"; // Ice flake emoji
+                    flake.classList.add("snowstorm-flake");
 
-                console.log('Access Gate state:', newState);
+                    // Random start position across the whole screen
+                    flake.style.left = `${Math.random() * window.innerWidth}px`;
+                    flake.style.top = `-${Math.random() * 1000}px`; // Start from slightly above the screen
+
+                    document.body.appendChild(flake);
+
+                    // Remove flakes after animation to keep performance smooth
+                    setTimeout(() => {
+                        flake.remove();
+                    }, 11000); // Snow lasts longer for max chaos
+                }
             }
 
-            // Add event listener to trigger the toggleAccessGate function when the checkbox changes
-            document.getElementById('accessGateSwitch').addEventListener('change', toggleAccessGate);
+            // Serious part - scaling the remote to fit the screen
+            function scaleRemote() {
+                let container = document.querySelector(".remote-container");
+                let parent = document.querySelector(".ACRMain");
 
+                let scale = Math.min(
+                    parent.clientWidth / 400,  // Scale width based on `.ACRMain`
+                    parent.clientHeight / 800  // Scale height based on `.ACRMain`
+                );
+
+                container.style.transform = `scale(${scale})`;
+            }
+
+            window.addEventListener("resize", scaleRemote);
+            scaleRemote(); // Run once on page load
         </script>
-
 
 
     </div>

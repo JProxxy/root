@@ -51,7 +51,7 @@
 }
 
 .dropdown-btn {
-  background-color: rgba(255, 255, 255, 0);
+  background-color: rgba(237, 0, 0, 0);
   padding: 10px;
   font-family: "Kodchasan", sans-serif;
   font-size: 1.5rem;
@@ -69,6 +69,7 @@
   width: 20%;
   background-color: rgba(0, 0, 255, 0);
   text-align: right;
+  
 }
 .IconDropDown {
   padding-top: 7%;
@@ -80,13 +81,12 @@
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
-  margin-left: 5.5%;
   background-color: rgb(255, 255, 255);
   border: 2px solid #0077ff00;
   width: 100%;
   border-radius: 8px;
   z-index: 10;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-item {
@@ -191,37 +191,41 @@
 }
 
 /* FIRST FLOOR LOG */
-
 .firstFloorLog {
   width: 77%;
-  height: 25%;
+  height: 300px; /* Fixed height */
   display: flex;
   flex-direction: column;
   background-color: #f3f3f3;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 25px;
-  padding: 20px;
-  margin-top: 7%;
+  padding: 15px;
+  margin-top: 10%;
   margin-left: 5%;
-  padding-top: 5%;
+  overflow-y: auto; /* Enable scrolling without visible scrollbar */
+  position: relative; /* Important: Allows absolute positioning inside */
 }
+
+.firstFloorLog::-webkit-scrollbar {
+  display: none; /* Hides scrollbar in Chrome, Edge, and Safari */
+}
+
 
 .ffLogTable {
   width: 100%;
-  height: auto;
   border-collapse: collapse;
   color: #0b3236;
-  background-color: rgba(255, 0, 0, 0);
+  background-color: transparent;
 }
 
 .ffLogTable td {
-  text-align: center; /* Center the content horizontally */
+  text-align: left;
   font-family: "Poppins", sans-serif;
-  font-size: 1rem;
-  font-weight: 200;
-  padding: 1%;
-  padding-bottom: 3%;
-  vertical-align: middle; /* Centers content vertically if needed */
+  font-size: 0.9rem; /* Reduced font size */
+  font-weight: 300;
+  padding: 6px 10px; /* Reduced padding */
+  vertical-align: middle;
+  word-wrap: break-word; /* Ensure long words break properly */
 }
 
 .line-with-circle {
@@ -229,34 +233,66 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  width: 85%; /* Adjust the width of the line */
-  margin: 0 auto; /* Center the line */
-  height: 1px;
+  width: 85%;
+  margin: 5px auto; /* Reduced margin */
+  height: 2px;
   background-color: #2d8b96;
 }
 
 .line-with-circle::before {
   content: "";
   position: absolute;
-  left: 0; /* Position the circle at the start of the line */
-  width: 4px; /* Circle diameter */
-  height: 4px;
+  left: 0;
+  width: 6px; /* Slightly smaller circle */
+  height: 6px;
   background-color: #2d8b96;
-  border-radius: 50%; /* Make it a circle */
+  border-radius: 50%;
 }
 
 .fflogTime {
   color: #0b3236;
   font-weight: 400;
-  margin-left: 20%;
-  padding-left: 16%;
+  font-size: 0.85rem;
+  padding-right: 10px; /* Keep a small padding for spacing */
+  text-align: right;
+  white-space: nowrap;
+  width: 40%; /* Control its width */
+  padding-left: 35%;
+  background-color: rgba(255, 0, 0, 0);
 }
 
 .ffuserLog {
   color: #0b3236;
-  margin-left: 5%;
-  padding-left: 16%;
+  text-align: left;
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding-left: 10px; /* Small padding to move it slightly right */
+  width: 75%; /* Control its width */
+  background-color: rgba(0, 0, 255, 0);
 }
+
+
+
+/* Floating button inside */
+.downloadBtn {
+  position: absolute;
+  top: 10px; /* Adjust position from top */
+  right: 15px; /* Adjust position from right */
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: #2d8b96; /* Matches theme */
+  z-index: 10; /* Ensures it's always on top */
+  display: block; /* Ensures visibility */
+}
+
+.downloadBtn:hover {
+  transform: scale(1.1);
+}
+
+/* DEVICES INPUTS */
 
 .deviceControl {
   background-color: rgba(165, 73, 73, 0);
@@ -268,6 +304,7 @@
   margin-left: 5%;
   display: flex;
   flex-direction: column;
+
 }
 
 
@@ -280,6 +317,8 @@
 
 .devTitle{
   margin-left: 2% !important;
+  margin-top: 2% !important;
+  margin-bottom: 2% !important;
 }
 
 .devices {
@@ -327,23 +366,17 @@
 .cameraImage {
   margin-top: 5%;
   margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
+  width: 55px;
+  height: 55px;
+  object-fit: contain; 
 }
 
-.accessGateImage,
-.cameraImage{
- width: 55px;
- height: 55px;
 
-}
 .accessGate p{
   margin-top: 5%;
 }
 .accessGate p,
 .accessGate span {
-
   padding-left: 10%;
   font-family: "Poppins", sans-serif;
   font-size: 1.2rem;

@@ -41,7 +41,7 @@
   width: 250px;
   background-color: rgba(0, 123, 255, 0);
   width: 30%;
-  padding-left: 2%;
+  padding-left: 5%;
 }
 
 .dropdown-btn {
@@ -56,6 +56,8 @@
   width: 100%;
   align-items: center;
   justify-content: space-between;
+
+  font-size: 2rem;
 }
 .iconddcont {
   width: 20%;
@@ -72,13 +74,12 @@
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
-  margin-left: 5.5%;
   background-color: rgb(255, 255, 255);
   border: 2px solid #0077ff00;
   width: 100%;
   border-radius: 8px;
   z-index: 10;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-item {
@@ -97,19 +98,21 @@
   display: block;
 }
 
+
 .firstFloor {
   width: 100%;
   height: 76%;
   border-radius: 8px;
-  background-color: #2d444600;
+background-color: rgba(255, 0, 0, 0);
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  justify-content: center;
+  align-items: center;
 }
 
+
 .firstFloor img {
-  width: 75%;
-  height: 80%;
+  width: 80%;
+  height: 85%;
 }
 
 
@@ -120,8 +123,9 @@
 }
 
 .room button:first-child {
-  margin-left: 4%;
+  margin-left: 5%;
 }
+
 
 .roomButton {
   display: inline-block;
@@ -184,36 +188,41 @@
 }
 
 /* FIRST FLOOR LOG */
-
 .firstFloorLog {
   width: 77%;
-  height: 30%;
+  height: 300px; /* Fixed height */
   display: flex;
   flex-direction: column;
   background-color: #f3f3f3;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 25px;
-  padding: 20px;
-  margin-top: 7%;
-  margin-left: 5%; /* Optional: ensure no extra margin */
+  padding: 15px;
+  margin-top: 10%;
+  margin-left: 5%;
+  overflow-y: auto; /* Enable scrolling without visible scrollbar */
+  position: relative; /* Important: Allows absolute positioning inside */
 }
+
+.firstFloorLog::-webkit-scrollbar {
+  display: none; /* Hides scrollbar in Chrome, Edge, and Safari */
+}
+
 
 .ffLogTable {
   width: 100%;
-  height: auto;
   border-collapse: collapse;
   color: #0b3236;
-  background-color: rgba(255, 0, 0, 0);
+  background-color: transparent;
 }
 
 .ffLogTable td {
-  text-align: center; /* Center the content horizontally */
+  text-align: left;
   font-family: "Poppins", sans-serif;
-  font-size: 1rem;
-  font-weight: 200;
-  padding: 1%;
-  padding-bottom: 3%;
-  vertical-align: middle; /* Centers content vertically if needed */
+  font-size: 0.9rem; /* Reduced font size */
+  font-weight: 300;
+  padding: 6px 10px; /* Reduced padding */
+  vertical-align: middle;
+  word-wrap: break-word; /* Ensure long words break properly */
 }
 
 .line-with-circle {
@@ -221,8 +230,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  width: 85%; /* Adjust the width of the line */
-  margin: 0 auto; /* Center the line */
+  width: 85%;
+  margin: 5px auto; /* Reduced margin */
   height: 2px;
   background-color: #2d8b96;
 }
@@ -230,33 +239,64 @@
 .line-with-circle::before {
   content: "";
   position: absolute;
-  left: 0; /* Position the circle at the start of the line */
-  width: 8px; /* Circle diameter */
-  height: 8px;
+  left: 0;
+  width: 6px; /* Slightly smaller circle */
+  height: 6px;
   background-color: #2d8b96;
-  border-radius: 50%; /* Make it a circle */
+  border-radius: 50%;
 }
 
 .fflogTime {
   color: #0b3236;
   font-weight: 400;
-  margin-left: 20%;
-  padding-left: 16%;
+  font-size: 0.85rem;
+  padding-right: 10px; /* Keep a small padding for spacing */
+  text-align: right;
+  white-space: nowrap;
+  width: 40%; /* Control its width */
+  padding-left: 35%;
+  background-color: rgba(255, 0, 0, 0);
 }
 
 .ffuserLog {
   color: #0b3236;
-  margin-left: 5%;
-  padding-left: 16%;
+  text-align: left;
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding-left: 10px; /* Small padding to move it slightly right */
+  width: 75%; /* Control its width */
+  background-color: rgba(0, 0, 255, 0);
 }
 
+
+
+/* Floating button inside */
+.downloadBtn {
+  position: absolute;
+  top: 10px; /* Adjust position from top */
+  right: 15px; /* Adjust position from right */
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: #2d8b96; /* Matches theme */
+  z-index: 10; /* Ensures it's always on top */
+  display: block; /* Ensures visibility */
+}
+
+.downloadBtn:hover {
+  transform: scale(1.1);
+}
+
+/* DEVICES INPUTS */
 .deviceControl {
   background-color: rgba(165, 73, 73, 0);
-  width: 80%;
-  height: 35%;
+  width: 83%;
+  height: 55%;
   border-radius: 25px;
-  padding: 20px;
-  margin-top: 1%;
+  padding: 5px;
+  padding-top: 10px;
   margin-left: 5%;
   display: flex;
   flex-direction: column;
@@ -269,17 +309,24 @@
   text-align: left;
 }
 
+.devTitle{
+  margin-left: 2% !important;
+  margin-top: 2% !important;
+  margin-bottom: 2% !important;
+}
+
 .devices {
   display: flex;
-  flex-wrap: nowrap; /* Prevent wrapping for horizontal scrolling */
-  gap: 20px; /* Space between columns */
+  flex-wrap: wrap;  /* Allows items to move to the next line if needed */
   background-color: transparent;
   width: 100%;
-  height: 95%;
-  overflow-x: auto; /* Enable horizontal scrolling */
+  height: 100%;
+
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: #c4c4c4 transparent;
+  background-color: rgba(0, 0, 0, 0);
 }
+
 
 /* For Webkit Browsers (Chrome, Safari) */
 .devices::-webkit-scrollbar {
@@ -292,93 +339,70 @@
 }
 
 .lights,
-.airConditionFF {
+.airConditionFF,
+.cameraFF {
   flex: 0 0 auto; /* Prevent flex items from shrinking */
-  width: 41%; /* Maintain consistent width */
-  height: 86%;
+  width: 40%; /* Maintain consistent wi dth */
+  height: 44%;
   border-radius: 20px;
   background-color: rgb(255, 255, 255);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  margin-top: 6%;
+  margin-top: 1%;
   overflow: hidden;
-  padding: 10px;
   box-sizing: border-box;
+  margin-left: 5%;
 }
 
-@media screen and (max-width: 768px) {
-  .devices {
-    flex-wrap: nowrap; /* Keep horizontal scrolling */
-    gap: 10px;
-  }
-
-  .lights,
-  .airConditionFF {
-    width: 70%; 
-    height: auto;
-    margin: 5% auto;
-  }
-
-  .lightsImage,
-  .airconImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .lights p,
-  .lights span,
-  .airConditionFF p,
-  .airConditionFF span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}
-
-.lights {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 41%;
-  height: 86%;
-  border-radius: 20px;
-  background-color: rgb(255, 255, 255);
-  justify-content: flex-start;
-  margin-top: 6%;
-  overflow: hidden;
-  padding: 10px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.lightsImage {
+.lightsImage,
+.airconImage,
+.cameraImage {
   margin-top: 5%;
   margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+  width: 55px;
+  height: 55px;
+  object-fit: contain; 
+}
+
+.cameraFF p,
+.cameraFF span {
+  padding-left: 10%;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.lights p{
+  margin-top: 2%;
+  padding-bottom: 4%;
 }
 
 .lights p,
 .lights span {
-  margin-top: 5%;
   padding-left: 10%;
   font-family: "Poppins", sans-serif;
-  font-size: 1rem;
-}
+  font-size: 1.2rem;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
-.lights p {
-  padding-top: 2%;
 }
 
 .switch-container {
+  padding-top: auto;
   margin-top: auto;
-  margin-bottom: 5%;
-  display: flex; /* Flexbox container to align items */
-  justify-content: flex-end; /* Align to the right */
-  background-color: rgba(70, 0, 0, 0);
+  align-self: center;
+  background-color: rgba(255, 0, 0, 0);
   width: 100%;
-  margin-right: 5%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .switch {
@@ -386,7 +410,7 @@
   display: inline-block;
   width: 50px;
   height: 35px;
-  margin-right: 0; /* No extra margin on the right */
+  margin-right: 7%;
 }
 
 .switch input {
@@ -430,136 +454,39 @@ input:checked + .slider:before {
 }
 
 /* Dropdown */
+
+.imageandlightscont {
+  display: flex;  
+  align-items: center; 
+  justify-content: space-between;  
+  width: 90%; 
+}
+
 .lightDropdown {
-  position: absolute;
   top: 10%;
   right: 10%;
-  width: 105px;
   padding: 5px;
   border-radius: 5px;
   font-family: "Poppins", sans-serif;
-  font-size: 0.9rem;
   background-color: #f6f6f6;
-  border: 1px solid #ccc;
+  border: none;
   cursor: pointer;
-}
-
-.lights p,
-.lights span {
-  margin-top: 5%;
-  padding-left: 10%;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.1rem;
-}
-
-.lights p,
-.lights span {
-  margin-top: 5%;
-  padding-left: 10%;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.1rem;
-  word-wrap: break-word;
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  white-space: nowrap;
-}
-
-@media screen and (max-width: 768px) {
-  .lights,
-  .airConditionFF {
-    width: 90%;
-    height: auto; 
-    margin: 5% auto;
-  }
-
-  .lightsImage,
-  .airconImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .lights p,
-  .lights span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
 }
 
 /* airCondition */
 
-.airConditionFF {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 41%;
-  height: 86%;
-  border-radius: 20px;
-  background-color: rgb(255, 255, 255);
-  justify-content: flex-start;
-  margin-top: 6%;
-  overflow: hidden; /* Prevent content overflow */
-  padding: 10px; /* Add padding for spacing */
-  box-sizing: border-box; /* Include padding in width/height */
-}
-
-.airconImage {
-  margin-top: 5%;
-  margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
-}
-
 .airConditionFF p,
 .airConditionFF span {
-  margin-top: 8%;
   padding-left: 10%;
   font-family: "Poppins", sans-serif;
-  font-size: 1.1rem;
-  word-wrap: break-word; /* Wrap text if needed */
-  overflow: hidden; /* Prevent text overflow */
-  text-overflow: ellipsis; /* Add ellipsis for long text */
-  white-space: nowrap; /* Prevent wrapping */
+  font-size: 1.2rem;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.airconImage {
-  margin-top: 5%;
-  margin-left: 5%;
-  width: 40px;
-  height: 40px;
-  object-fit: contain; /* Ensure the image scales properly */
-}
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 35px;
-  margin-right: 7%;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-@media screen and (max-width: 768px) {
-  .airConditionFF {
-    width: 90%; /* Adjust width on smaller screens */
-    height: auto; /* Allow height to adjust */
-    margin: 5% auto;
-  }
-
-  .airconImage {
-    width: 30px;
-    height: 30px;
-  }
-
-  .airConditionFF p,
-  .airConditionFF span {
-    font-size: 0.9rem; /* Adjust text size for smaller screens */
-  }
-}
 .switch-containerTwo {
     margin-top: auto;
     margin-bottom: 5%;
@@ -567,7 +494,7 @@ input:checked + .slider:before {
     background-color: rgba(255, 0, 0, 0);
     width: 100%;
     display: flex;
-    justify-content: flex-end; /* Aligns the switch to the right */
+    justify-content: flex-end;
   }
   
   .switchTwo {
@@ -578,9 +505,34 @@ input:checked + .slider:before {
     margin-right: 7%;
   }
   
-  .switchTwo input {
+  .switchTh input {
     opacity: 0;
     width: 0;
     height: 0;
   }
   
+
+
+
+  /* SECOND FLOOR */
+  /* Adjust the CSS to target only the air conditioner switch container */
+.acDropDown{
+  top: 10%;
+  right: 10%;
+  padding: 5px;
+  border-radius: 5px;
+  font-family: "Poppins", sans-serif;
+  background-color: #f6f6f6;
+  border: none;
+  cursor: pointer;
+
+}
+
+.imagesandaccont {
+  display: flex;  
+  align-items: center; 
+  justify-content: space-between;  
+  width: 90%; 
+}
+
+

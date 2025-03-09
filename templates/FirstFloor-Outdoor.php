@@ -20,14 +20,15 @@ if (!isset($_SESSION['user_id'])) {
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Outdoor.css">
-
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
 
 </head>
 
 <body>
     <div class="bgMain">
         <?php include '../partials/bgMain.php'; ?>
-   
+
         <div class="dashboardDevider">
             <div class="dashboardDeviderLeft">
                 <div class="dropdownCont">
@@ -54,7 +55,7 @@ if (!isset($_SESSION['user_id'])) {
                                 Fourth Floor
                             </div>
                             <div class="dropdown-item" data-value="fifthFloor">
-                                Fifth Floor
+                                Roof Top
                             </div>
                         </div>
                     </div>
@@ -98,10 +99,101 @@ if (!isset($_SESSION['user_id'])) {
                     </script>
 
                 </div>
-                <div class="firstFloor">
-                    <img src="../assets/images/firstFloor.png" alt="firstFloor" class="firstFloor">
+                <div class="firstFloor" id="firstfloor3d">
+                    <!-- The model-viewer will be added here via JavaScript -->
                 </div>
 
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const container = document.getElementById("firstfloor3d");
+                        const modelPath = "<?php echo '../assets/models/firstFloor.glb'; ?>"; // Ensure this path is correct
+
+                        fetch(modelPath)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! Status: ${response.status}`);
+                                }
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                const url = URL.createObjectURL(blob);
+
+                                // Create the <model-viewer> element dynamically
+                                const modelViewer = document.createElement("model-viewer");
+                                modelViewer.setAttribute("src", url);
+                                modelViewer.setAttribute("auto-rotate", "");
+                                modelViewer.setAttribute("camera-controls", "");
+                                modelViewer.setAttribute("shadow-intensity", "1");
+                                modelViewer.setAttribute("exposure", ".45");
+                                modelViewer.setAttribute("environment-image", "neutral");
+                                modelViewer.setAttribute("ar", "");
+                                modelViewer.setAttribute("disable-tap", "");
+                                modelViewer.style.width = "100%";
+                                modelViewer.style.height = "600px";
+                                modelViewer.style.position = 'relative'; // Ensure it's positioned relative for glitter effect positioning
+
+                                // Append it to the div
+                                container.appendChild(modelViewer);
+
+                                // Function to create glowing light trails
+                                const createGlowEffect = (x, y) => {
+                                    const glow = document.createElement('div');
+                                    const size = Math.random() * 6 + 4; // Random size for each glow particle (between 4 and 10px)
+                                    const color = `rgba(255, 255, 255, 0.8)`; // White glowing color
+                                    const animationDuration = Math.random() * 0.4 + 0.5; // Random animation duration for each glow
+
+                                    glow.style.position = 'absolute';
+                                    glow.style.left = `${x - size / 2}px`;  // Adjust for center position
+                                    glow.style.top = `${y - size / 2}px`;   // Adjust for center position
+                                    glow.style.width = `${size}px`;
+                                    glow.style.height = `${size}px`;
+                                    glow.style.backgroundColor = color;
+                                    glow.style.borderRadius = '50%';
+                                    glow.style.pointerEvents = 'none';
+                                    glow.style.animation = `glowAnimation ${animationDuration}s ease-out forwards`; // Glowing effect animation
+                                    modelViewer.appendChild(glow);
+
+                                    // Remove glow after animation
+                                    setTimeout(() => {
+                                        glow.remove();
+                                    }, animationDuration * 1000);
+                                };
+
+                                // Add mousemove event to create glowing light trail
+                                modelViewer.addEventListener('mousemove', (event) => {
+                                    const modelViewerRect = modelViewer.getBoundingClientRect();
+                                    const mouseX = event.clientX - modelViewerRect.left; // Get mouse position within model viewer
+                                    const mouseY = event.clientY - modelViewerRect.top;
+
+                                    // Trigger glowing light trail effect
+                                    createGlowEffect(mouseX, mouseY);
+                                });
+                            })
+                            .catch(error => {
+                                console.error("Error loading model:", error);
+                            });
+                    });
+                </script>
+
+                <style>
+                    /* Keyframe animation for glowing effect */
+                    @keyframes glowAnimation {
+                        0% {
+                            transform: scale(0);
+                            opacity: 1;
+                        }
+
+                        50% {
+                            transform: scale(1.5);
+                            opacity: 0.7;
+                        }
+
+                        100% {
+                            transform: scale(0);
+                            opacity: 0;
+                        }
+                    }
+                </style>
                 <div class="room">
                     <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
                     <button onclick="navigateToGarage('../templates/FirstFloor-Garage.php')" class="roomButton"
@@ -113,7 +205,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
             <div class="dashboardDeviderRight">
                 <!-- Search Bar with Icon Inside -->
-                <div class="searchContainer">
+                <!-- <div class="searchContainer">
                     <input type="text" id="searchInput" placeholder=" " class="searchInput">
                     <button onclick="performSearch()" class="searchButton">
                         <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
@@ -123,59 +215,23 @@ if (!isset($_SESSION['user_id'])) {
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </button>
-                </div>
+                </div> -->
 
                 <div class="firstFloorLog">
-                    <table class="ffLogTable">
-                        <tr>
-                            <td class="ffuserTime">
-                                <span class="fflogTime">10:45 AM</span>
-                            </td>
-                            <td class="ffuserLog">
-                                <span class="ffuserDid">Access gate was Closed</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div class="line-with-circle"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ffuserTime">
-                                <span class="fflogTime">10:50 AM</span>
-                            </td>
-                            <td class="ffuserLog">
-                                <span class="ffuserDid">Camera was Opened</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div class="line-with-circle"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ffuserTime">
-                                <span class="fflogTime">10:50 AM</span>
-                            </td>
-                            <td class="ffuserLog">
-                                <span class="ffuserDid">Camera was Closed</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <div class="line-with-circle"></div>
-                            </td>
-                        </tr>
-                    </table>
+                    <button id="downloadExcel" class="downloadBtn">
+                        <span class="material-icons">download</span>
+                    </button>
+
+                    <!-- Notifications will be inserted here dynamically -->
                 </div>
 
                 <div class="deviceControl">
                     <p class="devTitle">Devices</p>
                     <div class="devices">
                         <div class="accessGate">
-                            
-                        <img src="../assets/images/accessGate.png" alt="Access Gate" class="accessGateImage">
-                            
+
+                            <img src="../assets/images/accessGate.png" alt="Access Gate" class="accessGateImage">
+
                             <p>Access Gate</p>
                             <span>Outdoor</span>
 
@@ -275,7 +331,79 @@ if (!isset($_SESSION['user_id'])) {
 
         </script>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadNotifications();
+            });
+
+            function loadNotifications() {
+                fetch("../scripts/logs_firstFloor_Garage.php")
+                    .then(response => response.json())
+                    .then(data => {
+                        let logContainer = document.querySelector(".firstFloorLog");
+
+                        // Ensure the button exists and is properly placed
+                        let downloadButton = document.getElementById("downloadExcel");
+                        if (!downloadButton) {
+                            downloadButton = document.createElement("button");
+                            downloadButton.id = "downloadExcel";
+                            downloadButton.className = "downloadBtn";
+                            downloadButton.innerHTML = '<span class="material-icons">download</span>';
+                            logContainer.appendChild(downloadButton);
+                        }
+
+                        // Make sure the event listener is attached
+                        downloadButton.addEventListener("click", downloadExcel);
+
+                        let logHTML = '<table class="ffLogTable">';
+                        data.reverse().forEach((notif, index) => {
+                            logHTML += `
+                <tr>
+                    <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
+                    <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
+                </tr>`;
+
+                            if (index !== data.length - 1) {
+                                logHTML += `
+                <tr>
+                    <td colspan="2">
+                        <div class="line-with-circle"></div>
+                    </td>
+                </tr>`;
+                            }
+                        });
+
+                        logHTML += "</table>";
+
+                        // Remove old logs but keep the button
+                        let existingLogs = logContainer.querySelector("table");
+                        if (existingLogs) {
+                            existingLogs.remove();
+                        }
+                        logContainer.insertAdjacentHTML("beforeend", logHTML);
+                    })
+                    .catch(error => console.error("Error fetching notifications:", error));
+            }
+
+            function downloadExcel() {
+                fetch("../scripts/logs_firstFloor_Garage.php")
+                    .then(response => response.json())
+                    .then(data => {
+                        let worksheetData = [["Time", "Message"]]; // Header row
+                        data.forEach(log => worksheetData.push([log.time, log.message]));
+
+                        let ws = XLSX.utils.aoa_to_sheet(worksheetData);
+                        let wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
+
+                        XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
+                    })
+                    .catch(error => console.error("Error fetching data:", error));
+            }
+        </script>
 
     </div>
 </body>
