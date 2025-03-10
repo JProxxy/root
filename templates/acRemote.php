@@ -109,12 +109,13 @@ if (!isset($_SESSION['user_id'])) {
                             <!-- Non-interactive design images -->
                             <img class="bgRem" src="../assets/images/ac/bgRem.png">
 
-                            <img class="tempbar" src="../assets/images/ac/tempbar.png">
-
-                            <!-- Interactive images -->
-                            <img class="tempbarLow" src="../assets/images/ac/tempbarLow.png">
-                            <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
-
+                            <div class="tempbarCont">
+                                <div class="actualTemp"></div>
+                                <img class="tempbar" src="../assets/images/ac/tempbar.png">
+                                <!-- Interactive images -->
+                                <img class="tempbarLow" src="../assets/images/ac/tempbarLow.png">
+                                <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
+                            </div>
                             <img class="fan" src="../assets/images/ac/fan.png">
                             <img class="fanLow" src="../assets/images/ac/fanLow.png">
                             <img class="fanHigh" src="../assets/images/ac/fanHigh.png">
@@ -309,6 +310,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <span class="slider"></span>
                                 </label>
                             </div>
+
                         </div>
 
                         <div class="cameraFF">
@@ -387,204 +389,257 @@ if (!isset($_SESSION['user_id'])) {
                     });
             }
 
-            // Function to toggle aircon state
-            function toggleAirconFF() {
-                const airconSwitch = document.getElementById('airconFFSwitch');
-                const status = airconSwitch.checked ? 'ON' : 'OFF'; // Capture air conditioner status
-                console.log('Air Conditioner FF status:', status);
 
-                // Prepare the data to send to the API Gateway in the required format
-                const requestData = {
-                    body: JSON.stringify({
-                        data: {
-                            deviceName: 'AirconFF',  // AirconFF device name
-                            command: status          // Sending the command (ON/OFF)
-                        }
-                    })
-                };
-
-                // Send the data to Lambda API via API Gateway
-                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                })
-                    .then(response => response.json())
-                    .then(responseData => {
-                        console.log('Aircon control response:', responseData);
-                    })
-                    .catch(error => {
-                        console.error("Error updating aircon status:", error);
-                    });
-            }
-
-            function navigateToGarage() {
-                window.location.href = 'FirstFloor-Garage.php';
-            }
-
-            function navigateToOutdoor() {
-                window.location.href = '../templates/FirstFloor-Outdoor.php';
-            }
         </script>
 
-        <!-- TIMER AC REMOTE -->
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const progressBar = document.querySelector('.progress-bar');
-                const timeLeftText = document.getElementById('time-left');
-                const progressCircle = document.getElementById('progress-circle');
 
-                let totalTime = 0;  // Start with 0 seconds (0:00)
-                let countdownInterval;
-                let isRunning = false;  // Track if the countdown is running
+       <!-- Global Timer Variables & Functions -->
+<script>
+    // Global timer variables accessible anywhere.
+    let totalTime = 0;         // Total time in seconds
+    let countdownInterval;     // Reference to the countdown interval
+    let isRunning = false;     // Indicates if the countdown is active
 
-                const maxTime = 12 * 60 * 60;  // Maximum time of 12 hours in seconds (43200 seconds)
-                const circleCircumference = 2 * Math.PI * 95;  // Circumference of the circle
+    const maxTime = 12 * 60 * 60;  // 12 hours in seconds (43200)
+    const circleCircumference = 2 * Math.PI * 95;  // Circumference for the progress circle
 
-                // Function to update the progress bar and time left
-                function updateTimer() {
-                    const hours = Math.floor(totalTime / 3600); // Total hours
-                    const minutes = Math.floor((totalTime % 3600) / 60); // Remaining minutes
+    // Update the timer display using a ceiling method (round up any leftover seconds).
+    function updateTimer() {
+        let hours;
+        if (totalTime === 0) {
+            hours = 0;
+        } else if (totalTime % 3600 === 0) {
+            // Exact full hour (e.g., 11:00:00)
+            hours = totalTime / 3600;
+        } else {
+            // Otherwise, round up.
+            hours = Math.floor(totalTime / 3600) + 1;
+        }
+        // Cap at 12 hours.
+        if (hours > 12) hours = 12;
+        const formattedHours = String(hours).padStart(2, '0');
+        document.getElementById('time-left').textContent = formattedHours;
 
-                    // Ensure hours and minutes are always 2 digits (e.g., 01:09, 05:09, 11:00)
-                    const formattedHours = String(hours).padStart(2, '0');
-                    const formattedMinutes = String(minutes).padStart(2, '0');
+        // Update the SVG progress bar.
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
+            progressBar.style.strokeDashoffset = dashoffset;
+        }
+    }
 
-                    // Display the time with 2 digits for hours and minutes
-                    timeLeftText.textContent = `${formattedHours}:${formattedMinutes}`;
+    // Start the countdown: decrement totalTime each second.
+    function startCountdown() {
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            if (totalTime > 0) {
+                totalTime--;
+                updateTimer();
+            } else {
+                clearInterval(countdownInterval);
+                totalTime = 0;
+                updateTimer();
+                isRunning = false;
+            }
+        }, 1000);
+    }
 
-                    // Calculate strokeDashoffset based on the remaining time
-                    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
-                    progressBar.style.strokeDashoffset = dashoffset;
+    // Reset the timer (clear the counter and stop the countdown).
+    function resetTimer() {
+        clearInterval(countdownInterval);
+        totalTime = 0;
+        isRunning = false;
+        updateTimer();
+        console.log('Timer has been reset.');
+    }
+</script>
+
+<!-- Toggle Aircon Function -->
+<script>
+    function toggleAirconFF() {
+        const airconSwitch = document.getElementById('airconFFSwitch');
+        const status = airconSwitch.checked ? 'ON' : 'OFF';
+        console.log('Air Conditioner FF status:', status);
+
+        // UI elements to control.
+        const timerContainer = document.querySelector('.progress-wrapper');
+        const remoteContainer = document.querySelector('.remote-container');
+        const remoteButtons = remoteContainer ? remoteContainer.querySelectorAll('img') : [];
+        const powerOutput = document.querySelector('.acLog .logItem:first-child .outputCommand');
+
+        if (status === 'ON') {
+            // Activate UI.
+            if (timerContainer) {
+                timerContainer.style.display = 'block';
+                console.log('Timer container activated');
+            }
+            if (remoteContainer) {
+                remoteContainer.style.pointerEvents = 'auto';
+                console.log('Remote container enabled');
+            }
+            remoteButtons.forEach(btn => {
+                btn.style.opacity = '1';
+            });
+            if (powerOutput) {
+                powerOutput.textContent = 'On';
+            }
+            console.log('Remote controls activated');
+        } else {
+            // Deactivate UI.
+            if (timerContainer) {
+                timerContainer.style.display = 'none';
+                console.log('Timer container deactivated');
+            }
+            if (remoteContainer) {
+                remoteContainer.style.pointerEvents = 'none';
+                console.log('Remote container disabled');
+            }
+            remoteButtons.forEach(btn => {
+                btn.style.opacity = '0.5';
+            });
+            if (powerOutput) {
+                powerOutput.textContent = '';
+            }
+            console.log('Remote controls deactivated');
+
+            // Reset the timer when the aircon is turned off.
+            resetTimer();
+        }
+
+        // Send the new status to your backend API.
+        const requestData = {
+            body: JSON.stringify({
+                data: {
+                    deviceName: 'AirconFF',
+                    command: status
                 }
+            })
+        };
+        console.log('Sending request data:', requestData);
 
-                // Function to start the countdown
-                function startCountdown() {
-                    clearInterval(countdownInterval);  // Clear any existing intervals
-                    countdownInterval = setInterval(function () {
-                        if (totalTime > 0) {
-                            totalTime--;  // Decrease by 1 second
-                            updateTimer();
-                        } else {
-                            // Reset everything when it reaches 0:00
-                            clearInterval(countdownInterval);  // Clear the countdown interval
-                            totalTime = 0;  // Reset the timer to 0
-                            updateTimer();  // Reset the progress bar
-                            isRunning = false;  // Stop the countdown
-                        }
-                    }, 1000);
+        fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            console.log('Aircon control response:', responseData);
+        })
+        .catch(error => {
+            console.error("Error updating aircon status:", error);
+        });
+    }
+</script>
+
+<!-- Initialization on Page Load -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Force the aircon switch to be off by default.
+        const airconSwitch = document.getElementById('airconFFSwitch');
+        airconSwitch.checked = false;
+        // Update the UI accordingly.
+        toggleAirconFF();
+        updateTimer();
+
+        // Event listener for the timer progress circle.
+        const progressCircle = document.getElementById('progress-circle');
+        if (progressCircle) {
+            progressCircle.addEventListener("click", function () {
+                // Only allow interaction if aircon is on.
+                if (!airconSwitch.checked) {
+                    console.log("Aircon is off; timer click ignored");
+                    return;
                 }
-
-                // Click event to add 1 hour or reset the timer
-                progressCircle.addEventListener("click", function () {
-                    if (!isRunning) {
-                        // If the countdown is not already running, start it
-                        isRunning = true;
-                        startCountdown();
-                    }
-
-                    // Add 1 hour (3600 seconds) if the time is less than 12 hours
-                    totalTime += 60 * 60;  // Add 1 hour (3600 seconds)
-
-                    // If the time exceeds 12 hours, reset it to 0
-                    if (totalTime >= maxTime) {
-                        totalTime = 0;  // Reset the time to 0 seconds (0:00)
-                    }
-
-                    // Update the progress bar and timer immediately
-                    updateTimer();
-                });
-
-                // Initial setup for the timer
+                if (!isRunning) {
+                    isRunning = true;
+                    startCountdown();
+                }
+                // Add one hour (3600 seconds).
+                totalTime += 3600;
+                if (totalTime > maxTime) {
+                    totalTime = 0;
+                }
                 updateTimer();
             });
-        </script>
+        }
+    });
+</script>
 
-        <!-- AC REMOTE EFFECTS -->
-        <script>
-            // Only apply interactive behavior to images that should be interactive
-            document.querySelectorAll(".remote-container img").forEach(img => {
-                // Exclude bgRem and tempbar from interaction
-                if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
-                    img.addEventListener("mousedown", (e) => {
-                        e.preventDefault(); // Prevents dragging
-
-                        img.classList.add("tapped");
-
-                        // Create ice flakes ❄️
-                        for (let i = 0; i < 10; i++) {
-                            let flake = document.createElement("div");
-                            flake.innerHTML = "❄️"; // Ice flake emoji
-                            flake.classList.add("ice-flake");
-
-                            // Random start position near tap point
-                            let x = e.clientX + (Math.random() * 50 - 25);
-                            let y = e.clientY + (Math.random() * 30 - 15);
-                            flake.style.left = `${x}px`;
-                            flake.style.top = `${y}px`;
-
-                            document.body.appendChild(flake);
-
-                            // Remove flakes after animation
-                            setTimeout(() => {
-                                flake.remove();
-                            }, 1500);
-                        }
-
-                        setTimeout(() => {
-                            img.classList.remove("tapped");
-                        }, 300); // Remove tap effect
-                    });
+<!-- AC Remote Effects -->
+<script>
+    // Add interactive behavior to remote images (except for designated ones).
+    document.querySelectorAll(".remote-container img").forEach(img => {
+        if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
+            img.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                // Check if aircon is on.
+                const airconSwitch = document.getElementById('airconFFSwitch');
+                if (!airconSwitch.checked) {
+                    console.log("Aircon is off; image mousedown ignored");
+                    return;
                 }
-            });
-
-            // Handle click event for interactive images only
-            document.querySelector(".remote-container").addEventListener("click", (e) => {
-                if (e.target.tagName === "IMG" && !e.target.classList.contains("bgRem") && !e.target.classList.contains("tempbar")) {
-                    triggerSnowstorm();
-                }
-            });
-
-            // Snowstorm effect function for interactive images
-            function triggerSnowstorm() {
-                let numFlakes = 50; // More flakes for a real snowstorm!
-
-                for (let i = 0; i < numFlakes; i++) {
+                img.classList.add("tapped");
+                for (let i = 0; i < 10; i++) {
                     let flake = document.createElement("div");
-                    flake.innerHTML = "❄️"; // Ice flake emoji
-                    flake.classList.add("snowstorm-flake");
-
-                    // Random start position across the whole screen
-                    flake.style.left = `${Math.random() * window.innerWidth}px`;
-                    flake.style.top = `-${Math.random() * 1000}px`; // Start from slightly above the screen
-
+                    flake.innerHTML = "❄️";
+                    flake.classList.add("ice-flake");
+                    let x = e.clientX + (Math.random() * 50 - 25);
+                    let y = e.clientY + (Math.random() * 30 - 15);
+                    flake.style.left = `${x}px`;
+                    flake.style.top = `${y}px`;
                     document.body.appendChild(flake);
-
-                    // Remove flakes after animation to keep performance smooth
-                    setTimeout(() => {
-                        flake.remove();
-                    }, 11000); // Snow lasts longer for max chaos
+                    setTimeout(() => { flake.remove(); }, 1500);
                 }
-            }
+                setTimeout(() => { img.classList.remove("tapped"); }, 300);
+            });
+        }
+    });
 
-            // Serious part - scaling the remote to fit the screen
-            function scaleRemote() {
-                let container = document.querySelector(".remote-container");
-                let parent = document.querySelector(".ACRMain");
+    // Remote container click: trigger a snowstorm effect if aircon is on.
+    document.querySelector(".remote-container").addEventListener("click", (e) => {
+        const airconSwitch = document.getElementById('airconFFSwitch');
+        if (!airconSwitch.checked) {
+            console.log("Aircon is off; remote container click ignored");
+            return;
+        }
+        if (e.target.tagName === "IMG" && 
+            !e.target.classList.contains("bgRem") && 
+            !e.target.classList.contains("tempbar")) {
+            triggerSnowstorm();
+        }
+    });
 
-                let scale = Math.min(
-                    parent.clientWidth / 400,  // Scale width based on `.ACRMain`
-                    parent.clientHeight / 800  // Scale height based on `.ACRMain`
-                );
+    // Snowstorm effect: creates a burst of snowflakes.
+    function triggerSnowstorm() {
+        let numFlakes = 50;
+        for (let i = 0; i < numFlakes; i++) {
+            let flake = document.createElement("div");
+            flake.innerHTML = "❄️";
+            flake.classList.add("snowstorm-flake");
+            flake.style.left = `${Math.random() * window.innerWidth}px`;
+            flake.style.top = `-${Math.random() * 1000}px`;
+            document.body.appendChild(flake);
+            setTimeout(() => { flake.remove(); }, 11000);
+        }
+    }
 
-                container.style.transform = `scale(${scale})`;
-            }
+    // Responsive scaling for the remote container.
+    function scaleRemote() {
+        let container = document.querySelector(".remote-container");
+        let parent = document.querySelector(".ACRMain");
+        let scale = Math.min(
+            parent.clientWidth / 400,
+            parent.clientHeight / 800
+        );
+        container.style.transform = `scale(${scale})`;
+    }
 
-            window.addEventListener("resize", scaleRemote);
-            scaleRemote(); // Run once on page load
-        </script>
+    window.addEventListener("resize", scaleRemote);
+    scaleRemote();
+</script>
 
 
     </div>

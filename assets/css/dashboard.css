@@ -15,6 +15,7 @@
   top: 0;
   left: 8%;
   z-index: 2;
+
 }
 
 .dashboardDeviderLeft {
@@ -22,6 +23,7 @@
   font-family: "Kodchasan", sans-serif;
   display: flex;
   flex-direction: column;
+  background-color: rgba(255, 0, 0, 0);
 
 }
 

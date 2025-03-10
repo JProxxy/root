@@ -224,21 +224,23 @@
 
 .titleCommand,
 .outputCommand {
+  font-family: "Poppins", sans-serif;
   color: #0b3236;
   text-align: left;
   width: 50%;
   padding: 0px 0px;
+  padding-left: 5%;
 }
 
 .titleCommand {
-  font-weight: 450;
-  font-size: 2rem;
+  font-weight: 700;
+  font-size: 1.3rem;
   margin-bottom: 2px;
 }
 
 .outputCommand {
   font-weight: 400;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   margin-bottom: 2px;
 }
 
@@ -610,9 +612,9 @@ input:checked + .slider:before {
 .time-left {
   position: absolute;
   top: 40%;
-  left: 33%;
+  left: 35%;
   transform: translate(-50%, -50%);
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   color: #333;
   user-select: none;
@@ -621,7 +623,7 @@ input:checked + .slider:before {
 .hrs {
   position: absolute;
   top: 40.5%;
-  left: 55%;
+  left: 50%;
   transform: translate(-50%, -50%);
   font-size: 1.3rem;
   font-weight: bold;

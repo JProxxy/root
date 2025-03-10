@@ -12,122 +12,8 @@ session_start(); // Must be at the very top
     <title>Dashboard</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <!-- Load three.js -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
 
-    <!-- Load necessary additional files (GLTFLoader, OrbitControls, RGBELoader) -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true });
-            const container = document.querySelector('.dashboardDeviderLeft');
-
-            if (!container) {
-                console.error("Container element not found");
-                return;
-            }
-
-            // Set renderer size and append it to the container
-            const containerWidth = container.offsetWidth;
-            const containerHeight = container.offsetHeight;
-            renderer.setSize(containerWidth, containerHeight);
-            container.appendChild(renderer.domElement);
-
-            // Set background to transparent
-            renderer.setClearColor(0x000000, 0); // Transparent background (alpha = 0)
-
-            // Load HDRI texture using RGBELoader
-            const rgbeLoader = new THREE.RGBELoader();
-            rgbeLoader.load('../assets/models/HDRI/venice_dawn_1_4k.hdr', (texture) => {
-                texture.mapping = THREE.EquirectangularRefractionMapping;
-
-                // Use the HDRI for reflections and lighting, but don't set it as the scene background
-                scene.environment = texture;
-
-                // Adjust model material properties for environment map
-                if (model) {
-                    model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material.envMap = texture; // Apply the environment map to materials
-                        }
-                    });
-                }
-            });
-
-            // Add lights to the scene with reduced intensity
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Lower intensity of ambient light
-            scene.add(ambientLight);
-
-            const pointLight = new THREE.PointLight(0xffffff, 0.5, 100); // Lower intensity of point light
-            pointLight.position.set(5, 5, 5);
-            scene.add(pointLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Lower intensity of directional light
-            directionalLight.position.set(0, 10, 10).normalize(); // Position it above and pointing down
-            scene.add(directionalLight);
-
-            // Load GLTF model using GLTFLoader
-            const gltfLoader = new THREE.GLTFLoader();
-            let model;
-            gltfLoader.load('../assets/models/rivanMainBuilding.glb', (gltf) => {
-                model = gltf.scene;
-                scene.add(model);
-
-                // Move the model down and adjust scale and position
-                model.position.y = -22;
-                model.scale.x = 1.7;
-                model.position.x = 0;
-
-                // Traverse through the model's children and adjust the material properties
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        // Keep the original material, but adjust roughness and metalness
-                        child.material.roughness = 0.5;
-                        child.material.metalness = 0.1;
-                    }
-                });
-            }, undefined, (error) => {
-                console.error("Error loading 3D model:", error);
-            });
-
-            // Set camera position and focus on the model
-            camera.position.set(-11.34, 2.14, 20);
-            camera.lookAt(0, 0, 0);
-
-            // Enable OrbitControls for navigation
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.screenSpacePanning = false;
-            controls.minDistance = 2;
-            controls.maxDistance = 300;
-
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
-            }
-
-            animate();
-
-            // Resize handler
-            window.addEventListener('resize', () => {
-                const containerWidth = container.offsetWidth;
-                const containerHeight = container.offsetHeight;
-                renderer.setSize(containerWidth, containerHeight);
-                camera.aspect = containerWidth / containerHeight;
-                camera.updateProjectionMatrix();
-            });
-        });
-
-
-    </script>
 
 
 </head>
@@ -137,9 +23,86 @@ session_start(); // Must be at the very top
         <?php include '../partials/bgMain.php'; ?>
 
         <div class="dashboardDevider">
-            <div class="dashboardDeviderLeft">
+            <div class="dashboardDeviderLeft" id="dashboardDevider3d">
                 <!-- 3D Model will be rendered here -->
             </div>
+            <div id="dashboardDevider3d"></div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const container = document.getElementById("dashboardDevider3d");
+
+                    // PHP variable to get the model path
+                    const modelPath = "<?php echo '../assets/models/MainBuilding.glb'; ?>";
+
+                    // Check if the modelPath is correct
+                    console.log('Model Path:', modelPath);
+
+                    // Check if the model path is valid
+                    fetch(modelPath)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.blob();
+                        })
+                        .then(blob => {
+                            const url = URL.createObjectURL(blob);
+
+                            // Create the <model-viewer> element dynamically
+                            const modelViewer = document.createElement("model-viewer");
+                            modelViewer.setAttribute("src", url);
+                            modelViewer.setAttribute("auto-rotate", "");
+                            modelViewer.setAttribute("camera-controls", "");
+                            modelViewer.setAttribute("shadow-intensity", "1");
+                            modelViewer.setAttribute("exposure", ".45");
+                            modelViewer.setAttribute("environment-image", "neutral");
+                            modelViewer.setAttribute("ar", "");
+                            modelViewer.setAttribute("disable-tap", "");
+                            modelViewer.style.width = "100%";
+                            modelViewer.style.height = "820px";
+                            modelViewer.style.position = 'relative'; // Ensure it's positioned relative for glow effect positioning
+
+                            // Append the model-viewer to the container
+                            container.appendChild(modelViewer);
+
+                            // Function to create glowing light trails
+                            const createGlowEffect = (x, y) => {
+                                const glow = document.createElement('div');
+                                const size = Math.random() * 6 + 4; // Random size between 4 and 10px
+                                const color = `rgba(255, 255, 255, 0.8)`; // White glow
+                                const animationDuration = Math.random() * 0.4 + 0.5; // Random duration between 0.5 and 0.9 seconds
+
+                                glow.style.position = 'absolute';
+                                glow.style.left = `${x - size / 2}px`;
+                                glow.style.top = `${y - size / 2}px`;
+                                glow.style.width = `${size}px`;
+                                glow.style.height = `${size}px`;
+                                glow.style.backgroundColor = color;
+                                glow.style.borderRadius = '50%';
+                                glow.style.pointerEvents = 'none';
+                                glow.style.animation = `glowAnimation ${animationDuration}s ease-out forwards`;
+                                modelViewer.appendChild(glow);
+
+                                // Remove the glow element after the animation completes
+                                setTimeout(() => {
+                                    glow.remove();
+                                }, animationDuration * 1000);
+                            };
+
+                            // Add mousemove event to create glowing light trails
+                            modelViewer.addEventListener('mousemove', (event) => {
+                                const rect = modelViewer.getBoundingClientRect();
+                                const mouseX = event.clientX - rect.left;
+                                const mouseY = event.clientY - rect.top;
+                                createGlowEffect(mouseX, mouseY);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error loading model:", error);
+                        });
+                });
+            </script>
 
             <div class="dashboardDeviderRight">
                 <h2>Welcome to Rivan!</h2>
@@ -278,20 +241,20 @@ session_start(); // Must be at the very top
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-$(document).ready(function () {
-    function loadNotifications() {
-        $.ajax({
-            url: '../scripts/fetch_notifs.php', // Ensure correct PHP file path
-            method: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                if (!response || response.length === 0) {
-                    return;
-                }
+        $(document).ready(function () {
+            function loadNotifications() {
+                $.ajax({
+                    url: '../scripts/fetch_notifs.php', // Ensure correct PHP file path
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (!response || response.length === 0) {
+                            return;
+                        }
 
-                response.reverse().forEach((notif) => { // Reverse to maintain order
-                    let notifClass = `notif-item ${notif.type}`;
-                    let notifHtml = `
+                        response.reverse().forEach((notif) => { // Reverse to maintain order
+                            let notifClass = `notif-item ${notif.type}`;
+                            let notifHtml = `
                         <div class="${notifClass}" style="display: none;"> 
                             <span class="close-btn">&times;</span> 
                             <strong>${notif.title}</strong>
@@ -299,46 +262,46 @@ $(document).ready(function () {
                         </div>
                     `;
 
-                    // **Check if notification already exists**
-                    if (!$('.notifCont').find(`.notif-item:contains("${notif.message}")`).length) {
-                        let $newNotif = $(notifHtml);
+                            // **Check if notification already exists**
+                            if (!$('.notifCont').find(`.notif-item:contains("${notif.message}")`).length) {
+                                let $newNotif = $(notifHtml);
 
-                        // **Add new notification on top**
-                        $('.notifCont').prepend($newNotif);
+                                // **Add new notification on top**
+                                $('.notifCont').prepend($newNotif);
 
-                        // **Animate only if it’s a new notification**
-                        if (!$newNotif.is(':visible')) {
-                            $newNotif.slideDown(400); // **Smooth slide-in animation**
-                        }
+                                // **Animate only if it’s a new notification**
+                                if (!$newNotif.is(':visible')) {
+                                    $newNotif.slideDown(400); // **Smooth slide-in animation**
+                                }
+                            }
+                        });
+
+                        // **Keep only the latest 10 notifications**
+                        $('.notif-item').slice(10).fadeOut(300, function () { $(this).remove(); });
+                    },
+                    error: function () {
+                        console.error("Failed to load notifications.");
                     }
                 });
-
-                // **Keep only the latest 10 notifications**
-                $('.notif-item').slice(10).fadeOut(300, function () { $(this).remove(); });
-            },
-            error: function () {
-                console.error("Failed to load notifications.");
             }
+
+            // **Close button animation**
+            $('.notifCont').on('click', '.close-btn', function () {
+                $(this).parent().fadeOut(300, function () {
+                    $(this).remove();
+                });
+            });
+
+            // **Initial load without animation**
+            loadNotifications();
+
+            // **Fetch new notifications every 10 seconds**
+            setInterval(loadNotifications, 10000);
         });
-    }
-
-    // **Close button animation**
-    $('.notifCont').on('click', '.close-btn', function () {
-        $(this).parent().fadeOut(300, function () {
-            $(this).remove();
-        });
-    });
-
-    // **Initial load without animation**
-    loadNotifications();
-
-    // **Fetch new notifications every 10 seconds**
-    setInterval(loadNotifications, 10000);
-});
 
 
     </script>
-    
+
 
 
 </body>
