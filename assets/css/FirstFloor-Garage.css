@@ -357,13 +357,20 @@ background-color: rgba(255, 0, 0, 0);
 }
 
 .lightsImage,
-.airconImage,
 .cameraImage {
   margin-top: 5%;
   margin-left: 5%;
   width: 55px;
   height: 55px;
   object-fit: contain; 
+}
+
+.airconImage {
+  margin-top: 15%;
+  margin-left: 15%;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
 }
 
 .cameraFF p,

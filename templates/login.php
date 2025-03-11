@@ -142,23 +142,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
                 <form action="../classes/register.php" method="POST" id="signupForm">
                     <input type="hidden" name="csrf_token" value="<?php echo bin2hex(random_bytes(32)); ?>">
+                    <input type="hidden" name="recaptcha_response" id="recaptchaResponse"> <!-- reCAPTCHA Token -->
+
                     <div class="boxTwo">
                         <h2 class="signUpTitle">USER SIGN UP</h2>
+
                         <div class="inputsign-container">
                             <i class="fas fa-user"></i>
                             <input type="text" name="username" placeholder="Username" required
                                 pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
                         </div>
+
                         <div class="inputsign-container">
                             <i class="fas fa-envelope"></i>
                             <input type="email" name="email" placeholder="Email" required
                                 pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
                         </div>
+
                         <div class="inputsign-container">
                             <i class="fas fa-phone"></i>
                             <input type="tel" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]{10}"
                                 title="10-digit phone number">
                         </div>
+
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" name="password" placeholder="Password" required
@@ -173,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                     onclick="togglePasswordVisibility('password', this)"></i>
                             </div>
                         </div>
+
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="retype_password" name="retype_password"
@@ -185,7 +192,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 Passwords do not match
                             </span>
                         </div>
+
                         <button type="submit" class="signupButton">SIGN UP</button>
+
                         <div class="link-container">
                             <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In
                                 Account</a>
@@ -193,14 +202,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     </div>
                 </form>
             </div>
+
+            <!-- Include Google's reCAPTCHA v3 script -->
+            <script src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
+
+            <script>
+                document.getElementById('signupForm').addEventListener('submit', function (event) {
+                    event.preventDefault(); // Prevent form from submitting immediately
+
+                    grecaptcha.ready(function () {
+                        grecaptcha.execute('6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij', { action: 'signup' }).then(function (token) {
+                            document.getElementById('recaptchaResponse').value = token;
+                            document.getElementById('signupForm').submit(); // Submit after token is set
+                        });
+                    });
+                });
+            </script>
+
             <div class="frontImg"></div>
         </div>
     </div>
 
 
 </body>
-
-</html>
 
 
 <script>
@@ -210,6 +234,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         login.style.display = login.style.display === 'none' ? 'flex' : 'none';
         signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
     }
+
+</script>
+
+</html>
+
+
+<script>
 
     function checkPasswordStrength(password) {
         const strengthBar = document.querySelector('.strength-bar');

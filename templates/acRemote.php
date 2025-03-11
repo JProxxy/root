@@ -110,11 +110,12 @@ if (!isset($_SESSION['user_id'])) {
                             <img class="bgRem" src="../assets/images/ac/bgRem.png">
 
                             <div class="tempbarCont">
-                                <div class="actualTemp"></div>
+
                                 <img class="tempbar" src="../assets/images/ac/tempbar.png">
                                 <!-- Interactive images -->
                                 <img class="tempbarLow" src="../assets/images/ac/tempbarLow.png">
                                 <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
+                                <h1 class="actualTemp" id="ACRCTemp"></h1>
                             </div>
                             <img class="fan" src="../assets/images/ac/fan.png">
                             <img class="fanLow" src="../assets/images/ac/fanLow.png">
@@ -132,7 +133,7 @@ if (!isset($_SESSION['user_id'])) {
                             <!-- Timer Donut -->
                             <div class="container">
                                 <div class="progress-wrapper">
-                                    <svg class="progress-circle" id="progress-circle" width="225" height="300">
+                                    <svg class="progress-circle" id="progress-circle" width="215" height="215">
                                         <defs>
                                             <linearGradient class="progress-gradient" id="progress-gradient" x1="0%"
                                                 y1="0%" x2="100%" y2="100%">
@@ -144,13 +145,15 @@ if (!isset($_SESSION['user_id'])) {
                                                 <stop offset="71.79%" style="stop-color: #65B1BA; stop-opacity: 1" />
                                             </linearGradient>
                                         </defs>
-                                        <circle class="progress-background" cx="120" cy="120" r="95" />
-                                        <circle class="progress-bar" cx="120" cy="120" r="95" />
+                                        <circle class="progress-background" cx="107.5" cy="107.5" r="97" />
+                                        <circle class="progress-bar" cx="107.5" cy="107.5" r="97" />
                                     </svg>
                                     <div class="time-left" id="time-left">--:--</div>
                                     <span class="hrs">hrs</span>
                                 </div>
                             </div>
+
+
 
                         </div>
                     </div>
@@ -163,66 +166,51 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
             <div class="dashboardDeviderRight">
-                <!-- <div class="searchContainer">
-                    <input type="text" id="searchInputX" placeholder=" " class="searchInput">
-                    <button onclick="performSearch()" class="searchButton">
-                        <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </button>
-                </div> -->
                 <div class="acLog">
                     <div class="firstPartLog">
                         <div class="logItem">
                             <div class="titleCommand">Power</div>
-                            <div class="outputCommand">On</div>
+                            <div class="outputCommand" id="ACpower"></div>
                         </div>
 
                         <div class="line-with-circleR"></div>
 
                         <div class="logItem">
                             <div class="titleCommand">Temp</div>
-                            <div class="outputCommand">16°C</div>
+                            <div class="outputCommand" id="ACtemp">°C</div>
                         </div>
 
                         <div class="line-with-circleR"></div>
 
                         <div class="logItem">
                             <div class="titleCommand">Timer</div>
-                            <div class="outputCommand">8 hrs</div>
+                            <div class="outputCommand" id="ACtimer"></div>
                         </div>
-                        <div class="line-with-circleR"></div>
                     </div>
 
-                    <!-- Vertical Divider -->
                     <div class="divider"></div>
 
                     <div class="secondPartLog">
                         <div class="logItem">
                             <div class="titleCommand">Mode</div>
-                            <div class="outputCommand">Fan</div>
+                            <div class="outputCommand" id="ACmode"></div>
                         </div>
 
                         <div class="line-with-circleL"></div>
 
                         <div class="logItem">
                             <div class="titleCommand">Fan</div>
-                            <div class="outputCommand">High</div>
+                            <div class="outputCommand" id="ACfan"></div>
                         </div>
 
                         <div class="line-with-circleL"></div>
 
                         <div class="logItem">
                             <div class="titleCommand">Swing</div>
-                            <div class="outputCommand">Off</div>
+                            <div class="outputCommand" id="ACswing"></div>
                         </div>
-                        <div class="line-with-circleL"></div>
                     </div>
                 </div>
-
 
 
 
@@ -390,256 +378,252 @@ if (!isset($_SESSION['user_id'])) {
             }
 
 
+            function navigateToGarage() {
+                window.location.href = 'FirstFloor-Garage.php';
+            }
+
+            function navigateToOutdoor() {
+                window.location.href = '../templates/FirstFloor-Outdoor.php';
+            }
         </script>
 
 
-       <!-- Global Timer Variables & Functions -->
-<script>
-    // Global timer variables accessible anywhere.
-    let totalTime = 0;         // Total time in seconds
-    let countdownInterval;     // Reference to the countdown interval
-    let isRunning = false;     // Indicates if the countdown is active
+        <script>
+            function toggleAirconFF() {
+                const switchElement = document.getElementById("airconFFSwitch");
+                const remoteContainer = document.querySelector(".remote-container");
+                const elementsToHide = [
+                    "ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"
+                ];
 
-    const maxTime = 12 * 60 * 60;  // 12 hours in seconds (43200)
-    const circleCircumference = 2 * Math.PI * 95;  // Circumference for the progress circle
+                if (switchElement.checked) {
+                    remoteContainer.classList.add("enabled"); // Enable controls
+                    elementsToHide.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = "block"; // Show text
+                    });
+                } else {
+                    remoteContainer.classList.remove("enabled"); // Disable controls
 
-    // Update the timer display using a ceiling method (round up any leftover seconds).
-    function updateTimer() {
-        let hours;
-        if (totalTime === 0) {
-            hours = 0;
-        } else if (totalTime % 3600 === 0) {
-            // Exact full hour (e.g., 11:00:00)
-            hours = totalTime / 3600;
-        } else {
-            // Otherwise, round up.
-            hours = Math.floor(totalTime / 3600) + 1;
-        }
-        // Cap at 12 hours.
-        if (hours > 12) hours = 12;
-        const formattedHours = String(hours).padStart(2, '0');
-        document.getElementById('time-left').textContent = formattedHours;
+                    // Hide text elements
+                    elementsToHide.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = "none"; // Hide text
+                    });
 
-        // Update the SVG progress bar.
-        const progressBar = document.querySelector('.progress-bar');
-        if (progressBar) {
-            const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
-            progressBar.style.strokeDashoffset = dashoffset;
-        }
-    }
+                    // Stop all intervals
+                    let highestInterval = setInterval(() => { }, 1000);
+                    for (let i = 0; i < highestInterval; i++) {
+                        clearInterval(i);
+                    }
 
-    // Start the countdown: decrement totalTime each second.
-    function startCountdown() {
-        clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-            if (totalTime > 0) {
-                totalTime--;
-                updateTimer();
-            } else {
-                clearInterval(countdownInterval);
-                totalTime = 0;
-                updateTimer();
-                isRunning = false;
+                    // Stop all requestAnimationFrame loops
+                    let highestFrame = requestAnimationFrame(() => { });
+                    for (let i = 0; i < highestFrame; i++) {
+                        cancelAnimationFrame(i);
+                    }
+                }
             }
-        }, 1000);
-    }
 
-    // Reset the timer (clear the counter and stop the countdown).
-    function resetTimer() {
-        clearInterval(countdownInterval);
-        totalTime = 0;
-        isRunning = false;
-        updateTimer();
-        console.log('Timer has been reset.');
-    }
-</script>
-
-<!-- Toggle Aircon Function -->
-<script>
-    function toggleAirconFF() {
-        const airconSwitch = document.getElementById('airconFFSwitch');
-        const status = airconSwitch.checked ? 'ON' : 'OFF';
-        console.log('Air Conditioner FF status:', status);
-
-        // UI elements to control.
-        const timerContainer = document.querySelector('.progress-wrapper');
-        const remoteContainer = document.querySelector('.remote-container');
-        const remoteButtons = remoteContainer ? remoteContainer.querySelectorAll('img') : [];
-        const powerOutput = document.querySelector('.acLog .logItem:first-child .outputCommand');
-
-        if (status === 'ON') {
-            // Activate UI.
-            if (timerContainer) {
-                timerContainer.style.display = 'block';
-                console.log('Timer container activated');
-            }
-            if (remoteContainer) {
-                remoteContainer.style.pointerEvents = 'auto';
-                console.log('Remote container enabled');
-            }
-            remoteButtons.forEach(btn => {
-                btn.style.opacity = '1';
+            // Ensure elements are hidden on page load
+            document.addEventListener("DOMContentLoaded", function () {
+                toggleAirconFF(); // Run function on page load to check initial state
             });
-            if (powerOutput) {
-                powerOutput.textContent = 'On';
+
+
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            function fetchACLog() {
+                $.ajax({
+                    url: '../scripts/fetch-AC-data.php',  // PHP script to get AC log
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        // Update UI with fetched data
+                        $("#ACpower").text(data.power);
+                        $("#ACtemp").text(data.temp + " °C");
+                        $("#ACtimer").text(data.timer);
+                        $("#ACmode").text(data.mode);
+                        $("#ACfan").text(data.fan);
+                        $("#ACswing").text(data.swing);
+                        $("#ACRCTemp").text(data.temp);  // Updated to include room temperature
+
+                        // Print the fetched data to the console
+                        console.log("AC Log Updated:", data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching AC log:", error);
+                    }
+                });
             }
-            console.log('Remote controls activated');
-        } else {
-            // Deactivate UI.
-            if (timerContainer) {
-                timerContainer.style.display = 'none';
-                console.log('Timer container deactivated');
-            }
-            if (remoteContainer) {
-                remoteContainer.style.pointerEvents = 'none';
-                console.log('Remote container disabled');
-            }
-            remoteButtons.forEach(btn => {
-                btn.style.opacity = '0.5';
+
+            // Fetch data when the page loads
+            $(document).ready(function () {
+                fetchACLog();  // Initial fetch
+                setInterval(fetchACLog, 3000);  // Fetch every 3 seconds
             });
-            if (powerOutput) {
-                powerOutput.textContent = '';
-            }
-            console.log('Remote controls deactivated');
+        </script>
 
-            // Reset the timer when the aircon is turned off.
-            resetTimer();
-        }
 
-        // Send the new status to your backend API.
-        const requestData = {
-            body: JSON.stringify({
-                data: {
-                    deviceName: 'AirconFF',
-                    command: status
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const progressBar = document.querySelector('.progress-bar');
+                const timeLeftText = document.getElementById('time-left');
+                const progressCircle = document.getElementById('progress-circle');
+
+
+                let totalTime = 0;  // total time in seconds
+                let countdownInterval;
+                let isRunning = false;  // whether the countdown is active
+
+                const maxTime = 12 * 60 * 60;  // 12 hours in seconds (43200)
+                const circleCircumference = 2 * Math.PI * 97.1;  // Circumference of the progress circle
+
+                // Updates the displayed time using a ceiling method.
+                function updateTimer() {
+                    let hours;
+                    if (totalTime === 0) {
+                        hours = 0;
+                    } else if (totalTime % 3600 === 0) {
+                        // Exactly a full hour (e.g., 11:00:00)
+                        hours = totalTime / 3600;
+                    } else {
+                        // If there are leftover seconds, round up to the next full hour.
+                        hours = Math.floor(totalTime / 3600) + 1;
+                    }
+                    // Cap the displayed hours at 12.
+                    if (hours > 12) {
+                        hours = 12;
+                    }
+                    const formattedHours = String(hours).padStart(2, '0');
+                    timeLeftText.textContent = formattedHours;
+
+                    // Update the progress circle
+                    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
+                    progressBar.style.strokeDashoffset = dashoffset;
                 }
-            })
-        };
-        console.log('Sending request data:', requestData);
 
-        fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        })
-        .then(response => response.json())
-        .then(responseData => {
-            console.log('Aircon control response:', responseData);
-        })
-        .catch(error => {
-            console.error("Error updating aircon status:", error);
-        });
-    }
-</script>
+                function startCountdown() {
+                    clearInterval(countdownInterval);  // Clear any existing countdown
+                    countdownInterval = setInterval(function () {
+                        if (totalTime > 0) {
+                            totalTime--;  // Decrement by one second
+                            updateTimer();
+                        } else {
+                            clearInterval(countdownInterval);
+                            totalTime = 0;
+                            updateTimer();
+                            isRunning = false;
+                        }
+                    }, 1000);
+                }
 
-<!-- Initialization on Page Load -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Force the aircon switch to be off by default.
-        const airconSwitch = document.getElementById('airconFFSwitch');
-        airconSwitch.checked = false;
-        // Update the UI accordingly.
-        toggleAirconFF();
-        updateTimer();
+                progressCircle.addEventListener("click", function () {
+                    if (!isRunning) {
+                        isRunning = true;
+                        startCountdown();
+                    }
 
-        // Event listener for the timer progress circle.
-        const progressCircle = document.getElementById('progress-circle');
-        if (progressCircle) {
-            progressCircle.addEventListener("click", function () {
-                // Only allow interaction if aircon is on.
-                if (!airconSwitch.checked) {
-                    console.log("Aircon is off; timer click ignored");
-                    return;
-                }
-                if (!isRunning) {
-                    isRunning = true;
-                    startCountdown();
-                }
-                // Add one hour (3600 seconds).
-                totalTime += 3600;
-                if (totalTime > maxTime) {
-                    totalTime = 0;
-                }
-                updateTimer();
+                    // Each click adds one hour (3600 seconds)
+                    totalTime += 3600;
+
+                    // If the total time exceeds 12 hours, reset to 0
+                    if (totalTime > maxTime) {
+                        totalTime = 0;
+                    }
+                    updateTimer();
+                });
+
+                updateTimer(); // Initial update
             });
-        }
-    });
-</script>
+        </script>
 
-<!-- AC Remote Effects -->
-<script>
-    // Add interactive behavior to remote images (except for designated ones).
-    document.querySelectorAll(".remote-container img").forEach(img => {
-        if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
-            img.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                // Check if aircon is on.
-                const airconSwitch = document.getElementById('airconFFSwitch');
-                if (!airconSwitch.checked) {
-                    console.log("Aircon is off; image mousedown ignored");
-                    return;
+
+        <!-- AC REMOTE EFFECTS -->
+        <script>
+            // Only apply interactive behavior to images that should be interactive
+            document.querySelectorAll(".remote-container img").forEach(img => {
+                if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
+                    img.addEventListener("mousedown", (e) => {
+                        e.preventDefault(); // Prevent dragging
+                        img.classList.add("tapped");
+
+                        // Create ice flakes ❄️
+                        for (let i = 0; i < 10; i++) {
+                            let flake = document.createElement("div");
+                            flake.innerHTML = "❄️"; // Ice flake emoji
+                            flake.classList.add("ice-flake");
+
+                            // Random start position near tap point
+                            let x = e.clientX + (Math.random() * 50 - 25);
+                            let y = e.clientY + (Math.random() * 30 - 15);
+                            flake.style.left = x + "px";
+                            flake.style.top = y + "px";
+
+                            document.body.appendChild(flake);
+
+                            // Remove flakes after animation
+                            setTimeout(() => {
+                                flake.remove();
+                            }, 1500);
+                        }
+
+                        setTimeout(() => {
+                            img.classList.remove("tapped");
+                        }, 300);
+                    });
                 }
-                img.classList.add("tapped");
-                for (let i = 0; i < 10; i++) {
+            });
+
+            // Handle click event for interactive images only
+            document.querySelector(".remote-container").addEventListener("click", (e) => {
+                if (e.target.tagName === "IMG" && !e.target.classList.contains("bgRem") && !e.target.classList.contains("tempbar")) {
+                    triggerSnowstorm();
+                }
+            });
+
+            // Snowstorm effect function for interactive images
+            function triggerSnowstorm() {
+                let numFlakes = 50; // More flakes for a real snowstorm!
+
+                for (let i = 0; i < numFlakes; i++) {
                     let flake = document.createElement("div");
-                    flake.innerHTML = "❄️";
-                    flake.classList.add("ice-flake");
-                    let x = e.clientX + (Math.random() * 50 - 25);
-                    let y = e.clientY + (Math.random() * 30 - 15);
-                    flake.style.left = `${x}px`;
-                    flake.style.top = `${y}px`;
+                    flake.innerHTML = "❄️"; // Ice flake emoji
+                    flake.classList.add("snowstorm-flake");
+
+                    // Random start position across the whole screen
+                    flake.style.left = Math.random() * window.innerWidth + "px";
+                    flake.style.top = -Math.random() * 1000 + "px"; // Start from slightly above the screen
+
                     document.body.appendChild(flake);
-                    setTimeout(() => { flake.remove(); }, 1500);
+
+                    // Remove flakes after animation to keep performance smooth
+                    setTimeout(() => {
+                        flake.remove();
+                    }, 11000);
                 }
-                setTimeout(() => { img.classList.remove("tapped"); }, 300);
-            });
-        }
-    });
+            }
 
-    // Remote container click: trigger a snowstorm effect if aircon is on.
-    document.querySelector(".remote-container").addEventListener("click", (e) => {
-        const airconSwitch = document.getElementById('airconFFSwitch');
-        if (!airconSwitch.checked) {
-            console.log("Aircon is off; remote container click ignored");
-            return;
-        }
-        if (e.target.tagName === "IMG" && 
-            !e.target.classList.contains("bgRem") && 
-            !e.target.classList.contains("tempbar")) {
-            triggerSnowstorm();
-        }
-    });
+            // Scaling the remote to fit the screen
+            function scaleRemote() {
+                let container = document.querySelector(".remote-container");
+                let parent = document.querySelector(".ACRMain");
 
-    // Snowstorm effect: creates a burst of snowflakes.
-    function triggerSnowstorm() {
-        let numFlakes = 50;
-        for (let i = 0; i < numFlakes; i++) {
-            let flake = document.createElement("div");
-            flake.innerHTML = "❄️";
-            flake.classList.add("snowstorm-flake");
-            flake.style.left = `${Math.random() * window.innerWidth}px`;
-            flake.style.top = `-${Math.random() * 1000}px`;
-            document.body.appendChild(flake);
-            setTimeout(() => { flake.remove(); }, 11000);
-        }
-    }
+                let scale = Math.min(
+                    parent.clientWidth / 400,  // Scale width based on .ACRMain
+                    parent.clientHeight / 800  // Scale height based on .ACRMain
+                );
 
-    // Responsive scaling for the remote container.
-    function scaleRemote() {
-        let container = document.querySelector(".remote-container");
-        let parent = document.querySelector(".ACRMain");
-        let scale = Math.min(
-            parent.clientWidth / 400,
-            parent.clientHeight / 800
-        );
-        container.style.transform = `scale(${scale})`;
-    }
+                container.style.transform = "scale(" + scale + ")";
+            }
 
-    window.addEventListener("resize", scaleRemote);
-    scaleRemote();
-</script>
+            window.addEventListener("resize", scaleRemote);
+            scaleRemote(); // Run once on page load
+        </script>
 
 
     </div>

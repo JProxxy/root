@@ -378,7 +378,6 @@
 }
 
 .lightsImage,
-.airconImage,
 .cameraImage {
   margin-top: 5%;
   margin-left: 5%;
@@ -386,6 +385,15 @@
   height: 55px;
   object-fit: contain;
 }
+
+.airconImage {
+  margin-top: 15%;
+  margin-left: 15%;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+
 
 .cameraFF p,
 .cameraFF span {
@@ -574,8 +582,8 @@ input:checked + .slider:before {
 .container {
   /* background-color: red; */
   position: fixed;
-  top: 55%;
-  left: 51.5%;
+  top: 54.2%;
+  left: 53%;
   transform: translate(-50%, -50%);
   margin-top: 0;
   padding-left: 0;
@@ -583,12 +591,11 @@ input:checked + .slider:before {
   height: 300px;
 }
 
-
 .progress-circle {
   transform: rotate(-90deg);
-  width: 226px;
-  height: 225px;
-  /* background-color: red; */
+  width: 220px;
+  height: 220px;
+  background-color: rgba(0, 81, 255, 0);
 }
 
 .progress-background {
@@ -597,22 +604,20 @@ input:checked + .slider:before {
   stroke-width: 14;
 }
 
-
-
 .progress-bar {
   fill: none;
   stroke: url(#progress-gradient);
   stroke-width: 14;
   stroke-linecap: round;
-  stroke-dasharray: 596;
-  stroke-dashoffset: 596;
+  stroke-dasharray: 609.47; /* Circumference of the circle */
+  stroke-dashoffset: 609.47;
   transition: stroke-dashoffset 1s ease;
 }
 
 .time-left {
   position: absolute;
-  top: 40%;
-  left: 35%;
+  top: 42%;
+  left: 30%;
   transform: translate(-50%, -50%);
   font-size: 2rem;
   font-weight: bold;
@@ -622,11 +627,11 @@ input:checked + .slider:before {
 
 .hrs {
   position: absolute;
-  top: 40.5%;
-  left: 50%;
+  top: 42%;
+  left: 45%;
   transform: translate(-50%, -50%);
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 500;
   color: #333;
   user-select: none;
 }
@@ -715,6 +720,20 @@ input:checked + .slider:before {
   left: 79%;
 }
 
+.actualTemp {
+  position: absolute;
+  top: 45%;
+  right: -3.7%;
+  transform: translate(-50%, -50%);
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 3.3rem;
+  font-weight: bold;
+  color: #ffffff;
+  user-select: none;
+  background-color: rgba(255, 0, 0, 0);
+
+}
+
 .tempbarLow {
   width: 15% !important;
   height: 15% !important;
@@ -728,6 +747,27 @@ input:checked + .slider:before {
   top: 17%;
   left: 75%;
 }
+
+.remote-container {
+  opacity: 0.5; /* Visually disabled */
+  pointer-events: none; /* Prevent interaction */
+  filter: grayscale(50%); /* Make it look inactive */
+  transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+.remote-container.disabled * {
+  animation: none !important;  /* Stop all animations */
+  transition: none !important; /* Stop hover effects */
+  pointer-events: none !important; 
+  
+}
+
+.remote-container.enabled {
+  opacity: 1;
+  pointer-events: auto;
+  filter: grayscale(0%);
+}
+
 
 .remote-container img {
   position: absolute;

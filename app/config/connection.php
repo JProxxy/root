@@ -1,10 +1,10 @@
 <?php
 // Database configuration on AWS
 // note: if you stop ec2, the $host ip will change same with the public address 
-// $host = '52.221.180.50';
-// $dbname = 'rivan_iot';
-// $username = 'root';
-// $password = 'Pa$$word1';
+$host = '52.221.180.50';
+$dbname = 'rivan_iot';
+$username = 'root';
+$password = 'Pa$$word1';
 
 
 // Local Host for testing
