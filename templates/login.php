@@ -239,9 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 </html>
 
-
 <script>
-
     function checkPasswordStrength(password) {
         const strengthBar = document.querySelector('.strength-bar');
         const hasNumber = /\d/.test(password);
@@ -312,19 +310,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             .catch(error => console.error('Error:', error));
     }
 
-
-
-
-
     function showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error';
-        errorDiv.innerHTML = 
-        <strong>Authentication Error:</strong><br>
-        ${message || 'Unknown error occurred'}
-    ;
+        errorDiv.innerHTML = `
+            <strong>Authentication Error:</strong><br>
+            ${message || 'Unknown error occurred'}
+        `;
         document.querySelector('.logInContainer').prepend(errorDiv);
     }
-
-
 </script>
