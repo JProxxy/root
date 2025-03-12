@@ -18,7 +18,7 @@ $recaptchaResponse = $_POST['recaptcha_response'] ?? ''; // Get reCAPTCHA token
 // Initialize an array for error messages
 $errors = [];
 
-// 🔹 Validate reCAPTCHA first
+// Validate reCAPTCHA first
 $recaptcha_secret = "6LcWnvEqAAAAAPPiyMaVPKIHb_DtNDdGUaSG_3fq"; // Replace with your reCAPTCHA Secret Key
 $verify_url = "https://www.google.com/recaptcha/api/siteverify";
 $data = [
@@ -40,7 +40,7 @@ $response_data = json_decode($verify_response);
 
 // If reCAPTCHA fails or score is too low, block registration
 if (!$response_data->success || $response_data->score < 0.5) {
-    die("<p>reCAPTCHA verification failed. Please try again.</p>");
+    $errors[] = "reCAPTCHA verification failed. Please try again.";
 }
 
 // Basic validations
@@ -74,10 +74,7 @@ if (!empty($errors)) {
 // Check if a user with the same username or email already exists
 try {
     $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username OR email = :email LIMIT 1");
-    $stmt->execute([
-        ':username' => $username,
-        ':email'    => $email
-    ]);
+    $stmt->execute([':username' => $username, ':email' => $email]);
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($existingUser) {
@@ -96,12 +93,7 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 // Insert the new user into the database
 try {
     $stmt = $conn->prepare("INSERT INTO users (username, password, email, phoneNumber, created_at, updated_at, role_id) VALUES (:username, :password, :email, :phoneNumber, NOW(), NOW(), 2)");
-    $stmt->execute([
-        ':username'    => $username,
-        ':password'    => $hashedPassword,
-        ':email'       => $email,
-        ':phoneNumber' => $phoneNumber
-    ]);
+    $stmt->execute([':username' => $username, ':password' => $hashedPassword, ':email' => $email, ':phoneNumber' => $phoneNumber]);
 
     // On success, redirect to the login page
     header("Location: ../templates/login.php");
