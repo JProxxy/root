@@ -228,56 +228,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
 <script>
-    let isCaptchaVerified = false; // Disable the login link if CAPTCHA is not verified
-
-    // Function to toggle between login and signup containers
     function toggleContainers() {
-        if (!isCaptchaVerified) {
-            alert("Please complete the CAPTCHA first!");
-            return;
-        }
-        
         const login = document.getElementById('logInContainer');
         const signup = document.getElementById('signUpContainer');
         login.style.display = login.style.display === 'none' ? 'flex' : 'none';
         signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
     }
 
-    // Handle CAPTCHA completion and verify user's credentials
-    function handleCredentialResponse(response) {
-        // Send the ID token to your server for validation
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                token: response.credential
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                // CAPTCHA verified successfully, allow going back to login
-                isCaptchaVerified = true;
-                console.log('User authenticated');
-            } else {
-                console.error('Authentication failed');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Ensure that the login page is disabled until CAPTCHA is completed
-    document.getElementById('showLoginPassword').addEventListener('change', function () {
-        if (!isCaptchaVerified) {
-            alert("Please complete the CAPTCHA first!");
-            // Prevent login password field toggle if CAPTCHA is not verified
-            this.checked = false;
-        }
-    });
 </script>
-
 
 </html>
 
