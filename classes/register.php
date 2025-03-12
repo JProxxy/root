@@ -37,6 +37,8 @@ $options = [
 $context  = stream_context_create($options);
 $verify_response = file_get_contents($verify_url, false, $context);
 $response_data = json_decode($verify_response);
+error_log("reCAPTCHA response: " . print_r($response_data, true));
+
 
 // If reCAPTCHA fails or score is too low, block registration
 if (!$response_data->success || $response_data->score < 0.5) {
