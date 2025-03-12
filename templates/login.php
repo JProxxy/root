@@ -204,17 +204,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             </div>
 
             <!-- Include Google's reCAPTCHA v3 script -->
-            <script src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
+            <script
+                src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
 
             <script>
                 document.getElementById('signupForm').addEventListener('submit', function (event) {
-                    event.preventDefault(); // Prevent form from submitting immediately
+                    event.preventDefault(); // Prevent immediate form submission
+
+                    console.log("Signup button clicked. Triggering reCAPTCHA v3...");
 
                     grecaptcha.ready(function () {
-                        grecaptcha.execute('6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij', { action: 'signup' }).then(function (token) {
-                            document.getElementById('recaptchaResponse').value = token;
-                            document.getElementById('signupForm').submit(); // Submit after token is set
-                        });
+                        console.log("reCAPTCHA is ready. Executing...");
+                        grecaptcha.execute('6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij', { action: 'signup' })
+                            .then(function (token) {
+                                console.log("reCAPTCHA token received:", token);
+                                document.getElementById('recaptchaResponse').value = token;
+                                // Now submit the form with the token set.
+                                document.getElementById('signupForm').submit();
+                            });
                     });
                 });
             </script>
