@@ -37,9 +37,8 @@ $options = [
 $context  = stream_context_create($options);
 $verify_response = file_get_contents($verify_url, false, $context);
 $response_data = json_decode($verify_response);
-// Output the reCAPTCHA response to the browser console
+// Output the reCAPTCHA response to the browser console (for debugging)
 echo "<script>console.log('reCAPTCHA response: " . json_encode($response_data) . "');</script>";
-
 
 // If reCAPTCHA fails or score is too low, block registration
 if (!$response_data->success || $response_data->score < 0.5) {
@@ -98,8 +97,11 @@ try {
     $stmt = $conn->prepare("INSERT INTO users (username, password, email, phoneNumber, created_at, updated_at, role_id) VALUES (:username, :password, :email, :phoneNumber, NOW(), NOW(), 2)");
     $stmt->execute([':username' => $username, ':password' => $hashedPassword, ':email' => $email, ':phoneNumber' => $phoneNumber]);
 
-    // On success, redirect to the login page
-    header("Location: ../templates/login.php");
+    // On success, output a JavaScript alert and then redirect to the login page when "OK" is clicked.
+    echo "<script>
+            alert('Signup successful!');
+            window.location.href = '../templates/login.php';
+          </script>";
     exit;
 } catch (PDOException $e) {
     error_log("Database Insert Error: " . $e->getMessage());
