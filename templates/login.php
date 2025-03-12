@@ -66,13 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             border-radius: 4px;
             background-color: #f8d7da;
         }
-
         .password-strength {
             height: 4px;
             background: #eee;
             margin: 8px 0;
         }
-
         .strength-bar {
             height: 100%;
             width: 0;
@@ -84,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 <body>
     <div class="whiteBG">
         <div class="gridContainer">
+            <!-- LOGIN CONTAINER -->
             <div class="logInContainer" id="logInContainer">
                 <form method="POST" action="">
                     <?php if (!empty($errorMessage)): ?>
@@ -93,195 +92,151 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <h2 class="loginTitle">USER LOGIN</h2>
                         <div class="input-container">
                             <i class="fas fa-user user-icon"></i>
-                            <input type="text" id="username" name="username" placeholder="Username" required
-                                autocomplete="username" minlength="3" maxlength="30">
+                            <input type="text" id="username" name="username" placeholder="Username" required autocomplete="username" minlength="3" maxlength="30">
                         </div>
                         <div class="input-container">
                             <i class="fas fa-lock lock-icon"></i>
-                            <input type="password" id="loginpassword" name="password" placeholder="Password" required
-                                autocomplete="current-password" minlength="8">
+                            <input type="password" id="loginpassword" name="password" placeholder="Password" required autocomplete="current-password" minlength="8">
                         </div>
                         <div class="showPasswordLabel">
                             <input type="checkbox" id="showLoginPassword" onclick="toggleLoginPassword()">
                             <label for="showLoginPassword">Show Password</label>
                         </div>
-
                         <div class="divider">
                             <span>OR</span>
                         </div>
-
+                        <!-- Google Sign-In -->
                         <div id="g_id_onload"
-                            data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
-                            data-auto_prompt="false">
+                             data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
+                             data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                             data-auto_prompt="false">
                         </div>
-
                         <div class="ContGoogle">
-                            <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
-                                data-shape="pill" data-text="signin_with">
+                            <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large" data-shape="pill" data-text="signin_with">
                             </div>
                         </div>
-
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
                         <div class="link-container">
-                            <a href="javascript:void(0);" onclick="toggleContainers()" class="createAcc">Create
-                                Account</a>
+                            <a href="javascript:void(0);" onclick="toggleContainers()" class="createAcc">Create Account</a>
                         </div>
                         <div class="link-container">
                             <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
                         </div>
                     </div>
-
-
-
                 </form>
             </div>
 
+            <!-- SIGN UP CONTAINER -->
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
                 <form action="../classes/register.php" method="POST" id="signupForm">
+                    <!-- CSRF token -->
                     <input type="hidden" name="csrf_token" value="<?php echo bin2hex(random_bytes(32)); ?>">
-                    <input type="hidden" name="recaptcha_response" id="recaptchaResponse"> <!-- reCAPTCHA Token -->
-
+                    <!-- Hidden field for reCAPTCHA token -->
+                    <input type="hidden" name="recaptcha_response" id="recaptchaResponse">
+                    
                     <div class="boxTwo">
                         <h2 class="signUpTitle">USER SIGN UP</h2>
-
                         <div class="inputsign-container">
                             <i class="fas fa-user"></i>
-                            <input type="text" name="username" placeholder="Username" required
-                                pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
+                            <input type="text" name="username" placeholder="Username" required pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
                         </div>
-
                         <div class="inputsign-container">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" name="email" placeholder="Email" required
-                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                            <input type="email" name="email" placeholder="Email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
                         </div>
-
                         <div class="inputsign-container">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]{10}"
-                                title="10-digit phone number">
+                            <input type="tel" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]{10}" title="10-digit phone number">
                         </div>
-
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" name="password" placeholder="Password" required
-                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                                title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
-                                oninput="checkPasswordStrength(this.value)">
+                                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                   title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
+                                   oninput="checkPasswordStrength(this.value)">
                             <div class="password-strength">
                                 <div class="strength-bar"></div>
                             </div>
                             <div class="eyePosition">
-                                <i class="fas fa-eye password-eye-icon"
-                                    onclick="togglePasswordVisibility('password', this)"></i>
+                                <i class="fas fa-eye password-eye-icon" onclick="togglePasswordVisibility('password', this)"></i>
                             </div>
                         </div>
-
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="retype_password" name="retype_password"
-                                placeholder="Retype Password" required oninput="validatePasswordMatch()">
+                            <input type="password" id="retype_password" name="retype_password" placeholder="Retype Password" required oninput="validatePasswordMatch()">
                             <div class="eyePosition">
-                                <i class="fas fa-eye password-eye-icon"
-                                    onclick="togglePasswordVisibility('retype_password', this)"></i>
+                                <i class="fas fa-eye password-eye-icon" onclick="togglePasswordVisibility('retype_password', this)"></i>
                             </div>
-                            <span class="password-match-error" style="display:none;color:red;font-size:0.9em;">
-                                Passwords do not match
-                            </span>
+                            <span class="password-match-error" style="display:none;color:red;font-size:0.9em;">Passwords do not match</span>
                         </div>
-
                         <button type="submit" class="signupButton">SIGN UP</button>
-
                         <div class="link-container">
-                            <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In
-                                Account</a>
+                            <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In Account</a>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- Include Google's reCAPTCHA v3 script -->
+            <!-- Include reCAPTCHA v3 API -->
             <script src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
-
+            
+            <!-- Intercept signup submission to get reCAPTCHA token -->
             <script>
                 document.getElementById('signupForm').addEventListener('submit', function (event) {
-                    event.preventDefault(); // Prevent form from submitting immediately
-
+                    event.preventDefault(); // Prevent immediate form submission
                     grecaptcha.ready(function () {
-                        grecaptcha.execute('6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij', { action: 'signup' }).then(function (token) {
-                            document.getElementById('recaptchaResponse').value = token;
-                            document.getElementById('signupForm').submit(); // Submit after token is set
-                        });
+                        grecaptcha.execute('6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij', { action: 'signup' })
+                            .then(function (token) {
+                                document.getElementById('recaptchaResponse').value = token;
+                                document.getElementById('signupForm').submit(); // Submit after token is set
+                            });
                     });
                 });
             </script>
-
+            
             <div class="frontImg"></div>
         </div>
     </div>
-
-
 </body>
 
-
+<!-- Additional JavaScript functions -->
 <script>
-    let isCaptchaVerified = false; // Disable the login link if CAPTCHA is not verified
-
-    // Function to toggle between login and signup containers
+    // Toggle between login and signup containers only if CAPTCHA is verified (set via the Google callback)
+    let isCaptchaVerified = false;
     function toggleContainers() {
         if (!isCaptchaVerified) {
             alert("Please complete the CAPTCHA first!");
             return;
         }
-        
         const login = document.getElementById('logInContainer');
         const signup = document.getElementById('signUpContainer');
         login.style.display = login.style.display === 'none' ? 'flex' : 'none';
         signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
     }
-
-    // Handle CAPTCHA completion and verify user's credentials
+    
+    // Handle the Google credential response (for Google sign-in)
     function handleCredentialResponse(response) {
         // Send the ID token to your server for validation
         fetch('../scripts/google-auth.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                token: response.credential
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: response.credential })
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // CAPTCHA verified successfully, allow going back to login
                 isCaptchaVerified = true;
-                console.log('User authenticated');
+                console.log('User authenticated via Google');
             } else {
-                console.error('Authentication failed');
+                console.error('Google authentication failed');
             }
         })
         .catch(error => console.error('Error:', error));
     }
-
-    // Ensure that the login page is disabled until CAPTCHA is completed
-    document.getElementById('showLoginPassword').addEventListener('change', function () {
-        if (!isCaptchaVerified) {
-            alert("Please complete the CAPTCHA first!");
-            // Prevent login password field toggle if CAPTCHA is not verified
-            this.checked = false;
-        }
-    });
-</script>
-
-
-</html>
-
-<script>
+    
+    // Password strength meter
     function checkPasswordStrength(password) {
         const strengthBar = document.querySelector('.strength-bar');
         const hasNumber = /\d/.test(password);
@@ -293,72 +248,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             (hasUpper ? 25 : 0) +
             (hasLower ? 25 : 0)
         ), 100);
-
         strengthBar.style.width = strength + '%';
         strengthBar.style.backgroundColor =
             strength >= 75 ? '#28a745' :
-                strength >= 50 ? '#ffc107' :
-                    '#dc3545';
+            strength >= 50 ? '#ffc107' :
+            '#dc3545';
     }
-
+    
+    // Validate password matching
     function validatePasswordMatch() {
         const password = document.getElementById('password').value;
         const retype = document.getElementById('retype_password').value;
         const errorSpan = document.querySelector('.password-match-error');
         errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
     }
-
+    
+    // Toggle password visibility for signup form
     function togglePasswordVisibility(inputId, icon) {
         const input = document.getElementById(inputId);
         input.type = input.type === 'password' ? 'text' : 'password';
         icon.classList.toggle('fa-eye-slash');
     }
-
+    
+    // Toggle password visibility for login form
     document.getElementById('showLoginPassword').addEventListener('change', function () {
         const passwordField = document.getElementById('loginpassword');
         passwordField.type = this.checked ? 'text' : 'password';
     });
-
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
-        const password = document.getElementById('password').value;
-        const retype = document.getElementById('retype_password').value;
-        if (password !== retype) {
-            e.preventDefault();
-            // alert('Error: Passwords do not match!');
-            document.getElementById('retype_password').focus();
-        }
-    });
-
-    function handleCredentialResponse(response) {
-        // Send the ID token to your server for validation
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                token: response.credential
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Redirect or handle successful login
-                    console.log('User authenticated');
-                } else {
-                    console.error('Authentication failed');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.innerHTML = `
-            <strong>Authentication Error:</strong><br>
-            ${message || 'Unknown error occurred'}
-        `;
-        document.querySelector('.logInContainer').prepend(errorDiv);
-    }
 </script>
+</html>
