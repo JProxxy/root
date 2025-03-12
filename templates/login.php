@@ -57,28 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        .error {
-            color: #dc3545;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #f5c6cb;
-            border-radius: 4px;
-            background-color: #f8d7da;
-        }
 
-        .password-strength {
-            height: 4px;
-            background: #eee;
-            margin: 8px 0;
-        }
-
-        .strength-bar {
-            height: 100%;
-            width: 0;
-            transition: width 0.3s ease;
-        }
-    </style>
 </head>
 
 <body>
@@ -93,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <h2 class="loginTitle">USER LOGIN</h2>
                         <div class="input-container">
                             <i class="fas fa-user user-icon"></i>
+
                             <input type="text" id="username" name="username" placeholder="Username" required
                                 autocomplete="username" minlength="3" maxlength="30">
                         </div>
@@ -147,39 +127,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     <div class="boxTwo">
                         <h2 class="signUpTitle">USER SIGN UP</h2>
 
+                        <!-- Username Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-user"></i>
-                            <input type="text" name="username" placeholder="Username" required
-                                pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)">
+                            <input type="text" id="SignUpUsername" name="SignUpUsername" placeholder="Username" required
+                                pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)"
+                                oninput="validateInput('SignUpUsername')">
+                            <span class="error-message SignUpUsername-error">Invalid username</span>
                         </div>
 
+                        <!-- Email Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-envelope"></i>
-                            <input type="email" name="email" placeholder="Email" required
-                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                            <input type="email" id="email" name="email" placeholder="Email" required
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="validateInput('email')">
+                            <span class="error-message email-error">Invalid email format</span>
                         </div>
 
+                        <!-- Phone Number Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-phone"></i>
-                            <input type="tel" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]{10}"
-                                title="10-digit phone number">
+                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required
+                                pattern="[0-9]{10}" title="10-digit phone number"
+                                oninput="validateInput('phoneNumber')">
+                            <span class="error-message phone-error">Enter a 10-digit phone number</span>
                         </div>
 
+                        <!-- Password Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="password" name="password" placeholder="Password" required
                                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                                 title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
-                                oninput="checkPasswordStrength(this.value)">
+                                oninput="checkPasswordStrength(this.value); validateInput('password')">
+
+                            <!-- Strength Bar -->
                             <div class="password-strength">
                                 <div class="strength-bar"></div>
                             </div>
+
+                            <!-- Error Message -->
+                            <span class="password-strength-message error-message" style="display: none;">
+                                Weak password
+                            </span>
+
+                            <!-- Show/Hide Password Icon -->
                             <div class="eyePosition">
                                 <i class="fas fa-eye password-eye-icon"
                                     onclick="togglePasswordVisibility('password', this)"></i>
                             </div>
                         </div>
 
+
+                        <!-- Retype Password Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="retype_password" name="retype_password"
@@ -188,9 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 <i class="fas fa-eye password-eye-icon"
                                     onclick="togglePasswordVisibility('retype_password', this)"></i>
                             </div>
-                            <span class="password-match-error" style="display:none;color:red;font-size:0.9em;">
-                                Passwords do not match
-                            </span>
+                            <span class="password-match-error">Passwords do not match</span>
                         </div>
 
                         <button type="submit" class="signupButton">SIGN UP</button>
@@ -204,7 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             </div>
 
             <!-- Include Google's reCAPTCHA v3 script -->
-            <script src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
+            <script
+                src="https://www.google.com/recaptcha/api.js?render=6LcWnvEqAAAAACO3p_9pzADJIiKwPMYXiQFBRXij"></script>
 
             <script>
                 document.getElementById('signupForm').addEventListener('submit', function (event) {
@@ -227,96 +226,146 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 </body>
 
 
+
 <script>
     function toggleContainers() {
         const login = document.getElementById('logInContainer');
         const signup = document.getElementById('signUpContainer');
         login.style.display = login.style.display === 'none' ? 'flex' : 'none';
         signup.style.display = signup.style.display === 'none' ? 'flex' : 'none';
+
     }
+
+
+
+    // Validate Password and Retype Password Match
+function validatePassword() {
+    const password = document.getElementById("password").value;
+    const retype = document.getElementById("retype").value;
+    const errorSpan = document.getElementById("passwordError");
+
+    errorSpan.style.display = password && retype && password !== retype ? "block" : "none";
+}
+
+// Toggle Password Visibility
+function togglePasswordVisibility(inputId, icon) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === "password";
+
+    input.type = isPassword ? "text" : "password";
+    icon.classList.toggle("fa-eye-slash", isPassword);
+    icon.classList.toggle("fa-eye", !isPassword);
+}
+
+// Show/Hide Login Password
+function toggleLoginPassword() {
+    const passwordInput = document.getElementById("loginpassword");
+    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+}
+
 
 </script>
 
 </html>
-
 <script>
+    // Real-time validation for Username
+    document.querySelector('input[name="SignUpUsername"]').addEventListener('input', function () {
+        const SignUpUsername = this.value;
+        const regex = /^[a-zA-Z0-9]{3,12}$/; // Only letters and numbers, 3-12 characters
+        const errorSpan = this.nextElementSibling;
+
+        if (!regex.test(SignUpUsername)) {
+            errorSpan.textContent = "Invalid username. Only letters & numbers (3-12 characters).";
+            errorSpan.style.display = "block";
+        } else {
+            errorSpan.style.display = "none";
+        }
+    });
+
+    // Real-time validation for Email
+    document.querySelector('input[name="email"]').addEventListener('input', function () {
+        const email = this.value;
+        const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/; // Standard email pattern
+        const errorSpan = this.nextElementSibling;
+
+        if (!regex.test(email)) {
+            errorSpan.textContent = "Invalid email format.";
+            errorSpan.style.display = "block";
+        } else {
+            errorSpan.style.display = "none";
+        }
+    });
+
+    // Real-time validation for Phone Number
+    document.querySelector('input[name="phoneNumber"]').addEventListener('input', function () {
+        const phone = this.value;
+        const regex = /^[0-9]{10}$/; // Must be 10-digit numeric
+        const errorSpan = this.nextElementSibling;
+
+        if (!regex.test(phone)) {
+            errorSpan.textContent = "Invalid phone number. Must be 10 digits.";
+            errorSpan.style.display = "block";
+        } else {
+            errorSpan.style.display = "none";
+        }
+    });
+
+    // Real-time validation for Password
+    document.getElementById('password').addEventListener('input', function () {
+        checkPasswordStrength(this.value);
+        validatePasswordMatch();
+    });
+
+    // Password Strength Checker
+    // Password Strength Checker
     function checkPasswordStrength(password) {
         const strengthBar = document.querySelector('.strength-bar');
+        const errorSpan = document.querySelector('.password-strength-message');
+
         const hasNumber = /\d/.test(password);
         const hasUpper = /[A-Z]/.test(password);
         const hasLower = /[a-z]/.test(password);
-        const strength = Math.min((
+
+        const strength = Math.min(
             (password.length >= 8 ? 25 : 0) +
             (hasNumber ? 25 : 0) +
             (hasUpper ? 25 : 0) +
-            (hasLower ? 25 : 0)
-        ), 100);
+            (hasLower ? 25 : 0), 100
+        );
 
+        // Update strength bar width and color
         strengthBar.style.width = strength + '%';
         strengthBar.style.backgroundColor =
-            strength >= 75 ? '#28a745' :
-                strength >= 50 ? '#ffc107' :
-                    '#dc3545';
+            strength >= 75 ? '#28a745' : // Green (Strong)
+                strength >= 50 ? '#ffc107' : // Yellow (Medium)
+                    '#dc3545'; // Red (Weak)
+
+        // Show/hide error message based on strength
+        if (errorSpan) {
+            errorSpan.textContent = strength < 50 ? "Weak password" : "";
+            errorSpan.style.display = strength < 50 ? "block" : "none";
+        }
     }
 
+
+    // Validate Password Match
     function validatePasswordMatch() {
         const password = document.getElementById('password').value;
         const retype = document.getElementById('retype_password').value;
         const errorSpan = document.querySelector('.password-match-error');
-        errorSpan.style.display = (password && retype && password !== retype) ? 'block' : 'none';
+
+        if (password && retype && password !== retype) {
+            errorSpan.textContent = "Passwords do not match!";
+            errorSpan.style.display = "block";
+        } else {
+            errorSpan.style.display = "none";
+        }
     }
 
+    // Show/Hide Password
     function togglePasswordVisibility(inputId, icon) {
         const input = document.getElementById(inputId);
         input.type = input.type === 'password' ? 'text' : 'password';
         icon.classList.toggle('fa-eye-slash');
-    }
-
-    document.getElementById('showLoginPassword').addEventListener('change', function () {
-        const passwordField = document.getElementById('loginpassword');
-        passwordField.type = this.checked ? 'text' : 'password';
-    });
-
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
-        const password = document.getElementById('password').value;
-        const retype = document.getElementById('retype_password').value;
-        if (password !== retype) {
-            e.preventDefault();
-            // alert('Error: Passwords do not match!');
-            document.getElementById('retype_password').focus();
-        }
-    });
-
-    function handleCredentialResponse(response) {
-        // Send the ID token to your server for validation
-        fetch('../scripts/google-auth.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                token: response.credential
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    // Redirect or handle successful login
-                    console.log('User authenticated');
-                } else {
-                    console.error('Authentication failed');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.innerHTML = `
-            <strong>Authentication Error:</strong><br>
-            ${message || 'Unknown error occurred'}
-        `;
-        document.querySelector('.logInContainer').prepend(errorDiv);
     }
 </script>

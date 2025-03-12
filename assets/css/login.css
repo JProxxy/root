@@ -96,13 +96,14 @@ body {
   padding: 15px 10px 17px 45px;
   border: 1px solid #ddd;
   border-radius: 50px;
-  background-color: #6abdb1;
+  background-color: #39b09e;
   color: #fafafa;
   font-family: "Kodchasan", sans-serif;
   text-align: left; /* Align text to the left */
   text-indent: 10%;
   font-size: 1.05rem;
 }
+
 
 .input-container input::placeholder {
   color: #ffffff;
@@ -117,7 +118,7 @@ body {
   padding: 10px 10px 10px 0px;
   width: 100%;
   color: #fff;
-  background-color: #6abdb1 !important;
+  background-color: #39b09e !important;
   border: none;
 }
 
@@ -230,4 +231,145 @@ body {
   min-width: 67% !important;
   max-width: 67% !important;
   background-color: #2d8b9600;
+}
+
+/* JS DIV MAKING */
+
+/* Error message styling */
+.error {
+  width: 61%;
+  margin-left: 26%;
+  padding: 15px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #d9534f;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+
+.SignUpUsername-error,
+.email-error,
+.phone-error {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 93%;
+    background-color: #f8d7da;
+    color: #d9534f;
+    text-align: left;
+    font-size: 0.9rem;
+    padding: 5px 10px;  /* Reduced padding to prevent overlap */
+    border: 1px solid #f5c6cb;
+    border-radius: 15px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10;  /* Ensures it appears above inputs */
+}
+
+.inputsign-container {
+  position: relative;  /* Ensure error message positions correctly */
+  width: 100%;
+  margin-bottom: 20px; /* Add space for floating error messages */
+}
+
+
+.password-match-error {
+  display: none;
+  position: absolute;
+  top: 100%;
+  width: 93%;
+  background-color: #f8d7da;
+  color: #d9534f;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border: 1px solid #f5c6cb;
+  border-radius: 15px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Password Strength Bar */
+.password-strength {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 93%;
+  background-color: #d9d9d9;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 10;
+}
+
+/* Password Strength Bar Progress */
+.strength-bar {
+  height: 5px;
+  width: 0%;
+  background-color: #dc3545;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Floating Error Message */
+.password-strength-message {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  background-color: #f8d7da;
+  color: #d9534f;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 20;
+  display: none; /* Initially hidden */
+}
+
+/* Eye Icon Position */
+.eyePosition {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+
+/* Strength colors */
+.strength-bar.weak {
+  background-color: #dc3545;
+}
+
+.strength-bar.medium {
+  background-color: #ffc107;
+}
+
+.strength-bar.strong {
+  background-color: #28a745;
+}
+
+.error-message {
+  display: none;
+  position: absolute;
+  top: 100%;
+  width: 93%;
+  background-color: #f8d7da;
+  color: #d9534f;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border: 1px solid #f5c6cb;
+  border-radius: 15px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
