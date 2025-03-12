@@ -4,7 +4,8 @@ require_once '../app/config/connection.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Invalid request method.");
+    echo "<script>alert('Invalid request method.');</script>";
+    exit;
 }
 
 // Retrieve and trim form fields
@@ -22,7 +23,7 @@ $errors = [];
 $recaptcha_secret = "6LcWnvEqAAAAAPPiyMaVPKIHb_DtNDdGUaSG_3fq"; // Replace with your reCAPTCHA Secret Key
 $verify_url = "https://www.google.com/recaptcha/api/siteverify";
 $data = [
-    'secret' => $recaptcha_secret,
+    'secret'   => $recaptcha_secret,
     'response' => $recaptchaResponse
 ];
 
@@ -64,12 +65,10 @@ if ($password !== $retypePassword) {
     $errors[] = "Passwords do not match.";
 }
 
-// If there are errors, display them and stop processing
+// If there are errors, output them via alert and stop processing
 if (!empty($errors)) {
-    echo "<h3>Registration Errors:</h3>";
-    foreach ($errors as $error) {
-        echo "<p>" . htmlspecialchars($error) . "</p>";
-    }
+    $errorMsg = "Registration Errors:\n" . implode("\n", $errors);
+    echo "<script>alert(" . json_encode($errorMsg) . ");</script>";
     exit;
 }
 
@@ -80,12 +79,12 @@ try {
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($existingUser) {
-        echo "<p>Username or Email already exists. Please try a different one.</p>";
+        echo "<script>alert('Username or Email already exists. Please try a different one.');</script>";
         exit;
     }
 } catch (PDOException $e) {
     error_log("Database Error: " . $e->getMessage());
-    echo "<p>System error. Please try again later.</p>";
+    echo "<script>alert('System error. Please try again later.');</script>";
     exit;
 }
 
@@ -105,7 +104,7 @@ try {
     exit;
 } catch (PDOException $e) {
     error_log("Database Insert Error: " . $e->getMessage());
-    echo "<p>System error. Please try again later.</p>";
+    echo "<script>alert('System error. Please try again later.');</script>";
     exit;
 }
 ?>
