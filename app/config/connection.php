@@ -15,14 +15,14 @@ $password = 'Pa$$word1';
 
 
 // Create a PDO connection
-// try {
-//     $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-//     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//     $conn->exec("set names utf8"); // Optional: set charset
-//     // echo "Connected successfully"; // Temporary debugging message
-// } catch (PDOException $e) {
-//     error_log($e->getMessage()); // Log the error for debugging
-//     echo "Connection failed: " . $e->getMessage(); // Display the detailed error message
-//     die(); // Terminate the script
-// }
-// ?>
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->exec("set names utf8"); // Optional: set charset
+    // echo "Connected successfully"; // Temporary debugging message
+} catch (PDOException $e) {
+    error_log($e->getMessage()); // Log the error for debugging
+    echo "Connection failed: " . $e->getMessage(); // Display the detailed error message
+    die(); // Terminate the script
+}
+?>
