@@ -117,17 +117,333 @@ if (!isset($_SESSION['user_id'])) {
                                 <img class="tempbarHigh" src="../assets/images/ac/tempbarHigh.png">
                                 <h1 class="actualTemp" id="ACRCTemp"></h1>
                             </div>
-                            <img class="fan" src="../assets/images/ac/fan.png">
-                            <img class="fanLow" src="../assets/images/ac/fanLow.png">
-                            <img class="fanHigh" src="../assets/images/ac/fanHigh.png">
-                            <img class="mode" src="../assets/images/ac/mode.png">
-                            <img class="modeCool" src="../assets/images/ac/modeCool.png">
-                            <img class="modeDry" src="../assets/images/ac/modeDry.png">
-                            <img class="modeFan" src="../assets/images/ac/modeFan.png">
-                            <img class="swing" src="../assets/images/ac/swing.png">
-                            <img class="swingOn" src="../assets/images/ac/swingOn.png">
-                            <img class="swingOff" src="../assets/images/ac/swingOff.png">
-                            <img class="sleep" src="../assets/images/ac/sleep.png">
+
+                            <div class="fanCont">
+                                <img class="fan" src="../assets/images/ac/fan.png">
+                                <img class="fanLow" src="../assets/images/ac/fanLow-White.png">
+                                <img class="fanLow" src="../assets/images/ac/fanLow-Green.png" style="display: none;">
+                                <img class="fanHigh" src="../assets/images/ac/fanHigh-Green.png">
+                                <img class="fanHigh" src="../assets/images/ac/fanHigh-White.png" style="display: none;">
+                            </div>
+
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    // Select the fan container
+                                    const fanCont = document.querySelector(".fanCont");
+
+                                    // Select images
+                                    const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
+                                    const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
+                                    const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
+                                    const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
+
+                                    let currentFanState = "High"; // Default fan state
+
+                                    function setFanHigh() {
+                                        fanHighGreen.style.display = "block";
+                                        fanHighWhite.style.display = "none";
+                                        fanLowGreen.style.display = "none";
+                                        fanLowWhite.style.display = "block";
+                                        currentFanState = "High";
+                                        sendFanData(currentFanState);
+                                    }
+
+                                    function setFanLow() {
+                                        fanHighGreen.style.display = "none";
+                                        fanHighWhite.style.display = "block";
+                                        fanLowGreen.style.display = "block";
+                                        fanLowWhite.style.display = "none";
+                                        currentFanState = "Low";
+                                        sendFanData(currentFanState);
+                                    }
+
+                                    function sendFanData(fanState) {
+                                        fetch("../scripts/fetch-AC-data.php", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({ fan: fanState }), // Send fan state to PHP
+                                        })
+                                            .then(response => response.text())
+                                            .then(data => {
+                                                console.log("Response from fetch-AC-data.php:", data);
+                                            })
+                                            .catch(error => {
+                                                console.error("Error sending fan data:", error);
+                                            });
+                                    }
+
+                                    // Initialize default state
+                                    setFanHigh();
+
+                                    // Toggle on click
+                                    fanCont.addEventListener("click", function () {
+                                        if (currentFanState === "High") {
+                                            setFanLow();
+                                        } else {
+                                            setFanHigh();
+                                        }
+                                    });
+                                });
+                            </script>
+
+                            <div class="modeCont">
+                                <!-- Mode icon (could be used as the click target as well) -->
+                                <img class="mode" src="../assets/images/ac/mode.png">
+
+                                <!-- Mode Cool -->
+                                <img class="modeCool" src="../assets/images/ac/modeCool-Green.png">
+                                <img class="modeCool" src="../assets/images/ac/modeCool-White.png"
+                                    style="display: none;">
+
+                                <!-- Mode Dry -->
+                                <img class="modeDry" src="../assets/images/ac/modeDry-White.png">
+                                <img class="modeDry" src="../assets/images/ac/modeDry-Green.png" style="display: none;">
+
+                                <!-- Mode Fan -->
+                                <img class="modeFan" src="../assets/images/ac/modeFan-White.png">
+                                <img class="modeFan" src="../assets/images/ac/modeFan-Green.png" style="display: none;">
+                            </div>
+
+
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    // Select the mode container
+                                    const modeCont = document.querySelector(".modeCont");
+
+                                    // Select images based on their classes
+                                    const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
+                                    const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
+                                    const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
+                                    const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
+                                    const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
+                                    const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
+
+                                    // Track the current state (0, 1, or 2)
+                                    let currentState = 0;
+
+                                    function updateModeDisplay() {
+                                        let activeMode = ""; // This will store which mode is currently green
+
+                                        if (currentState === 0) {
+                                            // Default state
+                                            modeCoolGreen.style.display = "block";
+                                            modeCoolWhite.style.display = "none";
+                                            modeDryWhite.style.display = "block";
+                                            modeDryGreen.style.display = "none";
+                                            modeFanWhite.style.display = "block";
+                                            modeFanGreen.style.display = "none";
+                                            activeMode = "Cool";
+                                        } else if (currentState === 1) {
+                                            // First click state
+                                            modeCoolGreen.style.display = "none";
+                                            modeCoolWhite.style.display = "block";
+                                            modeDryWhite.style.display = "none";
+                                            modeDryGreen.style.display = "block";
+                                            modeFanWhite.style.display = "block";
+                                            modeFanGreen.style.display = "none";
+                                            activeMode = "Dry";
+                                        } else if (currentState === 2) {
+                                            // Second click state
+                                            modeCoolGreen.style.display = "none";
+                                            modeCoolWhite.style.display = "block";
+                                            modeDryWhite.style.display = "block";
+                                            modeDryGreen.style.display = "none";
+                                            modeFanWhite.style.display = "none";
+                                            modeFanGreen.style.display = "block";
+                                            activeMode = "Fan";
+                                        }
+
+                                        // Send the active mode to fetch-AC-data.php
+                                        sendModeData(activeMode);
+                                    }
+
+                                    function sendModeData(activeMode) {
+                                        fetch("../scripts/fetch-AC-data.php", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",  // Change to JSON
+                                            },
+                                            body: JSON.stringify({ activeMode }),  // Send JSON format
+                                        })
+                                            .then(response => response.text())
+                                            .then(data => {
+                                                console.log("Response from fetch-AC-data.php:", data);
+                                            })
+                                            .catch(error => {
+                                                console.error("Error sending mode data:", error);
+                                            });
+                                    }
+
+
+                                    // Initialize with default state
+                                    updateModeDisplay();
+
+                                    // Click event to toggle mode
+                                    modeCont.addEventListener("click", function () {
+                                        currentState = (currentState + 1) % 3; // Cycle through states 0 → 1 → 2 → 0
+                                        updateModeDisplay();
+                                    });
+                                });
+                            </script>
+
+
+
+
+
+                            <div class="swingCont">
+                                <!-- Click target (could also be the container itself) -->
+                                <img class="swing" src="../assets/images/ac/swing.png">
+
+                                <!-- Swing "On" images -->
+                                <img class="swingOn" src="../assets/images/ac/swingOn-White.png">
+                                <img class="swingOn" src="../assets/images/ac/swingOn-Green.png"
+                                    style="display: noneF;">
+
+                                <!-- Swing "Off" images -->
+                                <img class="swingOff" src="../assets/images/ac/swingOff-Green.png">
+                                <img class="swingOff" src="../assets/images/ac/swingOff-White.png"
+                                    style="display: none;">
+                            </div>
+
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    // Get references to the images within the container
+                                    const swingCont = document.querySelector(".swingCont");
+                                    const swingOnWhite = swingCont.querySelector("img.swingOn[src*='swingOn-White']");
+                                    const swingOnGreen = swingCont.querySelector("img.swingOn[src*='swingOn-Green']");
+                                    const swingOffGreen = swingCont.querySelector("img.swingOff[src*='swingOff-Green']");
+                                    const swingOffWhite = swingCont.querySelector("img.swingOff[src*='swingOff-White']");
+
+                                    let swingState = "Off"; // Default state
+
+                                    function setSwingOn() {
+                                        swingOffGreen.style.display = "none";
+                                        swingOffWhite.style.display = "block";
+                                        swingOnWhite.style.display = "none";
+                                        swingOnGreen.style.display = "block";
+                                        swingState = "On";
+                                        sendSwingData(swingState);
+                                    }
+
+                                    function setSwingOff() {
+                                        swingOffGreen.style.display = "block";
+                                        swingOffWhite.style.display = "none";
+                                        swingOnWhite.style.display = "block";
+                                        swingOnGreen.style.display = "none";
+                                        swingState = "Off";
+                                        sendSwingData(swingState);
+                                    }
+
+                                    function sendSwingData(state) {
+                                        fetch("../scripts/fetch-AC-data.php", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({ swing: state }), // Send swing state to PHP
+                                        })
+                                            .then(response => response.text())
+                                            .then(data => {
+                                                console.log("Response from fetch-AC-data.php:", data);
+                                            })
+                                            .catch(error => {
+                                                console.error("Error sending swing data:", error);
+                                            });
+                                    }
+
+                                    // Initialize display
+                                    setSwingOff();
+
+                                    swingCont.addEventListener("click", function () {
+                                        if (swingState === "Off") {
+                                            setSwingOn();
+                                        } else {
+                                            setSwingOff();
+                                        }
+                                    });
+                                });
+
+                            </script>
+
+                            <img id="sleepWhite" class="sleep" src="../assets/images/ac/sleep-White.png">
+                            <img id="sleepGreen" class="sleep" src="../assets/images/ac/sleep-Green.png"
+                                style="display: none;">
+
+                            <script>
+                              document.addEventListener("DOMContentLoaded", function () {
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
+
+    let sleepState = "Off"; // Default state
+    let currentMode = "Cool"; // Default AC mode
+
+    function setSleepOn() {
+        if (currentMode === "Dry" || currentMode === "Fan") return; // Prevent enabling Sleep in Dry or Fan mode
+        sleepWhite.style.display = "none";
+        sleepGreen.style.display = "block";
+        sleepState = "On";
+        sendSleepData(sleepState);
+    }
+
+    function setSleepOff() {
+        sleepWhite.style.display = "block";
+        sleepGreen.style.display = "none";
+        sleepState = "Off";
+        sendSleepData(sleepState);
+    }
+
+    function sendSleepData(state) {
+        fetch("../scripts/fetch-AC-data.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sleep: state }), // Send sleep state to PHP
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log("Response from fetch-AC-data.php:", data);
+        })
+        .catch(error => {
+            console.error("Error sending sleep data:", error);
+        });
+    }
+
+    // Function to update mode and disable/enable Sleep mode
+    function updateMode(newMode) {
+        currentMode = newMode;
+        if (currentMode === "Dry" || currentMode === "Fan") {
+            setSleepOff(); // Force sleep mode off
+            sleepWhite.style.opacity = "0.5"; // Visually indicate it's disabled
+            sleepGreen.style.opacity = "0.5";
+            sleepWhite.style.pointerEvents = "none"; // Fully disable clicks
+            sleepGreen.style.pointerEvents = "none";
+        } else {
+            sleepWhite.style.opacity = "1"; // Re-enable when Cool mode is active
+            sleepGreen.style.opacity = "1";
+            sleepWhite.style.pointerEvents = "auto"; // Enable clicks
+            sleepGreen.style.pointerEvents = "auto";
+        }
+    }
+
+    // Initialize default state
+    setSleepOff();
+
+    sleepWhite.addEventListener("click", setSleepOn);
+    sleepGreen.addEventListener("click", setSleepOff);
+
+    // Example: Call `updateMode()` when AC mode is changed
+    document.addEventListener("modeChanged", function (event) {
+        updateMode(event.detail.mode); // Listen for mode change events
+    });
+});
+
+
+                            </script>
+
+
 
                             <img class="timer" id="timer" src="../assets/images/ac/timer.png">
                             <!-- Timer Donut -->
@@ -466,8 +782,67 @@ if (!isset($_SESSION['user_id'])) {
             });
         </script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const tempbarLow = document.querySelector(".tempbarLow");
+                const tempbarHigh = document.querySelector(".tempbarHigh");
+                const ACRCTempEl = document.getElementById("ACRCTemp");
+                const ACtempDisplay = document.getElementById("ACtemp");
 
+                // Initialize the temperature (defaulting to 31 if the element is empty)
+                let currentTemp = parseInt(ACRCTempEl.textContent) || 31;
+                ACRCTempEl.textContent = currentTemp;
+                ACtempDisplay.textContent = currentTemp + " °C";
 
+                // Function to send the updated temperature to the server
+                function updateTempOnServer(temp) {
+                    $.ajax({
+                        url: '../scripts/fetch-AC-data.php', // Ensure this URL is correct
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ temp: temp }),
+                        success: function (responseData) {
+                            console.log("AC Log Updated:", responseData);
+                            // Optionally update the AC log display if needed:
+                            ACtempDisplay.textContent = responseData.temp + " °C";
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error updating temperature:", error);
+                        }
+                    });
+                }
+
+                // Decrease temperature when clicking on tempbarLow
+                tempbarLow.addEventListener("click", function () {
+                    // Get current temperature from the element or fallback
+                    currentTemp = parseInt(ACRCTempEl.textContent) || 31;
+                    if (currentTemp > 16) {
+                        currentTemp--; // Decrease by 1 degree
+                        ACRCTempEl.textContent = currentTemp;
+                        ACtempDisplay.textContent = currentTemp + " °C"; // Update the AC log display too
+                        updateTempOnServer(currentTemp);
+                        console.log("Temperature decreased to: " + currentTemp);
+                    } else {
+                        console.log("Minimum temperature of 16°C reached.");
+                    }
+                });
+
+                // Increase temperature when clicking on tempbarHigh
+                tempbarHigh.addEventListener("click", function () {
+                    currentTemp = parseInt(ACRCTempEl.textContent) || 31;
+                    if (currentTemp < 31) {
+                        currentTemp++; // Increase by 1 degree
+                        ACRCTempEl.textContent = currentTemp;
+                        ACtempDisplay.textContent = currentTemp + " °C";
+                        updateTempOnServer(currentTemp);
+                        console.log("Temperature increased to: " + currentTemp);
+                    } else {
+                        console.log("Maximum temperature of 31°C reached.");
+                    }
+                });
+            });
+        </script>
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
