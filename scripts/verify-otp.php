@@ -2,6 +2,8 @@
 session_start();
 header("Content-Type: application/json");
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include '../app/config/connection.php'; // Include database connection
 
 // Get OTP from request
@@ -10,6 +12,10 @@ $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 // Validate input
 if (empty($enteredOTP) || strlen($enteredOTP) !== 5) {
     echo json_encode(["success" => false, "message" => "Invalid OTP format"]);
+    exit();
+}
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Database connection failed."]);
     exit();
 }
 
