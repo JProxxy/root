@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Retrieve and trim form fields
-$username       = trim($_POST['username'] ?? '');
+$username       = trim($_POST['SignUpUsername'] ?? '');
 $email          = trim($_POST['email'] ?? '');
 $phoneNumber    = trim($_POST['phoneNumber'] ?? '');
 $password       = trim($_POST['password'] ?? '');
