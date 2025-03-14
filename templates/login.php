@@ -32,7 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             // Check if the account is locked
             if ($lockUntil && strtotime($lockUntil) > time()) {
                 $remainingTime = strtotime($lockUntil) - time();
-                echo "Account is locked. Try again after $remainingTime seconds.";
+                echo "<script>
+        alert('Account is locked. Try again after $remainingTime seconds.');
+        window.history.back(); // Redirects back to the login page
+    </script>";
                 exit();
             }
 
