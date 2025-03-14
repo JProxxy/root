@@ -14,7 +14,7 @@ if (empty($enteredOTP) || strlen($enteredOTP) !== 5) {
 }
 
 // Retrieve stored OTP from the session or database
-$email = $_SESSION['reset_email'] ?? null;  // Email should be stored when OTP is sent
+$email = $_SESSION['reset_email'] ?? null;
 
 if (!$email) {
     echo json_encode(["success" => false, "message" => "Session expired. Please request a new OTP."]);
@@ -22,25 +22,27 @@ if (!$email) {
 }
 
 // Fetch OTP details from the database
-$stmt = $conn->prepare("SELECT user_id, email, otp_code, otp_expiry FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT user_id, email, CAST(otp_code AS CHAR) AS otp_code, otp_expiry FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
     $userId = $row['user_id'];
-    $storedOTP = $row['otp_code'];
+    $storedOTP = trim(strval($row['otp_code'])); // Convert OTP to string & trim
     $otpExpiry = strtotime($row['otp_expiry']);
     $currentTime = time();
 
+    // Debugging logs
+    error_log("Entered OTP: " . $enteredOTP);
+    error_log("Stored OTP: " . $storedOTP);
+
     // Check if OTP is correct
     if ($enteredOTP === $storedOTP) {
-        // Check if OTP has expired
         if ($currentTime > $otpExpiry) {
             echo json_encode(["success" => false, "message" => "OTP has expired. Request a new one."]);
         } else {
-            // OTP is valid, allow password reset
-            $_SESSION['verified_user_id'] = $userId;  // Store user_id for reset-password process
+            $_SESSION['verified_user_id'] = $userId;
             echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
         }
     } else {
@@ -50,7 +52,7 @@ if ($row = $result->fetch_assoc()) {
     echo json_encode(["success" => false, "message" => "Email not found."]);
 }
 
-// Close the database connection
+// Close database connection
 $stmt->close();
 $conn->close();
 ?>
