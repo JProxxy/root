@@ -44,7 +44,7 @@
                 console.log("Button clicked, sending request..."); // Debugging log
 
                 // Send email to the backend for validation
-                fetch("forgot-password.php", {
+                fetch("../scripts/check-email.php", {
                     method: "POST",
                     body: new FormData(form),
                 })
