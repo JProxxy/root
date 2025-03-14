@@ -113,7 +113,8 @@ $email = $_SESSION['reset_email']; // Get email
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = "../templates/reset-password.php";
+                        alert("OTP verified successfully! Redirecting to login page...");
+                        window.location.href = "../templates/login.php";
                     } else {
                         document.getElementById("message").textContent = "Invalid OTP. Please try again.";
                     }
