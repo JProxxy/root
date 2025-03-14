@@ -1,3 +1,14 @@
+<?php
+session_start();
+if (!isset($_SESSION['reset_email'])) {
+    header("Location: ../templates/forgot-password.php"); // Redirect if email is missing
+    exit();
+}
+
+$email = $_SESSION['reset_email']; // Get email
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +24,7 @@
             justify-content: center;
             margin-top: 20px;
         }
-        
+
         .otp-input {
             width: 50px;
             height: 50px;
@@ -34,7 +45,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        
+
         .verify-btn:hover {
             background-color: #0056b3;
         }
@@ -99,18 +110,18 @@
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: "otp=" + encodeURIComponent(enteredOTP)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = "../templates/reset-password.php";
-                } else {
-                    document.getElementById("message").textContent = "Invalid OTP. Please try again.";
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("message").textContent = "An error occurred. Please try again.";
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = "../templates/reset-password.php";
+                    } else {
+                        document.getElementById("message").textContent = "Invalid OTP. Please try again.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById("message").textContent = "An error occurred. Please try again.";
+                });
         }
     </script>
 </body>

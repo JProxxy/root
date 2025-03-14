@@ -2,7 +2,7 @@
 session_start();
 header("Content-Type: application/json");
 
-include '../app/config/connection.php';  // Include database connection
+include '../app/config/connection.php'; // Include database connection
 
 // Get OTP from request
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
@@ -13,13 +13,13 @@ if (empty($enteredOTP) || strlen($enteredOTP) !== 5) {
     exit();
 }
 
-// Retrieve stored OTP from the session or database
-$email = $_SESSION['reset_email'] ?? null;
-
-if (!$email) {
+// Retrieve stored email from session
+if (!isset($_SESSION['reset_email'])) {
     echo json_encode(["success" => false, "message" => "Session expired. Please request a new OTP."]);
     exit();
 }
+
+$email = $_SESSION['reset_email']; // Get stored email
 
 // Fetch OTP details from the database
 $stmt = $conn->prepare("SELECT user_id, email, CAST(otp_code AS CHAR) AS otp_code, otp_expiry FROM users WHERE email = ?");
@@ -29,7 +29,7 @@ $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
     $userId = $row['user_id'];
-    $storedOTP = trim(strval($row['otp_code'])); // Convert OTP to string & trim
+    $storedOTP = trim(strval($row['otp_code'])); // Ensure stored OTP is a string
     $otpExpiry = strtotime($row['otp_expiry']);
     $currentTime = time();
 
@@ -42,7 +42,7 @@ if ($row = $result->fetch_assoc()) {
         if ($currentTime > $otpExpiry) {
             echo json_encode(["success" => false, "message" => "OTP has expired. Request a new one."]);
         } else {
-            $_SESSION['verified_user_id'] = $userId;
+            $_SESSION['verified_user_id'] = $userId; // Store verified user ID
             echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
         }
     } else {

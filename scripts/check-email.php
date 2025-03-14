@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json");
-include '../app/config/connection.php'; 
-require '../vendor/autoload.php'; 
+include '../app/config/connection.php';
+require '../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -32,14 +32,14 @@ try {
         $updateStmt->execute();
 
         $mail = new PHPMailer(true);
-        
+
         try {
             $mail->isSMTP();
             $mail->SMTPDebug = 0; // Debugging enabled
             $mail->Debugoutput = 'html'; // Debug output format
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'jproxxyv1@gmail.com';  
+            $mail->Username = 'jproxxyv1@gmail.com';
             $mail->Password = 'cohw zplj ztag sifm'; // Use an App Password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
@@ -49,10 +49,13 @@ try {
 
             $mail->isHTML(true);
             $mail->Subject = 'Your OTP Code';
-            $mail->Body    = "Your OTP for password reset is: <b>$otp</b>. This code expires in 10 minutes.";
+            $mail->Body = "Your OTP for password reset is: <b>$otp</b>. This code expires in 10 minutes.";
 
             if ($mail->send()) {
-                echo json_encode(["success" => true, "message" => "OTP sent successfully"]);
+                session_start(); // Start session at the top
+                $_SESSION['reset_email'] = $email; // Store email in session
+
+                echo json_encode(["success" => true, "message" => "OTP sent successfully", "redirect" => "../templates/reset-password.php"]);
             } else {
                 echo json_encode(["success" => false, "message" => "Email sending failed"]);
             }
