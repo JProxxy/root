@@ -4,8 +4,7 @@ require_once '../app/config/connection.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['error'] = "Invalid request method.";
-    header("Location: ../templates/signup.php");
+    echo "<script>alert('Invalid request method.');</script>";
     exit;
 }
 
@@ -70,10 +69,9 @@ if (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password)) {
     $errors[] = "Password must be at least 8 characters long, contain a capital letter, a number, and a special character.";
 }
 
-// If there are errors, redirect back with error messages
+// If there are errors, alert them and stop processing
 if (!empty($errors)) {
-    $_SESSION['error'] = implode("<br>", $errors);
-    header("Location: ../templates/signup.php");
+    echo "<script>alert('" . implode("\\n", $errors) . "');</script>";
     exit;
 }
 
@@ -93,7 +91,6 @@ try {
     exit;
 }
 
-
 // Hash the password securely
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -108,13 +105,14 @@ try {
         ':phoneNumber'=> $phoneNumber
     ]);
 
-    $_SESSION['success'] = "Signup successful!";
-    header("Location: ../templates/login.php");
+    echo "<script>
+            alert('Signup successful!');
+            window.location.href = '../templates/login.php';
+          </script>";
     exit;
 } catch (PDOException $e) {
     error_log("Database Insert Error: " . $e->getMessage());
-    $_SESSION['error'] = "System error. Please try again later.";
-    header("Location: ../templates/signup.php");
+    echo "<script>alert('System error. Please try again later.');</script>";
     exit;
 }
 ?>
