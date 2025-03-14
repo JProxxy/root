@@ -84,16 +84,12 @@ try {
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($existingUser) {
-        $_SESSION['error'] = "Username or Email already exists. Please try a different one.";
-        header("Location: ../templates/signup.php");
+        echo "<script>alert('Username or Email already exists. Please try a different one.');</script>";
         exit;
     }
 } catch (PDOException $e) {
     error_log("Database Error: " . $e->getMessage());
-    echo "<script>
-            alert('System error. Please try again later.');
-            window.location.href = '../templates/signup.php';
-          </script>";
+    echo "<script>alert('System error. Please try again later.');</script>";
     exit;
 }
 
