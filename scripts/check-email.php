@@ -35,7 +35,7 @@ try {
         
         try {
             $mail->isSMTP();
-            $mail->SMTPDebug = 2; // Debugging enabled
+            $mail->SMTPDebug = 0; // Debugging enabled
             $mail->Debugoutput = 'html'; // Debug output format
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
