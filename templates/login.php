@@ -13,6 +13,7 @@ error_reporting(E_ALL);
 require_once '../app/config/connection.php';
 
 $errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
@@ -24,8 +25,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // Check if the user has a Google ID (Skip password verification)
-            if (!empty($user['google_id']) || password_verify($password, $user['password'])) {
+            $hashedPassword = $user['password'];
+            $failedAttempts = $user['failed_attempts'];
+            $lockUntil = $user['lock_until'];
+
+            // Check if the account is locked
+            if ($lockUntil && strtotime($lockUntil) > time()) {
+                $remainingTime = strtotime($lockUntil) - time();
+                echo "Account is locked. Try again after $remainingTime seconds.";
+                exit();
+            }
+
+            // Check password (if user has no Google ID)
+            if (!empty($user['google_id']) || password_verify($password, $hashedPassword)) {
+                // Reset failed attempts on successful login
+                $stmt = $conn->prepare("UPDATE users SET failed_attempts = 0, lock_until = NULL WHERE username = :username");
+                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->execute();
+
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['ip_address'] = $_SERVER['REMOTE_ADDR'];
@@ -34,7 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 header("Location: ../templates/dashboard.php");
                 exit();
             } else {
-                $errorMessage = "Invalid username or password.";
+                // Increase failed attempt count
+                $failedAttempts++;
+
+                if ($failedAttempts >= 3) {
+                    // Lock account for 30 seconds
+                    $stmt = $conn->prepare("UPDATE users SET failed_attempts = :failed_attempts, lock_until = NOW() + INTERVAL 30 SECOND WHERE username = :username");
+                } else {
+                    $stmt = $conn->prepare("UPDATE users SET failed_attempts = :failed_attempts WHERE username = :username");
+                }
+
+                $stmt->bindParam(':failed_attempts', $failedAttempts, PDO::PARAM_INT);
+                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->execute();
+
+                $remainingAttempts = 3 - $failedAttempts;
+                $errorMessage = "Invalid password. " . ($remainingAttempts > 0 ? "$remainingAttempts attempts left." : "Your account is locked for 30 seconds.");
             }
         } else {
             $errorMessage = "Account not found.";
@@ -44,7 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $errorMessage = "System error. Please try again later.";
     }
 }
+
+if (!empty($errorMessage)) {
+    echo $errorMessage;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -269,6 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 </script>
 
 </html>
+
+
 <script>
     // Real-time validation for Username
     document.querySelector('input[name="SignUpUsername"]').addEventListener('input', function () {
