@@ -110,8 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 Account</a>
                         </div>
                         <div class="link-container">
-                            <a href="forgotPassword.php" class="forgotPass">Forgot Password?</a>
+                            <a href="../templates/forgot-password.php" class="forgotPass">Forgot
+                                Password?</a>
                         </div>
+
                     </div>
 
 
@@ -239,29 +241,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
     // Validate Password and Retype Password Match
-function validatePassword() {
-    const password = document.getElementById("password").value;
-    const retype = document.getElementById("retype").value;
-    const errorSpan = document.getElementById("passwordError");
+    function validatePassword() {
+        const password = document.getElementById("password").value;
+        const retype = document.getElementById("retype").value;
+        const errorSpan = document.getElementById("passwordError");
 
-    errorSpan.style.display = password && retype && password !== retype ? "block" : "none";
-}
+        errorSpan.style.display = password && retype && password !== retype ? "block" : "none";
+    }
 
-// Toggle Password Visibility
-function togglePasswordVisibility(inputId, icon) {
-    const input = document.getElementById(inputId);
-    const isPassword = input.type === "password";
+    // Toggle Password Visibility
+    function togglePasswordVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        const isPassword = input.type === "password";
 
-    input.type = isPassword ? "text" : "password";
-    icon.classList.toggle("fa-eye-slash", isPassword);
-    icon.classList.toggle("fa-eye", !isPassword);
-}
+        input.type = isPassword ? "text" : "password";
+        icon.classList.toggle("fa-eye-slash", isPassword);
+        icon.classList.toggle("fa-eye", !isPassword);
+    }
 
-// Show/Hide Login Password
-function toggleLoginPassword() {
-    const passwordInput = document.getElementById("loginpassword");
-    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-}
+    // Show/Hide Login Password
+    function toggleLoginPassword() {
+        const passwordInput = document.getElementById("loginpassword");
+        passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+    }
 
 
 </script>
