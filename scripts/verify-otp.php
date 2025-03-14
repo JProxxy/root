@@ -22,14 +22,14 @@ if (!$email) {
 }
 
 // Fetch OTP details from the database
-$stmt = $conn->prepare("SELECT user_id, email, otp, otp_expiry FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT user_id, email, otp_code, otp_expiry FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
     $userId = $row['user_id'];
-    $storedOTP = $row['otp'];
+    $storedOTP = $row['otp_code'];
     $otpExpiry = strtotime($row['otp_expiry']);
     $currentTime = time();
 
