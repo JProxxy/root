@@ -32,15 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             // Check if the account is locked
             if ($lockUntil && strtotime($lockUntil) > time()) {
                 $remainingTime = strtotime($lockUntil) - time();
-                echo "<script>
-        alert('Account is locked. Try again after $remainingTime seconds.');
-        window.history.back(); // Redirects back to the login page
-    </script>";
+                echo "<script>alert('Account is locked. Try again after $remainingTime seconds.'); window.history.back();</script>";
                 exit();
             }
+            
 
             // Check password (if user has no Google ID)
-            if (!empty($user['google_id']) || password_verify($password, $hashedPassword)) {
+            if (!empty($user['google_id']) || (!empty($hashedPassword) && password_verify($password, $hashedPassword))) {
                 // Reset failed attempts on successful login
                 $stmt = $conn->prepare("UPDATE users SET failed_attempts = 0, lock_until = NULL WHERE username = :username");
                 $stmt->bindParam(':username', $username, PDO::PARAM_STR);
