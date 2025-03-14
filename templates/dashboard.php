@@ -30,79 +30,79 @@ session_start(); // Must be at the very top
             <div id="dashboardDevider3d"></div>
 
             <script>
-                document.addEventListener("DOMContentLoaded", function () {
+                document.addEventListener("DOMContentLoaded", async function () {
                     const container = document.getElementById("dashboardDevider3d");
 
                     // PHP variable to get the model path
                     const modelPath = "<?php echo '../assets/models/MainBuilding.glb'; ?>";
-
-                    // Check if the modelPath is correct
                     console.log('Model Path:', modelPath);
 
-                    // Check if the model path is valid
-                    fetch(modelPath)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.blob();
-                        })
-                        .then(blob => {
-                            const url = URL.createObjectURL(blob);
+                    try {
+                        // Use caching to try and speed up the request
+                        const response = await fetch(modelPath, { cache: 'force-cache' });
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        const blob = await response.blob();
 
-                            // Create the <model-viewer> element dynamically
-                            const modelViewer = document.createElement("model-viewer");
-                            modelViewer.setAttribute("src", url);
-                            modelViewer.setAttribute("auto-rotate", "");
-                            modelViewer.setAttribute("camera-controls", "");
-                            modelViewer.setAttribute("shadow-intensity", "1");
-                            modelViewer.setAttribute("exposure", ".45");
-                            modelViewer.setAttribute("environment-image", "neutral");
-                            modelViewer.setAttribute("ar", "");
-                            modelViewer.setAttribute("disable-tap", "");
-                            modelViewer.style.width = "100%";
-                            modelViewer.style.height = "820px";
-                            modelViewer.style.position = 'relative'; // Ensure it's positioned relative for glow effect positioning
+                        // Create a local URL for the model file
+                        const url = URL.createObjectURL(blob);
 
-                            // Append the model-viewer to the container
-                            container.appendChild(modelViewer);
+                        // Create the <model-viewer> element dynamically
+                        const modelViewer = document.createElement("model-viewer");
+                        modelViewer.setAttribute("src", url);
+                        modelViewer.setAttribute("auto-rotate", "");
+                        modelViewer.setAttribute("camera-controls", "");
+                        modelViewer.setAttribute("shadow-intensity", "1");
+                        modelViewer.setAttribute("exposure", ".45");
+                        modelViewer.setAttribute("environment-image", "neutral");
+                        modelViewer.setAttribute("ar", "");
+                        modelViewer.setAttribute("disable-tap", "");
+                        // Add a poster image to display while the model loads (replace with your image)
+                        modelViewer.setAttribute("poster", "../assets/images/loading-model.jpg");
+                        modelViewer.style.width = "100%";
+                        modelViewer.style.height = "820px";
+                        modelViewer.style.position = 'relative'; // For glow effect positioning
 
-                            // Function to create glowing light trails
-                            const createGlowEffect = (x, y) => {
-                                const glow = document.createElement('div');
-                                const size = Math.random() * 6 + 4; // Random size between 4 and 10px
-                                const color = `rgba(255, 255, 255, 0.8)`; // White glow
-                                const animationDuration = Math.random() * 0.4 + 0.5; // Random duration between 0.5 and 0.9 seconds
+                        // Append the model-viewer to the container
+                        container.appendChild(modelViewer);
 
-                                glow.style.position = 'absolute';
-                                glow.style.left = `${x - size / 2}px`;
-                                glow.style.top = `${y - size / 2}px`;
-                                glow.style.width = `${size}px`;
-                                glow.style.height = `${size}px`;
-                                glow.style.backgroundColor = color;
-                                glow.style.borderRadius = '50%';
-                                glow.style.pointerEvents = 'none';
-                                glow.style.animation = `glowAnimation ${animationDuration}s ease-out forwards`;
-                                modelViewer.appendChild(glow);
+                        // Function to create glowing light trails
+                        const createGlowEffect = (x, y) => {
+                            const glow = document.createElement('div');
+                            const size = Math.random() * 6 + 4; // Random size between 4 and 10px
+                            const color = `rgba(255, 255, 255, 0.8)`; // White glow
+                            const animationDuration = Math.random() * 0.4 + 0.5; // Random duration between 0.5 and 0.9 seconds
 
-                                // Remove the glow element after the animation completes
-                                setTimeout(() => {
-                                    glow.remove();
-                                }, animationDuration * 1000);
-                            };
+                            glow.style.position = 'absolute';
+                            glow.style.left = `${x - size / 2}px`;
+                            glow.style.top = `${y - size / 2}px`;
+                            glow.style.width = `${size}px`;
+                            glow.style.height = `${size}px`;
+                            glow.style.backgroundColor = color;
+                            glow.style.borderRadius = '50%';
+                            glow.style.pointerEvents = 'none';
+                            glow.style.animation = `glowAnimation ${animationDuration}s ease-out forwards`;
+                            modelViewer.appendChild(glow);
 
-                            // Add mousemove event to create glowing light trails
-                            modelViewer.addEventListener('mousemove', (event) => {
-                                const rect = modelViewer.getBoundingClientRect();
-                                const mouseX = event.clientX - rect.left;
-                                const mouseY = event.clientY - rect.top;
-                                createGlowEffect(mouseX, mouseY);
-                            });
-                        })
-                        .catch(error => {
-                            console.error("Error loading model:", error);
+                            // Remove the glow element after the animation completes
+                            setTimeout(() => {
+                                glow.remove();
+                            }, animationDuration * 1000);
+                        };
+
+                        // Add mousemove event to create glowing light trails
+                        modelViewer.addEventListener('mousemove', (event) => {
+                            const rect = modelViewer.getBoundingClientRect();
+                            const mouseX = event.clientX - rect.left;
+                            const mouseY = event.clientY - rect.top;
+                            createGlowEffect(mouseX, mouseY);
                         });
+                    } catch (error) {
+                        console.error("Error loading model:", error);
+                    }
                 });
+
             </script>
 
             <div class="dashboardDeviderRight">
