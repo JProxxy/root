@@ -15,7 +15,7 @@ session_start(); // Must be at the very top
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
-  
+
 
 </head>
 
@@ -201,10 +201,13 @@ session_start(); // Must be at the very top
     </div>
     <script>
         $(document).ready(function () {
-            if (!$.browser.webkit) {
-                $('.wrapper').html('<p>Sorry! Non webkit users. :(</p>');
+            let isWebkit = navigator.userAgent.toLowerCase().includes("webkit");
+
+            if (!isWebkit) {
+                $('.wrapper').html('<p>Sorry! Non-webkit users. :(</p>');
             }
         });
+
     </script>
 
     <script>
