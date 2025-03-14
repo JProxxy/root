@@ -198,6 +198,8 @@ session_start(); // Must be at the very top
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         $(document).ready(function () {
             if (!$.browser.webkit) {
@@ -238,8 +240,7 @@ session_start(); // Must be at the very top
         fetchWeatherData();
 
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+  
     <script>
         $(document).ready(function () {
             function loadNotifications() {
