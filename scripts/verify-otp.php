@@ -2,20 +2,16 @@
 session_start();
 header("Content-Type: application/json");
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-include '../app/config/connection.php'; // Include database connection
+error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+ini_set('display_errors', 0);
+
+include '../app/config/connection.php';  // Include database connection
 
 // Get OTP from request
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
-// Validate input
 if (empty($enteredOTP) || strlen($enteredOTP) !== 5) {
     echo json_encode(["success" => false, "message" => "Invalid OTP format"]);
-    exit();
-}
-if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Database connection failed."]);
     exit();
 }
 
@@ -25,17 +21,17 @@ if (!isset($_SESSION['reset_email'])) {
     exit();
 }
 
-$email = $_SESSION['reset_email']; // Get stored email
+$email = $_SESSION['reset_email'];
 
 // Fetch OTP details from the database
-$stmt = $conn->prepare("SELECT user_id, email, CAST(otp_code AS CHAR) AS otp_code, otp_expiry FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
+$stmt = $conn->prepare("SELECT user_id, otp_code, otp_expiry FROM users WHERE email = :email");
+$stmt->bindParam(":email", $email, PDO::PARAM_STR);
 $stmt->execute();
-$result = $stmt->get_result();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($row = $result->fetch_assoc()) {
+if ($row) {
     $userId = $row['user_id'];
-    $storedOTP = trim(strval($row['otp_code'])); // Ensure stored OTP is a string
+    $storedOTP = trim(strval($row['otp_code']));
     $otpExpiry = strtotime($row['otp_expiry']);
     $currentTime = time();
 
@@ -59,6 +55,6 @@ if ($row = $result->fetch_assoc()) {
 }
 
 // Close database connection
-$stmt->close();
-$conn->close();
+$stmt->closeCursor();
+$conn = null;
 ?>
