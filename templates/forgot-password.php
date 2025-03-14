@@ -20,56 +20,63 @@
             We will send a secure code to your email to enhance your privacy and security.
         </div>
 
-        <div class="inputsign-container">
-            <i class="fas fa-envelope"></i> <!-- Email Icon -->
-            <input type="email" id="EmailCheck" name="Email" placeholder="Email" required>
-        </div>
+        <!-- Wrap input inside a form -->
+        <form id="forgotPassForm">
+            <div class="inputsign-container">
+                <i class="fas fa-envelope"></i> <!-- Email Icon -->
+                <input type="email" id="EmailCheck" name="Email" placeholder="Email" required>
+            </div>
 
-        <button type="submit" class="forgotPassButton">Send Code</button>
+            <button type="submit" class="forgotPassButton">Send Code</button>
+        </form>
     </div>
 
     <script>
-        window.onload = function () {
-            document.querySelector(".forgotPassButton").addEventListener("click", function (event) {
-                event.preventDefault(); // Prevent form submission
+        document.getElementById("forgotPassForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
 
-                let emailInput = document.getElementById("EmailCheck");
-                let email = emailInput.value.trim();
+            let form = document.getElementById("forgotPassForm");
+            let emailInput = document.getElementById("EmailCheck");
+            let email = emailInput.value.trim();
 
-                if (email === "") {
-                    alert("Please enter your email.");
-                    return;
+            if (email === "") {
+                alert("Please enter your email.");
+                return;
+            }
+
+            console.log("Button clicked, sending request..."); // Debugging log
+
+            // Create FormData object
+            let formData = new FormData(form);
+
+            fetch("../scripts/check-email.php", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.text()) // Read response as text
+            .then(text => {
+                let jsonStart = text.indexOf("{");
+                let jsonEnd = text.lastIndexOf("}");
+                if (jsonStart !== -1 && jsonEnd !== -1) {
+                    let jsonString = text.substring(jsonStart, jsonEnd + 1);
+                    return JSON.parse(jsonString);
+                } else {
+                    throw new Error("Invalid JSON response from server.");
                 }
-
-                console.log("Button clicked, sending request..."); // Debugging log
-
-                // Send email to the backend for validation
-                fetch("../scripts/check-email.php", {
-                    method: "POST",
-                    body: new FormData(form),
-                })
-                    .then(response => response.text()) // Read as text first
-                    .then(text => {
-                        // Extract JSON part
-                        let jsonStart = text.indexOf("{");
-                        let jsonEnd = text.lastIndexOf("}");
-                        if (jsonStart !== -1 && jsonEnd !== -1) {
-                            let jsonString = text.substring(jsonStart, jsonEnd + 1);
-                            return JSON.parse(jsonString);
-                        } else {
-                            throw new Error("Invalid JSON response");
-                        }
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            console.log("OTP sent successfully");
-                        } else {
-                            console.error("OTP sending failed");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-            });
-        };
+            })
+            .then(data => {
+                if (data.success) {
+                    alert("A verification code has been sent to your email.");
+                    console.log("OTP sent successfully.");
+                    // Redirect user to verification page if needed
+                    // window.location.href = "verify-code.php";
+                } else {
+                    alert("Failed to send OTP. Please check your email and try again.");
+                    console.error("OTP sending failed.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
     </script>
 </body>
 
