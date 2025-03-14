@@ -90,10 +90,13 @@ try {
     }
 } catch (PDOException $e) {
     error_log("Database Error: " . $e->getMessage());
-    $_SESSION['error'] = "System error. Please try again later.";
-    header("Location: ../templates/signup.php");
+    echo "<script>
+            alert('System error. Please try again later.');
+            window.location.href = '../templates/signup.php';
+          </script>";
     exit;
 }
+
 
 // Hash the password securely
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
