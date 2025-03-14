@@ -44,27 +44,30 @@
                 console.log("Button clicked, sending request..."); // Debugging log
 
                 // Send email to the backend for validation
-                fetch("../scripts/check-email.php", {
+                fetch("forgot-password.php", {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: "email=" + encodeURIComponent(email)
+                    body: new FormData(form),
                 })
-                    .then(response => response.text()) // Read as text instead of JSON
-                    .then(data => {
-                        console.log("Raw response from PHP:", data); // Debugging
-                        try {
-                            let jsonData = JSON.parse(data);
-                            if (jsonData.success) {
-                                window.location.href = "../templates/reset-password.php";
-                            } else {
-                                alert(jsonData.message || "No account with that email is found.");
-                            }
-                        } catch (error) {
-                            console.error("JSON Parse Error:", error, "Received:", data);
-                            alert("An error occurred. Check console logs.");
+                    .then(response => response.text()) // Read as text first
+                    .then(text => {
+                        // Extract JSON part
+                        let jsonStart = text.indexOf("{");
+                        let jsonEnd = text.lastIndexOf("}");
+                        if (jsonStart !== -1 && jsonEnd !== -1) {
+                            let jsonString = text.substring(jsonStart, jsonEnd + 1);
+                            return JSON.parse(jsonString);
+                        } else {
+                            throw new Error("Invalid JSON response");
                         }
                     })
-                    .catch(error => console.error("Fetch error:", error));
+                    .then(data => {
+                        if (data.success) {
+                            console.log("OTP sent successfully");
+                        } else {
+                            console.error("OTP sending failed");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
             });
         };
     </script>
