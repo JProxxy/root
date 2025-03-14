@@ -77,9 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     }
 }
 
-if (!empty($errorMessage)) {
-    echo $errorMessage;
-}
 ?>
 
 <!DOCTYPE html>
