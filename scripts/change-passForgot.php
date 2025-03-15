@@ -1,11 +1,13 @@
-    <?php
-    session_start();
+<?php
+session_start();
+if (!isset($_SESSION['reset_email'])) {
+    header("Location: ../templates/forgot-password.php"); // Redirect if email is missing
+    exit();
+}
 
-    // Check if the session email is set (i.e., the user has initiated a password reset request)
-    if (!isset($_SESSION['reset_email'])) {
-        header("Location: ../templates/forgot-password.php"); // Redirect if email is missing
-        exit();
-    }
+$email = $_SESSION['reset_email']; // Get email
+
+?>
 
     $email = $_SESSION['reset_email']; // Get email from session
 
