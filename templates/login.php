@@ -32,9 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             // Check if the account is locked
             if ($lockUntil && strtotime($lockUntil) > time()) {
                 $remainingTime = strtotime($lockUntil) - time();
-                echo "<script>alert('Account is locked. Try again after $remainingTime seconds.'); window.history.back();</script>";
-                exit();
+
+                // Prevent caching and handle redirect
+                header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+                header("Pragma: no-cache");
+                header("Location: ../templates/login.php"); // Redirect to login page
+                exit(); // Ensure no further code execution
             }
+
 
 
             // Check password (if user has no Google ID)
