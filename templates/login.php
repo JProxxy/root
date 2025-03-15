@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 echo "<script>alert('Account is locked. Try again after $remainingTime seconds.'); window.history.back();</script>";
                 exit();
             }
-            
+
 
             // Check password (if user has no Google ID)
             if (!empty($user['google_id']) || (!empty($hashedPassword) && password_verify($password, $hashedPassword))) {
@@ -338,16 +338,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
     // Real-time validation for Phone Number
     document.querySelector('input[name="phoneNumber"]').addEventListener('input', function () {
         const phone = this.value;
-        const regex = /^[0-9]{10}$/; // Must be 10-digit numeric
+        const regex = /^[0-9]{11}$/; // Must be 11-digit numeric
         const errorSpan = this.nextElementSibling;
 
         if (!regex.test(phone)) {
-            errorSpan.textContent = "Invalid phone number. Must be 10 digits.";
+            errorSpan.textContent = "Invalid phone number. Must be 11 digits.";
             errorSpan.style.display = "block";
         } else {
             errorSpan.style.display = "none";
         }
     });
+
 
     // Real-time validation for Password
     document.getElementById('password').addEventListener('input', function () {

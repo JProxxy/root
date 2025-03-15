@@ -1,0 +1,409 @@
+.dashboardDevider {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  width: 92%;
+  height: 100%;
+  background-color: rgba(162, 162, 162, 0);
+}
+
+.h1 {
+  margin-top: 3%;
+  text-align: left; /* Ensures heading is centered */
+  font-size: 24px; /* Adjust size as needed */
+  margin-bottom: 15px; /* Adds space between heading and controls */
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+
+  width: 100%;
+  
+}
+
+.customControls {
+  /* margin-top: 2%; */
+  display: flex;
+  justify-content: center; /* Centers items horizontally */
+  align-items: center; /* Centers items vertically */
+  gap: 5%; /* Adds spacing */
+  width: 95%;
+  height: 80%;
+  background-color: rgba(174, 0, 255, 0);
+  padding: 20px;
+}
+
+.waterTankControl,
+.airconditioningControl {
+  width: 35%;
+  height: 80%;
+  padding: 20px;
+  background: #f3f3f3;
+  border-radius: 25px;
+
+  align-items: flex-start; /* Align items to the top */
+  justify-content: flex-start; /* Avoid stretching */
+  flex-direction: column;
+}
+
+/* Icon and text */
+.control-content {
+  display: flex;
+  align-items: center;
+  padding-left: 2%;
+  gap: 10px;
+
+  width: 96%;
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.control-content h3 {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  padding-left: 5%;
+}
+
+/* Ensures switch stays on the right */
+.switch-container {
+  margin-top: 10px; /* Adds spacing */
+  margin-left: auto; /* Pushes switch to the right */
+  display: flex;
+  justify-content: flex-end; /* Ensures content is right-aligned */
+  width: auto; /* Prevents full width */
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 35px;
+}
+
+.control-icon {
+  width: 40px;
+  height: 40px;
+}
+
+h3 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #c4c4c4;
+  transition: 0.4s;
+  border-radius: 25px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 2.5px;
+  bottom: 6.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf4f00;
+  background: linear-gradient(180deg, #6fa6ac 0%, #598489 47.5%, #2d4446 100%);
+  border-radius: 40px;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.setwaterLevel {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  width: 100%;
+  margin-top: 7%;
+  padding-left: 2.5%;
+}
+
+/* Container Styling */
+.sliderWaterCont {
+  width: 90%; /* Adjust width as needed */
+  display: flex;
+  justify-content: flex-start; /* Aligns content to the left */
+  align-items: flex-start; /* Ensures top alignment */
+  flex-direction: column; /* Stack span and slider */
+  background-color: rgba(255, 0, 0, 0);
+  margin-top: 8%;
+  margin-left: 2.5%;
+}
+
+.minimumGroup span {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+
+  width: 100%;
+  margin-top: 7% !important;
+}
+.range-slider {
+  position: relative;
+  width: 510px;
+  margin: 20px auto;
+}
+
+.waterMinimumLevel,
+.waterMaximumLevel {
+  -webkit-appearance: none;
+  width: 92%;
+  height: 35px; /* Thick track */
+  border-radius: 25px;
+  background: #f3f3f3;
+  background-image: linear-gradient(
+    90deg,
+    #39b09e 0%,
+    #50968d 17.5%,
+    #5b8884 36%,
+    #618280 54%,
+    #637f7d 71.5%,
+    #657d7c 85.75%,
+    #667b7b 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  outline: none;
+  position: relative;
+}
+
+/* Custom thumb */
+.waterMinimumLevel::-webkit-slider-thumb,
+.waterMaximumLevel::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 45px;
+  background: #0b3236;
+  cursor: pointer;
+  transition: 0.2s;
+  position: relative;
+}
+
+.waterMinimumLevel::-moz-range-thumb,
+.waterMaximumLevel::-moz-range-thumb {
+  width: 8px;
+  height: 30px;
+  background: #4caf50;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Tooltip Styling */
+.tooltip {
+  position: absolute;
+  bottom: -28px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  background: #33333300;
+  color: #0b3236;
+  padding: 5px;
+  border-radius: 3px;
+  display: none;
+}
+
+/* Stationary Tooltips */
+.start-tooltip,
+.end-tooltip {
+  position: absolute;
+  bottom: -28px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  background: #33333300;
+  color: #0b3236;
+  padding: 5px;
+  border-radius: 3px;
+  display: block;
+}
+
+.start-tooltip {
+  left: 0;
+}
+
+.end-tooltip {
+  right: 3%;
+}
+
+/* Non-sliding bar */
+.non-sliding .slider-bar {
+  width: 92%;
+  height: 35px;
+  border-radius: 25px;
+  background: #f3f3f3;
+  background-image: linear-gradient(
+    90deg,
+    #39b09e 0%,
+    #50968d 17.5%,
+    #5b8884 36%,
+    #618280 54%,
+    #637f7d 71.5%,
+    #657d7c 85.75%,
+    #667b7b 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 50% 100%; /* You can adjust the fill size here if needed */
+  margin: 5px 0;
+}
+
+/* AIRCON */
+
+.settemprange {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  width: 100%;
+  margin-top: 7%;
+  padding-left: 2.5%;
+}
+
+/* Container Styling */
+.sliderACCont {
+  width: 90%; /* Adjust width as needed */
+  display: flex;
+  justify-content: flex-start; /* Aligns content to the left */
+  align-items: flex-start; /* Ensures top alignment */
+  flex-direction: column; /* Stack span and slider */
+  background-color: rgba(255, 0, 0, 0);
+  margin-top: 8%;
+  margin-left: 2.5%;
+}
+
+.minimumGroup span {
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+
+  width: 100%;
+  margin-top: 7% !important;
+}
+.range-slider {
+  position: relative;
+  width: 510px;
+  margin: 20px auto;
+}
+
+.acMinimumLevel,
+.acMaximumLevel {
+  -webkit-appearance: none;
+  width: 92%;
+  height: 35px; /* Thick track */
+  border-radius: 30px 0px 0px 30px; /* Updated border radius */
+  background: linear-gradient(
+    90.01deg,
+    #39b09e 0.01%,
+    #519f8f 20.07%,
+    #659183 37.16%,
+    #7b8176 55.74%,
+    #927168 74.32%,
+    #a8615b 92.89%,
+    #ea3232 111.47%,
+    #ea3232 127.82%,
+    #ea3232 143.42%,
+    #ea3232 147.88%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%; /* Initial state: no progress */
+  outline: none;
+  position: relative;
+}
+
+/* Custom thumb */
+.acMinimumLevel::-webkit-slider-thumb,
+.acMaximumLevel::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 45px;
+  background: #0b3236;
+  cursor: pointer;
+  transition: 0.2s;
+  position: relative;
+}
+
+.acMinimumLevel::-moz-range-thumb,
+.acMaximumLevel::-moz-range-thumb {
+  width: 8px;
+  height: 30px;
+  background: #4caf50;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* Tooltip Styling */
+.tooltip {
+  position: absolute;
+  bottom: -28px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  background: #33333300;
+  color: #0b3236;
+  padding: 5px;
+  border-radius: 3px;
+  display: none;
+}
+
+/* Stationary Tooltips */
+.start-tooltip,
+.end-tooltip {
+  position: absolute;
+  bottom: -28px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  background: #33333300;
+  color: #0b3236;
+  padding: 5px;
+  border-radius: 3px;
+  display: block;
+}
+
+.start-tooltip {
+  left: 0;
+}
+
+.end-tooltip {
+  right: 3%;
+}
+
+/* Non-sliding bar */
+.non-slidingAC .slider-bar {
+  width: 92%;
+  height: 35px;
+  border-radius: 25px;
+  background: #f3f3f3;
+  background-image: linear-gradient(
+    90deg,
+    #39b09e 0%,
+    #50968d 17.5%,
+    #5b8884 36%,
+    #618280 54%,
+    #637f7d 71.5%,
+    #657d7c 85.75%,
+    #667b7b 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 50% 100%; /* You can adjust the fill size here if needed */
+  margin: 5px 0;
+}
