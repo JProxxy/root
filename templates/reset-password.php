@@ -57,10 +57,10 @@ $email = $_SESSION['reset_email']; // Get email
 
     <div class="leftCont">
         <div class="spillOne">
-            HAVING TROUBLE REMEMBERING YOUR PASSWORD?
+            ALMOST THERE!
         </div>
         <div class="spillTwo">
-            We will send a secure code to your email to enhance your privacy and security.
+            Please review the email and input the code in the designated field below for verification.
         </div>
 
         <!-- OTP Input Fields -->
@@ -113,8 +113,8 @@ $email = $_SESSION['reset_email']; // Get email
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert("OTP verified successfully! Redirecting to login page...");
-                        window.location.href = "../templates/login.php";
+                        alert("OTP verified successfully! Reset your password now");
+                        window.location.href = "../templates/reset-passwordNow.php";
                     } else {
                         document.getElementById("message").textContent = "Invalid OTP. Please try again.";
                     }
