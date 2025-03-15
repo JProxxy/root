@@ -7,7 +7,7 @@ if (!isset($_SESSION['reset_email'])) {
 
 $email = $_SESSION['reset_email']; // Get email
 
-?>
+
 
     $email = $_SESSION['reset_email']; // Get email from session
 
