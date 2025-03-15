@@ -3,8 +3,14 @@
 session_start();
 header("Content-Type: application/json");
 
-error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
-ini_set('display_errors', 0);
+
+if (!isset($_SESSION['reset_email'])) {
+    header("Location: ../templates/forgot-password.php"); // Redirect if email is missing
+    exit();
+}
+
+$email = $_SESSION['reset_email']; // Get email
+
 
 include '../app/config/connection.php';  // Include database connection
 ?>
