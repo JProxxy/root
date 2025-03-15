@@ -36,7 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 // Prevent caching and handle redirect
                 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
                 header("Pragma: no-cache");
-                header("Location: ../templates/login.php"); // Redirect to login page
+
+                // JavaScript alert before redirect
+                echo "<script>alert('Account is locked. Try again after $remainingTime seconds.'); window.location.href = '../templates/login.php';</script>";
                 exit(); // Ensure no further code execution
             }
 
