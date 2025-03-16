@@ -160,22 +160,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <script>
                             function handleCredentialResponse(response) {
                                 const token = response.credential;
+                                console.log("Google Token:", token);
 
+                                // Send the token to google-auth.php using fetch
                                 fetch('../scripts/google-auth.php', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ token: token }) // Send only token
+                                    body: JSON.stringify({ token: token })
                                 })
-                                    .then(response => response.json())
+                                    .then(resp => resp.json())
                                     .then(data => {
                                         if (data.success) {
-                                            window.location.href = "/templates/dashboard.php";
-
+                                            // Redirect to dashboard on successful authentication.
+                                            window.location.href = "../templates/dashboard.php";
                                         } else {
                                             alert("Google authentication failed: " + data.message);
                                         }
                                     })
-                                    .catch(error => console.error("Error:", error));
+                                    .catch(error => {
+                                        console.error("Error:", error);
+                                        alert("An error occurred while processing your login.");
+                                    });
                             }
                         </script>
                         <div class="input-container">
