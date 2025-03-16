@@ -153,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             </div>
                         </div>
 
+
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -166,10 +167,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
 
                     </div>
-
-
-
                 </form>
+                <script>
+                    function handleCredentialResponse(response) {
+                        const token = response.credential;
+                        console.log("Google Token:", token);
+
+                        // Send the token to google-auth.php using fetch
+                        fetch('../scripts/google-auth.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: token })
+                        })
+                            .then(resp => resp.text())  // Change `.json()` to `.text()` for debugging
+                            .then(data => {
+                                console.log("Server Response:", data); // Debug: Show raw response
+                                try {
+                                    let parsedData = JSON.parse(data);
+                                    if (parsedData.success) {
+                                        window.location.href = "../templates/dashboard.php";
+                                    } else {
+                                        alert("Google authentication failed: " + parsedData.message);
+                                    }
+                                } catch (error) {
+                                    console.error("JSON Parse Error:", error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Fetch Error:", error);
+                            });
+
+                    }
+                </script>
             </div>
 
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
@@ -425,176 +454,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         icon.classList.toggle('fa-eye-slash');
     }
 </script>
-
-<?php
-session_start(); // Start session at the top
-
-header("Content-Type: application/json");
-
-// Get POST data from Google sign-in
-$data = json_decode(file_get_contents("php://input"), true);
-$token = $data['token'] ?? '';
-
-// Verify Google Token (if you haven't already)
-if (!$token) {
-    echo json_encode(["success" => false, "message" => "No token received."]);
-    exit();
-}
-
-// Decode Google JWT Token (Optional)
-$jwtParts = explode('.', $token);
-$payload = json_decode(base64_decode($jwtParts[1]), true);
-
-// Extract user data
-$email = $payload['email'] ?? '';
-$name = $payload['name'] ?? '';
-$sub = $payload['sub'] ?? ''; // Google's unique user ID
-
-if (!$email || !$sub) {
-    echo json_encode(["success" => false, "message" => "Invalid Google response."]);
-    exit();
-}
-
-// Store user data in session
-$_SESSION['user_email'] = $email;
-$_SESSION['user_name'] = $name;
-$_SESSION['user_id'] = $sub; // Set user_id (Google's unique identifier)
-
-echo json_encode(["success" => true, "email" => $email, "name" => $name, "user_id" => $sub]);
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Cross-Origin-Embedder-Policy: credentialless"); 
-header("Cross-Origin-Resource-Policy: cross-origin");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-// Enable error reporting (disable in production)
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
-
-const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
-
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../app/config/connection.php'; // This should create a PDO instance in $conn
-
-try {
-    // Ensure the request method is POST.
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception("Invalid request method");
-    }
-
-    // Read JSON payload from the request body.
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (!$data || !isset($data['token'])) {
-        throw new Exception("Missing required field: token");
-    }
-    
-    $token = $data['token'];
-
-    // Verify the Google token.
-    $client = new Google_Client(['client_id' => GOOGLE_CLIENT_ID]);
-    $payload = $client->verifyIdToken($token);
-    if (!$payload) {
-        throw new Exception("Invalid Google token");
-    }
-
-    // Extract user data from the token.
-    $google_id = $payload['sub'];
-    $email = $payload['email'];
-    $first_name = $payload['given_name'] ?? '';
-    $last_name = $payload['family_name'] ?? '';
-    $profile_picture = $payload['picture'] ?? '';
-    $username = $email; // For simplicity, use email as username.
-
-    // Validate required fields.
-    if (empty($email) || empty($google_id) || empty($profile_picture)) {
-        throw new Exception("Invalid input data");
-    }
-
-    // Begin a transaction.
-    $conn->beginTransaction();
-
-    // Check if the user exists (by Google ID or email).
-    $stmt = $conn->prepare("SELECT user_id, google_id FROM users WHERE google_id = :google_id OR email = :email");
-    $stmt->execute([
-        ':google_id' => $google_id,
-        ':email' => $email
-    ]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        // Insert a new user.
-        $stmt = $conn->prepare("
-            INSERT INTO users 
-            (google_id, email, username, first_name, last_name, profile_picture, created_at)
-            VALUES (:google_id, :email, :username, :first_name, :last_name, :profile_picture, NOW())
-        ");
-        $stmt->execute([
-            ':google_id' => $google_id,
-            ':email' => $email,
-            ':username' => $username,
-            ':first_name' => $first_name,
-            ':last_name' => $last_name,
-            ':profile_picture' => $profile_picture
-        ]);
-        $user_id = $conn->lastInsertId();
-        if (!$user_id) {
-            throw new Exception("Failed to get user ID.");
-        }
-    } else {
-        $user_id = $user['user_id'];
-        // If the user exists but their google_id field is empty, update it.
-        if (empty($user['google_id'])) {
-            $stmt = $conn->prepare("UPDATE users SET google_id = :google_id WHERE user_id = :user_id");
-            $stmt->execute([
-                ':google_id' => $google_id,
-                ':user_id' => $user_id
-            ]);
-        }
-    }
-
-    // Commit the transaction.
-    $conn->commit();
-
-    // Regenerate session ID for security and set session variables.
-    session_regenerate_id(true);
-    $_SESSION['user'] = [
-        'user_id' => $user_id,
-        'email' => $email,
-        'username' => $username,
-        'first_name' => $first_name,
-        'last_name' => $last_name,
-        'profile_picture' => $profile_picture,
-        'auth_method' => 'google',
-        'ip' => $_SERVER['REMOTE_ADDR'],         // Comes directly from the server.
-        'agent' => $_SERVER['HTTP_USER_AGENT'],    // Also comes directly from the server.
-        'created' => time()
-    ];
-
-    // Return a success JSON response.
-    echo json_encode([
-        'success' => true,
-        'email' => $email,
-        'name' => trim($first_name . ' ' . $last_name),
-        'sub' => $google_id
-    ]);
-    exit();
-
-} catch (Exception $e) {
-    // Roll back the transaction if needed.
-    if ($conn->inTransaction()) {
-        $conn->rollBack();
-    }
-    error_log("[" . date('Y-m-d H:i:s') . "] ERROR: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    exit();
-}
-?>
