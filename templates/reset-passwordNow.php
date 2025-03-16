@@ -180,7 +180,14 @@ include '../app/config/connection.php';  // Include database connection
 
             message.style.display = "block"; // Show message
         }
-
+        function validateInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input.value) {
+        input.style.border = "2px solid red";
+    } else {
+        input.style.border = "2px solid green";
+    }
+}
     </script>
 </body>
 
