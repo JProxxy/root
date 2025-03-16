@@ -1,7 +1,38 @@
 <?php
-// Start session at the very beginning.
-session_start();
+session_start(); // Start session at the top
 
+header("Content-Type: application/json");
+
+// Get POST data from Google sign-in
+$data = json_decode(file_get_contents("php://input"), true);
+$token = $data['token'] ?? '';
+
+// Verify Google Token (if you haven't already)
+if (!$token) {
+    echo json_encode(["success" => false, "message" => "No token received."]);
+    exit();
+}
+
+// Decode Google JWT Token (Optional)
+$jwtParts = explode('.', $token);
+$payload = json_decode(base64_decode($jwtParts[1]), true);
+
+// Extract user data
+$email = $payload['email'] ?? '';
+$name = $payload['name'] ?? '';
+$sub = $payload['sub'] ?? ''; // Google's unique user ID
+
+if (!$email || !$sub) {
+    echo json_encode(["success" => false, "message" => "Invalid Google response."]);
+    exit();
+}
+
+// Store user data in session
+$_SESSION['user_email'] = $email;
+$_SESSION['user_name'] = $name;
+$_SESSION['user_id'] = $sub; // Set user_id (Google's unique identifier)
+
+echo json_encode(["success" => true, "email" => $email, "name" => $name, "user_id" => $sub]);
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Cross-Origin-Embedder-Policy: credentialless"); 
 header("Cross-Origin-Resource-Policy: cross-origin");

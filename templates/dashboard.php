@@ -1,5 +1,13 @@
 <?php
-session_start(); // Must be at the very top
+session_start(); // Ensure session starts
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../templates/login.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+echo "Welcome, " . $_SESSION['user_name']; // Debug: Check if session works
 ?>
 
 <!DOCTYPE html>
