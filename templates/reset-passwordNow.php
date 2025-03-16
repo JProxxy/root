@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 
@@ -85,7 +84,7 @@ include '../app/config/connection.php';  // Include database connection
         }
 
         document.getElementById('changePass').addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault(); // Prevent form submission
 
             const password = document.getElementById('password').value;
             const retypePassword = document.getElementById('retype_password').value;
@@ -101,28 +100,25 @@ include '../app/config/connection.php';  // Include database connection
                 return; // If password is invalid, stop further actions
             }
 
-            // Prepare data to be sent in the request
+            // Prepare data to be sent
             const data = {
                 password: password,
                 retype_password: retypePassword
             };
 
-            // Send the data using Fetch API (make sure the URL is correct)
+            // Send data using Fetch API
             fetch('../scripts/change-passForgot.php', {
-                method: 'POST', // Use POST method for sensitive data
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // Set the content type
+                    'Content-Type': 'application/json', // Ensure correct content type
                 },
-                body: JSON.stringify(data) // Convert the data to JSON format
+                body: JSON.stringify(data) // Convert data to JSON
             })
-                .then(response => response.json()) // Parse the response as JSON
+                .then(response => response.json()) // Parse response as JSON
                 .then(data => {
+                    alert(data.message);
                     if (data.success) {
-                        alert('Password changed successfully!');
-                        // Redirect to login page after success
-                        window.location.href = "../templates/login.php";
-                    } else {
-                        alert('Error changing password: ' + data.message);
+                        window.location.href = "../templates/login.php"; // Redirect to login on success
                     }
                 })
                 .catch(error => {
