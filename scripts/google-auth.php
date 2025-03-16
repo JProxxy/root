@@ -3,11 +3,12 @@
 session_start();
 
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Cross-Origin-Embedder-Policy: credentialless");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+header("Cross-Origin-Opener-Policy: same-origin"); // More permissive
+header("Cross-Origin-Embedder-Policy: require-corp"); // Required for security
+header("Cross-Origin-Resource-Policy: cross-origin"); // Allows embedding
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
