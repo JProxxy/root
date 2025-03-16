@@ -192,10 +192,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <div class="inputsign-container">
                             <i class="fas fa-phone"></i>
                             <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required
-                                pattern="[0-9]{10}" title="10-digit phone number"
+                                pattern="[0-9]{11}" title="11-digit phone number"
                                 oninput="validateInput('phoneNumber')">
-                            <span class="error-message phone-error">Enter a 10-digit phone number</span>
+                            <span class="error-message phone-error">Enter an 11-digit phone number</span>
                         </div>
+
 
                         <!-- Password Field -->
                         <div class="inputsign-container">
@@ -363,7 +364,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         validatePasswordMatch();
     });
 
-    // Password Strength Checker
     // Password Strength Checker
     function checkPasswordStrength(password) {
         const strengthBar = document.querySelector('.strength-bar');
