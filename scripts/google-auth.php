@@ -20,14 +20,6 @@ error_log("Session before redirect: " . print_r($_SESSION, true));
 echo json_encode(['success' => true]);
 exit();
 
-
-// Set headers for CORS and JSON response
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-
 // Error reporting
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);

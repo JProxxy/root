@@ -5,11 +5,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Set headers
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: *"); // Change '*' to specific frontend URL if needed
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true"); // If using authentication (JWT, cookies)
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Cross-Origin-Embedder-Policy: credentialless");
+
+// Handle preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 // Allow OPTIONS method for preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
