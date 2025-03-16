@@ -2,15 +2,14 @@
 // Start session at the very beginning.
 session_start();
 
-// Set headers for CORS and JSON output.
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Cross-Origin-Embedder-Policy: credentialless");
 
-// Handle preflight requests.
+// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
