@@ -1,59 +1,62 @@
 <?php
 session_start();
+header('Content-Type: application/json'); // ✅ Ensure the response is JSON
 
-if (!isset($_SESSION['reset_email'])) {
-    echo json_encode(['success' => false, 'message' => 'Session expired. Please try again.']);
-    exit();
-}
+include '../app/config/connection.php'; // Database connection
 
-$email = $_SESSION['reset_email']; // Get email from session
+$response = array(); // Initialize response array
 
-// Include database connection
-require_once '../app/config/connection.php';
+// Check if request method is POST
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Get JSON input
+    $input = json_decode(file_get_contents("php://input"), true);
 
-// Read raw JSON data from the request body
-$data = json_decode(file_get_contents("php://input"), true);
-var_dump($data); // See what is being received
-exit();
-
-
-// Check if JSON data was received properly
-if (!$data || !isset($data['password']) || !isset($data['retype_password'])) {
-    echo json_encode(['success' => false, 'message' => 'Password fields are missing.']);
-    exit();
-}
-
-$password = $data['password'];
-$retype_password = $data['retype_password'];
-
-// Check if passwords match
-if ($password !== $retype_password) {
-    echo json_encode(['success' => false, 'message' => 'Passwords do not match.']);
-    exit();
-}
-
-// Hash the new password
-$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-try {
-    // Prepare SQL query to update the password for the user with the given email
-    $sql = "UPDATE users SET password = :password WHERE email = :email";
-    $stmt = $pdo->prepare($sql);
-
-    // Bind the parameters to the SQL query
-    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-
-    // Execute the query
-    if ($stmt->execute()) {
-        // Password successfully updated
-        echo json_encode(['success' => true, 'message' => 'Password changed successfully!']);
-    } else {
-        // If the query fails
-        echo json_encode(['success' => false, 'message' => 'Error updating password. Please try again.']);
+    // Validate input
+    if (!isset($input['password']) || !isset($input['retype_password'])) {
+        $response = array("success" => false, "message" => "Missing required fields.");
+        echo json_encode($response);
+        exit();
     }
-} catch (PDOException $e) {
-    // Handle any database connection errors
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+
+    $password = $input['password'];
+    $retypePassword = $input['retype_password'];
+
+    // Ensure passwords match
+    if ($password !== $retypePassword) {
+        $response = array("success" => false, "message" => "Passwords do not match.");
+        echo json_encode($response);
+        exit();
+    }
+
+    // Encrypt password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // Get email from session
+    if (!isset($_SESSION['reset_email'])) {
+        $response = array("success" => false, "message" => "Session expired. Try again.");
+        echo json_encode($response);
+        exit();
+    }
+
+    $email = $_SESSION['reset_email'];
+
+    // Update password in database
+    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
+    $stmt->bind_param("ss", $hashedPassword, $email);
+
+    if ($stmt->execute()) {
+        $response = array("success" => true, "message" => "Password changed successfully!");
+        unset($_SESSION['reset_email']); // Remove reset session
+    } else {
+        $response = array("success" => false, "message" => "Database error. Try again.");
+    }
+
+    $stmt->close();
+} else {
+    $response = array("success" => false, "message" => "Invalid request method.");
 }
+
+// Return JSON response
+echo json_encode($response);
+exit();
 ?>
