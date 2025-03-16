@@ -153,28 +153,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <script>
                             function handleCredentialResponse(response) {
                                 const token = response.credential;
-                                console.log("Google Token:", token);
 
-                                // Send token and other user info to google-auth.php via Fetch API
-                                fetch('../scripts/google-auth.php', {
+                                fetch('scripts/google-auth.php', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        token: token,
-                                        google_id: '', // Optionally, you may pass this if available; google-auth.php will verify via the token payload.
-                                        email: '',      // Optional; can be derived from the token.
-                                        first_name: '',
-                                        last_name: '',
-                                        profile_picture: ''
-                                    })
+                                    body: JSON.stringify({ token: token }) // Send only token
                                 })
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
-                                            console.log("Login Successful:", data);
-                                            window.location.href = "templates/dashboard.php"; // Redirect to dashboard
+                                            window.location.href = "templates/dashboard.php";
                                         } else {
-                                            console.error("Login Failed:", data.message);
                                             alert("Google authentication failed: " + data.message);
                                         }
                                     })
