@@ -42,7 +42,7 @@ include '../app/config/connection.php';  // Include database connection
             <input type="password" id="password" name="password" placeholder="Password" required
                 pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                 title="Must contain: 8+ characters, 1 uppercase, 1 lowercase, 1 number"
-                oninput="checkPasswordStrength(this.value); validateInput('password')">
+                oninput="checkPasswordStrength(this.value);">
 
             <!-- Strength Bar -->
             <div class="password-strength">
@@ -180,14 +180,7 @@ include '../app/config/connection.php';  // Include database connection
 
             message.style.display = "block"; // Show message
         }
-        function validateInput(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input.value) {
-        input.style.border = "2px solid red";
-    } else {
-        input.style.border = "2px solid green";
-    }
-}
+
     </script>
 </body>
 
