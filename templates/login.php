@@ -5,6 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 header("Content-Type: text/html; charset=UTF-8");
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
+header("Cross-Origin-Embedder-Policy: credentialless"); 
+header("Cross-Origin-Resource-Policy: cross-origin");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+
 // Handle preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -135,10 +143,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
                         <div id="g_id_onload"
                             data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
+                            data-context="signin" data-ux_mode="redirect" data-callback="handleCredentialResponse"
                             data-auto_prompt="false">
                         </div>
-
+                        
                         <div class="ContGoogle">
                             <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
                                 data-shape="pill" data-text="signin_with">

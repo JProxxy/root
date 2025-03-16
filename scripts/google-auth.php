@@ -2,13 +2,13 @@
 // Start session at the very beginning.
 session_start();
 
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
+header("Cross-Origin-Embedder-Policy: credentialless"); 
+header("Cross-Origin-Resource-Policy: cross-origin");
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
-header("Cross-Origin-Opener-Policy: same-origin"); // More permissive
-header("Cross-Origin-Embedder-Policy: require-corp"); // Required for security
-header("Cross-Origin-Resource-Policy: cross-origin"); // Allows embedding
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
