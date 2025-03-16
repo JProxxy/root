@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                     .then(data => {
                                         if (data.success) {
                                             // Redirect to dashboard on successful authentication.
-                                            window.location.href = "../templates/dashboard.php";
+                                            window.location.href = "dashboard.php";
                                         } else {
                                             alert("Google authentication failed: " + data.message);
                                         }
