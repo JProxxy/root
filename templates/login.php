@@ -159,28 +159,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 console.log("Google Token:", token);
 
                                 // Send the token to google-auth.php using fetch
-                                fetch('../scripts/google-auth.php', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ token: token })
-                                })
-                                    .then(resp => resp.text())  // Change `.json()` to `.text()` for debugging
-                                    .then(data => {
-                                        console.log("Server Response:", data); // Debug: Show raw response
-                                        try {
-                                            let parsedData = JSON.parse(data);
-                                            if (parsedData.success) {
-                                                window.location.href = "../templates/dashboard.php";
-                                            } else {
-                                                alert("Google authentication failed: " + parsedData.message);
-                                            }
-                                        } catch (error) {
-                                            console.error("JSON Parse Error:", error);
-                                        }
+                                function handleCredentialResponse(response) {
+                                    const token = response.credential;
+                                    console.log("Google Token:", token);
+
+                                    // Send the token to google-auth.php using fetch
+                                    fetch('../scripts/google-auth.php', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ token: token })
                                     })
-                                    .catch(error => {
-                                        console.error("Fetch Error:", error);
-                                    });
+                                        .then(resp => resp.text())  // Use text() first for debugging
+                                        .then(data => {
+                                            console.log("Raw Server Response:", data);
+                                            try {
+                                                // Parse the JSON after confirming that it's complete
+                                                let parsedData = JSON.parse(data);
+                                                console.log("Parsed Data:", parsedData);
+                                                if (parsedData.success) {
+                                                    // Redirect only after successful response processing
+                                                    window.location.href = "../templates/dashboard.php";
+                                                } else {
+                                                    alert("Google authentication failed: " + parsedData.message);
+                                                }
+                                            } catch (error) {
+                                                console.error("JSON Parse Error:", error);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Fetch Error:", error);
+                                        });
+                                }
 
                             }
                         </script>
