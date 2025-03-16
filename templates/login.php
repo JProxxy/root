@@ -152,21 +152,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
                         <script>
                             function handleCredentialResponse(response) {
-                                const token = response.credential; // Get Google token
-                                console.log("Google Token:", token); // Debugging
+                                const token = response.credential;
+                                console.log("Google Token:", token);
 
-                                // Send token to google-auth.php via AJAX
-                                fetch('../scripts/google-auth.php', {
+                                // Send token and other user info to google-auth.php via Fetch API
+                                fetch('scripts/google-auth.php', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ token })
+                                    body: JSON.stringify({
+                                        token: token,
+                                        google_id: '', // Optionally, you may pass this if available; google-auth.php will verify via the token payload.
+                                        email: '',      // Optional; can be derived from the token.
+                                        first_name: '',
+                                        last_name: '',
+                                        profile_picture: ''
+                                    })
                                 })
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
                                             console.log("Login Successful:", data);
-                                            // Store user session or redirect
-                                            window.location.href = "dashboard.php";
+                                            window.location.href = "templates/dashboard.php"; // Redirect to dashboard
                                         } else {
                                             console.error("Login Failed:", data.message);
                                             alert("Google authentication failed: " + data.message);
