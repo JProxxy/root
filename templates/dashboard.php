@@ -1,13 +1,13 @@
 <?php
-session_start(); // Ensure session starts
+// session_start(); // Ensure session starts
 
 // if (!isset($_SESSION['user_id'])) {
 //     header("Location: ../templates/login.php");
 //     exit();
 // }
 
-$user_id = $_SESSION['user_id'];
-echo "Welcome, " . $_SESSION['user_name']; // Debug: Check if session works
+// $user_id = $_SESSION['user_id'];
+// echo "Welcome, " . $_SESSION['user_name']; // Debug: Check if session works
 ?>
 
 <!DOCTYPE html>
