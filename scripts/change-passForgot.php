@@ -11,6 +11,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Get JSON input
     $input = json_decode(file_get_contents("php://input"), true);
 
+    if ($input === null) {
+        echo json_encode(["success" => false, "message" => "Invalid JSON input."]);
+        exit();
+    }
+    
+
     // Validate input
     if (!isset($input['password']) || !isset($input['retype_password'])) {
         $response = array("success" => false, "message" => "Missing required fields.");

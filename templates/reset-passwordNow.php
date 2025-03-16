@@ -110,20 +110,25 @@ include '../app/config/connection.php';  // Include database connection
             fetch('../scripts/change-passForgot.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // Ensure correct content type
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data) // Convert data to JSON
+                body: JSON.stringify({
+                    password: document.getElementById('password').value,
+                    retype_password: document.getElementById('retype_password').value
+                })
             })
-                .then(response => response.json()) // Parse response as JSON
+                .then(response => response.json())
                 .then(data => {
+                    console.log(data); // Debug response
                     alert(data.message);
                     if (data.success) {
-                        window.location.href = "../templates/login.php"; // Redirect to login on success
+                        window.location.href = "../templates/login.php"; // Redirect on success
                     }
                 })
                 .catch(error => {
                     alert('Error: ' + error.message);
                 });
+
         });
 
         // Validate password format
