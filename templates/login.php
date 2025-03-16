@@ -1,15 +1,21 @@
 <?php
-session_start();
+// Start session first, but prevent output issues
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Set headers
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Cross-Origin-Opener-Policy: unsafe-none");
-header("Cross-Origin-Embedder-Policy: unsafe-none");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups"); 
+header("Cross-Origin-Embedder-Policy: credentialless");
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
+// Allow OPTIONS method for preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 require_once '../app/config/connection.php';
 
 $errorMessage = '';
