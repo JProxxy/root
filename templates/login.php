@@ -153,7 +153,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             </div>
                         </div>
 
+                        <script>
+                            function handleCredentialResponse(response) {
+                                const token = response.credential;
+                                console.log("Google Token:", token);
 
+                                // Send the token to google-auth.php using fetch
+                                fetch('../scripts/google-auth.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ token: token })
+                                })
+                                    .then(resp => resp.text())  // Change `.json()` to `.text()` for debugging
+                                    .then(data => {
+                                        console.log("Server Response:", data); // Debug: Show raw response
+                                        try {
+                                            let parsedData = JSON.parse(data);
+                                            if (parsedData.success) {
+                                                window.location.href = "../templates/dashboard.php";
+                                            } else {
+                                                alert("Google authentication failed: " + parsedData.message);
+                                            }
+                                        } catch (error) {
+                                            console.error("JSON Parse Error:", error);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Fetch Error:", error);
+                                    });
+
+                            }
+                        </script>
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -167,38 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         </div>
 
                     </div>
+
+
+
                 </form>
-                <script>
-                    function handleCredentialResponse(response) {
-                        const token = response.credential;
-                        console.log("Google Token:", token);
-
-                        // Send the token to google-auth.php using fetch
-                        fetch('../scripts/google-auth.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ token: token })
-                        })
-                            .then(resp => resp.text())  // Change `.json()` to `.text()` for debugging
-                            .then(data => {
-                                console.log("Server Response:", data); // Debug: Show raw response
-                                try {
-                                    let parsedData = JSON.parse(data);
-                                    if (parsedData.success) {
-                                        window.location.href = "../templates/dashboard.php";
-                                    } else {
-                                        alert("Google authentication failed: " + parsedData.message);
-                                    }
-                                } catch (error) {
-                                    console.error("JSON Parse Error:", error);
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Fetch Error:", error);
-                            });
-
-                    }
-                </script>
             </div>
 
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
