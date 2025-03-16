@@ -166,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 })
                                     .then(resp => resp.json())
                                     .then(data => {
+                                        console.log("Server Response:", data); 
                                         if (data.success) {
                                             // Redirect to dashboard on successful authentication.
                                             window.location.href = "dashboard.php";
