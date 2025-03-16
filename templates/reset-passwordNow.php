@@ -149,6 +149,38 @@ include '../app/config/connection.php';  // Include database connection
             }
             return true;
         }
+
+        // Function to check password strength
+        function checkPasswordStrength(password) {
+            const strengthBar = document.querySelector(".strength-bar");
+            const message = document.querySelector(".password-strength-message");
+
+            let strength = 0;
+
+            // Criteria for strength evaluation
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+            // Update strength bar based on strength
+            strengthBar.style.width = (strength * 20) + "%";
+
+            if (strength < 3) {
+                message.textContent = "Weak password";
+                message.style.color = "red";
+            } else if (strength < 4) {
+                message.textContent = "Moderate password";
+                message.style.color = "orange";
+            } else {
+                message.textContent = "Strong password";
+                message.style.color = "green";
+            }
+
+            message.style.display = "block"; // Show message
+        }
+
     </script>
 </body>
 
