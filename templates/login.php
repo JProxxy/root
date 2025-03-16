@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header("Content-Type: text/html; charset=UTF-8");
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Cross-Origin-Embedder-Policy: credentialless"); 
+header("Cross-Origin-Embedder-Policy: credentialless");
 header("Cross-Origin-Resource-Policy: cross-origin");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
                             data-auto_prompt="false">
                         </div>
-                        
+
                         <div class="ContGoogle">
                             <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
                                 data-shape="pill" data-text="signin_with">
@@ -164,20 +164,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ token: token })
                                 })
-                                    .then(resp => resp.json())
+                                    .then(resp => resp.text())  // Change `.json()` to `.text()` for debugging
                                     .then(data => {
-                                        console.log("Server Response:", data); 
-                                        if (data.success) {
-                                            // Redirect to dashboard on successful authentication.
-                                            window.location.href = "dashboard.php";
-                                        } else {
-                                            alert("Google authentication failed: " + data.message);
+                                        console.log("Server Response:", data); // Debug: Show raw response
+                                        try {
+                                            let parsedData = JSON.parse(data);
+                                            if (parsedData.success) {
+                                                window.location.href = "../templates/dashboard.php";
+                                            } else {
+                                                alert("Google authentication failed: " + parsedData.message);
+                                            }
+                                        } catch (error) {
+                                            console.error("JSON Parse Error:", error);
                                         }
                                     })
                                     .catch(error => {
-                                        console.error("Error:", error);
-                                        alert("An error occurred while processing your login.");
+                                        console.error("Fetch Error:", error);
                                     });
+
                             }
                         </script>
                         <div class="input-container">
