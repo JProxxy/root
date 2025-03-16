@@ -13,6 +13,9 @@ require_once '../app/config/connection.php';
 
 // Read raw JSON data from the request body
 $data = json_decode(file_get_contents("php://input"), true);
+var_dump($data); // See what is being received
+exit();
+
 
 // Check if JSON data was received properly
 if (!$data || !isset($data['password']) || !isset($data['retype_password'])) {
