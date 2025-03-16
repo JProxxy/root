@@ -1,5 +1,4 @@
 <?php
-session_set_cookie_params(0, '/', '.rivaniot.online', true, true);
 session_start();
 
 session_regenerate_id(true);

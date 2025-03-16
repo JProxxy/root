@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
             // Check password (if user has no Google ID)
-            if (!empty($user['google_id']) || (!empty($hashedPassword) && password_verify($password, $hashedPassword))) {
+            if ((!empty($hashedPassword) && password_verify($password, $hashedPassword)) || (!empty($user['google_id']) && empty($hashedPassword))) {
                 // Reset failed attempts on successful login
                 $stmt = $conn->prepare("UPDATE users SET failed_attempts = 0, lock_until = NULL WHERE username = :username");
                 $stmt->bindParam(':username', $username, PDO::PARAM_STR);
