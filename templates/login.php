@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
-                                            window.location.href = "templates/dashboard.php";
+                                            window.location.href = "dashboard.php";
                                         } else {
                                             alert("Google authentication failed: " + data.message);
                                         }
