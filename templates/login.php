@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             function handleCredentialResponse(response) {
                                 const token = response.credential;
 
-                                fetch('scripts/google-auth.php', {
+                                fetch('../scripts/google-auth.php', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ token: token }) // Send only token
