@@ -1,20 +1,10 @@
 <?php
-// Configure session cookie parameters (adjust domain as needed)
-session_set_cookie_params([
-    'lifetime' => 0,                 // Session cookie lasts until the browser is closed
-    'path' => '/',                   // Available throughout the entire domain
-    'domain' => 'rivaniot.online',    // Change this to your domain (or use '.rivaniot.online' for all subdomains)
-    'secure' => true,                // Set to true if you're using HTTPS
-    'httponly' => true,              // Prevents JavaScript from accessing the cookie
-    'samesite' => 'Lax'              // Adjust as needed ('Lax', 'Strict', or 'None' with secure true)
-]);
-
 // Start the session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include the database connection (ensure this file creates a PDO instance in $conn)
+// Include the database connection
 require_once '../app/config/connection.php';
 
 // Check if the user is logged in
@@ -43,6 +33,7 @@ if (!empty($user_data['profile_picture'])) {
     $profilePictureUrl = "https://ui-avatars.com/api/?name=" . urlencode($initial) . "&background=random&color=fff";
 }
 ?>
+
 
 
 <!DOCTYPE html>
