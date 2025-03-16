@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Cross-Origin-Opener-Policy: same-origin-allow-popups"); 
+header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Cross-Origin-Embedder-Policy: credentialless");
 
 // Allow OPTIONS method for preflight requests
@@ -150,6 +150,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             </div>
                         </div>
 
+                        <script>
+                            function handleCredentialResponse(response) {
+                                const token = response.credential; // Get Google token
+                                console.log("Google Token:", token); // Debugging
+
+                                // Send token to google-auth.php via AJAX
+                                fetch('../scripts/google-auth.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ token })
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            console.log("Login Successful:", data);
+                                            // Store user session or redirect
+                                            window.location.href = "dashboard.php";
+                                        } else {
+                                            console.error("Login Failed:", data.message);
+                                            alert("Google authentication failed: " + data.message);
+                                        }
+                                    })
+                                    .catch(error => console.error("Error:", error));
+                            }
+                        </script>
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
