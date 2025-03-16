@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 console.log("Google Token:", token);
 
                                 // Send token and other user info to google-auth.php via Fetch API
-                                fetch('scripts/google-auth.php', {
+                                fetch('../scripts/google-auth.php', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
