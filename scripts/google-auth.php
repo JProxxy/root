@@ -1,5 +1,26 @@
 <?php
+session_set_cookie_params(0, '/', '.rivaniot.online', true, true);
 session_start();
+
+session_regenerate_id(true);
+$_SESSION['user'] = [
+    'user_id' => $user_id,
+    'email' => $email,
+    'username' => $email,
+    'first_name' => $first_name,
+    'last_name' => $last_name,
+    'profile_picture' => $profile_picture,
+    'auth_method' => 'google',
+    'ip' => $_SERVER['REMOTE_ADDR'],
+    'agent' => $_SERVER['HTTP_USER_AGENT'],
+    'created' => time()
+];
+
+error_log("Session before redirect: " . print_r($_SESSION, true));
+
+echo json_encode(['success' => true]);
+exit();
+
 
 // Set headers for CORS and JSON response
 header("Access-Control-Allow-Origin: *");
