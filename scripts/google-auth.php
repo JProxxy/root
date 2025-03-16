@@ -3,7 +3,7 @@ session_start(); // Start session at the top
 
 header("Content-Type: application/json");
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
-header("Cross-Origin-Embedder-Policy: credentialless"); 
+header("Cross-Origin-Embedder-Policy: credentialless");
 header("Cross-Origin-Resource-Policy: cross-origin");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -117,6 +117,9 @@ try {
         'created' => time()
     ];
 
+    // Add this line to set the top-level user_id variable.
+    $_SESSION['user_id'] = $user_id;
+    
     // Return a single JSON success response.
     echo json_encode([
         'success' => true,
