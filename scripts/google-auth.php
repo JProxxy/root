@@ -2,37 +2,6 @@
 session_start(); // Start session at the top
 
 header("Content-Type: application/json");
-
-// Get POST data from Google sign-in
-$data = json_decode(file_get_contents("php://input"), true);
-$token = $data['token'] ?? '';
-
-// Verify Google Token (if you haven't already)
-if (!$token) {
-    echo json_encode(["success" => false, "message" => "No token received."]);
-    exit();
-}
-
-// Decode Google JWT Token (Optional)
-$jwtParts = explode('.', $token);
-$payload = json_decode(base64_decode($jwtParts[1]), true);
-
-// Extract user data
-$email = $payload['email'] ?? '';
-$name = $payload['name'] ?? '';
-$sub = $payload['sub'] ?? ''; // Google's unique user ID
-
-if (!$email || !$sub) {
-    echo json_encode(["success" => false, "message" => "Invalid Google response."]);
-    exit();
-}
-
-// Store user data in session
-$_SESSION['user_email'] = $email;
-$_SESSION['user_name'] = $name;
-$_SESSION['user_id'] = $sub; // Set user_id (Google's unique identifier)
-
-echo json_encode(["success" => true, "email" => $email, "name" => $name, "user_id" => $sub]);
 header("Cross-Origin-Opener-Policy: same-origin-allow-popups");
 header("Cross-Origin-Embedder-Policy: credentialless"); 
 header("Cross-Origin-Resource-Policy: cross-origin");
@@ -47,15 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Enable error reporting (disable in production)
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../storage/logs/google-auth-errors.log');
+// Read POST data from Google sign-in
+$data = json_decode(file_get_contents("php://input"), true);
+$token = $data['token'] ?? '';
 
-const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
+if (!$token) {
+    echo json_encode(["success" => false, "message" => "No token received."]);
+    exit();
+}
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../app/config/connection.php'; // This should create a PDO instance in $conn
+
+// Verify the Google token using Google_Client.
+const GOOGLE_CLIENT_ID = '460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com';
+$client = new Google_Client(['client_id' => GOOGLE_CLIENT_ID]);
 
 try {
     // Ensure the request method is POST.
@@ -63,16 +38,7 @@ try {
         throw new Exception("Invalid request method");
     }
 
-    // Read JSON payload from the request body.
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (!$data || !isset($data['token'])) {
-        throw new Exception("Missing required field: token");
-    }
-    
-    $token = $data['token'];
-
-    // Verify the Google token.
-    $client = new Google_Client(['client_id' => GOOGLE_CLIENT_ID]);
+    // Verify the token.
     $payload = $client->verifyIdToken($token);
     if (!$payload) {
         throw new Exception("Invalid Google token");
@@ -123,7 +89,7 @@ try {
         }
     } else {
         $user_id = $user['user_id'];
-        // If the user exists but their google_id field is empty, update it.
+        // Update the record if google_id is missing.
         if (empty($user['google_id'])) {
             $stmt = $conn->prepare("UPDATE users SET google_id = :google_id WHERE user_id = :user_id");
             $stmt->execute([
@@ -146,12 +112,12 @@ try {
         'last_name' => $last_name,
         'profile_picture' => $profile_picture,
         'auth_method' => 'google',
-        'ip' => $_SERVER['REMOTE_ADDR'],         // Comes directly from the server.
-        'agent' => $_SERVER['HTTP_USER_AGENT'],    // Also comes directly from the server.
+        'ip' => $_SERVER['REMOTE_ADDR'],
+        'agent' => $_SERVER['HTTP_USER_AGENT'],
         'created' => time()
     ];
 
-    // Return a success JSON response.
+    // Return a single JSON success response.
     echo json_encode([
         'success' => true,
         'email' => $email,
