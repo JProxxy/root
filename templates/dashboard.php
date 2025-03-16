@@ -1,5 +1,10 @@
 <?php
-session_start(); // Must be at the very top
+session_start();
+error_log("Session Data on Dashboard: " . print_r($_SESSION, true));
+if (!isset($_SESSION['user'])) {
+    header("Location: ../templates/login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
