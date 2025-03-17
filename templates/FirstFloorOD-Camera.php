@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Outdoor Camera</title>
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/FirstFloor-Outdoor.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -99,108 +99,11 @@ if (!isset($_SESSION['user_id'])) {
                     </script>
 
                 </div>
-                <div class="firstFloor" id="firstfloor3d">
-                    <!-- The model-viewer will be added here via JavaScript -->
+                <div class="firstFloor">
+                
                 </div>
 
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        const container = document.getElementById("firstfloor3d");
-                        const modelPath = "<?php echo '../assets/models/firstFloor.glb'; ?>"; // Ensure this path is correct
-
-                        fetch(modelPath)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! Status: ${response.status}`);
-                                }
-                                return response.blob();
-                            })
-                            .then(blob => {
-                                const url = URL.createObjectURL(blob);
-
-                                // Create the <model-viewer> element dynamically
-                                const modelViewer = document.createElement("model-viewer");
-                                modelViewer.setAttribute("src", url);
-                                modelViewer.setAttribute("auto-rotate", "");
-                                modelViewer.setAttribute("camera-controls", "");
-                                modelViewer.setAttribute("shadow-intensity", "1");
-                                modelViewer.setAttribute("exposure", ".45");
-                                modelViewer.setAttribute("environment-image", "neutral");
-                                modelViewer.setAttribute("ar", "");
-                                modelViewer.setAttribute("disable-tap", "");
-                                modelViewer.style.width = "100%";
-                                modelViewer.style.height = "600px";
-                                modelViewer.style.position = 'relative'; // Ensure it's positioned relative for glitter effect positioning
-
-                                // Append it to the div
-                                container.appendChild(modelViewer);
-
-                                // Function to create glowing light trails
-                                const createGlowEffect = (x, y) => {
-                                    const glow = document.createElement('div');
-                                    const size = Math.random() * 6 + 4; // Random size for each glow particle (between 4 and 10px)
-                                    const color = `rgba(255, 255, 255, 0.8)`; // White glowing color
-                                    const animationDuration = Math.random() * 0.4 + 0.5; // Random animation duration for each glow
-
-                                    glow.style.position = 'absolute';
-                                    glow.style.left = `${x - size / 2}px`;  // Adjust for center position
-                                    glow.style.top = `${y - size / 2}px`;   // Adjust for center position
-                                    glow.style.width = `${size}px`;
-                                    glow.style.height = `${size}px`;
-                                    glow.style.backgroundColor = color;
-                                    glow.style.borderRadius = '50%';
-                                    glow.style.pointerEvents = 'none';
-                                    glow.style.animation = `glowAnimation ${animationDuration}s ease-out forwards`; // Glowing effect animation
-                                    modelViewer.appendChild(glow);
-
-                                    // Remove glow after animation
-                                    setTimeout(() => {
-                                        glow.remove();
-                                    }, animationDuration * 1000);
-                                };
-
-                                // Add mousemove event to create glowing light trail
-                                modelViewer.addEventListener('mousemove', (event) => {
-                                    const modelViewerRect = modelViewer.getBoundingClientRect();
-                                    const mouseX = event.clientX - modelViewerRect.left; // Get mouse position within model viewer
-                                    const mouseY = event.clientY - modelViewerRect.top;
-
-                                    // Trigger glowing light trail effect
-                                    createGlowEffect(mouseX, mouseY);
-                                });
-                            })
-                            .catch(error => {
-                                console.error("Error loading model:", error);
-                            });
-                    });
-                </script>
-
-                <style>
-                    /* Keyframe animation for glowing effect */
-                    @keyframes glowAnimation {
-                        0% {
-                            transform: scale(0);
-                            opacity: 1;
-                        }
-
-                        50% {
-                            transform: scale(1.5);
-                            opacity: 0.7;
-                        }
-
-                        100% {
-                            transform: scale(0);
-                            opacity: 0;
-                        }
-                    }
-                </style>
-                <div class="room">
-                    <!-- "Garage" button starts with the activeButton class to indicate it's the default -->
-                    <button onclick="navigateToGarage('../templates/FirstFloor-Garage.php')" class="roomButton"
-                        id="garageButton">Garage</button>
-                    <button onclick="navigateToOutdoor()" class="roomButton activeButton"
-                        id="outdoorButton">Outdoor</button>
-                </div>
+               
 
             </div>
             <div class="dashboardDeviderRight">
