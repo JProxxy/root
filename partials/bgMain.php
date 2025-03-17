@@ -8,11 +8,11 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once '../app/config/connection.php';
 
 // Check if the user is logged in
-if (!isset($_SESSION['user_id']['user'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../templates/login.php");
     exit();
 }
-$user_id = $_SESSION['user_id']['user'];
+$user_id = $_SESSION['user_id'];
 
 
 // Fetch user's email and profile_picture from the database using PDO
