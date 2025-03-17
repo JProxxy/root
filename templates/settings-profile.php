@@ -217,11 +217,14 @@ if (!empty($user_data['profile_picture'])) {
                                     </tr>
                                     <tr class="tr-content">
                                         <td><input type="text" id="firstName" name="first_name"
-                                                value="<?php echo htmlspecialchars($first_name); ?>" disabled title="<?php echo htmlspecialchars($first_name); ?>"/></td>
+                                                value="<?php echo htmlspecialchars($first_name); ?>" disabled
+                                                title="<?php echo htmlspecialchars($first_name); ?>" /></td>
                                         <td><input type="text" id="lastName" name="last_name"
-                                                value="<?php echo htmlspecialchars($last_name); ?>" disabled title="<?php echo htmlspecialchars($last_name); ?>"/></td>
+                                                value="<?php echo htmlspecialchars($last_name); ?>" disabled
+                                                title="<?php echo htmlspecialchars($last_name); ?>" /></td>
                                         <td><input type="text" id="bio" name="bio"
-                                                value="<?php echo htmlspecialchars($bio); ?>" disabled title="<?php echo htmlspecialchars($bio); ?>"/></td>
+                                                value="<?php echo htmlspecialchars($bio); ?>" disabled
+                                                title="<?php echo htmlspecialchars($bio); ?>" /></td>
                                     </tr>
                                     <tr class="tr-title">
                                         <td>Email Address</td>
@@ -230,9 +233,11 @@ if (!empty($user_data['profile_picture'])) {
                                     </tr>
                                     <tr class="tr-content">
                                         <td><input type="email" id="emailInput" name="email"
-                                                value="<?php echo htmlspecialchars($email); ?>" disabled title="<?php echo htmlspecialchars($email); ?>"/></td>
+                                                value="<?php echo htmlspecialchars($email); ?>" disabled
+                                                title="<?php echo htmlspecialchars($email); ?>" /></td>
                                         <td><input type="text" id="phoneNumber" name="phoneNumber"
-                                                value="<?php echo htmlspecialchars($phoneNumber); ?>" disabled title="<?php echo htmlspecialchars($phoneNumber); ?>"/></td>
+                                                value="<?php echo htmlspecialchars($phoneNumber); ?>" disabled
+                                                title="<?php echo htmlspecialchars($phoneNumber); ?>" /></td>
                                         <td>
                                             <select id="genderSelect" name="gender" disabled>
                                                 <option value="N/A" <?php echo ($gender == 'N/A') ? 'selected' : ''; ?>>
@@ -270,15 +275,18 @@ if (!empty($user_data['profile_picture'])) {
                                     <tr class="tr-content">
                                         <td>
                                             <input type="text" id="country" name="country"
-                                                value="<?php echo htmlspecialchars($country); ?>" disabled title="<?php echo htmlspecialchars($country); ?>"/>
+                                                value="<?php echo htmlspecialchars($country); ?>" disabled
+                                                title="<?php echo htmlspecialchars($country); ?>" />
                                         </td>
                                         <td>
-                                            <input type="text"  id="city" name="city"
-                                                value="<?php echo htmlspecialchars($city); ?>" disabled title="<?php echo htmlspecialchars($city); ?>"/>
+                                            <input type="text" id="city" name="city"
+                                                value="<?php echo htmlspecialchars($city); ?>" disabled
+                                                title="<?php echo htmlspecialchars($city); ?>" />
                                         </td>
                                         <td>
                                             <input type="text" id="street_address" name="street_address"
-                                                value="<?php echo htmlspecialchars($street_address); ?>" disabled title="<?php echo htmlspecialchars($street_address); ?>"/>
+                                                value="<?php echo htmlspecialchars($street_address); ?>" disabled
+                                                title="<?php echo htmlspecialchars($street_address); ?>" />
                                         </td>
                                     </tr>
                                     <tr class="tr-title">
@@ -289,11 +297,13 @@ if (!empty($user_data['profile_picture'])) {
                                     <tr class="tr-content">
                                         <td>
                                             <input type="text" name="postal_code"
-                                                value="<?php echo htmlspecialchars($postal_code); ?>" disabled title="<?php echo htmlspecialchars($postal_code); ?>"/>
+                                                value="<?php echo htmlspecialchars($postal_code); ?>" disabled
+                                                title="<?php echo htmlspecialchars($postal_code); ?>" />
                                         </td>
                                         <td>
                                             <input type="text" name="barangay"
-                                                value="<?php echo htmlspecialchars($barangay); ?>" disabled title="<?php echo htmlspecialchars($barangay); ?>"/>
+                                                value="<?php echo htmlspecialchars($barangay); ?>" disabled
+                                                title="<?php echo htmlspecialchars($barangay); ?>" />
                                         </td>
                                         <td></td>
                                     </tr>
@@ -572,138 +582,145 @@ if (!empty($user_data['profile_picture'])) {
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
-                .then(data => {
+                .then(response => response.text()) // Change to .text() for debugging
+                .then(text => {
+                    console.log('Server response:', text);
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        alert('Invalid JSON response: ' + text);
+                        return;
+                    }
+
                     if (data.url) {
-                        // Successfully uploaded; set profile image and reload the page
                         document.getElementById('profile-img').src = data.url;
-                        window.location.reload(); // Reload the page to update it
+                        window.location.reload();
                     } else {
-                        alert('Error uploading file');
+                        alert('Error: ' + (data.error || 'Unknown error'));
                     }
                 })
                 .catch(error => {
                     console.error('Error uploading file:', error);
                     alert('Error uploading file');
-                });
+                })
         }
-    }
 </script>
 
 <!-- SHOW PROFILE/ EDIT PERSONAL INFO-->
 <script>
 
-    // Toggle edit/save for Personal Info
-    function toggleEditPersonalInfo() {
-        // Get the form elements by their IDs (excluding email)
-        const inputsToToggle = [
-            document.getElementById('firstName'),
-            document.getElementById('lastName'),
-            document.getElementById('bio'),
-            document.getElementById('phoneNumber')
-        ];
-        const selectsToToggle = [
-            document.getElementById('genderSelect')
-        ];
-        const editBtn = document.getElementById('editPI-btn');
+        // Toggle edit/save for Personal Info
+        function toggleEditPersonalInfo() {
+            // Get the form elements by their IDs (excluding email)
+            const inputsToToggle = [
+                document.getElementById('firstName'),
+                document.getElementById('lastName'),
+                document.getElementById('bio'),
+                document.getElementById('phoneNumber')
+            ];
+            const selectsToToggle = [
+                document.getElementById('genderSelect')
+            ];
+            const editBtn = document.getElementById('editPI-btn');
 
-        // Determine editability by checking one of the inputs (e.g., firstName)
-        const isEditable = inputsToToggle[0].disabled;
+            // Determine editability by checking one of the inputs (e.g., firstName)
+            const isEditable = inputsToToggle[0].disabled;
 
-        // Toggle disabled state for selected inputs
-        inputsToToggle.forEach(input => {
-            input.disabled = !isEditable;
-        });
-        selectsToToggle.forEach(select => {
-            select.disabled = !isEditable;
-        });
+            // Toggle disabled state for selected inputs
+            inputsToToggle.forEach(input => {
+                input.disabled = !isEditable;
+            });
+            selectsToToggle.forEach(select => {
+                select.disabled = !isEditable;
+            });
 
-        // Toggle button appearance and onclick attribute
-        if (isEditable) {
-            // Change to "Save" button
-            editBtn.src = '../assets/images/button-confirm.png';
-            editBtn.setAttribute('onclick', 'savePersonalInfo()');
-        } else {
-            // Change back to "Edit" button
-            editBtn.src = '../assets/images/button-edit.png';
-            editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
+            // Toggle button appearance and onclick attribute
+            if (isEditable) {
+                // Change to "Save" button
+                editBtn.src = '../assets/images/button-confirm.png';
+                editBtn.setAttribute('onclick', 'savePersonalInfo()');
+            } else {
+                // Change back to "Edit" button
+                editBtn.src = '../assets/images/button-edit.png';
+                editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
+            }
         }
-    }
 
 
-    // Save Personal Info
-    function savePersonalInfo() {
-        // Collect form data
-        const form = document.getElementById('personalInfoForm');
-        const formData = new FormData(form);
+        // Save Personal Info
+        function savePersonalInfo() {
+            // Collect form data
+            const form = document.getElementById('personalInfoForm');
+            const formData = new FormData(form);
 
-        // Use AJAX to send data to the server
-        fetch('../scripts/update_profile.php', {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Personal info has been saved.');
-                    toggleEditPersonalInfo();
-                    window.location.reload();
-                } else {
-                    alert('There was an error saving the info.');
-                }
+            // Use AJAX to send data to the server
+            fetch('../scripts/update_profile.php', {
+                method: 'POST',
+                body: formData,
             })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Save Address Info using AJAX
-    function saveAddress() {
-        // Collect form data from the address form
-        const form = document.querySelector('.bottom-right form');
-        const formData = new FormData(form);
-
-        // Send the data to update_address.php via a POST request
-        fetch('../scripts/update_address.php', {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Address info has been saved.');
-                    toggleEditAddress(); // Switch back to non-editable mode
-                    window.location.reload();
-                } else {
-                    alert('There was an error saving the address.');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-
-    // Toggle edit/save for Address
-    function toggleEditAddress() {
-        // Get the form elements
-        const inputs = document.querySelectorAll('.bottom-right input');
-        const editBtn = document.getElementById('editAdd-btn');
-        const form = document.querySelector('.bottom-right form');
-
-        // Check if the form is already editable
-        const isEditable = inputs[0].disabled;
-
-        // Toggle disabled state
-        inputs.forEach(input => input.disabled = !isEditable);
-
-        // Toggle the button image
-        if (isEditable) {
-            // Change to "Save" button
-            editBtn.src = '../assets/images/button-confirm.png';
-            editBtn.setAttribute('onclick', 'saveAddress()');
-        } else {
-            // Change back to "Edit" button
-            editBtn.src = '../assets/images/button-edit.png';
-            editBtn.setAttribute('onclick', 'toggleEditAddress()');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Personal info has been saved.');
+                        toggleEditPersonalInfo();
+                        window.location.reload();
+                    } else {
+                        alert('There was an error saving the info.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         }
-    }
+
+        // Save Address Info using AJAX
+        function saveAddress() {
+            // Collect form data from the address form
+            const form = document.querySelector('.bottom-right form');
+            const formData = new FormData(form);
+
+            // Send the data to update_address.php via a POST request
+            fetch('../scripts/update_address.php', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Address info has been saved.');
+                        toggleEditAddress(); // Switch back to non-editable mode
+                        window.location.reload();
+                    } else {
+                        alert('There was an error saving the address.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        // Toggle edit/save for Address
+        function toggleEditAddress() {
+            // Get the form elements
+            const inputs = document.querySelectorAll('.bottom-right input');
+            const editBtn = document.getElementById('editAdd-btn');
+            const form = document.querySelector('.bottom-right form');
+
+            // Check if the form is already editable
+            const isEditable = inputs[0].disabled;
+
+            // Toggle disabled state
+            inputs.forEach(input => input.disabled = !isEditable);
+
+            // Toggle the button image
+            if (isEditable) {
+                // Change to "Save" button
+                editBtn.src = '../assets/images/button-confirm.png';
+                editBtn.setAttribute('onclick', 'saveAddress()');
+            } else {
+                // Change back to "Edit" button
+                editBtn.src = '../assets/images/button-edit.png';
+                editBtn.setAttribute('onclick', 'toggleEditAddress()');
+            }
+        }
 
 
 

@@ -85,9 +85,9 @@ if (move_uploaded_file($file['tmp_name'], $filePath)) {
     // Delete the old file only if it's different from the new file URL
     if ($row && !empty($row['profile_picture']) && $row['profile_picture'] !== $profilePicUrl) {
         $oldFilePath = $row['profile_picture'];
-        if (file_exists($oldFilePath)) {
-            unlink($oldFilePath);
-        }
+        if (file_exists(realpath($oldFilePath))) {
+            unlink(realpath($oldFilePath));
+        }        
     }
     
     // Update the user's profile_picture column in the database using PDO
