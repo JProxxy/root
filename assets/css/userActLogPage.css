@@ -1,11 +1,224 @@
-.dashboardDevider{
-    display: flex;
-    width: 82%;
-    height: 89%;
-    position: absolute;
-    top: 5.5%;
-    left: 12.5%;
-    z-index: 2;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
-    background-color: rgba(255, 0, 0, 0.082);
+.dashboardDevider {
+  display: flex;
+  width: 82%;
+  height: 89%;
+  position: absolute;
+  top: 5.5%;
+  left: 12.5%;
+  z-index: 2;
+
+  background-color: rgba(255, 0, 0, 0);
 }
+
+.userActLogCont {
+  margin-top: 5%;
+  margin-left: 5%;
+  width: 90%;
+  height: 83%;
+  border-radius: 25px;
+  background-color: rgb(255, 255, 255);
+}
+nav {
+  background-color: #f8f8f81a;
+  padding: 30px 20px;
+  width: auto;
+  position: relative; /* Required for absolute positioning */
+}
+
+nav::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 5%; /* Adjust for centering */
+  width: 90%; /* Border width is now 80% of nav */
+  height: 1px; /* Thickness */
+  background-color: #3d3d3d;
+}
+
+nav ul {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav ul li {
+  margin-right: 20px; /* Space between items */
+  display: flex;
+  align-items: center;
+}
+
+nav ul li:first-child {
+  width: 10%;
+}
+
+nav ul li:nth-child(2) {
+  width: 20%;
+  font-size: 1.4rem;
+  font-weight: 500;
+  text-align: left;
+  display: flex;
+  justify-content: flex-start; /* Aligns content to the left */
+  align-items: center; /* Keeps content vertically centered */
+}
+
+nav ul li:nth-child(3) {
+  width: 35%;
+}
+
+nav ul li:nth-child(4) {
+  width: 30%;
+  display: flex;
+  padding-right: 1.6%;
+  justify-content: flex-end; /* Push content to the right */
+  align-items: center; /* Keep it vertically centered */
+  margin-left: auto; /* Moves this item to the right */
+}
+
+nav ul li {
+  width: 100%; /* Set a fixed width for each list item */
+  height: 50px; /* Set a fixed height (adjust as needed) */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  text-align: center;
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflow content */
+  background-color: rgba(255, 255, 0, 0);
+
+  font-family: "Kodchasan", sans-serif;
+}
+
+nav ul li img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensure image fits inside */
+}
+
+/* Adjust the search bar */
+.searchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 45px 10px 15px; /* Space for the button */
+  text-indent: 7%; /* Indents the typed text */
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1rem;
+  border: 1px solid #3d3d3d;
+  border-radius: 25px;
+  outline: none;
+}
+
+.searchButton {
+  position: absolute;
+  left: 15px; /* Position inside the input */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optional: Adjust the icon size */
+.searchButton svg {
+  width: 25px;
+  height: 25px;
+  color: #555; /* Adjust color */
+}
+
+.filterCont,
+.dateCont,
+.sortCont {
+  width: 20%;
+  padding: 5px 10px;
+  background-color: rgb(255, 255, 255);
+  font-size: 1.2rem;
+  color: #0b3236;
+  border-radius: 5px;
+  text-align: center;
+  margin-right: 10px;
+  border: 1px solid #0b3236; /* Adds a border line */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  font-family: "Kodchasan", sans-serif;
+}
+
+/* TABLE */
+
+.actLogTable {
+  display: flex;
+  justify-content: center; /* Centers the table horizontally */
+  align-items: center; /* Centers vertically if there's enough height */
+  width: 100%; /* Ensure it takes full width */
+  padding: 20px;
+}
+
+table {
+  width: 90%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+  color: #0b3236;
+}
+
+td {
+    text-align: center; /* Centers horizontally */
+    vertical-align: middle; /* Centers vertically */
+  }
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+
+  
+/* Styles for the status badges */
+.status-authorized, .status-unauthorized {
+    display: inline-flex; /* Keeps it inline but allows centering */
+    justify-content: center; /* Ensures text stays centered */
+    align-items: center; /* Centers vertically */
+    padding: 8px 15px; /* Adjust for better spacing */
+    border-radius: 30px;
+    font-weight: bold;
+    min-width: 100px; /* Ensures a more uniform size */
+    text-align: center;
+  }
+  
+  /* Green for Authorized */
+  .status-authorized {
+    color: #3b5d33;
+    background-color: #ceffc2;
+  }
+  
+  /* Red for Unauthorized */
+  .status-unauthorized {
+    color: #dd0000;
+    background-color: #ffcece;
+  }
