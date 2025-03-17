@@ -39,7 +39,7 @@
 .scrollable {
   margin-top: 5%;
   width: 85%;
-  max-height: 550px;
+  max-height: 650px;
   overflow-y: scroll;
   overflow-x: hidden;
   background-color: rgba(232, 189, 189, 0);
@@ -226,7 +226,7 @@
 .notifPage {
   margin-top: 5%;
   width: 95%;
-  height: 80vh;
+  height: 75vh;
   border-radius: 25px;
   background-color: #eeeeee;
   overflow-y: hidden;
@@ -336,14 +336,15 @@
 .dashboardLog {
   /* position: absolute; */
   width: 87%;
-  height: 75%;
+  height: 63%;
   right: 5%;
   margin-top: 5%;
+  margin-bottom: 5%;
   display: flex;
   flex-direction: column;
   background-color: #eeeeee;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 30px 30px 0px 0px;
+  border-radius: 30px;
   padding: 20px;
 }
 

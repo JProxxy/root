@@ -1,0 +1,11 @@
+.dashboardDevider{
+    display: flex;
+    width: 82%;
+    height: 89%;
+    position: absolute;
+    top: 5.5%;
+    left: 12.5%;
+    z-index: 2;
+
+    background-color: rgba(255, 0, 0, 0.082);
+}
