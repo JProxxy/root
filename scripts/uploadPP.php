@@ -64,6 +64,12 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
+if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+    error_log('Failed to move uploaded file: ' . $file['tmp_name'] . ' to ' . $filePath);
+    echo json_encode(['error' => 'Error moving file.']);
+    exit;
+}
+
 // Move the uploaded file
 if (move_uploaded_file($file['tmp_name'], $filePath)) {
     // Determine the URL for the new profile picture

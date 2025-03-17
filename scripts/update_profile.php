@@ -1,46 +1,51 @@
 <?php
+// Start the session
 session_start();
 
-// Ensure user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+// Check if user_id is set in the session
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+} else {
+    // Return error if user is not logged in
+    echo json_encode(['success' => false, 'error' => 'User not logged in']);
     exit;
 }
 
+// Database connection
 require_once '../app/config/connection.php';
 
-$targetDir = "../uploads/"; // Change this to your actual upload directory
-if (!is_dir($targetDir)) {
-    mkdir($targetDir, 0775, true); // Ensure directory exists
-}
+// Sanitize input to prevent SQL injection
+$first_name = htmlspecialchars($_POST['first_name']);
+$last_name = htmlspecialchars($_POST['last_name']);
+$phoneNumber = htmlspecialchars($_POST['phoneNumber']);
+$bio = htmlspecialchars($_POST['bio']);
+$gender = htmlspecialchars($_POST['gender']);
 
-if (isset($_FILES['file']) && $_FILES['file']['error'] === 0) {
-    $file = $_FILES['file'];
-    $fileName = basename($file['name']);
-    $fileType = pathinfo($fileName, PATHINFO_EXTENSION);
-    $allowedTypes = ['jpg', 'jpeg', 'png'];
+// Update query with placeholders
+$sql = "UPDATE users SET first_name = :first_name, last_name = :last_name, bio = :bio, phoneNumber = :phoneNumber, gender= :gender WHERE user_id = :user_id";
 
-    if (!in_array(strtolower($fileType), $allowedTypes)) {
-        echo json_encode(['success' => false, 'message' => 'Invalid file type']);
-        exit;
-    }
+try {
+    // Prepare the SQL query
+    $stmt = $conn->prepare($sql);
 
-    $newFileName = uniqid('profile_', true) . '.' . $fileType;
-    $filePath = $targetDir . $newFileName;
+    // Bind parameters using PDO's bindParam() method
+    $stmt->bindParam(':first_name', $first_name);
+    $stmt->bindParam(':last_name', $last_name);
+    $stmt->bindParam(':bio', $bio);
+    $stmt->bindParam(':phoneNumber', $phoneNumber);
+    $stmt->bindParam(':gender', $gender);
+    $stmt->bindParam(':user_id', $user_id);
 
-    if (move_uploaded_file($file['tmp_name'], $filePath)) {
-        // Save the new filename to the database
-        $stmt = $conn->prepare("UPDATE users SET profile_picture = :profile_picture WHERE user_id = :user_id");
-        $stmt->execute([
-            ':profile_picture' => $newFileName,
-            ':user_id' => $_SESSION['user_id']
-        ]);
-
-        echo json_encode(['success' => true, 'url' => "/uploads/$newFileName"]);
+    // Execute the query
+    if ($stmt->execute()) {
+        // Return a success response as JSON
+        echo json_encode(['success' => true]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Error moving uploaded file']);
+        // Return an error response as JSON
+        echo json_encode(['success' => false]);
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'No file uploaded or file error']);
+} catch (PDOException $e) {
+    // Return error message in JSON format
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 ?>
