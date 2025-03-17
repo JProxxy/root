@@ -603,124 +603,126 @@ if (!empty($user_data['profile_picture'])) {
                 .catch(error => {
                     console.error('Error uploading file:', error);
                     alert('Error uploading file');
-                })
+                });
+
         }
+    }
 </script>
 
 <!-- SHOW PROFILE/ EDIT PERSONAL INFO-->
 <script>
 
-        // Toggle edit/save for Personal Info
-        function toggleEditPersonalInfo() {
-            // Get the form elements by their IDs (excluding email)
-            const inputsToToggle = [
-                document.getElementById('firstName'),
-                document.getElementById('lastName'),
-                document.getElementById('bio'),
-                document.getElementById('phoneNumber')
-            ];
-            const selectsToToggle = [
-                document.getElementById('genderSelect')
-            ];
-            const editBtn = document.getElementById('editPI-btn');
+    // Toggle edit/save for Personal Info
+    function toggleEditPersonalInfo() {
+        // Get the form elements by their IDs (excluding email)
+        const inputsToToggle = [
+            document.getElementById('firstName'),
+            document.getElementById('lastName'),
+            document.getElementById('bio'),
+            document.getElementById('phoneNumber')
+        ];
+        const selectsToToggle = [
+            document.getElementById('genderSelect')
+        ];
+        const editBtn = document.getElementById('editPI-btn');
 
-            // Determine editability by checking one of the inputs (e.g., firstName)
-            const isEditable = inputsToToggle[0].disabled;
+        // Determine editability by checking one of the inputs (e.g., firstName)
+        const isEditable = inputsToToggle[0].disabled;
 
-            // Toggle disabled state for selected inputs
-            inputsToToggle.forEach(input => {
-                input.disabled = !isEditable;
-            });
-            selectsToToggle.forEach(select => {
-                select.disabled = !isEditable;
-            });
+        // Toggle disabled state for selected inputs
+        inputsToToggle.forEach(input => {
+            input.disabled = !isEditable;
+        });
+        selectsToToggle.forEach(select => {
+            select.disabled = !isEditable;
+        });
 
-            // Toggle button appearance and onclick attribute
-            if (isEditable) {
-                // Change to "Save" button
-                editBtn.src = '../assets/images/button-confirm.png';
-                editBtn.setAttribute('onclick', 'savePersonalInfo()');
-            } else {
-                // Change back to "Edit" button
-                editBtn.src = '../assets/images/button-edit.png';
-                editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
-            }
+        // Toggle button appearance and onclick attribute
+        if (isEditable) {
+            // Change to "Save" button
+            editBtn.src = '../assets/images/button-confirm.png';
+            editBtn.setAttribute('onclick', 'savePersonalInfo()');
+        } else {
+            // Change back to "Edit" button
+            editBtn.src = '../assets/images/button-edit.png';
+            editBtn.setAttribute('onclick', 'toggleEditPersonalInfo()');
         }
+    }
 
 
-        // Save Personal Info
-        function savePersonalInfo() {
-            // Collect form data
-            const form = document.getElementById('personalInfoForm');
-            const formData = new FormData(form);
+    // Save Personal Info
+    function savePersonalInfo() {
+        // Collect form data
+        const form = document.getElementById('personalInfoForm');
+        const formData = new FormData(form);
 
-            // Use AJAX to send data to the server
-            fetch('../scripts/update_profile.php', {
-                method: 'POST',
-                body: formData,
+        // Use AJAX to send data to the server
+        fetch('../scripts/update_profile.php', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Personal info has been saved.');
+                    toggleEditPersonalInfo();
+                    window.location.reload();
+                } else {
+                    alert('There was an error saving the info.');
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Personal info has been saved.');
-                        toggleEditPersonalInfo();
-                        window.location.reload();
-                    } else {
-                        alert('There was an error saving the info.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
+            .catch(error => console.error('Error:', error));
+    }
 
-        // Save Address Info using AJAX
-        function saveAddress() {
-            // Collect form data from the address form
-            const form = document.querySelector('.bottom-right form');
-            const formData = new FormData(form);
+    // Save Address Info using AJAX
+    function saveAddress() {
+        // Collect form data from the address form
+        const form = document.querySelector('.bottom-right form');
+        const formData = new FormData(form);
 
-            // Send the data to update_address.php via a POST request
-            fetch('../scripts/update_address.php', {
-                method: 'POST',
-                body: formData,
+        // Send the data to update_address.php via a POST request
+        fetch('../scripts/update_address.php', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Address info has been saved.');
+                    toggleEditAddress(); // Switch back to non-editable mode
+                    window.location.reload();
+                } else {
+                    alert('There was an error saving the address.');
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Address info has been saved.');
-                        toggleEditAddress(); // Switch back to non-editable mode
-                        window.location.reload();
-                    } else {
-                        alert('There was an error saving the address.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error:', error));
+    }
+
+
+    // Toggle edit/save for Address
+    function toggleEditAddress() {
+        // Get the form elements
+        const inputs = document.querySelectorAll('.bottom-right input');
+        const editBtn = document.getElementById('editAdd-btn');
+        const form = document.querySelector('.bottom-right form');
+
+        // Check if the form is already editable
+        const isEditable = inputs[0].disabled;
+
+        // Toggle disabled state
+        inputs.forEach(input => input.disabled = !isEditable);
+
+        // Toggle the button image
+        if (isEditable) {
+            // Change to "Save" button
+            editBtn.src = '../assets/images/button-confirm.png';
+            editBtn.setAttribute('onclick', 'saveAddress()');
+        } else {
+            // Change back to "Edit" button
+            editBtn.src = '../assets/images/button-edit.png';
+            editBtn.setAttribute('onclick', 'toggleEditAddress()');
         }
-
-
-        // Toggle edit/save for Address
-        function toggleEditAddress() {
-            // Get the form elements
-            const inputs = document.querySelectorAll('.bottom-right input');
-            const editBtn = document.getElementById('editAdd-btn');
-            const form = document.querySelector('.bottom-right form');
-
-            // Check if the form is already editable
-            const isEditable = inputs[0].disabled;
-
-            // Toggle disabled state
-            inputs.forEach(input => input.disabled = !isEditable);
-
-            // Toggle the button image
-            if (isEditable) {
-                // Change to "Save" button
-                editBtn.src = '../assets/images/button-confirm.png';
-                editBtn.setAttribute('onclick', 'saveAddress()');
-            } else {
-                // Change back to "Edit" button
-                editBtn.src = '../assets/images/button-edit.png';
-                editBtn.setAttribute('onclick', 'toggleEditAddress()');
-            }
-        }
+    }
 
 
 
