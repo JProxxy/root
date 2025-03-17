@@ -155,7 +155,10 @@
                     <div class="dashboardLog">
                         <div class="headerLog">
                             <p>User Activity Log</p>
-                            <img src="../assets/images/next.png" alt="next icon" class="next" />
+                            <a href="../templates/userActLogPage.php">
+                                <img src="../assets/images/next.png" alt="next icon" class="next" />
+                            </a>
+
                         </div>
 
                         <table class="userLogTable">
