@@ -102,20 +102,6 @@ try {
     // Commit the transaction.
     $conn->commit();
 
-    // Regenerate session ID for security and set session variables.
-    session_regenerate_id(true);
-    $_SESSION['user'] = [
-        'user_id' => $user_id,
-        'email' => $email,
-        'username' => $username,
-        'first_name' => $first_name,
-        'last_name' => $last_name,
-        'profile_picture' => $profile_picture,
-        'auth_method' => 'google',
-        'ip' => $_SERVER['REMOTE_ADDR'],
-        'agent' => $_SERVER['HTTP_USER_AGENT'],
-        'created' => time()
-    ];
 
     // Add this line to set the top-level user_id variable.
     $_SESSION['user_id'] = $user_id;
