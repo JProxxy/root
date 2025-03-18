@@ -100,10 +100,10 @@ if (!isset($_SESSION['user_id'])) {
 
                 </div>
                 <div class="firstFloor">
-                
+
                 </div>
 
-               
+
 
             </div>
             <div class="dashboardDeviderRight">
@@ -148,9 +148,10 @@ if (!isset($_SESSION['user_id'])) {
 
 
                         <div class="cameraFF">
-                            <a href="../templates/FirstFloorOD-Camera.php">
+                            <a href="http://192.168.100.36/">
                                 <img src="../assets/images/camera.png" alt="Camera" class="cameraImage">
                             </a>
+
                             <p>Camera</p>
                             <span>Outdoor</span>
 
