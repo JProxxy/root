@@ -301,7 +301,7 @@ if (!isset($_SESSION['user_id'])) {
                 };
             
                 // Send the payload to your API Gateway endpoint which triggers your Lambda
-                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                fetch('arn:aws:execute-api:ap-southeast-1:207567780437:y9saie9s20/*/*/accessgate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
