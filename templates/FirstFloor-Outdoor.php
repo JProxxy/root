@@ -291,29 +291,32 @@ if (!isset($_SESSION['user_id'])) {
                 const status = accessGateSwitch.checked ? 'UNLOCK' : 'LOCK';
                 console.log("Access Gate toggled: " + status);
             
-                // Prepare the payload in the format expected by your Lambda
+                // Prepare the payload in the format expected by your Lambda function:
+                // It will have deviceName "GateAccess" and the command ("UNLOCK" or "LOCK")
                 const payload = {
                     data: {
-                        deviceName: "GateAccess",  // Identifier for the gate access device
-                        command: status            // Command to execute ("UNLOCK" or "LOCK")
+                        deviceName: "GateAccess",  // Ensures Lambda processes this as gate access
+                        command: status
                     }
                 };
             
-                // Send the payload to the API Gateway endpoint
+                // Send the payload to your API Gateway endpoint which triggers your Lambda
                 fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(payload) // The payload is stringified and sent as the request body
+                    body: JSON.stringify(payload)
                 })
-                .then(response => response.json()) // Handle the response from Lambda
+                .then(response => response.json())
                 .then(responseData => {
-                    console.log('Device control response:', responseData);
+                    console.log('Gate access response:', responseData);
                 })
                 .catch(error => {
-                    console.error("Error updating device status:", error);
+                    console.error("Error updating gate access status:", error);
                 });
+            }
+            
             }
             
 
