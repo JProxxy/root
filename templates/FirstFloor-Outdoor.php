@@ -285,51 +285,37 @@ if (!isset($_SESSION['user_id'])) {
 
 
 
-            // Set MQTT connection parameters
-            const endpoint = 'wss://a36m8r0b5lz7mq-ats.iot.ap-southeast-1.amazonaws.com/mqtt';  // Replace with your IoT endpoint
-            const client = mqtt.connect(endpoint, {
-                clientId: 'webClient_' + Math.floor(Math.random() * 1000),  // Ensure unique client ID
-                clean: true,
-                reconnectPeriod: 1000,
-                username: '',  // Optional if using Cognito
-                password: '',  // Optional if using Cognito
-                ca: '../assets/certificate/AmazonRootCA1.pem',  // Path to your root certificate
-                cert: '../assets/certificate/Device Certificate.crt',  // Path to your device certificate
-                key: '../assets/certificate/Private Key.key',  // Path to your private key
-            });
-
-            // Connect to the broker
-            client.on('connect', function () {
-                console.log('Connected to MQTT broker');
-            });
-
-            // Subscribe to a topic (optional, if you want to receive updates)
-            const topic = 'home/office/accessGate';  // The topic ESP32 is subscribed to
-            client.subscribe(topic, function (err) {
-                if (err) {
-                    console.error('Failed to subscribe:', err);
-                }
-            });
-
-            // Listen for messages on the topic
-            client.on('message', function (topic, message) {
-                console.log('Received message:', topic, message.toString());
-                // You can update the UI or trigger events based on the message
-            });
-
-            // Function to publish state change when the access gate switch is toggled
-            async function toggleAccessGate() {
+            function toggleAccessGate() {
                 const accessGateSwitch = document.getElementById('accessGateSwitch');
-                const newState = accessGateSwitch.checked ? 1 : 0;
-
-                // Publish the state change to the MQTT topic
-                client.publish('home/office/accessGate', JSON.stringify({ state: newState }));
-
-                console.log('Access Gate state:', newState);
+                // Determine command: when checked, the gate is unlocked; when unchecked, locked.
+                const status = accessGateSwitch.checked ? 'UNLOCK' : 'LOCK';
+                console.log("Access Gate toggled: " + status);
+            
+                // Prepare the payload in the format expected by your Lambda
+                const payload = {
+                    data: {
+                        deviceName: "GateAccess",  // Identifier for the gate access device
+                        command: status            // Command to execute ("UNLOCK" or "LOCK")
+                    }
+                };
+            
+                // Send the payload to the API Gateway endpoint
+                fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload) // The payload is stringified and sent as the request body
+                })
+                .then(response => response.json()) // Handle the response from Lambda
+                .then(responseData => {
+                    console.log('Device control response:', responseData);
+                })
+                .catch(error => {
+                    console.error("Error updating device status:", error);
+                });
             }
-
-            // Add event listener to trigger the toggleAccessGate function when the checkbox changes
-            document.getElementById('accessGateSwitch').addEventListener('change', toggleAccessGate);
+            
 
         </script>
 
