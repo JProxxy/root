@@ -2,6 +2,8 @@
 // Start the session
 session_start();
 
+$user_id = $_SESSION['user_id'] ?? 'default_user_id';
+
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
     // Redirect to login page if not logged in
