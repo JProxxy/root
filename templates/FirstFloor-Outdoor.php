@@ -2,7 +2,7 @@
 // Start the session
 session_start();
 
-$user_id = $_SESSION['user_id'] ?? 'default_user_id';
+
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -269,46 +269,47 @@ if (!isset($_SESSION['user_id'])) {
 
 
         <script>
+            // Navigation functions
             function navigateToOutdoor() {
-                // Change background color of Outdoor button
                 document.getElementById("outdoorButton").classList.add("activeButton");
                 document.getElementById("garageButton").classList.remove("activeButton");
             }
 
+            // Consider renaming one of these if you need both behaviors
             function navigateToGarage() {
-                // Reset Outdoor button and change background for Garage button
-                document.getElementById("garageButton").classList.add("activeButton");
-                document.getElementById("outdoorButton").classList.remove("activeButton");
-            }
-
-            function navigateToGarage(url) {
+                // This function will redirect to the garage page.
                 window.location.href = "../templates/FirstFloor-Garage.php";
             }
 
-
+            // Fetch user ID from PHP and store it in sessionStorage
+            fetch('../scripts/getUserId.php')
+                .then(response => response.json())
+                .then(data => {
+                    sessionStorage.setItem('user_id', data.user_id);
+                    console.log("Fetched user ID:", data.user_id);
+                })
+                .catch(error => console.error('Error fetching user ID:', error));
 
             function toggleAccessGate() {
                 const accessGateSwitch = document.getElementById('accessGateSwitch');
-                // Determine command: when checked, the gate should open; when unchecked, it should close.
+                // Determine command based on the switch state
                 const action = accessGateSwitch.checked ? 'open' : 'close';
                 console.log("Access Gate toggled: " + action);
 
-                // Retrieve the user_id from session storage (or adjust based on how you store session data)
+                // Retrieve the user_id from session storage
                 const userId = sessionStorage.getItem('user_id') || 'unknown_user';
-                console.log("User ID: " + userId);
+                console.log("User ID:", userId);
 
-                // Prepare the payload exactly as expected by Lambda
-                // You may need to adjust Lambda to parse and use the user_id as needed.
+                // Prepare the payload to send to Lambda
                 const payload = {
                     action: action,
                     user_id: userId
                 };
 
-                // Use the full API Gateway endpoint URL:
-                // It combines the base URL and the resource path (/accessgate)
+                // API Gateway endpoint URL for the POST /accessgate resource
                 const apiUrl = 'https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate';
 
-                // Send the payload to your API Gateway endpoint, which triggers your Lambda function
+                // Send the payload to your API Gateway endpoint
                 fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -324,12 +325,8 @@ if (!isset($_SESSION['user_id'])) {
                         console.error("Error updating gate access status:", error);
                     });
             }
-
-
-
-
-
         </script>
+
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
