@@ -287,38 +287,45 @@ if (!isset($_SESSION['user_id'])) {
 
             function toggleAccessGate() {
                 const accessGateSwitch = document.getElementById('accessGateSwitch');
-                // Determine command: when checked, the gate is unlocked; when unchecked, locked.
-                const status = accessGateSwitch.checked ? 'UNLOCK' : 'LOCK';
-                console.log("Access Gate toggled: " + status);
-            
-                // Prepare the payload in the format expected by your Lambda function:
-                // It will have deviceName "GateAccess" and the command ("UNLOCK" or "LOCK")
+                // Determine command: when checked, the gate should open; when unchecked, it should close.
+                const action = accessGateSwitch.checked ? 'open' : 'close';
+                console.log("Access Gate toggled: " + action);
+
+                // Retrieve the user_id from session storage (or adjust based on how you store session data)
+                const userId = sessionStorage.getItem('user_id') || 'unknown_user';
+                console.log("User ID: " + userId);
+
+                // Prepare the payload exactly as expected by Lambda
+                // You may need to adjust Lambda to parse and use the user_id as needed.
                 const payload = {
-                    data: {
-                        deviceName: "GateAccess",  // Ensures Lambda processes this as gate access
-                        command: status
-                    }
+                    action: action,
+                    user_id: userId
                 };
-            
-                // Send the payload to your API Gateway endpoint which triggers your Lambda
-                fetch('arn:aws:execute-api:ap-southeast-1:207567780437:y9saie9s20/*/*/accessgate', {
+
+                // Use the full API Gateway endpoint URL:
+                // It combines the base URL and the resource path (/accessgate)
+                const apiUrl = 'https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate';
+
+                // Send the payload to your API Gateway endpoint, which triggers your Lambda function
+                fetch(apiUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 })
-                .then(response => response.json())
-                .then(responseData => {
-                    console.log('Gate access response:', responseData);
-                })
-                .catch(error => {
-                    console.error("Error updating gate access status:", error);
-                });
+                    .then(response => response.json())
+                    .then(responseData => {
+                        console.log('Gate access response:', responseData);
+                    })
+                    .catch(error => {
+                        console.error("Error updating gate access status:", error);
+                    });
             }
-            
-            
-            
+
+
+
+
 
         </script>
 
