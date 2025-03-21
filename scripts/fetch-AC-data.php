@@ -1,41 +1,96 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// If the AC log isn't already in the session, initialize it.
-if (!isset($_SESSION['ac_log'])) {
-    $_SESSION['ac_log'] = [
-        "power" => "On",
-        "temp" => "30",
-        "timer" => "8 hrs",
-        "mode" => "Cool",
-        "fan" => "High",
-        "swing" => "Off"
-    ];
+include '../app/config/connection.php';
+
+// Ensure PDO throws exceptions
+$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+try {
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    if ($method === 'GET') {
+        $user_id = $_GET['user_id'] ?? 1;
+
+        // FETCH AC DATA
+        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+        $stmt->execute([':user_id' => $user_id]);
+        $acData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($acData) {
+            echo json_encode($acData);
+        } else {
+            // INSERT DEFAULT VALUES
+            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
+                                    VALUES (:user_id, 'Off', 26, '6 hrs', 'Cool', 'High', 'On', NOW())");
+            $stmt->execute([':user_id' => $user_id]);
+
+            // FETCH AGAIN
+            $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+            $stmt->execute([':user_id' => $user_id]);
+            $acData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            echo json_encode($acData);
+        }
+        exit;
+    } elseif ($method === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input)
+            throw new Exception("Invalid JSON input.");
+
+        $user_id = $input['user_id'] ?? null;
+        if (!$user_id)
+            throw new Exception("User ID is required.");
+
+        // List of fields to update
+        $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing'];
+        $updateValues = [];
+
+        // Use provided values, or fetch the current value if not set
+        foreach ($fields as $field) {
+            if (isset($input[$field])) {
+                $updateValues[$field] = $input[$field];
+            } else {
+                $stmt = $conn->prepare("SELECT $field FROM acRemote WHERE user_id = :user_id");
+                $stmt->execute([':user_id' => $user_id]);
+                $updateValues[$field] = $stmt->fetchColumn();
+            }
+        }
+
+        // Validate temperature range
+        if (isset($updateValues['temp'])) {
+            $temp = (int) $updateValues['temp'];
+            if ($temp < 16 || $temp > 32)
+                throw new Exception("Temperature must be between 16 and 32°C.");
+        }
+
+        // Build the SQL update statement dynamically
+        $sqlParts = [];
+        foreach ($updateValues as $key => $value) {
+            $sqlParts[] = "$key = :$key";
+        }
+        $sql = "UPDATE acRemote SET power = :power, temp = :temp, timer = :timer, mode = :mode, fan = :fan, swing = :swing WHERE user_id = :user_id";
+
+        error_log("Update values: " . print_r($updateValues, true));
+
+        $stmt = $conn->prepare($sql);
+        $updateValues['user_id'] = $user_id;
+        $stmt->execute($updateValues);
+
+        // Fetch the updated AC settings
+        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+        $stmt->execute([':user_id' => $user_id]);
+        $acData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Return the updated data along with a success message
+        echo json_encode(array_merge(["success" => true, "message" => "AC settings updated"], $acData));
+        exit;
+    }
+} catch (Exception $e) {
+    echo json_encode(["error" => $e->getMessage()]);
+    exit;
 }
-
-// Check if a POST request is made to update values.
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-
-    if (isset($input['fan'])) { // Handle fan speed update
-        $_SESSION['ac_log']['fan'] = $input['fan'];
-    }
-    if (isset($input['activeMode'])) { // Handle mode update
-        $_SESSION['ac_log']['mode'] = $input['activeMode'];
-    }
-    if (isset($input['swing'])) { // Handle swing state update
-        $_SESSION['ac_log']['swing'] = $input['swing'];
-    }    
-    if (isset($input['temp'])) {
-        $_SESSION['ac_log']['temp'] = $input['temp'];
-    }
-    if (isset($input['sleep'])) { // Handle sleep mode update
-        $_SESSION['ac_log']['sleep'] = $input['sleep'];
-    }
-    
-}
-
-// Return the AC log (which may now contain updated values).
-echo json_encode($_SESSION['ac_log']);
 ?>

@@ -10,6 +10,14 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../templates/login.php");
     exit();
 }
+include '../app/config/connection.php';
+
+
+$stmt = $conn->prepare("SELECT power FROM acRemote WHERE user_id = :user_id LIMIT 1");
+$stmt->execute([':user_id' => $_SESSION['user_id']]);
+$acData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$power = isset($acData['power']) ? $acData['power'] : 'Off';
 ?>
 
 <!DOCTYPE html>
@@ -23,9 +31,6 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/acRemote.css">
-
-
-
 </head>
 
 <body>
@@ -126,68 +131,6 @@ if (!isset($_SESSION['user_id'])) {
                                 <img class="fanHigh" src="../assets/images/ac/fanHigh-White.png" style="display: none;">
                             </div>
 
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    // Select the fan container
-                                    const fanCont = document.querySelector(".fanCont");
-
-                                    // Select images
-                                    const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
-                                    const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
-                                    const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
-                                    const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
-
-                                    let currentFanState = "High"; // Default fan state
-
-                                    function setFanHigh() {
-                                        fanHighGreen.style.display = "block";
-                                        fanHighWhite.style.display = "none";
-                                        fanLowGreen.style.display = "none";
-                                        fanLowWhite.style.display = "block";
-                                        currentFanState = "High";
-                                        sendFanData(currentFanState);
-                                    }
-
-                                    function setFanLow() {
-                                        fanHighGreen.style.display = "none";
-                                        fanHighWhite.style.display = "block";
-                                        fanLowGreen.style.display = "block";
-                                        fanLowWhite.style.display = "none";
-                                        currentFanState = "Low";
-                                        sendFanData(currentFanState);
-                                    }
-
-                                    function sendFanData(fanState) {
-                                        fetch("../scripts/fetch-AC-data.php", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify({ fan: fanState }), // Send fan state to PHP
-                                        })
-                                            .then(response => response.text())
-                                            .then(data => {
-                                                console.log("Response from fetch-AC-data.php:", data);
-                                            })
-                                            .catch(error => {
-                                                console.error("Error sending fan data:", error);
-                                            });
-                                    }
-
-                                    // Initialize default state
-                                    setFanHigh();
-
-                                    // Toggle on click
-                                    fanCont.addEventListener("click", function () {
-                                        if (currentFanState === "High") {
-                                            setFanLow();
-                                        } else {
-                                            setFanHigh();
-                                        }
-                                    });
-                                });
-                            </script>
-
                             <div class="modeCont">
                                 <!-- Mode icon (could be used as the click target as well) -->
                                 <img class="mode" src="../assets/images/ac/mode.png">
@@ -206,100 +149,13 @@ if (!isset($_SESSION['user_id'])) {
                                 <img class="modeFan" src="../assets/images/ac/modeFan-Green.png" style="display: none;">
                             </div>
 
-
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    // Select the mode container
-                                    const modeCont = document.querySelector(".modeCont");
-
-                                    // Select images based on their classes
-                                    const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
-                                    const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
-                                    const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
-                                    const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
-                                    const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
-                                    const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
-
-                                    // Track the current state (0, 1, or 2)
-                                    let currentState = 0;
-
-                                    function updateModeDisplay() {
-                                        let activeMode = ""; // This will store which mode is currently green
-
-                                        if (currentState === 0) {
-                                            // Default state
-                                            modeCoolGreen.style.display = "block";
-                                            modeCoolWhite.style.display = "none";
-                                            modeDryWhite.style.display = "block";
-                                            modeDryGreen.style.display = "none";
-                                            modeFanWhite.style.display = "block";
-                                            modeFanGreen.style.display = "none";
-                                            activeMode = "Cool";
-                                        } else if (currentState === 1) {
-                                            // First click state
-                                            modeCoolGreen.style.display = "none";
-                                            modeCoolWhite.style.display = "block";
-                                            modeDryWhite.style.display = "none";
-                                            modeDryGreen.style.display = "block";
-                                            modeFanWhite.style.display = "block";
-                                            modeFanGreen.style.display = "none";
-                                            activeMode = "Dry";
-                                        } else if (currentState === 2) {
-                                            // Second click state
-                                            modeCoolGreen.style.display = "none";
-                                            modeCoolWhite.style.display = "block";
-                                            modeDryWhite.style.display = "block";
-                                            modeDryGreen.style.display = "none";
-                                            modeFanWhite.style.display = "none";
-                                            modeFanGreen.style.display = "block";
-                                            activeMode = "Fan";
-                                        }
-
-                                        // Send the active mode to fetch-AC-data.php
-                                        sendModeData(activeMode);
-                                    }
-
-                                    function sendModeData(activeMode) {
-                                        fetch("../scripts/fetch-AC-data.php", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json",  // Change to JSON
-                                            },
-                                            body: JSON.stringify({ activeMode }),  // Send JSON format
-                                        })
-                                            .then(response => response.text())
-                                            .then(data => {
-                                                console.log("Response from fetch-AC-data.php:", data);
-                                            })
-                                            .catch(error => {
-                                                console.error("Error sending mode data:", error);
-                                            });
-                                    }
-
-
-                                    // Initialize with default state
-                                    updateModeDisplay();
-
-                                    // Click event to toggle mode
-                                    modeCont.addEventListener("click", function () {
-                                        currentState = (currentState + 1) % 3; // Cycle through states 0 → 1 → 2 → 0
-                                        updateModeDisplay();
-                                    });
-                                });
-                            </script>
-
-
-
-
-
                             <div class="swingCont">
                                 <!-- Click target (could also be the container itself) -->
                                 <img class="swing" src="../assets/images/ac/swing.png">
 
                                 <!-- Swing "On" images -->
                                 <img class="swingOn" src="../assets/images/ac/swingOn-White.png">
-                                <img class="swingOn" src="../assets/images/ac/swingOn-Green.png"
-                                    style="display: noneF;">
+                                <img class="swingOn" src="../assets/images/ac/swingOn-Green.png" style="display: none;">
 
                                 <!-- Swing "Off" images -->
                                 <img class="swingOff" src="../assets/images/ac/swingOff-Green.png">
@@ -307,143 +163,10 @@ if (!isset($_SESSION['user_id'])) {
                                     style="display: none;">
                             </div>
 
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function () {
-                                    // Get references to the images within the container
-                                    const swingCont = document.querySelector(".swingCont");
-                                    const swingOnWhite = swingCont.querySelector("img.swingOn[src*='swingOn-White']");
-                                    const swingOnGreen = swingCont.querySelector("img.swingOn[src*='swingOn-Green']");
-                                    const swingOffGreen = swingCont.querySelector("img.swingOff[src*='swingOff-Green']");
-                                    const swingOffWhite = swingCont.querySelector("img.swingOff[src*='swingOff-White']");
-
-                                    let swingState = "Off"; // Default state
-
-                                    function setSwingOn() {
-                                        swingOffGreen.style.display = "none";
-                                        swingOffWhite.style.display = "block";
-                                        swingOnWhite.style.display = "none";
-                                        swingOnGreen.style.display = "block";
-                                        swingState = "On";
-                                        sendSwingData(swingState);
-                                    }
-
-                                    function setSwingOff() {
-                                        swingOffGreen.style.display = "block";
-                                        swingOffWhite.style.display = "none";
-                                        swingOnWhite.style.display = "block";
-                                        swingOnGreen.style.display = "none";
-                                        swingState = "Off";
-                                        sendSwingData(swingState);
-                                    }
-
-                                    function sendSwingData(state) {
-                                        fetch("../scripts/fetch-AC-data.php", {
-                                            method: "POST",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify({ swing: state }), // Send swing state to PHP
-                                        })
-                                            .then(response => response.text())
-                                            .then(data => {
-                                                console.log("Response from fetch-AC-data.php:", data);
-                                            })
-                                            .catch(error => {
-                                                console.error("Error sending swing data:", error);
-                                            });
-                                    }
-
-                                    // Initialize display
-                                    setSwingOff();
-
-                                    swingCont.addEventListener("click", function () {
-                                        if (swingState === "Off") {
-                                            setSwingOn();
-                                        } else {
-                                            setSwingOff();
-                                        }
-                                    });
-                                });
-
-                            </script>
-
+                            <!-- Sleep images -->
                             <img id="sleepWhite" class="sleep" src="../assets/images/ac/sleep-White.png">
                             <img id="sleepGreen" class="sleep" src="../assets/images/ac/sleep-Green.png"
                                 style="display: none;">
-
-                            <script>
-                              document.addEventListener("DOMContentLoaded", function () {
-    const sleepWhite = document.getElementById("sleepWhite");
-    const sleepGreen = document.getElementById("sleepGreen");
-
-    let sleepState = "Off"; // Default state
-    let currentMode = "Cool"; // Default AC mode
-
-    function setSleepOn() {
-        if (currentMode === "Dry" || currentMode === "Fan") return; // Prevent enabling Sleep in Dry or Fan mode
-        sleepWhite.style.display = "none";
-        sleepGreen.style.display = "block";
-        sleepState = "On";
-        sendSleepData(sleepState);
-    }
-
-    function setSleepOff() {
-        sleepWhite.style.display = "block";
-        sleepGreen.style.display = "none";
-        sleepState = "Off";
-        sendSleepData(sleepState);
-    }
-
-    function sendSleepData(state) {
-        fetch("../scripts/fetch-AC-data.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ sleep: state }), // Send sleep state to PHP
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log("Response from fetch-AC-data.php:", data);
-        })
-        .catch(error => {
-            console.error("Error sending sleep data:", error);
-        });
-    }
-
-    // Function to update mode and disable/enable Sleep mode
-    function updateMode(newMode) {
-        currentMode = newMode;
-        if (currentMode === "Dry" || currentMode === "Fan") {
-            setSleepOff(); // Force sleep mode off
-            sleepWhite.style.opacity = "0.5"; // Visually indicate it's disabled
-            sleepGreen.style.opacity = "0.5";
-            sleepWhite.style.pointerEvents = "none"; // Fully disable clicks
-            sleepGreen.style.pointerEvents = "none";
-        } else {
-            sleepWhite.style.opacity = "1"; // Re-enable when Cool mode is active
-            sleepGreen.style.opacity = "1";
-            sleepWhite.style.pointerEvents = "auto"; // Enable clicks
-            sleepGreen.style.pointerEvents = "auto";
-        }
-    }
-
-    // Initialize default state
-    setSleepOff();
-
-    sleepWhite.addEventListener("click", setSleepOn);
-    sleepGreen.addEventListener("click", setSleepOff);
-
-    // Example: Call `updateMode()` when AC mode is changed
-    document.addEventListener("modeChanged", function (event) {
-        updateMode(event.detail.mode); // Listen for mode change events
-    });
-});
-
-
-                            </script>
-
-
 
                             <img class="timer" id="timer" src="../assets/images/ac/timer.png">
                             <!-- Timer Donut -->
@@ -469,8 +192,6 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                             </div>
 
-
-
                         </div>
                     </div>
                 </div>
@@ -482,55 +203,43 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
             <div class="dashboardDeviderRight">
+
+                <!-- Your AC log container -->
                 <div class="acLog">
                     <div class="firstPartLog">
                         <div class="logItem">
                             <div class="titleCommand">Power</div>
                             <div class="outputCommand" id="ACpower"></div>
                         </div>
-
                         <div class="line-with-circleR"></div>
-
                         <div class="logItem">
                             <div class="titleCommand">Temp</div>
                             <div class="outputCommand" id="ACtemp">°C</div>
                         </div>
-
                         <div class="line-with-circleR"></div>
-
                         <div class="logItem">
                             <div class="titleCommand">Timer</div>
                             <div class="outputCommand" id="ACtimer"></div>
                         </div>
                     </div>
-
                     <div class="divider"></div>
-
                     <div class="secondPartLog">
                         <div class="logItem">
                             <div class="titleCommand">Mode</div>
                             <div class="outputCommand" id="ACmode"></div>
                         </div>
-
                         <div class="line-with-circleL"></div>
-
                         <div class="logItem">
                             <div class="titleCommand">Fan</div>
                             <div class="outputCommand" id="ACfan"></div>
                         </div>
-
                         <div class="line-with-circleL"></div>
-
                         <div class="logItem">
                             <div class="titleCommand">Swing</div>
                             <div class="outputCommand" id="ACswing"></div>
                         </div>
                     </div>
                 </div>
-
-
-
-
 
                 <div class="deviceControl">
                     <p class="devTitle">Devices</p>
@@ -610,7 +319,7 @@ if (!isset($_SESSION['user_id'])) {
 
                             <div class="switch-containerTwo">
                                 <label class="switchTwo">
-                                    <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()">
+                                    <input type="checkbox" id="airconFFSwitch" onchange="toggleAirconFF()" <?php echo ($power === "On") ? "checked" : ""; ?>>
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -703,57 +412,191 @@ if (!isset($_SESSION['user_id'])) {
             }
         </script>
 
-
         <script>
+
+
+
+            // ============== POWER ON/OFF  ============== //
             function toggleAirconFF() {
                 const switchElement = document.getElementById("airconFFSwitch");
                 const remoteContainer = document.querySelector(".remote-container");
-                const elementsToHide = [
-                    "ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"
-                ];
+                const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
 
-                if (switchElement.checked) {
-                    remoteContainer.classList.add("enabled"); // Enable controls
+                // Determine current power state from a global variable if available,
+                // otherwise fall back to the switch's checked state.
+                const powerState = window.currentPower ? window.currentPower : (switchElement.checked ? "On" : "Off");
+
+                if (powerState === "On") {
+                    // If power is On, enable the controls and show text elements.
+                    remoteContainer.classList.add("enabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
-                        if (el) el.style.display = "block"; // Show text
+                        if (el) el.style.display = "block";
                     });
                 } else {
-                    remoteContainer.classList.remove("enabled"); // Disable controls
-
-                    // Hide text elements
+                    // If power is Off, disable controls and reset to default values.
+                    remoteContainer.classList.remove("enabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
-                        if (el) el.style.display = "none"; // Hide text
+                        if (el) el.style.display = "none";
                     });
+                    setDefaults();
 
-                    // Stop all intervals
-                    let highestInterval = setInterval(() => { }, 1000);
-                    for (let i = 0; i < highestInterval; i++) {
-                        clearInterval(i);
-                    }
+                    // Update the database with default values.
+                    // Defaults: Temp = 16, Fan = "High", Mode = "Cool", Swing = "Off", Timer = "0", Power = "Off"
+                    updateACSettings(16, "High", "Cool", "Off", "0", "Off");
+                }
 
-                    // Stop all requestAnimationFrame loops
-                    let highestFrame = requestAnimationFrame(() => { });
-                    for (let i = 0; i < highestFrame; i++) {
-                        cancelAnimationFrame(i);
-                    }
+                // Send the updated power status to the server.
+                updatePowerStatus();
+            }
+
+            // Force Mode to Cool (green)
+            function updateModeDisplay(modeIndex) {
+                if (modeIndex === 0) {
+                    const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
+                    const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
+                    if (modeCoolGreen) modeCoolGreen.style.display = "block";
+                    if (modeCoolWhite) modeCoolWhite.style.display = "none";
+
+                    const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
+                    const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
+                    const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
+                    const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
+                    if (modeDryWhite) modeDryWhite.style.display = "block";
+                    if (modeDryGreen) modeDryGreen.style.display = "none";
+                    if (modeFanWhite) modeFanWhite.style.display = "block";
+                    if (modeFanGreen) modeFanGreen.style.display = "none";
                 }
             }
 
-            // Ensure elements are hidden on page load
-            document.addEventListener("DOMContentLoaded", function () {
-                toggleAirconFF(); // Run function on page load to check initial state
-            });
+            // Force Fan High (green)
+            function setFanHigh() {
+                const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
+                const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
+                const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
+                const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
+                if (fanHighGreen) fanHighGreen.style.display = "block";
+                if (fanHighWhite) fanHighWhite.style.display = "none";
+                if (fanLowGreen) fanLowGreen.style.display = "none";
+                if (fanLowWhite) fanLowWhite.style.display = "block";
+            }
 
+            // Update Swing Display based on provided state ("On" or "Off")
+            function updateSwingDisplay(state) {
+                if (state === "On") {
+                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
+                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
+                    if (swingOnGreen) swingOnGreen.style.display = "block";
+                    if (swingOnWhite) swingOnWhite.style.display = "none";
+
+                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
+                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
+                    if (swingOffGreen) swingOffGreen.style.display = "none";
+                    if (swingOffWhite) swingOffWhite.style.display = "none";
+                } else {
+                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
+                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
+                    if (swingOffGreen) swingOffGreen.style.display = "block";
+                    if (swingOffWhite) swingOffWhite.style.display = "none";
+
+                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
+                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
+                    if (swingOnGreen) swingOnGreen.style.display = "none";
+                    if (swingOnWhite) swingOnWhite.style.display = "block";
+                }
+            }
+
+            // Set Defaults when power is Off
+            function setDefaults() {
+                const ACtimer = document.getElementById("ACtimer");
+                const ACtemp = document.getElementById("ACtemp");
+                const ACmode = document.getElementById("ACmode");
+                const ACfan = document.getElementById("ACfan");
+                const ACswing = document.getElementById("ACswing");
+                const ACRCTemp = document.getElementById("ACRCTemp");
+
+                if (ACtimer) ACtimer.innerText = "00";
+                if (ACtemp) ACtemp.innerText = "16";
+                if (ACmode) ACmode.innerText = "Cool";
+                if (ACfan) ACfan.innerText = "High";
+                if (ACswing) ACswing.innerText = "Off";
+                if (ACRCTemp) ACRCTemp.innerText = "16";
+
+                // Force defaults to green:
+                updateModeDisplay(0);
+                setFanHigh();
+                updateSwingDisplay("Off");
+            }
+
+            // Send the updated power status to the server.
+            function updatePowerStatus() {
+                const switchElement = document.getElementById("airconFFSwitch");
+                const powerStatus = switchElement.checked ? "On" : "Off";
+                const userID = "<?php echo $_SESSION['user_id']; ?>";
+                fetch("../scripts/fetch-AC-data.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: userID,
+                        power: powerStatus
+                    })
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log("Power status updated:", data);
+                    })
+                    .catch(error => {
+                        console.error("Error updating power status:", error);
+                    });
+            }
+            // Parameters: temp, fan, mode, swing, timer, power
+            function updateACSettings(temp, fan, mode, swing, timer, power) {
+                const userID = "<?php echo $_SESSION['user_id']; ?>";
+                $.ajax({
+                    url: '../scripts/fetch-AC-data.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        user_id: userID,
+                        temp: temp,
+                        fan: fan,
+                        mode: mode,
+                        swing: swing,
+                        timer: timer,
+                        power: power
+                    }),
+                    success: function (response) {
+                        if (response.success) {
+                            $("#ACtemp").text(response.temp + " °C");
+                            console.log("AC Settings Updated:", response);
+                        } else {
+                            console.error("Error updating AC settings:", response.error);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", xhr.responseText);
+                    }
+                });
+            }
+
+            // Attach the toggle function to the power switch change event.
+            document.addEventListener("DOMContentLoaded", function () {
+                const switchElement = document.getElementById("airconFFSwitch");
+                if (switchElement) {
+                    switchElement.addEventListener("change", toggleAirconFF);
+                }
+            });
 
         </script>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
+            // Function to fetch AC settings from the database and update the UI
             function fetchACLog() {
                 $.ajax({
-                    url: '../scripts/fetch-AC-data.php',  // PHP script to get AC log
+                    url: '../scripts/fetch-AC-data.php',
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
@@ -764,10 +607,18 @@ if (!isset($_SESSION['user_id'])) {
                         $("#ACmode").text(data.mode);
                         $("#ACfan").text(data.fan);
                         $("#ACswing").text(data.swing);
-                        $("#ACRCTemp").text(data.temp);  // Updated to include room temperature
+                        $("#ACRCTemp").text(data.temp); // Update the element with the DB temperature
 
-                        // Print the fetched data to the console
                         console.log("AC Log Updated:", data);
+
+                        // Update the switch state if needed...
+                        const switchElement = document.getElementById("airconFFSwitch");
+                        if (switchElement) {
+                            switchElement.checked = (data.power === "On");
+                        }
+
+                        // Save the power state globally
+                        window.currentPower = data.power;
                     },
                     error: function (xhr, status, error) {
                         console.error("Error fetching AC log:", error);
@@ -775,12 +626,32 @@ if (!isset($_SESSION['user_id'])) {
                 });
             }
 
-            // Fetch data when the page loads
+
             $(document).ready(function () {
-                fetchACLog();  // Initial fetch
-                setInterval(fetchACLog, 3000);  // Fetch every 3 seconds
+                // Initial fetch on page load
+                fetchACLog();
+                // Refresh every 3 seconds
+                setInterval(fetchACLog, 3000);
+
+                // Attach click event listeners to interactive elements so that after each click, we fetch the AC log
+                const interactiveSelectors = [
+                    ".tempbarLow",
+                    ".tempbarHigh",
+                    ".fanCont",
+                    ".modeCont",
+                    ".swingCont",
+                    ".sleep"  // if sleep images are interactive
+                ];
+                const interactiveElements = document.querySelectorAll(interactiveSelectors.join(", "));
+                interactiveElements.forEach(el => {
+                    el.addEventListener("click", function () {
+                        // Optionally, use a small delay to ensure any UI changes complete before re-fetching.
+                        setTimeout(fetchACLog, 100);
+                    });
+                });
             });
         </script>
+
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -789,39 +660,52 @@ if (!isset($_SESSION['user_id'])) {
                 const ACRCTempEl = document.getElementById("ACRCTemp");
                 const ACtempDisplay = document.getElementById("ACtemp");
 
-                // Initialize the temperature (defaulting to 31 if the element is empty)
-                let currentTemp = parseInt(ACRCTempEl.textContent) || 31;
+                // Initialize the temperature (defaulting if the element is empty)
+                let currentTemp = parseInt(ACRCTempEl.textContent) || 16;
                 ACRCTempEl.textContent = currentTemp;
                 ACtempDisplay.textContent = currentTemp + " °C";
 
-                // Function to send the updated temperature to the server
-                function updateTempOnServer(temp) {
+                // Function to send the updated AC settings to the server, including power status
+                function updateACSettings(temp, fan, mode, swing, timer, power) {
                     $.ajax({
-                        url: '../scripts/fetch-AC-data.php', // Ensure this URL is correct
+                        url: '../scripts/fetch-AC-data.php',
                         type: 'POST',
                         dataType: 'json',
                         contentType: 'application/json',
-                        data: JSON.stringify({ temp: temp }),
-                        success: function (responseData) {
-                            console.log("AC Log Updated:", responseData);
-                            // Optionally update the AC log display if needed:
-                            ACtempDisplay.textContent = responseData.temp + " °C";
+                        data: JSON.stringify({
+                            user_id: "<?php echo $_SESSION['user_id']; ?>", // Dynamic user ID from session
+                            temp: temp,
+                            fan: fan,
+                            mode: mode,
+                            swing: swing,
+                            timer: timer,
+                            power: power // Use the dynamic power value ("On" or "Off")
+                        }),
+                        success: function (response) {
+                            if (response.success) {
+                                $("#ACtemp").text(response.temp + " °C"); // Update UI with temperature
+                                console.log("AC Settings Updated:", response);
+                            } else {
+                                console.error("Error updating AC settings:", response.error);
+                            }
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error updating temperature:", error);
+                            console.error("AJAX Error:", xhr.responseText);
                         }
                     });
                 }
 
                 // Decrease temperature when clicking on tempbarLow
                 tempbarLow.addEventListener("click", function () {
-                    // Get current temperature from the element or fallback
-                    currentTemp = parseInt(ACRCTempEl.textContent) || 31;
+                    currentTemp = parseInt(ACRCTempEl.textContent) || 16;
                     if (currentTemp > 16) {
                         currentTemp--; // Decrease by 1 degree
                         ACRCTempEl.textContent = currentTemp;
-                        ACtempDisplay.textContent = currentTemp + " °C"; // Update the AC log display too
-                        updateTempOnServer(currentTemp);
+                        ACtempDisplay.textContent = currentTemp + " °C";
+
+                        // Call updateACSettings instead of undefined updateTempOnServer
+                        updateACSettings(currentTemp, "High", "Cool", "On", "0");
+
                         console.log("Temperature decreased to: " + currentTemp);
                     } else {
                         console.log("Minimum temperature of 16°C reached.");
@@ -830,178 +714,27 @@ if (!isset($_SESSION['user_id'])) {
 
                 // Increase temperature when clicking on tempbarHigh
                 tempbarHigh.addEventListener("click", function () {
-                    currentTemp = parseInt(ACRCTempEl.textContent) || 31;
-                    if (currentTemp < 31) {
+                    currentTemp = parseInt(ACRCTempEl.textContent) || 32;
+                    if (currentTemp < 32) {
                         currentTemp++; // Increase by 1 degree
                         ACRCTempEl.textContent = currentTemp;
                         ACtempDisplay.textContent = currentTemp + " °C";
-                        updateTempOnServer(currentTemp);
+
+                        // Call updateACSettings instead of undefined updateTempOnServer
+                        updateACSettings(currentTemp, "High", "Cool", "On", "0");
+
                         console.log("Temperature increased to: " + currentTemp);
                     } else {
-                        console.log("Maximum temperature of 31°C reached.");
+                        console.log("Maximum temperature of 32°C reached.");
                     }
                 });
+
             });
         </script>
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const progressBar = document.querySelector('.progress-bar');
-                const timeLeftText = document.getElementById('time-left');
-                const progressCircle = document.getElementById('progress-circle');
-
-
-                let totalTime = 0;  // total time in seconds
-                let countdownInterval;
-                let isRunning = false;  // whether the countdown is active
-
-                const maxTime = 12 * 60 * 60;  // 12 hours in seconds (43200)
-                const circleCircumference = 2 * Math.PI * 97.1;  // Circumference of the progress circle
-
-                // Updates the displayed time using a ceiling method.
-                function updateTimer() {
-                    let hours;
-                    if (totalTime === 0) {
-                        hours = 0;
-                    } else if (totalTime % 3600 === 0) {
-                        // Exactly a full hour (e.g., 11:00:00)
-                        hours = totalTime / 3600;
-                    } else {
-                        // If there are leftover seconds, round up to the next full hour.
-                        hours = Math.floor(totalTime / 3600) + 1;
-                    }
-                    // Cap the displayed hours at 12.
-                    if (hours > 12) {
-                        hours = 12;
-                    }
-                    const formattedHours = String(hours).padStart(2, '0');
-                    timeLeftText.textContent = formattedHours;
-
-                    // Update the progress circle
-                    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
-                    progressBar.style.strokeDashoffset = dashoffset;
-                }
-
-                function startCountdown() {
-                    clearInterval(countdownInterval);  // Clear any existing countdown
-                    countdownInterval = setInterval(function () {
-                        if (totalTime > 0) {
-                            totalTime--;  // Decrement by one second
-                            updateTimer();
-                        } else {
-                            clearInterval(countdownInterval);
-                            totalTime = 0;
-                            updateTimer();
-                            isRunning = false;
-                        }
-                    }, 1000);
-                }
-
-                progressCircle.addEventListener("click", function () {
-                    if (!isRunning) {
-                        isRunning = true;
-                        startCountdown();
-                    }
-
-                    // Each click adds one hour (3600 seconds)
-                    totalTime += 3600;
-
-                    // If the total time exceeds 12 hours, reset to 0
-                    if (totalTime > maxTime) {
-                        totalTime = 0;
-                    }
-                    updateTimer();
-                });
-
-                updateTimer(); // Initial update
-            });
-        </script>
-
-
-        <!-- AC REMOTE EFFECTS -->
-        <script>
-            // Only apply interactive behavior to images that should be interactive
-            document.querySelectorAll(".remote-container img").forEach(img => {
-                if (!img.classList.contains('bgRem') && !img.classList.contains('tempbar')) {
-                    img.addEventListener("mousedown", (e) => {
-                        e.preventDefault(); // Prevent dragging
-                        img.classList.add("tapped");
-
-                        // Create ice flakes ❄️
-                        for (let i = 0; i < 10; i++) {
-                            let flake = document.createElement("div");
-                            flake.innerHTML = "❄️"; // Ice flake emoji
-                            flake.classList.add("ice-flake");
-
-                            // Random start position near tap point
-                            let x = e.clientX + (Math.random() * 50 - 25);
-                            let y = e.clientY + (Math.random() * 30 - 15);
-                            flake.style.left = x + "px";
-                            flake.style.top = y + "px";
-
-                            document.body.appendChild(flake);
-
-                            // Remove flakes after animation
-                            setTimeout(() => {
-                                flake.remove();
-                            }, 1500);
-                        }
-
-                        setTimeout(() => {
-                            img.classList.remove("tapped");
-                        }, 300);
-                    });
-                }
-            });
-
-            // Handle click event for interactive images only
-            document.querySelector(".remote-container").addEventListener("click", (e) => {
-                if (e.target.tagName === "IMG" && !e.target.classList.contains("bgRem") && !e.target.classList.contains("tempbar")) {
-                    triggerSnowstorm();
-                }
-            });
-
-            // Snowstorm effect function for interactive images
-            function triggerSnowstorm() {
-                let numFlakes = 50; // More flakes for a real snowstorm!
-
-                for (let i = 0; i < numFlakes; i++) {
-                    let flake = document.createElement("div");
-                    flake.innerHTML = "❄️"; // Ice flake emoji
-                    flake.classList.add("snowstorm-flake");
-
-                    // Random start position across the whole screen
-                    flake.style.left = Math.random() * window.innerWidth + "px";
-                    flake.style.top = -Math.random() * 1000 + "px"; // Start from slightly above the screen
-
-                    document.body.appendChild(flake);
-
-                    // Remove flakes after animation to keep performance smooth
-                    setTimeout(() => {
-                        flake.remove();
-                    }, 11000);
-                }
-            }
-
-            // Scaling the remote to fit the screen
-            function scaleRemote() {
-                let container = document.querySelector(".remote-container");
-                let parent = document.querySelector(".ACRMain");
-
-                let scale = Math.min(
-                    parent.clientWidth / 400,  // Scale width based on .ACRMain
-                    parent.clientHeight / 800  // Scale height based on .ACRMain
-                );
-
-                container.style.transform = "scale(" + scale + ")";
-            }
-
-            window.addEventListener("resize", scaleRemote);
-            scaleRemote(); // Run once on page load
-        </script>
-
 
     </div>
+    <?php include '../assets/js/ac-controls.php'; ?>
+
 </body>
 
 </html>
