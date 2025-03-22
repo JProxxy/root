@@ -6,16 +6,21 @@ ini_set('display_errors', 1);
 
 include '../app/config/connection.php';
 
-// Ensure PDO throws exceptions
+// Ensure a valid user is logged in.
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(["error" => "User not authenticated."]);
+    exit;
+}
+$user_id = $_SESSION['user_id'];
+
+// Ensure PDO throws exceptions.
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
-        $user_id = $_GET['user_id'] ?? 1;
-
-        // FETCH AC DATA
+        // FETCH AC DATA for the authenticated user.
         $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -23,7 +28,7 @@ try {
         if ($acData) {
             echo json_encode($acData);
         } else {
-            // INSERT DEFAULT VALUES (Note: Timer default set in seconds; adjust as needed)
+            // INSERT DEFAULT VALUES for this user.
             $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
                                     VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', NOW())");
             $stmt->execute([':user_id' => $user_id]);
@@ -38,18 +43,30 @@ try {
         exit;
     } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input)
+        if (!$input) {
             throw new Exception("Invalid JSON input.");
+        }
 
-        $user_id = $input['user_id'] ?? null;
-        if (!$user_id)
-            throw new Exception("User ID is required.");
+        // Use the session user_id.
+        $user_id = $_SESSION['user_id'];
 
-        // List of fields to update. The "timer" field is included so you can update the timer value.
+        // Check if a record for this user exists.
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM acRemote WHERE user_id = :user_id");
+        $stmt->execute([':user_id' => $user_id]);
+        $exists = $stmt->fetchColumn();
+
+        if (!$exists) {
+            // Insert default values for a new user.
+            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
+                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', NOW())");
+            $stmt->execute([':user_id' => $user_id]);
+        }
+
+        // List of fields to update. The "timer" field is included.
         $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing'];
         $updateValues = [];
 
-        // Use provided values, or fetch the current value if not set
+        // Use provided values, or fetch the current value if not set.
         foreach ($fields as $field) {
             if (isset($input[$field])) {
                 $updateValues[$field] = $input[$field];
@@ -62,9 +79,10 @@ try {
 
         // Validate temperature range if provided.
         if (isset($updateValues['temp'])) {
-            $temp = (int) $updateValues['temp'];
-            if ($temp < 16 || $temp > 32)
+            $temp = (int)$updateValues['temp'];
+            if ($temp < 16 || $temp > 32) {
                 throw new Exception("Temperature must be between 16 and 32°C.");
+            }
         }
 
         // Build and execute the update query.
