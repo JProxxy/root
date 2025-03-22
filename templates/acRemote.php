@@ -415,40 +415,45 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
         <script>
 
 
-
-            // ============== POWER ON/OFF  ============== //
             function toggleAirconFF() {
                 const switchElement = document.getElementById("airconFFSwitch");
                 const remoteContainer = document.querySelector(".remote-container");
                 const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
 
-                // Determine current power state from a global variable if available,
-                // otherwise fall back to the switch's checked state.
-                const powerState = window.currentPower ? window.currentPower : (switchElement.checked ? "On" : "Off");
+                // Determine current power state.
+                const powerState = switchElement.checked ? "On" : "Off";
 
                 if (powerState === "On") {
-                    // If power is On, enable the controls and show text elements.
+                    // Enable controls.
                     remoteContainer.classList.add("enabled");
+                    remoteContainer.classList.remove("disabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.display = "block";
                     });
                 } else {
-                    // If power is Off, disable controls and reset to default values.
+                    // Disable controls.
                     remoteContainer.classList.remove("enabled");
+                    remoteContainer.classList.add("disabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.display = "none";
                     });
                     setDefaults();
+                    // Dispatch event to reset timer.
+                    document.dispatchEvent(new CustomEvent("airconOff"));
 
                     // Update the database with default values.
-                    // Defaults: Temp = 16, Fan = "High", Mode = "Cool", Swing = "Off", Timer = "0", Power = "Off"
                     updateACSettings(16, "High", "Cool", "Off", "0", "Off");
                 }
 
                 // Send the updated power status to the server.
                 updatePowerStatus();
+
+                // Reload the page after 2 seconds.
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             }
 
             // Force Mode to Cool (green)
@@ -507,7 +512,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                 }
             }
 
-            // Set Defaults when power is Off
+            // Reset the AC controls to default values when power is Off
             function setDefaults() {
                 const ACtimer = document.getElementById("ACtimer");
                 const ACtemp = document.getElementById("ACtemp");
@@ -550,6 +555,8 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                         console.error("Error updating power status:", error);
                     });
             }
+
+            // Update AC settings on the server.
             // Parameters: temp, fan, mode, swing, timer, power
             function updateACSettings(temp, fan, mode, swing, timer, power) {
                 const userID = "<?php echo $_SESSION['user_id']; ?>";
@@ -581,13 +588,43 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                 });
             }
 
-            // Attach the toggle function to the power switch change event.
+            // Initialize switch state on page load.
             document.addEventListener("DOMContentLoaded", function () {
                 const switchElement = document.getElementById("airconFFSwitch");
+                const remoteContainer = document.querySelector(".remote-container");
+
+                if (switchElement.checked) {
+                    remoteContainer.classList.add("enabled");
+                    remoteContainer.classList.remove("disabled");
+                    showControls();
+                } else {
+                    remoteContainer.classList.add("disabled");
+                    remoteContainer.classList.remove("enabled");
+                    hideControls();
+                }
+
+                // Attach the toggle function to the power switch change event.
                 if (switchElement) {
                     switchElement.addEventListener("change", toggleAirconFF);
                 }
             });
+
+            // Helper functions to show/hide AC controls.
+            function showControls() {
+                const elementsToShow = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
+                elementsToShow.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = "block";
+                });
+            }
+            function hideControls() {
+                const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
+                elementsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = "none";
+                });
+            }
+
 
         </script>
 
@@ -625,7 +662,6 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                     }
                 });
             }
-
 
             $(document).ready(function () {
                 // Initial fetch on page load

@@ -23,9 +23,9 @@ try {
         if ($acData) {
             echo json_encode($acData);
         } else {
-            // INSERT DEFAULT VALUES
+            // INSERT DEFAULT VALUES (Note: Timer default set in seconds; adjust as needed)
             $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
-                                    VALUES (:user_id, 'Off', 26, '6 hrs', 'Cool', 'High', 'On', NOW())");
+                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', NOW())");
             $stmt->execute([':user_id' => $user_id]);
 
             // FETCH AGAIN
@@ -45,7 +45,7 @@ try {
         if (!$user_id)
             throw new Exception("User ID is required.");
 
-        // List of fields to update
+        // List of fields to update. The "timer" field is included so you can update the timer value.
         $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing'];
         $updateValues = [];
 
@@ -60,32 +60,27 @@ try {
             }
         }
 
-        // Validate temperature range
+        // Validate temperature range if provided.
         if (isset($updateValues['temp'])) {
             $temp = (int) $updateValues['temp'];
             if ($temp < 16 || $temp > 32)
                 throw new Exception("Temperature must be between 16 and 32°C.");
         }
 
-        // Build the SQL update statement dynamically
-        $sqlParts = [];
-        foreach ($updateValues as $key => $value) {
-            $sqlParts[] = "$key = :$key";
-        }
+        // Build and execute the update query.
         $sql = "UPDATE acRemote SET power = :power, temp = :temp, timer = :timer, mode = :mode, fan = :fan, swing = :swing WHERE user_id = :user_id";
-
         error_log("Update values: " . print_r($updateValues, true));
 
         $stmt = $conn->prepare($sql);
         $updateValues['user_id'] = $user_id;
         $stmt->execute($updateValues);
 
-        // Fetch the updated AC settings
+        // Fetch the updated AC settings.
         $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Return the updated data along with a success message
+        // Return the updated data along with a success message.
         echo json_encode(array_merge(["success" => true, "message" => "AC settings updated"], $acData));
         exit;
     }

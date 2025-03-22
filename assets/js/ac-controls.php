@@ -250,92 +250,92 @@
 
 
 
-// ============== SLEEP LOGIC ============== //
+  // ============== SLEEP LOGIC ============== //
 
-// Global sleep state tracker (default: "Off")
-let sleepState = "Off";
+  // Global sleep state tracker (default: "Off")
+  let sleepState = "Off";
 
-// Function to set sleep to "On"
-function setSleepOn() {
-  // Prevent enabling sleep if mode is Dry or Fan
-  if (typeof currentMode !== "undefined" && (currentMode === "Dry" || currentMode === "Fan")) {
-    console.log("Sleep cannot be enabled in Dry or Fan mode.");
-    return;
-  }
-  
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
+  // Function to set sleep to "On"
+  function setSleepOn() {
+    // Prevent enabling sleep if mode is Dry or Fan
+    if (typeof currentMode !== "undefined" && (currentMode === "Dry" || currentMode === "Fan")) {
+      console.log("Sleep cannot be enabled in Dry or Fan mode.");
+      return;
+    }
 
-  // Hide the "off" image and show the "on" image
-  if (sleepWhite) sleepWhite.style.display = "none";
-  if (sleepGreen) sleepGreen.style.display = "block";
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
 
-  sleepState = "On";
-  console.log("Sleep: On");
-  sendSleepData(sleepState);
-}
+    // Hide the "off" image and show the "on" image
+    if (sleepWhite) sleepWhite.style.display = "none";
+    if (sleepGreen) sleepGreen.style.display = "block";
 
-// Function to set sleep to "Off"
-function setSleepOff() {
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
-
-  // Show the "off" image and hide the "on" image
-  if (sleepWhite) sleepWhite.style.display = "block";
-  if (sleepGreen) sleepGreen.style.display = "none";
-
-  sleepState = "Off";
-  console.log("Sleep: Off");
-  sendSleepData(sleepState);
-}
-
-// Attach click events to both sleep images so clicking toggles the state.
-document.addEventListener("DOMContentLoaded", function () {
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
-
-  // Clicking the "off" image toggles sleep mode on, if allowed.
-  if (sleepWhite) {
-    sleepWhite.addEventListener("click", function () {
-      if (sleepState === "Off") {
-        setSleepOn();
-      } else {
-        setSleepOff();
-      }
-    });
+    sleepState = "On";
+    console.log("Sleep: On");
+    sendSleepData(sleepState);
   }
 
-  // Clicking the "on" image toggles sleep mode off.
-  if (sleepGreen) {
-    sleepGreen.addEventListener("click", function () {
-      if (sleepState === "On") {
-        setSleepOff();
-      } else {
-        setSleepOn();
-      }
-    });
-  }
-});
+  // Function to set sleep to "Off"
+  function setSleepOff() {
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
 
-// Function to send the sleep state to the server
-function sendSleepData(state) {
-  const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
-  fetch("../scripts/fetch-AC-data.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: userID,
-      sleep: state
-    }),
-  })
-    .then(response => response.text())
-    .then(data => {
-      console.log("Sleep update response:", data);
+    // Show the "off" image and hide the "on" image
+    if (sleepWhite) sleepWhite.style.display = "block";
+    if (sleepGreen) sleepGreen.style.display = "none";
+
+    sleepState = "Off";
+    console.log("Sleep: Off");
+    sendSleepData(sleepState);
+  }
+
+  // Attach click events to both sleep images so clicking toggles the state.
+  document.addEventListener("DOMContentLoaded", function () {
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
+
+    // Clicking the "off" image toggles sleep mode on, if allowed.
+    if (sleepWhite) {
+      sleepWhite.addEventListener("click", function () {
+        if (sleepState === "Off") {
+          setSleepOn();
+        } else {
+          setSleepOff();
+        }
+      });
+    }
+
+    // Clicking the "on" image toggles sleep mode off.
+    if (sleepGreen) {
+      sleepGreen.addEventListener("click", function () {
+        if (sleepState === "On") {
+          setSleepOff();
+        } else {
+          setSleepOn();
+        }
+      });
+    }
+  });
+
+  // Function to send the sleep state to the server
+  function sendSleepData(state) {
+    const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
+    fetch("../scripts/fetch-AC-data.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userID,
+        sleep: state
+      }),
     })
-    .catch(error => {
-      console.error("Error sending sleep data:", error);
-    });
-}
+      .then(response => response.text())
+      .then(data => {
+        console.log("Sleep update response:", data);
+      })
+      .catch(error => {
+        console.error("Error sending sleep data:", error);
+      });
+  }
 
 
   // ============== SWING LOGIC ============== //
@@ -435,47 +435,41 @@ document.addEventListener("DOMContentLoaded", function () {
   const maxTime = 12 * 60 * 60; // 12 hours in seconds
   const circleCircumference = 2 * Math.PI * 97.1;
 
-  // Try to load stored timer from localStorage first.
+  // Load stored timer from localStorage if available.
   if (localStorage.getItem("totalTime")) {
     totalTime = parseInt(localStorage.getItem("totalTime"), 10);
   }
 
-  // Optionally, also fetch from the database
+  // Optionally, also fetch from the database.
   fetch("../scripts/fetch-AC-data.php?fetchTimer=1")
-    .then((response) => response.json())
-    .then((data) => {
-      // Only update totalTime if the fetched value is non-zero
-      // (adjust this logic as needed for your use case)
+    .then(response => response.json())
+    .then(data => {
       if (data.timer && data.timer > 0) {
-        totalTime = data.timer;
+        // If stored value is in seconds, you can use it directly.
+        // If it's stored as hours, multiply by 3600:
+        totalTime = data.timer; // Adjust if necessary (e.g., data.timer * 3600)
       }
       if (totalTime > 0) {
         isRunning = true;
-        startCountdown(); // Resume countdown if timer was already set
+        startCountdown(); // Resume countdown if timer was already set.
       }
       updateTimer();
     })
-    .catch((error) => console.error("Error fetching timer:", error));
+    .catch(error => console.error("Error fetching timer:", error));
 
   function updateTimer() {
+    // Calculate hours based on totalTime (in seconds)
     let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
     if (hours > 12) hours = 12;
     timeLeftText.textContent = String(hours).padStart(2, "0");
 
-    const dashoffset =
-      circleCircumference - (circleCircumference * totalTime) / maxTime;
+    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
     progressBar.style.strokeDashoffset = dashoffset;
 
     console.log(`Timer Set: ${hours} hour(s)`);
-    if (zeroCount) {
-      console.log("Reset by click (zeroCount).");
-    }
-    if (zeroTimer) {
-      console.log("Timer finished naturally (zeroTimer).");
-    }
 
-    // Save to database and localStorage whenever timer updates
-    saveTimerToDatabase(totalTime);
+    // Send the timer value to the backend via a POST request.
+    updateTimerToDatabase(hours);
     localStorage.setItem("totalTime", totalTime);
   }
 
@@ -489,27 +483,27 @@ document.addEventListener("DOMContentLoaded", function () {
         clearInterval(countdownInterval);
         totalTime = 0;
         isRunning = false;
-        zeroTimer = true; // Flag that the timer finished naturally
-        console.log("Timer Finished: 00 hour(s) - zeroTimer triggered");
+        zeroTimer = true;
+        console.log("Timer Finished naturally - zeroTimer triggered");
 
-        // Only turn off the switch when the timer finishes naturally
+        // When timer finishes naturally, turn off the switch.
         document.getElementById("airconFFSwitch").checked = false;
         toggleAirconFF();
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     }, 1000);
   }
 
+  // Click on the progress circle adds 1 hour (3600 seconds).
   progressCircle.addEventListener("click", function () {
-    // If timer is not running, start the countdown
     if (!isRunning) {
       isRunning = true;
       startCountdown();
     }
-
-    // Add 1 hour (3600 seconds)
     totalTime += 3600;
-
-    // If totalTime exceeds maxTime, reset to 0 using the zeroCount path.
     if (totalTime > maxTime) {
       totalTime = 0;
       zeroCount = true;
@@ -519,34 +513,39 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       zeroCount = false;
     }
-
     updateTimer();
   });
 
+  // Listen for the custom event to reset the timer when AC is off.
   document.addEventListener("airconOff", function () {
     totalTime = 0;
     clearInterval(countdownInterval);
     isRunning = false;
-    console.log("Timer Reset: 00 hour(s)");
+    console.log("Timer Reset due to AC Off");
     updateTimer();
   });
 
-  function saveTimerToDatabase(timerValue) {
+  updateTimer(); // Initial update
+
+  // Function to send the timer (in hours) to the backend via a POST request.
+  function updateTimerToDatabase(hoursValue) {
     fetch("../scripts/fetch-AC-data.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ timer: timerValue }),
+      body: JSON.stringify({
+        timer: hoursValue,
+        user_id: "<?php echo $_SESSION['user_id']; ?>"
+      }),
     })
-      .then((response) => response.json())
-      .catch((error) => console.error("Error saving timer:", error));
+      .then(response => response.json())
+      .then(data => {
+        console.log("Timer updated in DB:", data);
+      })
+      .catch(error => console.error("Error updating timer:", error));
   }
-
-  updateTimer(); // Initial update
 });
-
-
 
   //  ============== POWER ON?OFF  ============== //
 

@@ -747,28 +747,26 @@ input:checked + .slider:before {
   top: 17%;
   left: 75%;
 }
-
-/* .remote-container {
-
-} */
-
+.remote-container {
+  transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+/* Disabled state when power is off */
+.remote-container.disabled {
+  opacity: 0.5;           /* Visually disabled */
+  pointer-events: none;   /* Prevent interaction */
+  filter: grayscale(50%); /* Make it look inactive */
+}
 .remote-container.disabled * {
   animation: none !important;  /* Stop all animations */
   transition: none !important; /* Stop hover effects */
-  pointer-events: none !important; 
-  opacity: 0.5; /* Visually disabled */
-  pointer-events: none; /* Prevent interaction */
-  filter: grayscale(50%); /* Make it look inactive */
-  transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+  pointer-events: none !important;
 }
-
+/* Enabled state when power is on */
 .remote-container.enabled {
-  opacity: 1;
+  opacity: 1 !important;
   pointer-events: auto;
   filter: grayscale(0%);
 }
-
-
 .remote-container img {
   position: absolute;
   max-width: 100%;
