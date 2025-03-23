@@ -1,8 +1,5 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Global flag to prevent sending data on initial load.
-    let isInitialLoad = true;
-
     // Select the fan container and images
     const fanCont = document.querySelector(".fanCont");
     const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
@@ -23,33 +20,27 @@
     }
 
     // Function to update the UI and state to "High"
-    function setFanHigh(sendData = true) {
+    function setFanHigh() {
       if (fanHighGreen) fanHighGreen.style.display = "block";
       if (fanHighWhite) fanHighWhite.style.display = "none";
       if (fanLowGreen) fanLowGreen.style.display = "none";
       if (fanLowWhite) fanLowWhite.style.display = "block";
       currentFanState = "High";
       updateFanTracker();
-      // Only send data if not during initial load.
-      if (sendData) {
-        sendFanData(currentFanState);
-        sendFanStateLambda(userID, currentFanState);
-      }
+      sendFanData(currentFanState);
+      sendFanStateLambda(userID, currentFanState);
     }
 
     // Function to update the UI and state to "Low"
-    function setFanLow(sendData = true) {
+    function setFanLow() {
       if (fanHighGreen) fanHighGreen.style.display = "none";
       if (fanHighWhite) fanHighWhite.style.display = "block";
       if (fanLowGreen) fanLowGreen.style.display = "block";
       if (fanLowWhite) fanLowWhite.style.display = "none";
       currentFanState = "Low";
       updateFanTracker();
-      // Only send data if not during initial load.
-      if (sendData) {
-        sendFanData(currentFanState);
-        sendFanStateLambda(userID, currentFanState);
-      }
+      sendFanData(currentFanState);
+      sendFanStateLambda(userID, currentFanState);
     }
 
     // Function to send the fan state to the PHP backend
@@ -75,6 +66,7 @@
     }
 
     // Function to send the fan state to the Lambda API via API Gateway
+    // Function to send the fan state to the Lambda API via API Gateway
     function sendFanStateLambda(userId, fanState) {
       // Prepare the data in the required format
       const requestData = {
@@ -90,9 +82,9 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(requestData) // Correctly formatted JSON
       })
-        .then(response => response.json())
+        .then(response => response.json()) // Handle the response from Lambda
         .then(responseData => {
           console.log('Device control response:', responseData);
         })
@@ -109,29 +101,24 @@
         dataType: 'json',
         success: function (data) {
           console.log("Fetched fan state:", data.fan);
-          // Update the fan state based on the database value without sending data.
+          // Update the fan state based on the database value
           if (data.fan === "Low") {
-            setFanLow(false);
+            setFanLow();
           } else {
             // Default to High if the returned value is not "Low"
-            setFanHigh(false);
+            setFanHigh();
           }
-          // After initial load, allow subsequent changes to send data.
-          isInitialLoad = false;
         },
         error: function (xhr, status, error) {
           console.error("Error fetching fan state:", error);
-          // On error, default to High and end initial load.
-          setFanHigh(false);
-          isInitialLoad = false;
         }
       });
     }
 
-    // Fetch the fan state from the database on page load.
+    // Fetch the fan state from the database on page load
     fetchFanState();
 
-    // Toggle fan state on click, but only if the controls are enabled.
+    // Toggle fan state on click, but only if the controls are enabled
     fanCont.addEventListener("click", function () {
       if (fanCont.style.pointerEvents === "none") {
         return; // Do nothing if disabled
@@ -143,7 +130,7 @@
       }
     });
 
-    // Listen for the custom "modeChanged" event to disable/enable fan controls.
+    // Listen for the custom "modeChanged" event to disable/enable fan controls
     document.addEventListener("modeChanged", function (event) {
       const mode = event.detail.mode;
       if (mode === "Dry") {
@@ -158,7 +145,7 @@
       }
     });
   });
-
+  
   // ============== MODE LOGIC  ============== //
   // Declare globally, only once
   let currentMode = "Cool"; // Default mode
