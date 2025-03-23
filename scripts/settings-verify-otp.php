@@ -52,29 +52,23 @@ if ($enteredOTP !== $storedOTP) {
 
 // At this point, the OTP has been successfully verified
 
-// 5. Email Update:
-// Regardless of any condition, immediately retrieve the email from the session.
-$email = trim($_SESSION['reset_email']);
-
-// Email Uniqueness Check: Ensure no other user already uses this email.
-$stmtCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM users WHERE email = :email AND user_id != :user_id");
-$stmtCheck->bindParam(":email", $email, PDO::PARAM_STR);
-$stmtCheck->bindParam(":user_id", $user_id, PDO::PARAM_INT);
-$stmtCheck->execute();
-$rowCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
-
-if ($rowCheck['cnt'] > 0) {
-    echo json_encode(["success" => false, "message" => "Email already in use by another account."]);
-    exit();
+// 5. Update Email Based on user_id (using the email from session "reset_email")
+if (isset($_SESSION['reset_email']) && !empty($_SESSION['reset_email'])) {
+    $email = trim($_SESSION['reset_email']);
+    
+    // (Optional) You can perform an email uniqueness check here if needed.
+    
+    // Update Email:
+    $stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :user_id");
+    $stmtUpdate->bindParam(":email", $email, PDO::PARAM_STR);
+    $stmtUpdate->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+    $stmtUpdate->execute();
+    
+    echo json_encode(["success" => true, "message" => "OTP verified successfully and email updated."]);
+} else {
+    // If no new email is provided, simply confirm OTP success.
+    echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
 }
-
-// Update Email:
-$stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :user_id");
-$stmtUpdate->bindParam(":email", $email, PDO::PARAM_STR);
-$stmtUpdate->bindParam(":user_id", $user_id, PDO::PARAM_INT);
-$stmtUpdate->execute();
-
-echo json_encode(["success" => true, "message" => "OTP verified successfully and email updated."]);
 
 $stmt->closeCursor();
 $conn = null;
