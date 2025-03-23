@@ -20,21 +20,21 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
-        // FETCH AC DATA for the authenticated user.
-        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+        // FETCH AC DATA for the authenticated user (including sleep state).
+        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing, sleep FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($acData) {
             echo json_encode($acData);
         } else {
-            // INSERT DEFAULT VALUES for this user.
-            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
-                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', NOW())");
+            // INSERT DEFAULT VALUES for this user, now with a default sleep value ("Off").
+            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, sleep, timestamp) 
+                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', 'Off', NOW())");
             $stmt->execute([':user_id' => $user_id]);
 
             // FETCH AGAIN
-            $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+            $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing, sleep FROM acRemote WHERE user_id = :user_id LIMIT 1");
             $stmt->execute([':user_id' => $user_id]);
             $acData = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -57,13 +57,14 @@ try {
 
         if (!$exists) {
             // Insert default values for a new user.
-            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, timestamp) 
-                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', NOW())");
+            $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, sleep, timestamp) 
+                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', 'Off', NOW())");
             $stmt->execute([':user_id' => $user_id]);
         }
 
         // Build the dynamic update query.
-        $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing'];
+        // Note: "sleep" is now added to the list of updatable fields.
+        $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing', 'sleep'];
         $updateParts = [];
         $params = [];
 
@@ -72,7 +73,7 @@ try {
                 // Update the field.
                 $updateParts[] = "$field = :$field";
                 $params[$field] = $input[$field];
-                // Update the corresponding time column.
+                // Update the corresponding time column if required.
                 switch ($field) {
                     case 'power':
                         $updateParts[] = "powertime = NOW()";
@@ -91,6 +92,9 @@ try {
                         break;
                     case 'swing':
                         $updateParts[] = "swingtime = NOW()";
+                        break;
+                    case 'sleep':
+                        $updateParts[] = "sleeptime = NOW()";
                         break;
                 }
             }
@@ -116,7 +120,7 @@ try {
         }
 
         // Fetch the updated AC settings.
-        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");
+        $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing, sleep FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
 
