@@ -452,7 +452,7 @@
 
 
 
-  // ============== SWING LOGIC ============== //
+    // ============== SWING LOGIC ============== //
   // Global swing state tracker (default: "Off")
   let currentSwingState = "Off";
 
@@ -472,6 +472,7 @@
     currentSwingState = "On";
     console.log("Swing: On");
     sendSwingData(currentSwingState);
+    sendSwingLambda("<?php echo $_SESSION['user_id']; ?>", currentSwingState);
   }
 
   // Function to set swing to "Off"
@@ -490,6 +491,7 @@
     currentSwingState = "Off";
     console.log("Swing: Off");
     sendSwingData(currentSwingState);
+    sendSwingLambda("<?php echo $_SESSION['user_id']; ?>", currentSwingState);
   }
 
   // Function to update swing display based on provided state
@@ -501,7 +503,7 @@
     }
   }
 
-  // Function to send the swing state to the server (adjust the URL as needed)
+  // Function to send the swing state to the PHP backend
   function sendSwingData(state) {
     const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
     fetch("../scripts/fetch-AC-data.php", {
@@ -518,6 +520,33 @@
       })
       .catch(error => {
         console.error("Error sending swing data:", error);
+      });
+  }
+
+  // New function to send the swing state to the Lambda API via API Gateway
+  function sendSwingLambda(userId, state) {
+    // Prepare the data in the required format
+    const requestData = {
+      data: {
+        user_id: userId,
+        swing: state
+      }
+    };
+
+    // Make the fetch request to the Lambda API endpoint
+    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(responseData => {
+        console.log('Swing Lambda response:', responseData);
+      })
+      .catch(error => {
+        console.error("Error sending swing lambda data:", error);
       });
   }
 
