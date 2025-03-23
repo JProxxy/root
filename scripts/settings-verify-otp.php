@@ -8,8 +8,8 @@ ini_set('display_errors', 0);
 
 include '../app/config/connection.php';  // Include your database connection
 
-// Retrieve email and OTP from POST data
-$email = isset($_POST['email']) ? trim($_POST['email']) : '';
+// Use the email from session instead of POST data
+$email = isset($_SESSION['reset_email']) ? trim($_SESSION['reset_email']) : '';
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
 if (empty($email) || empty($enteredOTP)) {
