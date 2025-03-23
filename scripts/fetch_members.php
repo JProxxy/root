@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include '../app/config/connection.php'; // Ensure this file correctly sets up $conn (PDO instance)
+include '../app/config/connection.php';
 
 // Check if $conn is a valid PDO connection
 if (!$conn) {
