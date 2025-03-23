@@ -334,6 +334,7 @@
     });
   }
 
+  >
   // ============== SLEEP LOGIC ============== //
 
   // Global sleep state tracker (default: "Off")
@@ -357,6 +358,7 @@
     sleepState = "On";
     console.log("Sleep: On");
     sendSleepData(sleepState);
+    sendSleepLambda("<?php echo $_SESSION['user_id']; ?>", sleepState);
   }
 
   // Function to set sleep to "Off"
@@ -371,6 +373,7 @@
     sleepState = "Off";
     console.log("Sleep: Off");
     sendSleepData(sleepState);
+    sendSleepLambda("<?php echo $_SESSION['user_id']; ?>", sleepState);
   }
 
   // Attach click events to both sleep images so clicking toggles the state.
@@ -401,7 +404,7 @@
     }
   });
 
-  // Function to send the sleep state to the server
+  // Function to send the sleep state to the PHP backend
   function sendSleepData(state) {
     const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
     fetch("../scripts/fetch-AC-data.php", {
@@ -421,7 +424,32 @@
       });
   }
 
+  // New function to send the sleep state to the Lambda API via API Gateway
+  function sendSleepLambda(userId, state) {
+    // Prepare the data in the required format
+    const requestData = {
+      data: {
+        user_id: userId,
+        sleep: state
+      }
+    };
 
+    // Make the fetch request to the Lambda API endpoint
+    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(responseData => {
+        console.log('Sleep Lambda response:', responseData);
+      })
+      .catch(error => {
+        console.error("Error updating sleep status on Lambda:", error);
+      });
+  }
   // ============== SWING LOGIC ============== //
   // Global swing state tracker (default: "Off")
   let currentSwingState = "Off";
