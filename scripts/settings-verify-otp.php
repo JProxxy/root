@@ -50,8 +50,10 @@ if ($enteredOTP !== $storedOTP) {
     exit();
 }
 
-// At this point, the OTP has been successfully verified
-// 5. Email Update (Optional): This section will run only if OTP is verified.
+// ***** OTP Verified Successfully *****
+//
+// At this point, the OTP is verified successfully.
+// Now, proceed to email update if needed.
 if (isset($_SESSION['reset_email']) && !empty($_SESSION['reset_email'])) {
     $email = trim($_SESSION['reset_email']);
     
