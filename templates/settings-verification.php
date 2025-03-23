@@ -241,8 +241,8 @@ require_once '../app/config/connection.php';
                                         fetch('../scripts/settings-verify-otp.php', {
                                             method: "POST",
                                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                            body: "email=" + encodeURIComponent(verificationInput.value) +
-                                                "&otp=" + encodeURIComponent(otpValue)
+                                            body:"otp=" + encodeURIComponent(otpValue)
+
                                         })
                                             .then(response => response.text())
                                             .then(text => {
