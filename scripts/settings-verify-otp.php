@@ -8,7 +8,7 @@ ini_set('display_errors', 0);
 
 include '../app/config/connection.php';  // Include your database connection
 
-// Use the email from session (set when OTP was sent)
+// Use the email from session (set when OTP was sent) and get the OTP from POST data
 $email = isset($_SESSION['reset_email']) ? trim($_SESSION['reset_email']) : '';
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
@@ -40,7 +40,34 @@ if ($currentTime > $otpExpiry) {
 
 // Compare the entered OTP with the stored OTP
 if ($enteredOTP === $storedOTP) {
-    echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
+
+    // OTP verified successfully.
+    // If a user is logged in, check if this email is already used by another account.
+    if (isset($_SESSION['user_id'])) {
+        $currentUserId = $_SESSION['user_id'];
+
+        // Check if any other user (different from the current user) is already using this email
+        $stmtCheck = $conn->prepare("SELECT COUNT(*) AS cnt FROM users WHERE email = :email AND user_id != :currentUserId");
+        $stmtCheck->bindParam(":email", $email, PDO::PARAM_STR);
+        $stmtCheck->bindParam(":currentUserId", $currentUserId, PDO::PARAM_INT);
+        $stmtCheck->execute();
+        $rowCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+        if ($rowCheck && $rowCheck['cnt'] > 0) {
+            echo json_encode(["success" => false, "message" => "Cannot verify, email already in use."]);
+            exit();
+        }
+
+        // Otherwise, update the current user's email column with the verified email
+        $stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :currentUserId");
+        $stmtUpdate->bindParam(":email", $email, PDO::PARAM_STR);
+        $stmtUpdate->bindParam(":currentUserId", $currentUserId, PDO::PARAM_INT);
+        $stmtUpdate->execute();
+
+        echo json_encode(["success" => true, "message" => "OTP verified successfully and email updated."]);
+    } else {
+        // If no user is logged in, simply return success
+        echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
+    }
 } else {
     echo json_encode(["success" => false, "message" => "Invalid OTP. Please try again."]);
 }
