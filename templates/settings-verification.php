@@ -141,129 +141,129 @@ require_once '../app/config/connection.php';
 
                         <!-- JavaScript -->
                         <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                const modal = document.getElementById("verification-modal");
-                                const modalTitle = document.getElementById("modal-title");
-                                const modalLabel = document.getElementById("modal-label");
-                                const verificationInput = document.getElementById("verification-input");
-                                const otpInput = document.getElementById("otp");
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("verification-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalLabel = document.getElementById("modal-label");
+    const verificationInput = document.getElementById("verification-input");
+    const otpInput = document.getElementById("otp");
 
-                                // Open Modal with dynamic content
-                                function openModal(type) {
-                                    modal.style.display = "block";
+    // Open Modal with dynamic content
+    function openModal(type) {
+        modal.style.display = "block";
 
-                                    if (type === "email") {
-                                        modalTitle.textContent = "Verify Email";
-                                        modalLabel.textContent = "Enter Email Address";
-                                        verificationInput.placeholder = "Enter Email";
-                                        verificationInput.setAttribute("name", "email");
-                                    } else if (type === "phone") {
-                                        modalTitle.textContent = "Verify Phone Number";
-                                        modalLabel.textContent = "Enter Phone Number";
-                                        verificationInput.placeholder = "Enter Phone";
-                                        verificationInput.setAttribute("name", "phone");
-                                    } else if (type === "two-factor") {
-                                        modalTitle.textContent = "Two-Factor Authentication";
-                                        modalLabel.textContent = "Authenticator App Code";
-                                        verificationInput.placeholder = "Enter Authenticator Code";
-                                        verificationInput.setAttribute("name", "authenticator");
-                                    }
-                                }
+        if (type === "email") {
+            modalTitle.textContent = "Verify Email";
+            modalLabel.textContent = "Enter Email Address";
+            verificationInput.placeholder = "Enter Email";
+            verificationInput.setAttribute("name", "email");
+        } else if (type === "phone") {
+            modalTitle.textContent = "Verify Phone Number";
+            modalLabel.textContent = "Enter Phone Number";
+            verificationInput.placeholder = "Enter Phone";
+            verificationInput.setAttribute("name", "phone");
+        } else if (type === "two-factor") {
+            modalTitle.textContent = "Two-Factor Authentication";
+            modalLabel.textContent = "Authenticator App Code";
+            verificationInput.placeholder = "Enter Authenticator Code";
+            verificationInput.setAttribute("name", "authenticator");
+        }
+    }
 
-                                // Close Modal
-                                window.closeModal = function () {
-                                    modal.style.display = "none";
-                                    verificationInput.value = "";
-                                    otpInput.value = "";
-                                };
+    // Close Modal
+    window.closeModal = function () {
+        modal.style.display = "none";
+        verificationInput.value = "";
+        otpInput.value = "";
+    };
 
-                                // Attach event listeners to setup buttons
-                                document.querySelectorAll(".verify-btn").forEach(button => {
-                                    button.addEventListener("click", function () {
-                                        if (this.previousElementSibling.id === "verify-email") {
-                                            openModal("email");
-                                        } else if (this.previousElementSibling.id === "verify-phone") {
-                                            openModal("phone");
-                                        } else if (this.previousElementSibling.id === "two-factor") {
-                                            openModal("two-factor");
-                                        }
-                                    });
-                                });
+    // Attach event listeners to setup buttons
+    document.querySelectorAll(".verify-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            if (this.previousElementSibling.id === "verify-email") {
+                openModal("email");
+            } else if (this.previousElementSibling.id === "verify-phone") {
+                openModal("phone");
+            } else if (this.previousElementSibling.id === "two-factor") {
+                openModal("two-factor");
+            }
+        });
+    });
 
-                                // Combined function for sending and verifying OTP
-                                window.verifyAction = function () {
-                                    const inputType = verificationInput.getAttribute("name");
-                                    const inputValue = verificationInput.value.trim();
-                                    const otpValue = otpInput.value.trim();
+    // Combined function for sending and verifying OTP
+    window.verifyAction = function () {
+        const inputType = verificationInput.getAttribute("name");
+        const inputValue = verificationInput.value.trim();
+        const otpValue = otpInput.value.trim();
 
-                                    if (!inputValue) {
-                                        alert("Please enter your " + inputType + ".");
-                                        return;
-                                    }
+        if (!inputValue) {
+            alert("Please enter your " + inputType + ".");
+            return;
+        }
 
-                                    // If OTP field is empty, then send OTP
-                                    if (!otpValue) {
-                                        let sendEndpoint = inputType === "email" ? "../scripts/check-email.php" : "../scripts/check-phone.php";
+        // If OTP field is empty, then send OTP
+        if (!otpValue) {
+            let sendEndpoint = inputType === "email" ? "../scripts/check-email.php" : "../scripts/check-phone.php";
 
-                                        // For sending OTP, only email (or phone) is sent in the body
-                                        fetch(sendEndpoint, {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                            body: `${inputType}=${encodeURIComponent(inputValue)}`
-                                        })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                alert(data.message); // OTP sent message
-                                                // Now the user can enter the OTP into the OTP field
-                                            })
-                                            .catch(error => console.error("Error:", error));
-                                    } else {
-                                        // If OTP field is filled, then verify the OTP
-                                        let verifyEndpoint = inputType === "email" ? "../scripts/verify-email-otp.php" : "../scripts/verify-phone-otp.php";
-                                        // Adjust endpoints accordingly if you have a different one for phone
+            // For sending OTP, only email (or phone) is sent in the body
+            fetch(sendEndpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `${inputType}=${encodeURIComponent(inputValue)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // OTP sent message
+                    // Now the user can enter the OTP into the OTP field
+                })
+                .catch(error => console.error("Error:", error));
+        } else {
+            // If OTP field is filled, then verify the OTP
+            let verifyEndpoint = inputType === "email" ? "../scripts/verify-email-otp.php" : "../scripts/verify-phone-otp.php";
+            // Adjust endpoints accordingly if you have a different one for phone
 
-                                        fetch(verifyEndpoint, {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                            body: `${inputType}=${encodeURIComponent(inputValue)}&otp=${encodeURIComponent(otpValue)}`
-                                        })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                alert(data.message);
-                                                if (data.success) {
-                                                    closeModal();
-                                                    location.reload(); // Reload page after verification
-                                                }
-                                            })
-                                            .catch(error => console.error("Error:", error));
-                                    }
-                                };
+            fetch(verifyEndpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `${inputType}=${encodeURIComponent(inputValue)}&otp=${encodeURIComponent(otpValue)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        closeModal();
+                        location.reload(); // Reload page after verification
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    };
 
-                                // Listen for real-time input on the OTP field
-                                otpInput.addEventListener("input", function () {
-                                    const otpValue = otpInput.value.trim();
-                                    // Assuming OTP is 5 digits long
-                                    if (otpValue.length === 5) {
-                                        // Automatically verify OTP when 5 digits are entered
-                                        fetch('../scripts/settings-verify-otp.php', {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                            body: "email=" + encodeURIComponent(verificationInput.value) +
-                                                "&otp=" + encodeURIComponent(otpValue)
-                                        })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                alert(data.message);
-                                                if (data.success) {
-                                                    closeModal();
-                                                    location.reload();
-                                                }
-                                            })
-                                            .catch(error => console.error("Error:", error));
-                                    }
-                                });
-
-                        </script>
+    // Listen for real-time input on the OTP field
+    otpInput.addEventListener("input", function () {
+        const otpValue = otpInput.value.trim();
+        // Assuming OTP is 5 digits long
+        if (otpValue.length === 5) {
+            // Automatically verify OTP when 5 digits are entered
+            fetch('../scripts/settings-verify-otp.php', {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "email=" + encodeURIComponent(verificationInput.value) +
+                      "&otp=" + encodeURIComponent(otpValue)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        closeModal();
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    });
+});  // <-- Closing the DOMContentLoaded event listener
+</script>
 
                     </div>
 
