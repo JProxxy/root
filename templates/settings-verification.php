@@ -151,7 +151,6 @@ require_once '../app/config/connection.php';
                                 // Open Modal with dynamic content
                                 function openModal(type) {
                                     modal.style.display = "block";
-
                                     if (type === "email") {
                                         modalTitle.textContent = "Verify Email";
                                         modalLabel.textContent = "Enter Email Address";
@@ -190,7 +189,7 @@ require_once '../app/config/connection.php';
                                     });
                                 });
 
-                                // Combined function for sending and verifying OTP
+                                // Combined function for sending and verifying OTP (if using a manual button)
                                 window.verifyAction = function () {
                                     const inputType = verificationInput.getAttribute("name");
                                     const inputValue = verificationInput.value.trim();
@@ -201,11 +200,9 @@ require_once '../app/config/connection.php';
                                         return;
                                     }
 
-                                    // If OTP field is empty, then send OTP
                                     if (!otpValue) {
+                                        // Send OTP if OTP field is empty
                                         let sendEndpoint = inputType === "email" ? "../scripts/check-email.php" : "../scripts/check-phone.php";
-
-                                        // For sending OTP, only email (or phone) is sent in the body
                                         fetch(sendEndpoint, {
                                             method: "POST",
                                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -214,14 +211,11 @@ require_once '../app/config/connection.php';
                                             .then(response => response.json())
                                             .then(data => {
                                                 alert(data.message); // OTP sent message
-                                                // Now the user can enter the OTP into the OTP field
                                             })
                                             .catch(error => console.error("Error:", error));
                                     } else {
-                                        // If OTP field is filled, then verify the OTP
+                                        // Verify OTP if OTP field is filled
                                         let verifyEndpoint = inputType === "email" ? "../scripts/verify-email-otp.php" : "../scripts/verify-phone-otp.php";
-                                        // Adjust endpoints accordingly if you have a different one for phone
-
                                         fetch(verifyEndpoint, {
                                             method: "POST",
                                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -232,34 +226,42 @@ require_once '../app/config/connection.php';
                                                 alert(data.message);
                                                 if (data.success) {
                                                     closeModal();
-                                                    location.reload(); // Reload page after verification
+                                                    location.reload();
                                                 }
                                             })
                                             .catch(error => console.error("Error:", error));
                                     }
                                 };
 
-                                fetch('../scripts/settings-verify-otp.php', {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                    body: "email=" + encodeURIComponent(verificationInput.value) +
-                                        "&otp=" + encodeURIComponent(otpValue)
-                                })
-                                    .then(response => response.text())
-                                    .then(text => {
-                                        console.log("Raw response:", text);
-                                        return JSON.parse(text);
-                                    })
-                                    .then(data => {
-                                        alert(data.message);
-                                        if (data.success) {
-                                            closeModal();
-                                            location.reload();
-                                        }
-                                    })
-                                    .catch(error => console.error("Error:", error));
-                            });  // <-- Closing the DOMContentLoaded event listener
+                                // Listen for real-time input on the OTP field
+                                otpInput.addEventListener("input", function () {
+                                    const otpValue = otpInput.value.trim();
+                                    // Automatically verify OTP when 5 digits are entered
+                                    if (otpValue.length === 5) {
+                                        fetch('../scripts/settings-verify-otp.php', {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                            body: "email=" + encodeURIComponent(verificationInput.value) +
+                                                "&otp=" + encodeURIComponent(otpValue)
+                                        })
+                                            .then(response => response.text())
+                                            .then(text => {
+                                                console.log("Raw response:", text);
+                                                return JSON.parse(text);
+                                            })
+                                            .then(data => {
+                                                alert(data.message);
+                                                if (data.success) {
+                                                    closeModal();
+                                                    location.reload();
+                                                }
+                                            })
+                                            .catch(error => console.error("Error:", error));
+                                    }
+                                });
+                            });
                         </script>
+
 
                     </div>
 
