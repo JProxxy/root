@@ -564,6 +564,7 @@
       });
     }
   });
+  
   // ============== TIMER LOGIC ============== //
   document.addEventListener("DOMContentLoaded", function () {
     const progressBar = document.querySelector(".progress-bar");
@@ -588,8 +589,7 @@
       .then(response => response.json())
       .then(data => {
         if (data.timer && data.timer > 0) {
-          // If stored value is in seconds, you can use it directly.
-          // If it's stored as hours, multiply by 3600:
+          // If stored value is in seconds, use it directly or convert if stored as hours.
           totalTime = data.timer; // Adjust if necessary (e.g., data.timer * 3600)
         }
         if (totalTime > 0) {
@@ -611,8 +611,10 @@
 
       console.log(`Timer Set: ${hours} hour(s)`);
 
-      // Send the timer value to the backend via a POST request.
+      // Send the timer value (in hours) to the backend and Lambda.
       updateTimerToDatabase(hours);
+      sendTimerLambda("<?php echo $_SESSION['user_id']; ?>", hours);
+
       localStorage.setItem("totalTime", totalTime);
     }
 
@@ -670,7 +672,7 @@
 
     updateTimer(); // Initial update
 
-    // Function to send the timer (in hours) to the backend via a POST request.
+    // Function to send the timer (in hours) to the PHP backend via a POST request.
     function updateTimerToDatabase(hoursValue) {
       fetch("../scripts/fetch-AC-data.php", {
         method: "POST",
@@ -687,6 +689,33 @@
           console.log("Timer updated in DB:", data);
         })
         .catch(error => console.error("Error updating timer:", error));
+    }
+
+    // New function to send the timer state to the Lambda API via API Gateway
+    function sendTimerLambda(userId, hoursValue) {
+      // Prepare the data payload in the required format.
+      const requestData = {
+        data: {
+          user_id: userId,
+          timer: hoursValue
+        }
+      };
+
+      // Make the fetch request to the Lambda API endpoint.
+      fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+          console.log('Timer Lambda response:', responseData);
+        })
+        .catch(error => {
+          console.error("Error updating timer on Lambda:", error);
+        });
     }
   });
 
