@@ -762,10 +762,12 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                 // Function to send temperature update to AWS Lambda for high temperature adjustments.
                 function sendTempLambdaHigh(userId, currentTemp) {
                     const payload = {
-                        user_id: userId,
-                        tempbarHigh: currentTemp
+                        data: {
+                            user_id: userId,
+                            tembarHigh: currentTemp
+                        }
                     };
-                    fetch("https://your-lambda-url.example.com/tempHigh", {
+                    fetch("https://abc123.execute-api.ap-southeast-1.amazonaws.com/dev/tempHigh", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
@@ -775,13 +777,16 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                         .catch(error => console.error("Error updating Lambda (High):", error));
                 }
 
+
                 // Function to send temperature update to AWS Lambda for low temperature adjustments.
                 function sendTempLambdaLow(userId, currentTemp) {
                     const payload = {
-                        user_id: userId,
-                        tempbarLow: currentTemp
+                        data: {
+                            user_id: userId,
+                            tembarLow: currentTemp
+                        }
                     };
-                    fetch("https://your-lambda-url.example.com/tempLow", {
+                    fetch("https://abc123.execute-api.ap-southeast-1.amazonaws.com/dev/tempLow", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
@@ -790,6 +795,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                         .then(data => console.log("Lambda Low Response:", data))
                         .catch(error => console.error("Error updating Lambda (Low):", error));
                 }
+
 
                 // Decrease temperature when clicking on tempbarLow
                 tempbarLow.addEventListener("click", function () {
