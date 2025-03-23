@@ -1,5 +1,5 @@
 <script>
- document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     // Select the fan container and images
     const fanCont = document.querySelector(".fanCont");
     const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
@@ -66,25 +66,24 @@
     }
 
     // Function to send the fan state to the Lambda API via API Gateway
+    // Function to send the fan state to the Lambda API via API Gateway
     function sendFanStateLambda(userId, fanState) {
-      // Prepare the data to send in the required format
+      // Prepare the data in the required format
       const requestData = {
-        body: JSON.stringify({
-          data: {
-            user_id: userId,
-            fanstate: fanState
-          }
-        })
+        data: {
+          user_id: userId,
+          fanstate: fanState
+        }
       };
 
       // Make the fetch request to the API Gateway endpoint
       fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData) // Send the data in the required format
-        })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData) // Correctly formatted JSON
+      })
         .then(response => response.json()) // Handle the response from Lambda
         .then(responseData => {
           console.log('Device control response:', responseData);
@@ -146,7 +145,7 @@
       }
     });
   });
-  
+
   // ============== MODE LOGIC  ============== //
   // Declare globally, only once
   let currentMode = "Cool"; // Default mode
@@ -452,131 +451,131 @@
       });
     }
   });
-// ============== TIMER LOGIC ============== //
-document.addEventListener("DOMContentLoaded", function () {
-  const progressBar = document.querySelector(".progress-bar");
-  const timeLeftText = document.getElementById("time-left");
-  const progressCircle = document.getElementById("progress-circle");
+  // ============== TIMER LOGIC ============== //
+  document.addEventListener("DOMContentLoaded", function () {
+    const progressBar = document.querySelector(".progress-bar");
+    const timeLeftText = document.getElementById("time-left");
+    const progressCircle = document.getElementById("progress-circle");
 
-  let totalTime = 0; // Total time in seconds
-  let countdownInterval;
-  let isRunning = false;
-  let zeroCount = false; // Reset by clicking (exceeding 12 hours)
-  let zeroTimer = false; // Timer naturally finished
-  const maxTime = 12 * 60 * 60; // 12 hours in seconds
-  const circleCircumference = 2 * Math.PI * 97.1;
+    let totalTime = 0; // Total time in seconds
+    let countdownInterval;
+    let isRunning = false;
+    let zeroCount = false; // Reset by clicking (exceeding 12 hours)
+    let zeroTimer = false; // Timer naturally finished
+    const maxTime = 12 * 60 * 60; // 12 hours in seconds
+    const circleCircumference = 2 * Math.PI * 97.1;
 
-  // Load stored timer from localStorage if available.
-  if (localStorage.getItem("totalTime")) {
-    totalTime = parseInt(localStorage.getItem("totalTime"), 10);
-  }
-
-  // Optionally, also fetch from the database.
-  fetch("../scripts/fetch-AC-data.php?fetchTimer=1")
-    .then(response => response.json())
-    .then(data => {
-      if (data.timer && data.timer > 0) {
-        // If stored value is in seconds, you can use it directly.
-        // If it's stored as hours, multiply by 3600:
-        totalTime = data.timer; // Adjust if necessary (e.g., data.timer * 3600)
-      }
-      if (totalTime > 0) {
-        isRunning = true;
-        startCountdown(); // Resume countdown if timer was already set.
-      }
-      updateTimer();
-    })
-    .catch(error => console.error("Error fetching timer:", error));
-
-  function updateTimer() {
-    // Calculate hours based on totalTime (in seconds)
-    let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
-    if (hours > 12) hours = 12;
-    timeLeftText.textContent = String(hours).padStart(2, "0");
-
-    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
-    progressBar.style.strokeDashoffset = dashoffset;
-
-    console.log(`Timer Set: ${hours} hour(s)`);
-
-    // Send the timer value to the backend via a POST request.
-    updateTimerToDatabase(hours);
-    localStorage.setItem("totalTime", totalTime);
-  }
-
-  function startCountdown() {
-    clearInterval(countdownInterval);
-    countdownInterval = setInterval(() => {
-      if (totalTime > 0) {
-        totalTime--;
-        updateTimer();
-      } else {
-        clearInterval(countdownInterval);
-        totalTime = 0;
-        isRunning = false;
-        zeroTimer = true;
-        console.log("Timer Finished naturally - zeroTimer triggered");
-
-        // When timer finishes naturally, turn off the switch.
-        document.getElementById("airconFFSwitch").checked = false;
-        toggleAirconFF();
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
-    }, 1000);
-  }
-
-  // Click on the progress circle adds 1 hour (3600 seconds).
-  progressCircle.addEventListener("click", function () {
-    if (!isRunning) {
-      isRunning = true;
-      startCountdown();
+    // Load stored timer from localStorage if available.
+    if (localStorage.getItem("totalTime")) {
+      totalTime = parseInt(localStorage.getItem("totalTime"), 10);
     }
-    totalTime += 3600;
-    if (totalTime > maxTime) {
-      totalTime = 0;
-      zeroCount = true;
-      clearInterval(countdownInterval);
-      isRunning = false;
-      console.log("Timer reset via click - zeroCount triggered");
-    } else {
-      zeroCount = false;
-    }
-    updateTimer();
-  });
 
-  // Listen for the custom event to reset the timer when AC is off.
-  document.addEventListener("airconOff", function () {
-    totalTime = 0;
-    clearInterval(countdownInterval);
-    isRunning = false;
-    console.log("Timer Reset due to AC Off");
-    updateTimer();
-  });
-
-  updateTimer(); // Initial update
-
-  // Function to send the timer (in hours) to the backend via a POST request.
-  function updateTimerToDatabase(hoursValue) {
-    fetch("../scripts/fetch-AC-data.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        timer: hoursValue,
-        user_id: "<?php echo $_SESSION['user_id']; ?>"
-      }),
-    })
+    // Optionally, also fetch from the database.
+    fetch("../scripts/fetch-AC-data.php?fetchTimer=1")
       .then(response => response.json())
       .then(data => {
-        console.log("Timer updated in DB:", data);
+        if (data.timer && data.timer > 0) {
+          // If stored value is in seconds, you can use it directly.
+          // If it's stored as hours, multiply by 3600:
+          totalTime = data.timer; // Adjust if necessary (e.g., data.timer * 3600)
+        }
+        if (totalTime > 0) {
+          isRunning = true;
+          startCountdown(); // Resume countdown if timer was already set.
+        }
+        updateTimer();
       })
-      .catch(error => console.error("Error updating timer:", error));
-  }
-});
+      .catch(error => console.error("Error fetching timer:", error));
+
+    function updateTimer() {
+      // Calculate hours based on totalTime (in seconds)
+      let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
+      if (hours > 12) hours = 12;
+      timeLeftText.textContent = String(hours).padStart(2, "0");
+
+      const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
+      progressBar.style.strokeDashoffset = dashoffset;
+
+      console.log(`Timer Set: ${hours} hour(s)`);
+
+      // Send the timer value to the backend via a POST request.
+      updateTimerToDatabase(hours);
+      localStorage.setItem("totalTime", totalTime);
+    }
+
+    function startCountdown() {
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+        if (totalTime > 0) {
+          totalTime--;
+          updateTimer();
+        } else {
+          clearInterval(countdownInterval);
+          totalTime = 0;
+          isRunning = false;
+          zeroTimer = true;
+          console.log("Timer Finished naturally - zeroTimer triggered");
+
+          // When timer finishes naturally, turn off the switch.
+          document.getElementById("airconFFSwitch").checked = false;
+          toggleAirconFF();
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
+      }, 1000);
+    }
+
+    // Click on the progress circle adds 1 hour (3600 seconds).
+    progressCircle.addEventListener("click", function () {
+      if (!isRunning) {
+        isRunning = true;
+        startCountdown();
+      }
+      totalTime += 3600;
+      if (totalTime > maxTime) {
+        totalTime = 0;
+        zeroCount = true;
+        clearInterval(countdownInterval);
+        isRunning = false;
+        console.log("Timer reset via click - zeroCount triggered");
+      } else {
+        zeroCount = false;
+      }
+      updateTimer();
+    });
+
+    // Listen for the custom event to reset the timer when AC is off.
+    document.addEventListener("airconOff", function () {
+      totalTime = 0;
+      clearInterval(countdownInterval);
+      isRunning = false;
+      console.log("Timer Reset due to AC Off");
+      updateTimer();
+    });
+
+    updateTimer(); // Initial update
+
+    // Function to send the timer (in hours) to the backend via a POST request.
+    function updateTimerToDatabase(hoursValue) {
+      fetch("../scripts/fetch-AC-data.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          timer: hoursValue,
+          user_id: "<?php echo $_SESSION['user_id']; ?>"
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Timer updated in DB:", data);
+        })
+        .catch(error => console.error("Error updating timer:", error));
+    }
+  });
 
   //  ============== POWER ON?OFF  ============== //
 
