@@ -145,7 +145,7 @@
       }
     });
   });
-
+  
   // ============== MODE LOGIC  ============== //
   // Declare globally, only once
   let currentMode = "Cool"; // Default mode
@@ -279,12 +279,12 @@
 
     // Make the fetch request to the Lambda API endpoint
     fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
       .then(response => response.json())
       .then(responseData => {
         console.log('Lambda mode response:', responseData);
@@ -335,7 +335,7 @@
     });
   }
 
-  // ============== SLEEP LOGIC ============== //
+   // ============== SLEEP LOGIC ============== //
 
   // Global sleep state tracker (default: "Off")
   let sleepState = "Off";
@@ -436,12 +436,12 @@
 
     // Make the fetch request to the Lambda API endpoint
     fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
       .then(response => response.json())
       .then(responseData => {
         console.log('Sleep Lambda response:', responseData);
@@ -453,7 +453,7 @@
 
 
 
-  // ============== SWING LOGIC ============== //
+    // ============== SWING LOGIC ============== //
   // Global swing state tracker (default: "Off")
   let currentSwingState = "Off";
 
@@ -536,12 +536,12 @@
 
     // Make the fetch request to the Lambda API endpoint
     fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    })
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
       .then(response => response.json())
       .then(responseData => {
         console.log('Swing Lambda response:', responseData);
@@ -566,52 +566,72 @@
     }
   });
   // ============== TIMER LOGIC ============== //
-  // Declare your global variables
-  let totalTime = 0;
-  let timerStatus = "stopped";
+document.addEventListener("DOMContentLoaded", function () {
+  const progressBar = document.querySelector(".progress-bar");
+  const timeLeftText = document.getElementById("time-left");
+  const progressCircle = document.getElementById("progress-circle");
+  const airconSwitch = document.getElementById("airconFFSwitch");
+
+  let totalTime = 0; // Total time in hours
+  let countdownInterval;
   let isRunning = false;
-  let countdownInterval, zeroTimer, zeroCount;
+  let zeroCount = false; // Reset by clicking (exceeding 12 hours)
+  let zeroTimer = false; // Timer naturally finished
+  let timerStatus = "stopped"; // Default status
+  const maxTime = 12; // Maximum time in hours
+  const circleCircumference = 2 * Math.PI * 97.1;
 
-  document.addEventListener("DOMContentLoaded", function () {
-    // Restore timer and other states from localStorage.
-    totalTime = localStorage.getItem("totalTime")
-      ? parseInt(localStorage.getItem("totalTime"), 10)
-      : 0;
-    timerStatus = localStorage.getItem("timerStatus") || "stopped";
-    isRunning = localStorage.getItem("isRunning") === "true";
+  // Load stored timer from localStorage if available.
+  if (localStorage.getItem("totalTime")) {
+    totalTime = parseInt(localStorage.getItem("totalTime"), 10);
+  }
 
-    updateTimer();
+  // Fetch the timer and status from the database.
+  fetch("../scripts/fetch-AC-data.php?fetchTimer=1")
+    .then(response => response.json())
+    .then(data => {
+      if (data.timer && data.timer > 0) {
+        totalTime = data.timer; // Expecting timer in hours now
+      }
+      if (data.timer_status) {
+        timerStatus = data.timer_status;
+      }
 
-    // If the timer was running before the page was refreshed, resume the countdown.
-    if (totalTime > 0 && timerStatus === "running") {
-      startCountdown();
-    }
-  });
+      // If timer was running, resume countdown.
+      if (timerStatus === "running" && totalTime > 0) {
+        isRunning = true;
+        airconSwitch.checked = true; // Ensure switch is ON
+        startCountdown();
+      } else {
+        airconSwitch.checked = false; // Ensure switch is OFF if timer is stopped
+      }
+      updateTimer();
+    })
+    .catch(error => console.error("Error fetching timer:", error));
 
-  // Timer update function.
   function updateTimer() {
-    let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
-    if (hours > 12) hours = 12;
-    timeLeftText.textContent = String(hours).padStart(2, "0");
+    // Since totalTime is in hours already, we can directly use it.
+    let displayHours = totalTime;
+    if (displayHours > maxTime) displayHours = maxTime;
+    timeLeftText.textContent = String(displayHours).padStart(2, "0");
 
+    // Update the progress bar based on the fraction of maxTime used.
     const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
     progressBar.style.strokeDashoffset = dashoffset;
 
-    console.log(`Timer Set: ${hours} hour(s), Status: ${timerStatus}`);
+    console.log(`Timer Set: ${displayHours} hour(s), Status: ${timerStatus}`);
 
     // Send timer and status to backend and Lambda.
-    updateTimerToDatabase(hours, timerStatus);
-    sendTimerLambda("<?php echo $_SESSION['user_id']; ?>", hours, timerStatus);
+    updateTimerToDatabase(displayHours, timerStatus);
+    sendTimerLambda("<?php echo $_SESSION['user_id']; ?>", displayHours, timerStatus);
 
-    // Persist the states.
     localStorage.setItem("totalTime", totalTime);
-    localStorage.setItem("timerStatus", timerStatus);
-    localStorage.setItem("isRunning", isRunning);
   }
 
   // Countdown function.
   function startCountdown() {
     clearInterval(countdownInterval);
+    // For production, use 3600000 (1 hour in ms). For testing, you might use a shorter interval.
     countdownInterval = setInterval(() => {
       if (totalTime > 0) {
         totalTime--;
@@ -630,10 +650,10 @@
 
         updateTimer();
       }
-    }, 1000);
+    }, 3600000); // 1 hour interval; change this value for testing if needed.
   }
 
-  // Click on progress circle adds 1 hour (3600 seconds).
+  // Click on progress circle adds 1 hour.
   progressCircle.addEventListener("click", function () {
     if (!isRunning) {
       isRunning = true;
@@ -641,7 +661,7 @@
       airconSwitch.checked = true;
       startCountdown();
     }
-    totalTime += 3600;
+    totalTime += 1; // Add one hour
     if (totalTime > maxTime) {
       totalTime = 0;
       zeroCount = true;
@@ -666,7 +686,7 @@
     updateTimer();
   });
 
-  // Removed the extra updateTimer() call here to avoid overwriting restored state.
+  updateTimer(); // Initial update
 
   // Function to send the timer and status to PHP backend.
   function updateTimerToDatabase(hoursValue, status) {
@@ -703,8 +723,7 @@
       .then(responseData => console.log("Timer Lambda response:", responseData))
       .catch(error => console.error("Error updating timer on Lambda:", error));
   }
-
-
+});
 
   //  ============== POWER ON?OFF  ============== //
 
