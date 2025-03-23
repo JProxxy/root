@@ -415,244 +415,216 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
         <script>
 
 
-function toggleAirconFF() {
-    const switchElement = document.getElementById("airconFFSwitch");
-    const remoteContainer = document.querySelector(".remote-container");
-    const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
+            function toggleAirconFF() {
+                const switchElement = document.getElementById("airconFFSwitch");
+                const remoteContainer = document.querySelector(".remote-container");
+                const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
 
-    // Determine current power state.
-    const powerState = switchElement.checked ? "On" : "Off";
+                // Determine current power state.
+                const powerState = switchElement.checked ? "On" : "Off";
 
-    if (powerState === "On") {
-      // Enable controls.
-      remoteContainer.classList.add("enabled");
-      remoteContainer.classList.remove("disabled");
-      elementsToHide.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "block";
-      });
-    } else {
-      // Disable controls.
-      remoteContainer.classList.remove("enabled");
-      remoteContainer.classList.add("disabled");
-      elementsToHide.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = "none";
-      });
-      setDefaults();
-      // Dispatch event to reset timer.
-      document.dispatchEvent(new CustomEvent("airconOff"));
+                if (powerState === "On") {
+                    // Enable controls.
+                    remoteContainer.classList.add("enabled");
+                    remoteContainer.classList.remove("disabled");
+                    elementsToHide.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = "block";
+                    });
+                } else {
+                    // Disable controls.
+                    remoteContainer.classList.remove("enabled");
+                    remoteContainer.classList.add("disabled");
+                    elementsToHide.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.style.display = "none";
+                    });
+                    setDefaults();
+                    // Dispatch event to reset timer.
+                    document.dispatchEvent(new CustomEvent("airconOff"));
 
-      // Update the database with default values.
-      updateACSettings(16, "High", "Cool", "Off", "0", "Off");
-    }
+                    // Update the database with default values.
+                    updateACSettings(16, "High", "Cool", "Off", "0", "Off");
+                }
 
-    // Send the updated power status to the PHP backend.
-    updatePowerStatus();
-    // Also send the power state to the Lambda API.
-    sendPowerStateLambda("<?php echo $_SESSION['user_id']; ?>", powerState);
+                // Send the updated power status to the server.
+                updatePowerStatus();
 
-    // Reload the page after 2 seconds.
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
-  }
+                // Reload the page after 2 seconds.
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
 
-  // Function to send the power state to the Lambda API via API Gateway.
-  function sendPowerStateLambda(userId, powerState) {
-    // Prepare the payload in the required format.
-    const requestData = {
-      data: {
-        user_id: userId,
-        power: powerState
-      }
-    };
+            // Force Mode to Cool (green)
+            function updateModeDisplay(modeIndex) {
+                if (modeIndex === 0) {
+                    const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
+                    const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
+                    if (modeCoolGreen) modeCoolGreen.style.display = "block";
+                    if (modeCoolWhite) modeCoolWhite.style.display = "none";
 
-    // Make the fetch request to your Lambda API endpoint.
-    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    })
-      .then(response => response.json())
-      .then(responseData => {
-        console.log('Power state Lambda response:', responseData);
-      })
-      .catch(error => {
-        console.error("Error sending power state to Lambda:", error);
-      });
-  }
+                    const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
+                    const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
+                    const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
+                    const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
+                    if (modeDryWhite) modeDryWhite.style.display = "block";
+                    if (modeDryGreen) modeDryGreen.style.display = "none";
+                    if (modeFanWhite) modeFanWhite.style.display = "block";
+                    if (modeFanGreen) modeFanGreen.style.display = "none";
+                }
+            }
 
-  // ============== MODE LOGIC  ============== //
-  function updateModeDisplay(modeIndex) {
-    if (modeIndex === 0) {
-      const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
-      const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
-      if (modeCoolGreen) modeCoolGreen.style.display = "block";
-      if (modeCoolWhite) modeCoolWhite.style.display = "none";
+            // Force Fan High (green)
+            function setFanHigh() {
+                const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
+                const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
+                const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
+                const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
+                if (fanHighGreen) fanHighGreen.style.display = "block";
+                if (fanHighWhite) fanHighWhite.style.display = "none";
+                if (fanLowGreen) fanLowGreen.style.display = "none";
+                if (fanLowWhite) fanLowWhite.style.display = "block";
+            }
 
-      const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
-      const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
-      const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
-      const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
-      if (modeDryWhite) modeDryWhite.style.display = "block";
-      if (modeDryGreen) modeDryGreen.style.display = "none";
-      if (modeFanWhite) modeFanWhite.style.display = "block";
-      if (modeFanGreen) modeFanGreen.style.display = "none";
-    }
-  }
+            // Update Swing Display based on provided state ("On" or "Off")
+            function updateSwingDisplay(state) {
+                if (state === "On") {
+                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
+                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
+                    if (swingOnGreen) swingOnGreen.style.display = "block";
+                    if (swingOnWhite) swingOnWhite.style.display = "none";
 
-  // ============== FAN LOGIC  ============== //
-  function setFanHigh() {
-    const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
-    const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
-    const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
-    const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
-    if (fanHighGreen) fanHighGreen.style.display = "block";
-    if (fanHighWhite) fanHighWhite.style.display = "none";
-    if (fanLowGreen) fanLowGreen.style.display = "none";
-    if (fanLowWhite) fanLowWhite.style.display = "block";
-  }
+                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
+                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
+                    if (swingOffGreen) swingOffGreen.style.display = "none";
+                    if (swingOffWhite) swingOffWhite.style.display = "none";
+                } else {
+                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
+                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
+                    if (swingOffGreen) swingOffGreen.style.display = "block";
+                    if (swingOffWhite) swingOffWhite.style.display = "none";
 
-  // ============== SWING LOGIC  ============== //
-  function updateSwingDisplay(state) {
-    if (state === "On") {
-      const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
-      const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
-      if (swingOnGreen) swingOnGreen.style.display = "block";
-      if (swingOnWhite) swingOnWhite.style.display = "none";
+                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
+                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
+                    if (swingOnGreen) swingOnGreen.style.display = "none";
+                    if (swingOnWhite) swingOnWhite.style.display = "block";
+                }
+            }
 
-      const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
-      const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
-      if (swingOffGreen) swingOffGreen.style.display = "none";
-      if (swingOffWhite) swingOffWhite.style.display = "none";
-    } else {
-      const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
-      const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
-      if (swingOffGreen) swingOffGreen.style.display = "block";
-      if (swingOffWhite) swingOffWhite.style.display = "none";
+            // Reset the AC controls to default values when power is Off
+            function setDefaults() {
+                const ACtimer = document.getElementById("ACtimer");
+                const ACtemp = document.getElementById("ACtemp");
+                const ACmode = document.getElementById("ACmode");
+                const ACfan = document.getElementById("ACfan");
+                const ACswing = document.getElementById("ACswing");
+                const ACRCTemp = document.getElementById("ACRCTemp");
 
-      const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
-      const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
-      if (swingOnGreen) swingOnGreen.style.display = "none";
-      if (swingOnWhite) swingOnWhite.style.display = "block";
-    }
-  }
+                if (ACtimer) ACtimer.innerText = "00";
+                if (ACtemp) ACtemp.innerText = "16";
+                if (ACmode) ACmode.innerText = "Cool";
+                if (ACfan) ACfan.innerText = "High";
+                if (ACswing) ACswing.innerText = "Off";
+                if (ACRCTemp) ACRCTemp.innerText = "16";
 
-  // ============== DEFAULTS & CONTROL UPDATE ============== //
-  function setDefaults() {
-    const ACtimer = document.getElementById("ACtimer");
-    const ACtemp = document.getElementById("ACtemp");
-    const ACmode = document.getElementById("ACmode");
-    const ACfan = document.getElementById("ACfan");
-    const ACswing = document.getElementById("ACswing");
-    const ACRCTemp = document.getElementById("ACRCTemp");
+                // Force defaults to green:
+                updateModeDisplay(0);
+                setFanHigh();
+                updateSwingDisplay("Off");
+            }
 
-    if (ACtimer) ACtimer.innerText = "00";
-    if (ACtemp) ACtemp.innerText = "16";
-    if (ACmode) ACmode.innerText = "Cool";
-    if (ACfan) ACfan.innerText = "High";
-    if (ACswing) ACswing.innerText = "Off";
-    if (ACRCTemp) ACRCTemp.innerText = "16";
+            // Send the updated power status to the server.
+            function updatePowerStatus() {
+                const switchElement = document.getElementById("airconFFSwitch");
+                const powerStatus = switchElement.checked ? "On" : "Off";
+                const userID = "<?php echo $_SESSION['user_id']; ?>";
+                fetch("../scripts/fetch-AC-data.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: userID,
+                        power: powerStatus
+                    })
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log("Power status updated:", data);
+                    })
+                    .catch(error => {
+                        console.error("Error updating power status:", error);
+                    });
+            }
 
-    // Force defaults to green:
-    updateModeDisplay(0);
-    setFanHigh();
-    updateSwingDisplay("Off");
-  }
+            // Update AC settings on the server.
+            // Parameters: temp, fan, mode, swing, timer, power
+            function updateACSettings(temp, fan, mode, swing, timer, power) {
+                const userID = "<?php echo $_SESSION['user_id']; ?>";
+                $.ajax({
+                    url: '../scripts/fetch-AC-data.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        user_id: userID,
+                        temp: temp,
+                        fan: fan,
+                        mode: mode,
+                        swing: swing,
+                        timer: timer,
+                        power: power
+                    }),
+                    success: function (response) {
+                        if (response.success) {
+                            $("#ACtemp").text(response.temp + " °C");
+                            console.log("AC Settings Updated:", response);
+                        } else {
+                            console.error("Error updating AC settings:", response.error);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", xhr.responseText);
+                    }
+                });
+            }
 
-  // Send the updated power status to the server.
-  function updatePowerStatus() {
-    const switchElement = document.getElementById("airconFFSwitch");
-    const powerStatus = switchElement.checked ? "On" : "Off";
-    const userID = "<?php echo $_SESSION['user_id']; ?>";
-    fetch("../scripts/fetch-AC-data.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userID,
-        power: powerStatus
-      })
-    })
-      .then(response => response.text())
-      .then(data => {
-        console.log("Power status updated:", data);
-      })
-      .catch(error => {
-        console.error("Error updating power status:", error);
-      });
-  }
+            // Initialize switch state on page load.
+            document.addEventListener("DOMContentLoaded", function () {
+                const switchElement = document.getElementById("airconFFSwitch");
+                const remoteContainer = document.querySelector(".remote-container");
 
-  // Update AC settings on the server.
-  // Parameters: temp, fan, mode, swing, timer, power
-  function updateACSettings(temp, fan, mode, swing, timer, power) {
-    const userID = "<?php echo $_SESSION['user_id']; ?>";
-    $.ajax({
-      url: '../scripts/fetch-AC-data.php',
-      type: 'POST',
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify({
-        user_id: userID,
-        temp: temp,
-        fan: fan,
-        mode: mode,
-        swing: swing,
-        timer: timer,
-        power: power
-      }),
-      success: function (response) {
-        if (response.success) {
-          $("#ACtemp").text(response.temp + " °C");
-          console.log("AC Settings Updated:", response);
-        } else {
-          console.error("Error updating AC settings:", response.error);
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error("AJAX Error:", xhr.responseText);
-      }
-    });
-  }
+                if (switchElement.checked) {
+                    remoteContainer.classList.add("enabled");
+                    remoteContainer.classList.remove("disabled");
+                    showControls();
+                } else {
+                    remoteContainer.classList.add("disabled");
+                    remoteContainer.classList.remove("enabled");
+                    hideControls();
+                }
 
-  // Initialize switch state on page load.
-  document.addEventListener("DOMContentLoaded", function () {
-    const switchElement = document.getElementById("airconFFSwitch");
-    const remoteContainer = document.querySelector(".remote-container");
+                // Attach the toggle function to the power switch change event.
+                if (switchElement) {
+                    switchElement.addEventListener("change", toggleAirconFF);
+                }
+            });
 
-    if (switchElement.checked) {
-      remoteContainer.classList.add("enabled");
-      remoteContainer.classList.remove("disabled");
-      showControls();
-    } else {
-      remoteContainer.classList.add("disabled");
-      remoteContainer.classList.remove("enabled");
-      hideControls();
-    }
+            // Helper functions to show/hide AC controls.
+            function showControls() {
+                const elementsToShow = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
+                elementsToShow.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = "block";
+                });
+            }
+            function hideControls() {
+                const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
+                elementsToHide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = "none";
+                });
+            }
 
-    // Attach the toggle function to the power switch change event.
-    if (switchElement) {
-      switchElement.addEventListener("change", toggleAirconFF);
-    }
-  });
-
-  // Helper functions to show/hide AC controls.
-  function showControls() {
-    const elementsToShow = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
-    elementsToShow.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "block";
-    });
-  }
-  function hideControls() {
-    const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
-    elementsToHide.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
-  }
 
         </script>
 
