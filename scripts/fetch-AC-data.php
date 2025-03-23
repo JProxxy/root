@@ -49,17 +49,6 @@ try {
             throw new Exception("Invalid JSON input.");
         }   
 
-        // Fetch the current mode from the database
-        $stmt = $conn->prepare("SELECT mode FROM acRemote WHERE user_id = :user_id LIMIT 1");
-        $stmt->execute([':user_id' => $user_id]);
-        $currentMode = $stmt->fetchColumn();
-
-        // Prevent updating sleep if mode is Dry or Fan
-        if (isset($input['sleep']) && ($currentMode === 'Dry' || $currentMode === 'Fan')) {
-            echo json_encode(["error" => "Sleep mode cannot be enabled in Dry or Fan mode."]);
-            exit;
-        }
-
         // Check if a record for this user exists.
         $stmt = $conn->prepare("SELECT COUNT(*) FROM acRemote WHERE user_id = :user_id");
         $stmt->execute([':user_id' => $user_id]);
@@ -106,6 +95,12 @@ try {
                         break;
                 }
             }
+        }
+
+        // If mode is being changed to "Dry" or "Fan", force sleep to "Off"
+        if (isset($input['mode']) && ($input['mode'] === "Dry" || $input['mode'] === "Fan")) {
+            $updateParts[] = "sleep = 'Off'";
+            $updateParts[] = "sleeptime = NOW()"; // Update sleeptime when sleep is forced off
         }
 
         // Validate temperature range if provided.
