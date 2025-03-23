@@ -52,7 +52,12 @@ if ($enteredOTP !== $storedOTP) {
 
 // At this point, the OTP has been successfully verified
 
-// 5. Update Email Based on user_id (using the email from session "reset_email")
+// 5. Update isEmailVerified to 'yes' based solely on user_id
+$stmtVerify = $conn->prepare("UPDATE users SET isEmailVerified = 'yes' WHERE user_id = :user_id");
+$stmtVerify->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+$stmtVerify->execute();
+
+// 6. Update Email Based on user_id (using the email from session "reset_email") if available
 if (isset($_SESSION['reset_email']) && !empty($_SESSION['reset_email'])) {
     $email = trim($_SESSION['reset_email']);
     
@@ -64,10 +69,9 @@ if (isset($_SESSION['reset_email']) && !empty($_SESSION['reset_email'])) {
     $stmtUpdate->bindParam(":user_id", $user_id, PDO::PARAM_INT);
     $stmtUpdate->execute();
     
-    echo json_encode(["success" => true, "message" => "OTP verified successfully and email updated."]);
+    echo json_encode(["success" => true, "message" => "OTP verified successfully, email updated, and email verified."]);
 } else {
-    // If no new email is provided, simply confirm OTP success.
-    echo json_encode(["success" => true, "message" => "OTP verified successfully."]);
+    echo json_encode(["success" => true, "message" => "OTP verified successfully and email verified."]);
 }
 
 $stmt->closeCursor();

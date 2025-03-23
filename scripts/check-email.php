@@ -3,7 +3,7 @@ session_start();
 header("Content-Type: application/json");
 
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 include '../app/config/connection.php';  // Include database connection
 require '../vendor/autoload.php';  // Load PHPMailer
