@@ -1,5 +1,5 @@
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+ document.addEventListener("DOMContentLoaded", function () {
     // Select the fan container and images
     const fanCont = document.querySelector(".fanCont");
     const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
@@ -65,7 +65,7 @@
         });
     }
 
-    // New function to send the fan state to the Lambda API via API Gateway
+    // Function to send the fan state to the Lambda API via API Gateway
     function sendFanStateLambda(userId, fanState) {
       // Prepare the data to send in the required format
       const requestData = {
@@ -77,7 +77,7 @@
         })
       };
 
-      // Make the fetch request to the API Gateway endpoint to control the device
+      // Make the fetch request to the API Gateway endpoint
       fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
           method: 'POST',
           headers: {
