@@ -11,6 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     echo json_encode(["error" => "User not authenticated."]);
     exit;
 }
+
 $user_id = $_SESSION['user_id'];
 
 // Ensure PDO throws exceptions.
@@ -41,14 +42,23 @@ try {
             echo json_encode($acData);
         }
         exit;
+
     } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             throw new Exception("Invalid JSON input.");
         }   
 
-        // Use the session user_id.
-        $user_id = $_SESSION['user_id'];
+        // Fetch the current mode from the database
+        $stmt = $conn->prepare("SELECT mode FROM acRemote WHERE user_id = :user_id LIMIT 1");
+        $stmt->execute([':user_id' => $user_id]);
+        $currentMode = $stmt->fetchColumn();
+
+        // Prevent updating sleep if mode is Dry or Fan
+        if (isset($input['sleep']) && ($currentMode === 'Dry' || $currentMode === 'Fan')) {
+            echo json_encode(["error" => "Sleep mode cannot be enabled in Dry or Fan mode."]);
+            exit;
+        }
 
         // Check if a record for this user exists.
         $stmt = $conn->prepare("SELECT COUNT(*) FROM acRemote WHERE user_id = :user_id");
@@ -63,17 +73,15 @@ try {
         }
 
         // Build the dynamic update query.
-        // Note: "sleep" is now added to the list of updatable fields.
         $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing', 'sleep'];
         $updateParts = [];
         $params = [];
 
         foreach ($fields as $field) {
             if (isset($input[$field])) {
-                // Update the field.
                 $updateParts[] = "$field = :$field";
                 $params[$field] = $input[$field];
-                // Update the corresponding time column if required.
+
                 switch ($field) {
                     case 'power':
                         $updateParts[] = "powertime = NOW()";
@@ -94,7 +102,7 @@ try {
                         $updateParts[] = "swingtime = NOW()";
                         break;
                     case 'sleep':
-                        $updateParts[] = "sleeptime = NOW()";
+                        $updateParts[] = "sleeptime = NOW()"; // Update sleeptime only if sleep changes
                         break;
                 }
             }
