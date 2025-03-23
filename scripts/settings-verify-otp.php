@@ -2,38 +2,29 @@
 session_start();
 header("Content-Type: application/json");
 
-// Optionally disable error output for production
+// Optionally disable error output to avoid extra text in response
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 ini_set('display_errors', 0);
 
-include '../app/config/connection.php';  // Database connection
+include '../app/config/connection.php';  // Include your database connection
 
-// Get the OTP from POST data
-$enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
-
-// Use the new email from session (the one that the OTP was sent to)
+// Use the email from session instead of POST data
 $email = isset($_SESSION['reset_email']) ? trim($_SESSION['reset_email']) : '';
+$enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
 if (empty($email) || empty($enteredOTP)) {
     echo json_encode(["success" => false, "message" => "Email and OTP are required."]);
     exit();
 }
 
-// Ensure the current user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(["success" => false, "message" => "User not logged in."]);
-    exit();
-}
-$currentUserId = $_SESSION['user_id'];
-
-// Fetch the OTP details from the current user's record (using user_id)
-$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM users WHERE user_id = :userId");
-$stmt->bindParam(":userId", $currentUserId, PDO::PARAM_INT);
+// Fetch the OTP details from the database for the provided email
+$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM users WHERE email = :email");
+$stmt->bindParam(":email", $email, PDO::PARAM_STR);
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$row) {
-    echo json_encode(["success" => false, "message" => "User record not found."]);
+    echo json_encode(["success" => false, "message" => "No account found with this email."]);
     exit();
 }
 
@@ -49,24 +40,31 @@ if ($currentTime > $otpExpiry) {
 
 // Compare the entered OTP with the stored OTP
 if ($enteredOTP === $storedOTP) {
-    // OTP is correct. Now, check if any other user (with a different user_id) already uses this new email.
-    $stmtCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM users WHERE email = :email AND user_id != :userId");
+
+    // Ensure the user is logged in so we know which account to update
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(["success" => false, "message" => "User not logged in."]);
+        exit();
+    }
+    $currentUserId = $_SESSION['user_id'];
+
+    // Check if any other user (different from the current user) already uses this email
+    $stmtCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM users WHERE email = :email AND user_id != :currentUserId");
     $stmtCheck->bindParam(":email", $email, PDO::PARAM_STR);
-    $stmtCheck->bindParam(":userId", $currentUserId, PDO::PARAM_INT);
+    $stmtCheck->bindParam(":currentUserId", $currentUserId, PDO::PARAM_INT);
     $stmtCheck->execute();
     $rowCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
-    
     if ($rowCheck['cnt'] > 0) {
         echo json_encode(["success" => false, "message" => "Cannot verify, Email already in use."]);
         exit();
     }
-    
-    // No duplicate found; update the current user's email with the new verified email
-    $stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :userId");
+
+    // Update the current user's email column with the verified email
+    $stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :currentUserId");
     $stmtUpdate->bindParam(":email", $email, PDO::PARAM_STR);
-    $stmtUpdate->bindParam(":userId", $currentUserId, PDO::PARAM_INT);
+    $stmtUpdate->bindParam(":currentUserId", $currentUserId, PDO::PARAM_INT);
     $stmtUpdate->execute();
-    
+
     echo json_encode(["success" => true, "message" => "OTP verified successfully and email updated."]);
 } else {
     echo json_encode(["success" => false, "message" => "Invalid OTP. Please try again."]);
