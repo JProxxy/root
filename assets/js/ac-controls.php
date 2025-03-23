@@ -145,7 +145,6 @@
       }
     });
   });
-
   // ============== MODE LOGIC  ============== //
   // Declare globally, only once
   let currentMode = "Cool"; // Default mode
@@ -227,8 +226,10 @@
     }
 
     console.log("Mode Tracker:", currentMode);
-    // Send the active mode to fetch-AC-data.php
+    // Send the active mode to PHP backend
     sendModeData(currentMode);
+    // Also send the active mode to Lambda
+    sendModeLambda("<?php echo $_SESSION['user_id']; ?>", currentMode);
 
     // If the mode is Dry or Fan, force sleep mode to off:
     if (currentMode === "Dry" || currentMode === "Fan") {
@@ -265,6 +266,33 @@
       });
   }
 
+  // New function to send the mode to the Lambda API via API Gateway
+  function sendModeLambda(userId, mode) {
+    // Prepare the data in the required format (no extra wrapping)
+    const requestData = {
+      data: {
+        user_id: userId,
+        mode: mode
+      }
+    };
+
+    // Make the fetch request to the Lambda API endpoint
+    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(responseData => {
+        console.log('Lambda mode response:', responseData);
+      })
+      .catch(error => {
+        console.error("Error updating mode on Lambda:", error);
+      });
+  }
+
   // When the page loads, fetch the current mode from the database.
   document.addEventListener("DOMContentLoaded", function () {
     fetchACMode();
@@ -277,8 +305,34 @@
     });
   });
 
-
-
+  // Function to fetch the AC mode from the database (same as before)
+  function fetchACMode() {
+    $.ajax({
+      url: '../scripts/fetch-AC-data.php', // GET request will return the AC log
+      type: 'GET',
+      dataType: 'json',
+      success: function (data) {
+        console.log("Fetched mode from DB:", data.mode);
+        // If the mode exists in the DB, use it; otherwise default to "Cool"
+        if (data.mode) {
+          currentMode = data.mode;
+        } else {
+          currentMode = "Cool";
+        }
+        // Update the state accordingly
+        currentState = modeToState(currentMode);
+        // Now update the UI
+        updateModeDisplay();
+      },
+      error: function (xhr, status, error) {
+        console.error("Error fetching AC mode:", error);
+        // On error, default to "Cool"
+        currentMode = "Cool";
+        currentState = 0;
+        updateModeDisplay();
+      }
+    });
+  }
 
   // ============== SLEEP LOGIC ============== //
 
