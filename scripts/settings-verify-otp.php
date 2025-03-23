@@ -19,14 +19,14 @@ $user_id = $_SESSION['user_id'];
 // Retrieve email from session (the email to be updated) and OTP from POST data
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
-if (empty($email) || empty($enteredOTP)) {
+if (empty($user_id) || empty($enteredOTP)) {
     echo json_encode(["success" => false, "message" => "Email and OTP are required."]);
     exit();
 }
 
 // 2. Fetch Stored OTP Details using user_id (not email)
 // (Assumes you have an OTP table (otp_table) where OTP details are stored per user)
-$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM otp_table WHERE user_id = :user_id");
+$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM users WHERE user_id = :user_id");
 $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
