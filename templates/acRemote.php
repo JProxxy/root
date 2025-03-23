@@ -767,7 +767,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                             tembarHigh: currentTemp
                         }
                     };
-                    fetch("https://abc123.execute-api.ap-southeast-1.amazonaws.com/dev/tempHigh", {
+                    fetch("https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
@@ -786,7 +786,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                             tembarLow: currentTemp
                         }
                     };
-                    fetch("https://abc123.execute-api.ap-southeast-1.amazonaws.com/dev/tempLow", {
+                    fetch("https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
