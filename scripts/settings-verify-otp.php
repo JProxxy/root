@@ -9,13 +9,14 @@ ini_set('display_errors', 0);
 
 include '../app/config/connection.php';  // Include your database connection
 
-// Ensure user is logged in before proceeding
+// Make sure the user is logged in
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["success" => false, "message" => "User not logged in."]);
     exit();
 }
+$user_id = $_SESSION['user_id'];
 
-$currentUserId = $_SESSION['user_id'];
+// Retrieve email from session (the email to be updated) and OTP from POST data
 $email = isset($_SESSION['reset_email']) ? trim($_SESSION['reset_email']) : '';
 $enteredOTP = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
@@ -24,11 +25,10 @@ if (empty($email) || empty($enteredOTP)) {
     exit();
 }
 
-// 2. Retrieve OTP Details:
-// Query the database for the stored OTP and its expiry using the user_id.
-// (Assumes you store OTP details in a separate table 'users' keyed by user_id.)
-$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM users WHERE user_id = :user_id");
-$stmt->bindParam(":user_id", $currentUserId, PDO::PARAM_INT);
+// 2. Fetch Stored OTP Details using user_id (not email)
+// (Assumes you have an OTP table (otp_table) where OTP details are stored per user)
+$stmt = $conn->prepare("SELECT otp_code, otp_expiry FROM otp_table WHERE user_id = :user_id");
+$stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -42,24 +42,22 @@ $otpExpiry = strtotime($row['otp_expiry']);
 $currentTime = time();
 
 // 3. OTP Expiry Check:
-// Compare the current time with the OTP expiry time.
 if ($currentTime > $otpExpiry) {
     echo json_encode(["success" => false, "message" => "OTP has expired. Please request a new one."]);
     exit();
 }
 
 // 4. OTP Verification:
-// Compare the entered OTP with the stored OTP.
 if ($enteredOTP !== $storedOTP) {
     echo json_encode(["success" => false, "message" => "Invalid OTP. Please try again."]);
     exit();
 }
 
-// 5. User & Email Validation:
-// Verify that no other user is already using this email.
+// 5. Email Uniqueness Check:
+// Ensure no other user already uses this email.
 $stmtCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM users WHERE email = :email AND user_id != :user_id");
 $stmtCheck->bindParam(":email", $email, PDO::PARAM_STR);
-$stmtCheck->bindParam(":user_id", $currentUserId, PDO::PARAM_INT);
+$stmtCheck->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 $stmtCheck->execute();
 $rowCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 if ($rowCheck['cnt'] > 0) {
@@ -68,10 +66,10 @@ if ($rowCheck['cnt'] > 0) {
 }
 
 // 6. Update Email:
-// Update the logged-in user’s email in the database.
+// If all checks pass, update the logged-in user’s email in the database.
 $stmtUpdate = $conn->prepare("UPDATE users SET email = :email WHERE user_id = :user_id");
 $stmtUpdate->bindParam(":email", $email, PDO::PARAM_STR);
-$stmtUpdate->bindParam(":user_id", $currentUserId, PDO::PARAM_INT);
+$stmtUpdate->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 $stmtUpdate->execute();
 
 // Return a success message indicating the email update.
