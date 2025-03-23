@@ -415,7 +415,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
         <script>
 
 
-            function toggleAirconFF() {
+function toggleAirconFF() {
                 const switchElement = document.getElementById("airconFFSwitch");
                 const remoteContainer = document.querySelector(".remote-container");
                 const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
