@@ -45,7 +45,7 @@ try {
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             throw new Exception("Invalid JSON input.");
-        }
+        }   
 
         // Use the session user_id.
         $user_id = $_SESSION['user_id'];
@@ -62,36 +62,58 @@ try {
             $stmt->execute([':user_id' => $user_id]);
         }
 
-        // List of fields to update. The "timer" field is included.
+        // Build the dynamic update query.
         $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing'];
-        $updateValues = [];
+        $updateParts = [];
+        $params = [];
 
-        // Use provided values, or fetch the current value if not set.
         foreach ($fields as $field) {
             if (isset($input[$field])) {
-                $updateValues[$field] = $input[$field];
-            } else {
-                $stmt = $conn->prepare("SELECT $field FROM acRemote WHERE user_id = :user_id");
-                $stmt->execute([':user_id' => $user_id]);
-                $updateValues[$field] = $stmt->fetchColumn();
+                // Update the field.
+                $updateParts[] = "$field = :$field";
+                $params[$field] = $input[$field];
+                // Update the corresponding time column.
+                switch ($field) {
+                    case 'power':
+                        $updateParts[] = "powertime = NOW()";
+                        break;
+                    case 'temp':
+                        $updateParts[] = "temptime = NOW()";
+                        break;
+                    case 'timer':
+                        $updateParts[] = "timertime = NOW()";
+                        break;
+                    case 'mode':
+                        $updateParts[] = "modetime = NOW()";
+                        break;
+                    case 'fan':
+                        $updateParts[] = "fantime = NOW()";
+                        break;
+                    case 'swing':
+                        $updateParts[] = "swingtime = NOW()";
+                        break;
+                }
             }
         }
 
         // Validate temperature range if provided.
-        if (isset($updateValues['temp'])) {
-            $temp = (int)$updateValues['temp'];
+        if (isset($params['temp'])) {
+            $temp = (int)$params['temp'];
             if ($temp < 16 || $temp > 32) {
                 throw new Exception("Temperature must be between 16 and 32°C.");
             }
         }
 
-        // Build and execute the update query.
-        $sql = "UPDATE acRemote SET power = :power, temp = :temp, timer = :timer, mode = :mode, fan = :fan, swing = :swing WHERE user_id = :user_id";
-        error_log("Update values: " . print_r($updateValues, true));
+        $params['user_id'] = $user_id;
 
-        $stmt = $conn->prepare($sql);
-        $updateValues['user_id'] = $user_id;
-        $stmt->execute($updateValues);
+        if (!empty($updateParts)) {
+            $sql = "UPDATE acRemote SET " . implode(", ", $updateParts) . " WHERE user_id = :user_id";
+            error_log("Dynamic Update SQL: " . $sql);
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($params);
+        } else {
+            throw new Exception("No valid fields provided for update.");
+        }
 
         // Fetch the updated AC settings.
         $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing FROM acRemote WHERE user_id = :user_id LIMIT 1");

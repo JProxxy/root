@@ -28,6 +28,7 @@
       currentFanState = "High";
       updateFanTracker();
       sendFanData(currentFanState);
+      sendFanStateLambda(userID, currentFanState);
     }
 
     // Function to update the UI and state to "Low"
@@ -39,9 +40,10 @@
       currentFanState = "Low";
       updateFanTracker();
       sendFanData(currentFanState);
+      sendFanStateLambda(userID, currentFanState);
     }
 
-    // Function to send the fan state to the server
+    // Function to send the fan state to the PHP backend
     function sendFanData(fanState) {
       console.log("Sending fan data for user:", userID, "State:", fanState);
       fetch("../scripts/fetch-AC-data.php", {
@@ -60,6 +62,35 @@
         })
         .catch((error) => {
           console.error("Error sending fan data:", error);
+        });
+    }
+
+    // New function to send the fan state to the Lambda API via API Gateway
+    function sendFanStateLambda(userId, fanState) {
+      // Prepare the data to send in the required format
+      const requestData = {
+        body: JSON.stringify({
+          data: {
+            user_id: userId,
+            fanstate: fanState
+          }
+        })
+      };
+
+      // Make the fetch request to the API Gateway endpoint to control the device
+      fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData) // Send the data in the required format
+        })
+        .then(response => response.json()) // Handle the response from Lambda
+        .then(responseData => {
+          console.log('Device control response:', responseData);
+        })
+        .catch(error => {
+          console.error("Error updating device status:", error);
         });
     }
 
@@ -115,7 +146,7 @@
       }
     });
   });
-  // ============== MODE LOGIC ============== //
+  
   // ============== MODE LOGIC  ============== //
   // Declare globally, only once
   let currentMode = "Cool"; // Default mode
