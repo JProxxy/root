@@ -587,11 +587,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Fetch the timer and status from the database.
+  // Only update totalTime if localStorage doesn't have a valid value.
   fetch("../scripts/fetch-AC-data.php?fetchTimer=1")
     .then(response => response.json())
     .then(data => {
-      if (data.timer && data.timer > 0) {
-        totalTime = data.timer; // Expecting timer in hours now
+      // If localStorage doesn't have a valid timer or it’s zero, then use the database value.
+      if ((!localStorage.getItem("totalTime") || totalTime <= 0) && data.timer && data.timer > 0) {
+        totalTime = data.timer; // Expecting timer in hours
       }
       if (data.timer_status) {
         timerStatus = data.timer_status;
@@ -610,7 +612,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(error => console.error("Error fetching timer:", error));
 
   function updateTimer() {
-    // Since totalTime is in hours already, we can directly use it.
+    // totalTime is in hours, so display it directly.
     let displayHours = totalTime;
     if (displayHours > maxTime) displayHours = maxTime;
     timeLeftText.textContent = String(displayHours).padStart(2, "0");
@@ -631,7 +633,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Countdown function.
   function startCountdown() {
     clearInterval(countdownInterval);
-    // For production, use 3600000 (1 hour in ms). For testing, you might use a shorter interval.
+    // For production use 3600000 (1 hour in ms). For testing, you may use a shorter interval.
     countdownInterval = setInterval(() => {
       if (totalTime > 0) {
         totalTime--;
@@ -644,24 +646,25 @@ document.addEventListener("DOMContentLoaded", function () {
         timerStatus = "stopped";
         console.log("Timer Finished - turning off AC");
 
-        // Turn off the AC switch when timer finishes
+        // Turn off the AC switch when timer finishes.
         airconSwitch.checked = false;
         toggleAirconFF();
 
         updateTimer();
       }
-    }, 3600000); // 1 hour interval; change this value for testing if needed.
+    }, 3600000); // 1 hour interval (3600000 ms)
   }
 
   // Click on progress circle adds 1 hour.
   progressCircle.addEventListener("click", function () {
+    // If not already running, start the countdown.
     if (!isRunning) {
       isRunning = true;
       timerStatus = "running";
       airconSwitch.checked = true;
       startCountdown();
     }
-    totalTime += 1; // Add one hour
+    totalTime += 1; // Add one hour.
     if (totalTime > maxTime) {
       totalTime = 0;
       zeroCount = true;
@@ -676,7 +679,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTimer();
   });
 
-  // Listen for custom event to reset timer when AC is turned off.
+  // Listen for a custom event to reset the timer when AC is turned off.
   document.addEventListener("airconOff", function () {
     totalTime = 0;
     clearInterval(countdownInterval);
