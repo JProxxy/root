@@ -238,32 +238,56 @@ require_once '../app/config/connection.php';
                                             .catch(error => console.error("Error:", error));
                                     }
                                 };
-                            });
+
+                                // Listen for real-time input on the OTP field
+                                otpInput.addEventListener("input", function () {
+                                    const otpValue = otpInput.value.trim();
+                                    // Assuming OTP is 5 digits long
+                                    if (otpValue.length === 5) {
+                                        // Automatically verify OTP when 5 digits are entered
+                                        fetch('../scripts/settings-verify-otp.php', {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                            body: "email=" + encodeURIComponent(verificationInput.value) +
+                                                "&otp=" + encodeURIComponent(otpValue)
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                alert(data.message);
+                                                if (data.success) {
+                                                    closeModal();
+                                                    location.reload();
+                                                }
+                                            })
+                                            .catch(error => console.error("Error:", error));
+                                    }
+                                });
+
                         </script>
 
                     </div>
 
                 </div>
                 <script>
-                    // Remove the old submitForm that was trying to submit a non-existent form.
-                    // Instead, we call updatePassword() directly.
-                    function submitForm() {
-                        updatePassword();
-                    }
+                                // Remove the old submitForm that was trying to submit a non-existent form.
+                                // Instead, we call updatePassword() directly.
+                                function submitForm() {
+                                    updatePassword();
+                                }
 
-                    function togglePassword(fieldId) {
-                        const passwordField = document.getElementById(fieldId);
-                        const icon = passwordField.nextElementSibling;
-                        if (passwordField.type === "password") {
-                            passwordField.type = "text";
-                            icon.classList.remove("fa-eye");
-                            icon.classList.add("fa-eye-slash");
-                        } else {
-                            passwordField.type = "password";
-                            icon.classList.remove("fa-eye-slash");
-                            icon.classList.add("fa-eye");
-                        }
-                    }
+                                function togglePassword(fieldId) {
+                                    const passwordField = document.getElementById(fieldId);
+                                    const icon = passwordField.nextElementSibling;
+                                    if (passwordField.type === "password") {
+                                        passwordField.type = "text";
+                                        icon.classList.remove("fa-eye");
+                                        icon.classList.add("fa-eye-slash");
+                                    } else {
+                                        passwordField.type = "password";
+                                        icon.classList.remove("fa-eye-slash");
+                                        icon.classList.add("fa-eye");
+                                    }
+                                }
                 </script>
             </div>
         </div>
@@ -274,61 +298,61 @@ require_once '../app/config/connection.php';
 
 <!-- JavaScript to handle password update -->
 <script>
-    async function updatePassword() {
-        const currentPassword = document.getElementById("current-password").value;
-        const newPassword = document.getElementById("new-password").value;
-        const confirmPassword = document.getElementById("confirm-password").value;
-        const errorDiv = document.querySelector('.errorNewPass');
+                                async function updatePassword() {
+                                    const currentPassword = document.getElementById("current-password").value;
+                                    const newPassword = document.getElementById("new-password").value;
+                                    const confirmPassword = document.getElementById("confirm-password").value;
+                                    const errorDiv = document.querySelector('.errorNewPass');
 
-        // Clear any previous error messages and hide the div
-        errorDiv.innerText = "";
-        errorDiv.style.display = "none";
+                                    // Clear any previous error messages and hide the div
+                                    errorDiv.innerText = "";
+                                    errorDiv.style.display = "none";
 
-        // Ensure the new passwords match
-        if (newPassword !== confirmPassword) {
-            errorDiv.innerText = "New passwords do not match!";
-            errorDiv.style.display = "block"; // Show error
-            return;
-        }
+                                    // Ensure the new passwords match
+                                    if (newPassword !== confirmPassword) {
+                                        errorDiv.innerText = "New passwords do not match!";
+                                        errorDiv.style.display = "block"; // Show error
+                                        return;
+                                    }
 
-        const data = {
-            currentPassword: currentPassword,
-            newPassword: newPassword
-        };
+                                    const data = {
+                                        currentPassword: currentPassword,
+                                        newPassword: newPassword
+                                    };
 
-        try {
-            const response = await fetch('../scripts/update_settingsPassword.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+                                    try {
+                                        const response = await fetch('../scripts/update_settingsPassword.php', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify(data)
+                                        });
 
-            // Try to parse the JSON response
-            const result = await response.json();
+                                        // Try to parse the JSON response
+                                        const result = await response.json();
 
-            if (result.success) {
-                errorDiv.style.color = "green";
-                errorDiv.style.backgroundColor = "#DEF2E3"; // Set background color to DEF2E3
-                errorDiv.innerText = "Password updated successfully!";
-                errorDiv.style.display = "block"; // Show success message
-                // Clear the input fields
-                document.getElementById("current-password").value = "";
-                document.getElementById("new-password").value = "";
-                document.getElementById("confirm-password").value = "";
-            } else {
-                errorDiv.style.backgroundColor = "#f2dede";
-                errorDiv.style.color = "red";
-                errorDiv.innerText = result.message || "Error updating password";
-                errorDiv.style.display = "block"; // Show error
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            errorDiv.style.color = "red";
-            errorDiv.innerText = "An unexpected error occurred.";
-            errorDiv.style.display = "block"; // Show error
-        }
-    }
+                                        if (result.success) {
+                                            errorDiv.style.color = "green";
+                                            errorDiv.style.backgroundColor = "#DEF2E3"; // Set background color to DEF2E3
+                                            errorDiv.innerText = "Password updated successfully!";
+                                            errorDiv.style.display = "block"; // Show success message
+                                            // Clear the input fields
+                                            document.getElementById("current-password").value = "";
+                                            document.getElementById("new-password").value = "";
+                                            document.getElementById("confirm-password").value = "";
+                                        } else {
+                                            errorDiv.style.backgroundColor = "#f2dede";
+                                            errorDiv.style.color = "red";
+                                            errorDiv.innerText = result.message || "Error updating password";
+                                            errorDiv.style.display = "block"; // Show error
+                                        }
+                                    } catch (error) {
+                                        console.error("Error:", error);
+                                        errorDiv.style.color = "red";
+                                        errorDiv.innerText = "An unexpected error occurred.";
+                                        errorDiv.style.display = "block"; // Show error
+                                    }
+                                }
 
 </script>
