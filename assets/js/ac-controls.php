@@ -609,7 +609,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(error => console.error("Error fetching timer:", error));
 
-    document.addEventListener("DOMContentLoaded", function () {
+ document.addEventListener("DOMContentLoaded", function () {
   // Restore timer value from localStorage.
   totalTime = localStorage.getItem("totalTime")
     ? parseInt(localStorage.getItem("totalTime"), 10)
