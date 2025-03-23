@@ -334,100 +334,121 @@
     });
   }
 
- // ============== SLEEP LOGIC ============== //
+   // ============== SLEEP LOGIC ============== //
 
-// Global sleep state tracker (default: "Off")
-let sleepState = "Off";
+  // Global sleep state tracker (default: "Off")
+  let sleepState = "Off";
 
-// Function to set sleep to "On"
-function setSleepOn() {
-  // Prevent enabling sleep if mode is Dry or Fan
-  if (typeof currentMode !== "undefined" && (currentMode === "Dry" || currentMode === "Fan")) {
-    console.log("Sleep cannot be enabled in Dry or Fan mode.");
-    return;
+  // Function to set sleep to "On"
+  function setSleepOn() {
+    // Prevent enabling sleep if mode is Dry or Fan
+    if (typeof currentMode !== "undefined" && (currentMode === "Dry" || currentMode === "Fan")) {
+      console.log("Sleep cannot be enabled in Dry or Fan mode.");
+      return;
+    }
+
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
+
+    // Hide the "off" image and show the "on" image
+    if (sleepWhite) sleepWhite.style.display = "none";
+    if (sleepGreen) sleepGreen.style.display = "block";
+
+    sleepState = "On";
+    console.log("Sleep: On");
+    sendSleepData(sleepState);
+    sendSleepLambda("<?php echo $_SESSION['user_id']; ?>", sleepState);
   }
 
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
+  // Function to set sleep to "Off"
+  function setSleepOff() {
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
 
-  // Hide the "off" image and show the "on" image
-  if (sleepWhite) sleepWhite.style.display = "none";
-  if (sleepGreen) sleepGreen.style.display = "block";
+    // Show the "off" image and hide the "on" image
+    if (sleepWhite) sleepWhite.style.display = "block";
+    if (sleepGreen) sleepGreen.style.display = "none";
 
-  sleepState = "On";
-  console.log("Sleep: On");
-  sendSleepData(sleepState);
-}
-
-// Function to set sleep to "Off"
-function setSleepOff() {
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
-
-  // Show the "off" image and hide the "on" image
-  if (sleepWhite) sleepWhite.style.display = "block";
-  if (sleepGreen) sleepGreen.style.display = "none";
-
-  sleepState = "Off";
-  console.log("Sleep: Off");
-  sendSleepData(sleepState);
-}
-
-// Attach click events to both sleep images so clicking toggles the state.
-document.addEventListener("DOMContentLoaded", function () {
-  const sleepWhite = document.getElementById("sleepWhite");
-  const sleepGreen = document.getElementById("sleepGreen");
-
-  if (sleepWhite) {
-    sleepWhite.addEventListener("click", function () {
-      if (sleepState === "Off") {
-        setSleepOn();
-      } else {
-        setSleepOff();
-      }
-    });
+    sleepState = "Off";
+    console.log("Sleep: Off");
+    sendSleepData(sleepState);
+    sendSleepLambda("<?php echo $_SESSION['user_id']; ?>", sleepState);
   }
 
-  if (sleepGreen) {
-    sleepGreen.addEventListener("click", function () {
-      if (sleepState === "On") {
-        setSleepOff();
-      } else {
-        setSleepOn();
-      }
-    });
-  }
-});
+  // Attach click events to both sleep images so clicking toggles the state.
+  document.addEventListener("DOMContentLoaded", function () {
+    const sleepWhite = document.getElementById("sleepWhite");
+    const sleepGreen = document.getElementById("sleepGreen");
 
-// Function to send the sleep state to the Lambda endpoint as JSON.
-// Default values for mode and fanstate are provided since users cannot click sleep in Dry or Fan mode.
-function sendSleepData(state) {
-  const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
+    // Clicking the "off" image toggles sleep mode on, if allowed.
+    if (sleepWhite) {
+      sleepWhite.addEventListener("click", function () {
+        if (sleepState === "Off") {
+          setSleepOn();
+        } else {
+          setSleepOff();
+        }
+      });
+    }
 
-  // Use default values because the sleep button is only clickable when not in Dry or Fan mode.
-  const defaultMode = "Cool";
-  const defaultFanState = "High";
+    // Clicking the "on" image toggles sleep mode off.
+    if (sleepGreen) {
+      sleepGreen.addEventListener("click", function () {
+        if (sleepState === "On") {
+          setSleepOff();
+        } else {
+          setSleepOn();
+        }
+      });
+    }
+  });
 
-  const payload = {
-    user_id: userID,
-    sleep: state,
-    mode: defaultMode,
-    fanstate: defaultFanState
-  };
-
-  fetch("https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-    .then(response => response.text())
-    .then(data => {
-      console.log("Sleep update response:", data);
+  // Function to send the sleep state to the PHP backend
+  function sendSleepData(state) {
+    const userID = "<?php echo $_SESSION['user_id']; ?>"; // Dynamic user ID from session
+    fetch("../scripts/fetch-AC-data.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userID,
+        sleep: state
+      }),
     })
-    .catch(error => {
-      console.error("Error sending sleep data:", error);
-    });
-}
+      .then(response => response.text())
+      .then(data => {
+        console.log("Sleep update response:", data);
+      })
+      .catch(error => {
+        console.error("Error sending sleep data:", error);
+      });
+  }
+
+  // New function to send the sleep state to the Lambda API via API Gateway
+  function sendSleepLambda(userId, state) {
+    // Prepare the JSON payload
+    const requestData = {
+      data: {
+        user_id: userId,
+        sleep: state
+      }
+    };
+
+    // Make the fetch request to the Lambda API endpoint
+    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(responseData => {
+        console.log('Sleep Lambda response:', responseData);
+      })
+      .catch(error => {
+        console.error("Error updating sleep status on Lambda:", error);
+      });
+  }
 
 
 
