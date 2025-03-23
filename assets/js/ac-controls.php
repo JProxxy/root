@@ -609,44 +609,23 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch(error => console.error("Error fetching timer:", error));
 
-  function updateTimer() {
-    let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
-    if (hours > 12) hours = 12;
-    timeLeftText.textContent = String(hours).padStart(2, "0");
+    document.addEventListener("DOMContentLoaded", function () {
+  // Restore timer value from localStorage.
+  totalTime = localStorage.getItem("totalTime")
+    ? parseInt(localStorage.getItem("totalTime"), 10)
+    : 0;
+  
+  // Optionally, restore other state values.
+  // For example, if you stored timerStatus or isRunning, retrieve them here.
+  // timerStatus = localStorage.getItem("timerStatus") || "stopped";
+  // isRunning = localStorage.getItem("isRunning") === "true";
 
-    const dashoffset = circleCircumference - (circleCircumference * totalTime) / maxTime;
-    progressBar.style.strokeDashoffset = dashoffset;
+  // Initial update of the UI.
+  updateTimer();
 
-    console.log(`Timer Set: ${hours} hour(s), Status: ${timerStatus}`);
-
-    // Send timer and status to backend and Lambda.
-    updateTimerToDatabase(hours, timerStatus);
-    sendTimerLambda("<?php echo $_SESSION['user_id']; ?>", hours, timerStatus);
-
-    localStorage.setItem("totalTime", totalTime);
-  }
-
-  function startCountdown() {
-    clearInterval(countdownInterval);
-    countdownInterval = setInterval(() => {
-      if (totalTime > 0) {
-        totalTime--;
-        updateTimer();
-      } else {
-        clearInterval(countdownInterval);
-        totalTime = 0;
-        isRunning = false;
-        zeroTimer = true;
-        timerStatus = "stopped";
-        console.log("Timer Finished - turning off AC");
-
-        // Turn off the AC switch when timer finishes
-        airconSwitch.checked = false;
-        toggleAirconFF();
-
-        updateTimer();
-      }
-    }, 1000);
+  // Resume countdown if the timer was running.
+  if (totalTime > 0 && timerStatus === "running") {
+    startCountdown();
   }
 
   // Click on progress circle adds 1 hour (3600 seconds).
@@ -682,7 +661,51 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTimer();
   });
 
-  updateTimer(); // Initial update
+  // Timer update function.
+  function updateTimer() {
+    let hours = totalTime > 0 ? Math.ceil(totalTime / 3600) : 0;
+    if (hours > 12) hours = 12;
+    timeLeftText.textContent = String(hours).padStart(2, "0");
+
+    const dashoffset =
+      circleCircumference - (circleCircumference * totalTime) / maxTime;
+    progressBar.style.strokeDashoffset = dashoffset;
+
+    console.log(`Timer Set: ${hours} hour(s), Status: ${timerStatus}`);
+
+    // Send timer and status to backend and Lambda.
+    updateTimerToDatabase(hours, timerStatus);
+    sendTimerLambda("<?php echo $_SESSION['user_id']; ?>", hours, timerStatus);
+
+    localStorage.setItem("totalTime", totalTime);
+    // Optionally persist other states
+    // localStorage.setItem("timerStatus", timerStatus);
+    // localStorage.setItem("isRunning", isRunning);
+  }
+
+  // Countdown function.
+  function startCountdown() {
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      if (totalTime > 0) {
+        totalTime--;
+        updateTimer();
+      } else {
+        clearInterval(countdownInterval);
+        totalTime = 0;
+        isRunning = false;
+        zeroTimer = true;
+        timerStatus = "stopped";
+        console.log("Timer Finished - turning off AC");
+
+        // Turn off the AC switch when timer finishes
+        airconSwitch.checked = false;
+        toggleAirconFF();
+
+        updateTimer();
+      }
+    }, 1000);
+  }
 
   // Function to send the timer and status to PHP backend.
   function updateTimerToDatabase(hoursValue, status) {
