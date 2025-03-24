@@ -74,7 +74,77 @@ require_once '../app/config/connection.php';
                             <br>
                             <li>
                                 <span class="me-2" style="display: inline-block; width: 16px; height: 16px;"></span>
-                                <span style="color: red;">Delete Account</span>
+                                <span id="deleteAccount" style="color: red; cursor: pointer;">Delete Account</span>
+
+                                <!-- Delete Account Modal -->
+                                <div id="delete-modal" class="modal" style="display:none;">
+                                    <div class="modal-content">
+                                        <span class="close-btn" onclick="closeDeleteModal()">&times;</span>
+                                        <h2>Delete Account</h2>
+                                        <p>Are you sure you want to delete your account? This action is irreversible.
+                                        </p>
+                                        <input type="password" id="delete-password" class="text-input"
+                                            placeholder="Enter your password" required>
+                                        <input type="text" id="delete-confirm-text" class="text-input"
+                                            placeholder="Type 'delete' to confirm" required>
+                                        <button class="confirm-btnDelete" onclick="deleteAccount()">Confirm Delete</button>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    // Function to open the delete modal
+                                    function openDeleteModal() {
+                                        document.getElementById("delete-modal").style.display = "block";
+                                    }
+
+                                    // Function to close the delete modal
+                                    function closeDeleteModal() {
+                                        document.getElementById("delete-modal").style.display = "none";
+                                        document.getElementById("delete-password").value = "";
+                                        document.getElementById("delete-confirm-text").value = "";
+                                    }
+
+                                    // Attach click event to the Delete Account text
+                                    document.getElementById("deleteAccount").addEventListener("click", openDeleteModal);
+
+                                    // Function to handle account deletion
+                                    async function deleteAccount() {
+                                        const password = document.getElementById("delete-password").value.trim();
+                                        const confirmText = document.getElementById("delete-confirm-text").value.trim();
+
+                                        // Validate inputs
+                                        if (!password) {
+                                            alert("Please enter your password.");
+                                            return;
+                                        }
+                                        if (confirmText.toLowerCase() !== "delete") {
+                                            alert("Please type 'delete' to confirm.");
+                                            return;
+                                        }
+
+                                        // Send deletion request to the server
+                                        try {
+                                            const response = await fetch('../scripts/delete_account.php', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ password: password })
+                                            });
+                                            const result = await response.json();
+
+                                            if (result.success) {
+                                                alert("Your account has been deleted.");
+                                                // Optionally, redirect to the homepage or login page
+                                                window.location.href = "../templates/login.php";
+                                            } else {
+                                                alert(result.message || "Error deleting account.");
+                                            }
+                                        } catch (error) {
+                                            console.error("Error:", error);
+                                            alert("An unexpected error occurred.");
+                                        }
+                                    }
+                                </script>
+
                             </li>
                             <br>
                             <br>
@@ -106,6 +176,41 @@ require_once '../app/config/connection.php';
                                     placeholder="Verify Email Address" readonly>
                                 <button class="verify-btn" type="button">Setup</button>
                             </div>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const emailInput = document.getElementById('verify-email');
+                                    const verifyBtn = document.querySelector('.verify-btn');
+
+                                    // Fetch verification status from server
+                                    fetch('../scripts/isVerified.php')
+                                        .then(response => {
+                                            if (!response.ok) throw new Error('Network error');
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            if (data.isVerified) {
+                                                emailInput.value = data.email;
+                                                verifyBtn.innerHTML = `
+                    <svg class="verified-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                `;
+                                                verifyBtn.disabled = true;
+                                                verifyBtn.classList.add('verified');
+                                            } else {
+                                                verifyBtn.addEventListener('click', () => {
+                                                    // Initiate verification process
+                                                    window.location.href = '/verify-email';
+                                                });
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            // Handle errors (show message to user)
+                                        });
+                                });
+                            </script>
 
 
                             <div class="input-wrapper">
@@ -157,7 +262,7 @@ require_once '../app/config/connection.php';
                                         verificationInput.placeholder = "Enter Email";
                                         verificationInput.setAttribute("name", "email");
                                     } else if (type === "phone") {
-                                        modalTitle.textContent = "Verify Phone Number";
+                                        modalTitle.textContent = "Verify Phone";
                                         modalLabel.textContent = "Enter Phone Number";
                                         verificationInput.placeholder = "Enter Phone";
                                         verificationInput.setAttribute("name", "phone");
