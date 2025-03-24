@@ -39,7 +39,7 @@ $conn->beginTransaction();
 try {
     // Fetch user data
     $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt->bindValue(1, $userId, PDO::PARAM_INT);
     $stmt->execute();
     $stmt->store_result();
 
@@ -69,8 +69,9 @@ try {
 
     // Get all tables once
     $tablesResult = $conn->query("SHOW TABLES");
-    if (!$tablesResult) throw new Exception('Failed to retrieve tables.');
-    
+    if (!$tablesResult)
+        throw new Exception('Failed to retrieve tables.');
+
     $tables = [];
     while ($tableRow = $tablesResult->fetch_array()) {
         $tables[] = $tableRow[0];
@@ -81,7 +82,7 @@ try {
     foreach ($tables as $tableName) {
         $columnsResult = $conn->query("DESCRIBE `$tableName`");
         $hasUserIdColumn = false;
-        
+
         while ($column = $columnsResult->fetch_assoc()) {
             if (strtolower($column['Field']) === 'user_id') {
                 $hasUserIdColumn = true;
@@ -100,7 +101,8 @@ try {
             $stmtBackup->close();
 
             if (!empty($rows)) {
-                $filename = sprintf('%s%d_%s_%s_%d.csv',
+                $filename = sprintf(
+                    '%s%d_%s_%s_%d.csv',
                     $backupDir,
                     $userId,
                     $sanitizedEmail,
@@ -133,7 +135,7 @@ try {
     foreach ($tables as $tableName) {
         $columnsResult = $conn->query("DESCRIBE `$tableName`");
         $hasUserIdColumn = false;
-        
+
         while ($column = $columnsResult->fetch_assoc()) {
             if (strtolower($column['Field']) === 'user_id') {
                 $hasUserIdColumn = true;
