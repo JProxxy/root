@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Define the backup directory (adjust the path as needed)
-$backupDir = '/var/www/html/storage/user/deleted_userAccounts/';
+$backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
 
 // Check if the backup directory exists
 if (!is_dir($backupDir)) {
