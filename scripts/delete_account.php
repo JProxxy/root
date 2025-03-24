@@ -28,7 +28,8 @@ if (strtolower($confirm) !== 'delete') {
 }
 
 $userId = $_SESSION['user_id'];
-$password = isset($data['password']) ? $data['password'] : null;
+// Trim the password to remove any accidental spaces
+$password = isset($data['password']) ? trim($data['password']) : null;
 
 // Include database connection (this file should return a PDO connection in $conn)
 require_once '../app/config/connection.php';
@@ -49,6 +50,10 @@ try {
 
     $hashedPassword = $userData['password'];
     $userEmail = $userData['email'];
+
+    // Debug: log the plaintext password and hash (remove this in production)
+    error_log("User input password: " . $password);
+    error_log("Stored hash: " . $hashedPassword);
 
     // Validate password for non-OAuth users
     if (!is_null($hashedPassword)) {
@@ -165,3 +170,4 @@ try {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     exit;
 }
+?>
