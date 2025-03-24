@@ -35,7 +35,7 @@ $password = isset($data['password']) ? $data['password'] : null;
 require_once '../app/config/connection.php';
 
 // Start transaction
-$conn->begin_transaction();
+$conn->beginTransaction();
 
 try {
     // Fetch user data
