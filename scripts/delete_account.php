@@ -1,9 +1,10 @@
 <?php
-session_start();
-header('Content-Type: application/json');
-
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
+
+session_start();
+header('Content-Type: application/json');
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
