@@ -1,9 +1,9 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 header('Content-Type: application/json');
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -30,26 +30,25 @@ if (strtolower($confirm) !== 'delete') {
 $userId = $_SESSION['user_id'];
 $password = isset($data['password']) ? $data['password'] : null;
 
-// Include database connection
+// Include database connection (this file should return a PDO connection in $conn)
 require_once '../app/config/connection.php';
 
-// Start transaction
-$conn->beginTransaction();
-
 try {
+    // Begin transaction
+    $conn->beginTransaction();
+
     // Fetch user data
     $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
     $stmt->bindValue(1, $userId, PDO::PARAM_INT);
     $stmt->execute();
-    $stmt->store_result();
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($stmt->num_rows === 0) {
+    if (!$userData) {
         throw new Exception('User not found.');
     }
 
-    $stmt->bind_result($hashedPassword, $userEmail);
-    $stmt->fetch();
-    $stmt->close();
+    $hashedPassword = $userData['password'];
+    $userEmail = $userData['email'];
 
     // Validate password for non-OAuth users
     if (!is_null($hashedPassword)) {
@@ -67,42 +66,35 @@ try {
     // Sanitize email for filename
     $sanitizedEmail = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $userEmail);
 
-    // Get all tables once
-    $tablesResult = $conn->query("SHOW TABLES");
-    if (!$tablesResult)
-        throw new Exception('Failed to retrieve tables.');
-
-    $tables = [];
-    while ($tableRow = $tablesResult->fetch_array()) {
-        $tables[] = $tableRow[0];
-    }
+    // Get all tables
+    $tablesStmt = $conn->query("SHOW TABLES");
+    $tables = $tablesStmt->fetchAll(PDO::FETCH_NUM); // fetch as numeric array
 
     // Backup phase
     $backupSuccess = true;
-    foreach ($tables as $tableName) {
-        $columnsResult = $conn->query("DESCRIBE `$tableName`");
-        $hasUserIdColumn = false;
+    foreach ($tables as $tableRow) {
+        $tableName = $tableRow[0];
 
-        while ($column = $columnsResult->fetch_assoc()) {
+        // Check if the table has a column named 'user_id'
+        $columnsStmt = $conn->query("DESCRIBE `$tableName`");
+        $columns = $columnsStmt->fetchAll(PDO::FETCH_ASSOC);
+        $hasUserIdColumn = false;
+        foreach ($columns as $column) {
             if (strtolower($column['Field']) === 'user_id') {
                 $hasUserIdColumn = true;
                 break;
             }
         }
-        $columnsResult->free();
 
         if ($hasUserIdColumn) {
-            // Backup data
-            $stmtBackup = $conn->prepare("SELECT * FROM `$tableName` WHERE user_id = ?");
-            $stmtBackup->bind_param("i", $userId);
-            $stmtBackup->execute();
-            $result = $stmtBackup->get_result();
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-            $stmtBackup->close();
+            // Backup data for this table
+            $backupStmt = $conn->prepare("SELECT * FROM `$tableName` WHERE user_id = ?");
+            $backupStmt->bindValue(1, $userId, PDO::PARAM_INT);
+            $backupStmt->execute();
+            $rows = $backupStmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($rows)) {
-                $filename = sprintf(
-                    '%s%d_%s_%s_%d.csv',
+                $filename = sprintf('%s%d_%s_%s_%d.csv',
                     $backupDir,
                     $userId,
                     $sanitizedEmail,
@@ -111,15 +103,15 @@ try {
                 );
 
                 $file = fopen($filename, 'w');
-                if ($file === false || !fputcsv($file, array_keys($rows[0]))) {
+                if ($file === false || fputcsv($file, array_keys($rows[0])) === false) {
                     $backupSuccess = false;
                     break;
                 }
 
                 foreach ($rows as $row) {
-                    if (!fputcsv($file, $row)) {
+                    if (fputcsv($file, $row) === false) {
                         $backupSuccess = false;
-                        break 2; // Break both loops
+                        break 2; // Break out of both loops
                     }
                 }
                 fclose($file);
@@ -131,41 +123,40 @@ try {
         throw new Exception('Backup failed. Account deletion aborted.');
     }
 
-    // Deletion phase
-    foreach ($tables as $tableName) {
-        $columnsResult = $conn->query("DESCRIBE `$tableName`");
-        $hasUserIdColumn = false;
+    // Deletion phase: Loop through each table and delete user data
+    foreach ($tables as $tableRow) {
+        $tableName = $tableRow[0];
 
-        while ($column = $columnsResult->fetch_assoc()) {
+        $columnsStmt = $conn->query("DESCRIBE `$tableName`");
+        $columns = $columnsStmt->fetchAll(PDO::FETCH_ASSOC);
+        $hasUserIdColumn = false;
+        foreach ($columns as $column) {
             if (strtolower($column['Field']) === 'user_id') {
                 $hasUserIdColumn = true;
                 break;
             }
         }
-        $columnsResult->free();
 
         if ($hasUserIdColumn) {
-            $stmtDelete = $conn->prepare("DELETE FROM `$tableName` WHERE user_id = ?");
-            $stmtDelete->bind_param("i", $userId);
-            if (!$stmtDelete->execute()) {
+            $deleteStmt = $conn->prepare("DELETE FROM `$tableName` WHERE user_id = ?");
+            $deleteStmt->bindValue(1, $userId, PDO::PARAM_INT);
+            if (!$deleteStmt->execute()) {
                 throw new Exception('Error during data deletion.');
             }
-            $stmtDelete->close();
         }
     }
 
-    // Delete user account
+    // Finally, delete the account from the users table
     $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
-    $stmt->bind_param("i", $userId);
+    $stmt->bindValue(1, $userId, PDO::PARAM_INT);
     if (!$stmt->execute()) {
         throw new Exception('Error deleting account.');
     }
-    $stmt->close();
 
     // Commit transaction
     $conn->commit();
 
-    // Clear session
+    // Destroy the session
     session_destroy();
     echo json_encode(['success' => true, 'message' => 'Account deleted successfully and backup saved.']);
 
@@ -174,4 +165,3 @@ try {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     exit;
 }
-?>
