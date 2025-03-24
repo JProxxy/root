@@ -108,7 +108,6 @@ require_once '../app/config/connection.php';
                                     // Attach click event to the Delete Account text
                                     document.getElementById("deleteAccount").addEventListener("click", openDeleteModal);
 
-                                    // Function to handle account deletion
                                     async function deleteAccount() {
                                         const password = document.getElementById("delete-password").value.trim();
                                         const confirmText = document.getElementById("delete-confirm-text").value.trim();
@@ -131,13 +130,9 @@ require_once '../app/config/connection.php';
                                                     confirm: confirmText
                                                 })
                                             });
+                                            const result = await response.json();
+                                            console.log('Debug info:', result.debug); // Logs the debug info if provided
 
-                                            // Instead of immediately parsing JSON, first get the raw text:
-                                            const text = await response.text();
-                                            console.log("Response text:", text);
-
-                                            // Then try parsing JSON:
-                                            const result = JSON.parse(text);
                                             if (result.success) {
                                                 alert("Your account has been deleted.");
                                                 window.location.href = "../templates/login.php";
