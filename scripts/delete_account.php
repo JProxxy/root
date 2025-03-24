@@ -28,15 +28,15 @@ if (strtolower($confirm) !== 'delete') {
 }
 
 $userId = $_SESSION['user_id'];
-// Trim the password to remove any accidental spaces
-$password = isset($data['password']) ? trim($data['password']) : null;
+// Capture the user-provided password into a separate variable before including the connection
+$userInputPassword = isset($data['password']) ? trim($data['password']) : null;
 
-// Include database connection (this file should return a PDO connection in $conn)
+// Include database connection (this file uses $password for the DB, which won't affect $userInputPassword)
 require_once '../app/config/connection.php';
 
 // Temporary debug info array (remove in production)
 $debugInfo = [
-    'userInputPassword' => $password,
+    'userInputPassword' => $userInputPassword,
     'sessionUserId' => $userId
 ];
 
@@ -58,9 +58,9 @@ try {
     $userEmail = $userData['email'];
     $debugInfo['storedHash'] = $hashedPassword;
 
-    // Validate password for non-OAuth users
+    // Validate password for non-OAuth users using the separate variable
     if (!is_null($hashedPassword)) {
-        if (empty($password) || !password_verify($password, $hashedPassword)) {
+        if (empty($userInputPassword) || !password_verify($userInputPassword, $hashedPassword)) {
             throw new Exception('Incorrect password.');
         }
     }
@@ -177,7 +177,7 @@ try {
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage(),
-        'debug'   => $debugInfo  // Optionally include debug info here as well.
+        'debug'   => $debugInfo
     ]);
     exit;
 }
