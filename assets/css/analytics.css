@@ -66,6 +66,26 @@
   font-family: "Kodchasan", sans-serif;
 }
 
+.secondPart::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  height: 56%;
+  width: 2px;
+  background-color: #979797;
+}
+
+.fourthPart {
+  position: absolute;
+  bottom: 0; /* position at bottom */
+  right: 1%; /* position at right */
+  width: 63.5%;
+  height: 38%;
+  border-top: 2.5px solid #979797;
+  /* background-color: rgba(0, 128, 0, 0.247); */
+}
+
+/* WATER */
 /* Styling for textContainer to display children side by side */
 .textContainer {
   display: flex; /* Make the container a flexbox */
@@ -125,47 +145,279 @@
   margin-top: 2%;
 }
 
-.waterGauge{
-    position: relative;
-   padding-top: 5%;
+.waterGauge {
+  position: relative;
+  padding-top: 5%;
 }
 
 .deviderFirst {
-    border: 0; /* Remove the default border */
-    border-top: 3px solid #ccc; /* Light gray divider */
-    margin: 10px 0; /* Add space above and below */
-    width: 100%; /* Ensure it spans the full width */
+  border: 0; /* Remove the default border */
+  border-top: 3px solid #ccc; /* Light gray divider */
+  margin: 10px 0; /* Add space above and below */
+  width: 100%; /* Ensure it spans the full width */
 }
 
 .roomTempSelect {
-    display: flex;
-    align-items: center; /* Vertically align items */
-    gap: 10px; /* Adds spacing between the span and the select element */
-    margin-bottom: 2%;
+  display: flex;
+  align-items: center; /* Vertically align items */
+  gap: 10px; /* Adds spacing between the span and the select element */
+  margin-bottom: 2%;
 }
 
 .roomTitle {
-    font-size: 16px;
-    margin-right: 10px; /* Space between text and dropdown */
-   
+  font-size: 16px;
+  margin-right: 10px; /* Space between text and dropdown */
 }
 
 .dropdown {
-    padding: 5px;
-    font-size: 14px;
+  margin-top: 10px;
+  border: none;
+  padding: 8px 12px;
+  font-size: 16px;
+  background-color: #fff;
+  text-align: center;
+  text-align-last: center;
+  display: block;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Attempt to center the options inside the dropdown */
+.dropdown option {
+  text-align: left;
 }
 
 .chartRoomCont {
-    display: flex;
-    justify-content: space-between; /* Ensures space between the two divs */
-    gap: 10px; /* Optional: Adds space between the two elements */
+  margin-top: 2%;
+  display: flex;
+  justify-content: space-between; /* Ensures space between the two divs */
+  gap: 10px; /* Optional: Adds space between the two elements */
 }
 
 .roomTemp {
-    margin-top: 0%;
-    flex: 1; /* Ensures both elements take up equal width */
+  margin-top: 0%;
+  flex: 1; /* Ensures both elements take up equal width */
 }
 
 .roomHum {
-    flex: 1; /* Ensures both elements take up equal width */
+  flex: 1; /* Ensures both elements take up equal width */
+}
+
+.topBar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 95% !important;
+  vertical-align: middle;
+  background-color: rgba(255, 0, 0, 0);
+}
+.topBarItem {
+  background-color: #b9000000;
+  padding: 10px;
+  text-align: center;
+  margin-top: 15% !important;
+  margin-bottom: 35%;
+}
+
+/* SMART LIGHTS */
+
+.secondPart p {
+  margin-top: 12%;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0b3236;
+  text-align: center;
+  font-family: "Kodchasan", sans-serif;
+}
+
+.noteOAL {
+  position: relative;
+  height: 25px;
+  width: 25px;
+  background-color: #e2e46a;
+
+  margin-top: 20px;
+}
+
+.overallAveLightsOn,
+.peakUsageHours {
+  /* Change from flex to grid layout */
+  display: grid;
+  grid-template-columns: auto 1fr; /* Note in first column, text in second */
+  grid-template-rows: auto auto; /* First row for note & p, second row for span */
+  align-items: center; /* Vertically center items in their row */
+  gap: 10px;
+  width: 47%;
+  /* (Keep your background-color or remove it if not needed) */
+  background-color: rgba(255, 0, 0, 0);
+  margin-top: 2%;
+}
+
+/* Place the note div (first child) in column 1 */
+.overallAveLightsOn > .noteOAL,
+.peakUsageHours > .notePUH {
+  grid-column: 1;
+}
+
+/* Place the paragraph in column 2 */
+.overallAveLightsOn > p,
+.peakUsageHours > p {
+  grid-column: 2;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+/* Place the span in the second row spanning both columns */
+.overallAveLightsOn > span,
+.peakUsageHours > span {
+  grid-column: 1 / span 2;
+  text-align: center;
+}
+
+.notePUH {
+  position: relative;
+  height: 25px;
+  width: 25px;
+  background-color: #bdc00b;
+  margin-top: 20px;
+}
+
+/* AIRCON */
+
+.acHeaderCont p {
+  margin-top: 12%;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0b3236;
+  text-align: center;
+  font-family: "Kodchasan", sans-serif;
+  margin-bottom: 2%;
+}
+
+.acDD {
+  border: none; /* Removes border */
+  padding: 8px 12px; /* Adds spacing inside */
+  font-size: 16px; /* Adjust font size */
+  background-color: #fff; /* White background */
+  text-align: center; /* Center text (for browsers that support it) */
+  text-align-last: center; /* Ensures the selected option is centered (Chrome, Firefox) */
+  display: block; /* Make it a block element for horizontal centering */
+  margin: 0 auto; /* Center the element horizontally */
+  /* Optionally add a subtle shadow for depth */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5%;
+}
+/* Attempt to center the options inside the dropdown */
+.acDD option {
+  text-align: left;
+}
+
+/* Pie Chart */
+
+.pieWrapper {
+  display: flex;
+  justify-content: space-between; /* Spread items out; adjust as needed */
+  width: 100%;
+  margin: 0 auto;
+}
+
+.pieCont {
+  width: 65%; /* Adjust as needed */
+  background-color: rgba(255, 0, 0, 0);
+}
+
+.pieCont p {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #0b3236;
+  text-align: center;
+  font-family: "Kodchasan", sans-serif;
+  margin-top: 2%
+}
+
+/* CHART MISMO */
+.pieChartLightFloors {
+  position: relative;
+  padding-right: 5%;
+  width: 280px;
+  height: 280px;
+}
+
+/* Container for all legend items arranged in a grid */
+/* Each legend item: use flex column layout */
+.legendsCont {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Exactly 3 columns */
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "ff sf tf"
+    ".  fof Fif";
+  gap: 10px;
+  max-width: 600px;
+  margin: 10% auto 0;
+  margin-left: 10%;
+}
+
+/* Top row: note and floor name side by side */
+.legend-top {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 100%;
+}
+
+/* Icon styles for each note element */
+.noteffCont{
+  width: 20px;
+  height: 20px;
+  background-color: rgba(231, 243, 183, 1); /* Example color; change as needed */
+  margin-right: 5px;
+}
+
+
+.notesfCont {
+  width: 20px;
+  height: 20px;
+  background-color: rgba(217, 237, 141, 1); /* Example color; change as needed */
+  margin-right: 5px;
+}
+
+
+
+.notetfCont {
+  width: 20px;
+  height: 20px;
+  background-color: rgba(185, 189, 4, 1); /* Example color; change as needed */
+  margin-right: 5px;
+}
+
+.notefofCont{
+  width: 20px;
+  height: 20px;
+  background-color: rgba(185, 189, 4, 1); /* Example color; change as needed */
+  margin-right: 5px;
+}
+
+.notefifCont{
+  width: 20px;
+  height: 20px;
+  background-color: rgba(123, 125, 4, 1); /* Example color; change as needed */
+  margin-right: 5px;
+}
+
+/* Floor name styling */
+.legend-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Percentage styling */
+.legend-item span {
+  margin-top: 5px;
+ 
+  font-size: 14px;
+  color: #666;
+  display: block;
+  text-align: left;
+  margin-left: 25%;
 }

@@ -79,7 +79,9 @@ if (!empty($user_data['profile_picture'])) {
             <!-- Header -->
             <div class="headbackCont">
                 <div class="imgBack">
-                    <img src="../assets/images/back.png" alt="back" class="backIcon">
+                    <a href="../templates/dashboard.php">
+                        <img src="../assets/images/back.png" alt="back" class="backIcon">
+                    </a>
                 </div>
                 <div class="headerText">Account Settings</div>
             </div>
@@ -118,7 +120,79 @@ if (!empty($user_data['profile_picture'])) {
                             <br>
                             <li>
                                 <span class="me-2" style="display: inline-block; width: 16px; height: 16px;"></span>
-                                <span style="color: red;">Delete Account</span>
+                                <span id="deleteAccount" style="color: red; cursor: pointer;">Delete Account</span>
+
+                                <!-- Delete Account Modal -->
+                                <div id="delete-modal" class="modal" style="display:none;">
+                                    <div class="modal-content">
+                                        <span class="close-btn" onclick="closeDeleteModal()">&times;</span>
+                                        <h2>Delete Account</h2>
+                                        <p>Are you sure you want to delete your account? This action is irreversible.
+                                        </p>
+                                        <input type="password" id="delete-password" class="text-input"
+                                            placeholder="Enter your password" required>
+                                        <input type="text" id="delete-confirm-text" class="text-input"
+                                            placeholder="Type 'delete' to confirm" required>
+                                        <button class="confirm-btnDelete" onclick="deleteAccount()">Confirm
+                                            Delete</button>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    // Function to open the delete modal
+                                    function openDeleteModal() {
+                                        document.getElementById("delete-modal").style.display = "block";
+                                    }
+
+                                    // Function to close the delete modal
+                                    function closeDeleteModal() {
+                                        document.getElementById("delete-modal").style.display = "none";
+                                        document.getElementById("delete-password").value = "";
+                                        document.getElementById("delete-confirm-text").value = "";
+                                    }
+
+                                    // Attach click event to the Delete Account text
+                                    document.getElementById("deleteAccount").addEventListener("click", openDeleteModal);
+
+                                    async function deleteAccount() {
+                                        const password = document.getElementById("delete-password").value.trim();
+                                        const confirmText = document.getElementById("delete-confirm-text").value.trim();
+
+                                        if (!password) {
+                                            alert("Please enter your password.");
+                                            return;
+                                        }
+                                        if (confirmText.toLowerCase() !== "delete") {
+                                            alert("Please type 'delete' to confirm.");
+                                            return;
+                                        }
+
+                                        try {
+                                            const response = await fetch('../scripts/delete_account.php', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    password: password,
+                                                    confirm: confirmText
+                                                })
+                                            });
+                                            const result = await response.json();
+                                            console.log('Debug info:', result.debug); // Logs the debug info if provided
+
+                                            if (result.success) {
+                                                alert("Your account has been deleted.");
+                                                window.location.href = "../templates/login.php";
+                                            } else {
+                                                alert(result.message || "Error deleting account.");
+                                            }
+                                        } catch (error) {
+                                            console.error("Error:", error);
+                                            alert("An unexpected error occurred.");
+                                        }
+                                    }
+
+                                </script>
+
                             </li>
                             <br>
                             <br>

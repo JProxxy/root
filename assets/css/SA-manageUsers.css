@@ -1,0 +1,156 @@
+.contentWrapper,
+.headbackCont {
+  background-color: #f2f7fa;
+}
+.headerGroup {
+  display: flex;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.headerText {
+  margin-right: 10px;
+}
+
+.adminIcon {
+  width: 24px;
+  height: auto;
+}
+
+.flex-containerOneSA {
+  background-color: #ffffff;
+  flex-direction: column;
+  flex: 1;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  margin-left: 4%;
+  color: #595959;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+/* SEARCH BAR */
+
+.headerSACont {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+  background-color: #ffffff;
+  border-top-left-radius: 10px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  background-color: #f2f7fa;
+  border-radius: 25px;
+  padding: 0px 5px;
+  width: 300px;
+  position: relative;
+  text-indent: 4%;
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px;
+  border-radius: 25px;
+}
+
+.searchButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchButton svg {
+  width: 25px;
+  height: 25px;
+  color: #555;
+}
+
+.whiteLine {
+  background-color: #f2f7fa;
+  width: 100%;
+  height: 10px;
+  box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.rolesCont {
+  width: 1050px !important;
+  overflow-x: auto;  /* Enables horizontal scrolling when content overflows */
+  box-sizing: border-box;
+}
+
+/* Optional container for setting a maximum height */
+.table-container {
+  max-height: 490px;
+  overflow: auto;  /* Enables vertical scrolling if needed */
+  display: block;
+}
+
+.custom-table {
+  width: auto;  /* Table uses its natural width */
+  border-collapse: collapse;
+  table-layout: auto;  /* Columns size based on content */
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sticky header */
+.custom-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #f2f2f2;
+  z-index: 2;
+}
+
+.custom-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.custom-table tr:hover {
+  background-color: #ddd;
+}
+
+.custom-table select {
+  width: 100%;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+/* Column width classes for fixed widths */
+.col-no {
+  width: 5%;
+}
+.col-username {
+  width: 20%;
+}
+.col-email {
+  width: 25%;
+}
+.col-phone {
+  width: 15%;
+}
+/* Fixing the Role column to a specific width */
+.col-role {
+  width: 150px;  /* Adjust as needed */
+  min-width: 150px;
+  max-width: 150px;
+}

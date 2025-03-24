@@ -86,7 +86,45 @@ if (!empty($user_data['profile_picture'])) {
                         <img src="../assets/images/customize.png" alt="Members" class="icon" />
                         <span>Customize</span>
                     </div>
+
+
                 </div>
+
+                <?php
+                // Start the session if not already started
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+
+                // Include the database connection
+                require_once '../app/config/connection.php';
+
+                // Check if the user is logged in
+                if (!isset($_SESSION['user_id'])) {
+                    header("Location: ../templates/login.php");
+                    exit();
+                }
+
+                $user_id = $_SESSION['user_id'];
+
+                // Fetch user's role_id from the database using PDO
+                $query = "SELECT role_id FROM users WHERE user_id = :user_id";
+                $stmt = $conn->prepare($query);
+                $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+                $stmt->execute();
+                $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $role_id = $user_data['role_id'] ?? null; // Fetch role_id or set to null if not found
+                
+                // Show the sysad block only if role_id is 1
+                if ($role_id === 1): ?>
+                    <a href="../templates/SA.php">
+                        <div class="sysad">
+                            <img src="../assets/images/sysad.png" alt="sysad" class="sysadButton" />
+                        </div>
+                    </a>
+                <?php endif; ?>
+
                 <div class="lowerBarItem" onclick="handleLogout()">
                     <img src="../assets/images/logout.png" alt="Log Out" class="iconLogout" />
                     <span>Log Out</span>

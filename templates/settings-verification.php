@@ -37,7 +37,9 @@ require_once '../app/config/connection.php';
             <!-- Header -->
             <div class="headbackCont">
                 <div class="imgBack">
-                    <img src="../assets/images/back.png" alt="back" class="backIcon">
+                    <a href="../templates/dashboard.php">
+                        <img src="../assets/images/back.png" alt="back" class="backIcon">
+                    </a>
                 </div>
                 <div class="headerText">Account Settings</div>
             </div>
