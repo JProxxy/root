@@ -87,7 +87,8 @@ require_once '../app/config/connection.php';
                                             placeholder="Enter your password" required>
                                         <input type="text" id="delete-confirm-text" class="text-input"
                                             placeholder="Type 'delete' to confirm" required>
-                                        <button class="confirm-btnDelete" onclick="deleteAccount()">Confirm Delete</button>
+                                        <button class="confirm-btnDelete" onclick="deleteAccount()">Confirm
+                                            Delete</button>
                                     </div>
                                 </div>
 
@@ -127,7 +128,10 @@ require_once '../app/config/connection.php';
                                             const response = await fetch('../scripts/delete_account.php', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ password: password })
+                                                body: JSON.stringify({
+                                                    password: password,
+                                                    confirm: confirmText  // include the confirm field here
+                                                })
                                             });
                                             const result = await response.json();
 
