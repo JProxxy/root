@@ -34,6 +34,12 @@ $password = isset($data['password']) ? trim($data['password']) : null;
 // Include database connection (this file should return a PDO connection in $conn)
 require_once '../app/config/connection.php';
 
+// Temporary debug info array (remove in production)
+$debugInfo = [
+    'userInputPassword' => $password,
+    'sessionUserId' => $userId
+];
+
 try {
     // Begin transaction
     $conn->beginTransaction();
@@ -50,10 +56,7 @@ try {
 
     $hashedPassword = $userData['password'];
     $userEmail = $userData['email'];
-
-    // Debug: log the plaintext password and hash (remove this in production)
-    error_log("User input password: " . $password);
-    error_log("Stored hash: " . $hashedPassword);
+    $debugInfo['storedHash'] = $hashedPassword;
 
     // Validate password for non-OAuth users
     if (!is_null($hashedPassword)) {
@@ -163,11 +166,19 @@ try {
 
     // Destroy the session
     session_destroy();
-    echo json_encode(['success' => true, 'message' => 'Account deleted successfully and backup saved.']);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Account deleted successfully and backup saved.',
+        'debug'   => $debugInfo  // Debug info for development; remove in production.
+    ]);
 
 } catch (Exception $e) {
     $conn->rollback();
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage(),
+        'debug'   => $debugInfo  // Optionally include debug info here as well.
+    ]);
     exit;
 }
 ?>
