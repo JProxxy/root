@@ -113,7 +113,6 @@ require_once '../app/config/connection.php';
                                         const password = document.getElementById("delete-password").value.trim();
                                         const confirmText = document.getElementById("delete-confirm-text").value.trim();
 
-                                        // Validate inputs
                                         if (!password) {
                                             alert("Please enter your password.");
                                             return;
@@ -123,21 +122,24 @@ require_once '../app/config/connection.php';
                                             return;
                                         }
 
-                                        // Send deletion request to the server
                                         try {
                                             const response = await fetch('../scripts/delete_account.php', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({
                                                     password: password,
-                                                    confirm: confirmText  // include the confirm field here
+                                                    confirm: confirmText
                                                 })
                                             });
-                                            const result = await response.json();
 
+                                            // Instead of immediately parsing JSON, first get the raw text:
+                                            const text = await response.text();
+                                            console.log("Response text:", text);
+
+                                            // Then try parsing JSON:
+                                            const result = JSON.parse(text);
                                             if (result.success) {
                                                 alert("Your account has been deleted.");
-                                                // Optionally, redirect to the homepage or login page
                                                 window.location.href = "../templates/login.php";
                                             } else {
                                                 alert(result.message || "Error deleting account.");
@@ -147,6 +149,7 @@ require_once '../app/config/connection.php';
                                             alert("An unexpected error occurred.");
                                         }
                                     }
+
                                 </script>
 
                             </li>
