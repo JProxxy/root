@@ -140,13 +140,13 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                                 <img class="modeCool" src="../assets/images/ac/modeCool-White.png"
                                     style="display: none;">
 
-                                <!-- Mode Dry -->
-                                <img class="modeDry" src="../assets/images/ac/modeDry-White.png">
-                                <img class="modeDry" src="../assets/images/ac/modeDry-Green.png" style="display: none;">
-
                                 <!-- Mode Fan -->
                                 <img class="modeFan" src="../assets/images/ac/modeFan-White.png">
                                 <img class="modeFan" src="../assets/images/ac/modeFan-Green.png" style="display: none;">
+
+                                <!-- Mode Dry -->
+                                <img class="modeDry" src="../assets/images/ac/modeDry-White.png">
+                                <img class="modeDry" src="../assets/images/ac/modeDry-Green.png" style="display: none;">
                             </div>
 
                             <div class="swingCont">
@@ -414,308 +414,170 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
 
         <script>
 
-
-            // ============== POWER ON/OFF  ============== //
+            // Revised POWER TOGGLE FUNCTION with persistence and timer UI reset when off
             function toggleAirconFF() {
                 const switchElement = document.getElementById("airconFFSwitch");
                 const remoteContainer = document.querySelector(".remote-container");
                 const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
 
-                // Determine current power state.
+                // Get current power state
                 const powerState = switchElement.checked ? "On" : "Off";
 
+                // Persist power state in localStorage
+                localStorage.setItem("powerState", powerState);
+
+                // Only update UI visibility - DON'T reset values (except for timer UI when off)
                 if (powerState === "On") {
-                    // Enable controls.
                     remoteContainer.classList.add("enabled");
                     remoteContainer.classList.remove("disabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.display = "block";
-                    }); 
+                    });
                 } else {
-                    // Disable controls.
                     remoteContainer.classList.remove("enabled");
                     remoteContainer.classList.add("disabled");
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.display = "none";
                     });
-                    setDefaults();
-                    // Dispatch event to reset timer.
-                    document.dispatchEvent(new CustomEvent("airconOff"));
-
-                    // Update the database with default values.
-                    updateACSettings(16, "High", "Cool", "Off", "0", "Off");
+                    // Reset timer UI when power is off
+                    localStorage.setItem("totalTime", 0);
+                    const timeLeftText = document.getElementById("time-left");
+                    const progressBar = document.querySelector(".progress-bar");
+                    const circleCircumference = 2 * Math.PI * 97.1;
+                    if (timeLeftText) {
+                        timeLeftText.textContent = "00";
+                    }
+                    if (progressBar) {
+                        progressBar.style.strokeDashoffset = circleCircumference;
+                    }
                 }
 
-                // Send the updated power status to the server.
-                updatePowerStatus();
-
-                // *** NEW: Send power state to Lambda API ***
+                // Only send power state to backend - no other data
+                updatePowerStatus(powerState);
                 sendPowerStateLambda("<?php echo $_SESSION['user_id']; ?>", powerState);
-
-                // Reload the page after 2 seconds.
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
             }
 
-            // Force Mode to Cool (green)
-            function updateModeDisplay(modeIndex) {
-                if (modeIndex === 0) {
-                    const modeCoolGreen = document.querySelector(".modeCool[src*='modeCool-Green']");
-                    const modeCoolWhite = document.querySelector(".modeCool[src*='modeCool-White']");
-                    if (modeCoolGreen) modeCoolGreen.style.display = "block";
-                    if (modeCoolWhite) modeCoolWhite.style.display = "none";
-
-                    const modeDryWhite = document.querySelector(".modeDry[src*='modeDry-White']");
-                    const modeDryGreen = document.querySelector(".modeDry[src*='modeDry-Green']");
-                    const modeFanWhite = document.querySelector(".modeFan[src*='modeFan-White']");
-                    const modeFanGreen = document.querySelector(".modeFan[src*='modeFan-Green']");
-                    if (modeDryWhite) modeDryWhite.style.display = "block";
-                    if (modeDryGreen) modeDryGreen.style.display = "none";
-                    if (modeFanWhite) modeFanWhite.style.display = "block";
-                    if (modeFanGreen) modeFanGreen.style.display = "none";
-                }
-            }
-
-            // Force Fan High (green)
-            function setFanHigh() {
-                const fanHighGreen = document.querySelector(".fanHigh[src*='fanHigh-Green']");
-                const fanHighWhite = document.querySelector(".fanHigh[src*='fanHigh-White']");
-                const fanLowGreen = document.querySelector(".fanLow[src*='fanLow-Green']");
-                const fanLowWhite = document.querySelector(".fanLow[src*='fanLow-White']");
-                if (fanHighGreen) fanHighGreen.style.display = "block";
-                if (fanHighWhite) fanHighWhite.style.display = "none";
-                if (fanLowGreen) fanLowGreen.style.display = "none";
-                if (fanLowWhite) fanLowWhite.style.display = "block";
-            }
-
-            // Update Swing Display based on provided state ("On" or "Off")
-            function updateSwingDisplay(state) {
-                if (state === "On") {
-                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
-                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
-                    if (swingOnGreen) swingOnGreen.style.display = "block";
-                    if (swingOnWhite) swingOnWhite.style.display = "none";
-
-                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
-                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
-                    if (swingOffGreen) swingOffGreen.style.display = "none";
-                    if (swingOffWhite) swingOffWhite.style.display = "none";
-                } else {
-                    const swingOffGreen = document.querySelector(".swingOff[src*='swingOff-Green']");
-                    const swingOffWhite = document.querySelector(".swingOff[src*='swingOff-White']");
-                    if (swingOffGreen) swingOffGreen.style.display = "block";
-                    if (swingOffWhite) swingOffWhite.style.display = "none";
-
-                    const swingOnGreen = document.querySelector(".swingOn[src*='swingOn-Green']");
-                    const swingOnWhite = document.querySelector(".swingOn[src*='swingOn-White']");
-                    if (swingOnGreen) swingOnGreen.style.display = "none";
-                    if (swingOnWhite) swingOnWhite.style.display = "block";
-                }
-            }
-
-            // Reset the AC controls to default values when power is Off
-            function setDefaults() {
-                const ACtimer = document.getElementById("ACtimer");
-                const ACtemp = document.getElementById("ACtemp");
-                const ACmode = document.getElementById("ACmode");
-                const ACfan = document.getElementById("ACfan");
-                const ACswing = document.getElementById("ACswing");
-                const ACRCTemp = document.getElementById("ACRCTemp");
-
-                if (ACtimer) ACtimer.innerText = "00";
-                if (ACtemp) ACtemp.innerText = "16";
-                if (ACmode) ACmode.innerText = "Cool";
-                if (ACfan) ACfan.innerText = "High";
-                if (ACswing) ACswing.innerText = "Off";
-                if (ACRCTemp) ACRCTemp.innerText = "16";
-
-                // Force defaults to green:
-                updateModeDisplay(0);
-                setFanHigh();
-                updateSwingDisplay("Off");
-            }
-
-            // Send the updated power status to the server.
-            function updatePowerStatus() {
+            // On page load, check localStorage for a saved power state and apply it.
+            document.addEventListener("DOMContentLoaded", function () {
                 const switchElement = document.getElementById("airconFFSwitch");
-                const powerStatus = switchElement.checked ? "On" : "Off";
-                const userID = "<?php echo $_SESSION['user_id']; ?>";
+                const savedPowerState = localStorage.getItem("powerState");
+
+                // If a saved state exists, update the switch element accordingly.
+                if (savedPowerState) {
+                    switchElement.checked = savedPowerState === "On";
+                }
+
+                // Now trigger the toggle function to update the UI to match the saved state.
+                toggleAirconFF();
+            });
+
+            // ============== SIMPLIFIED POWER STATUS UPDATE ============== //
+            function updatePowerStatus(powerState) {
                 fetch("../scripts/fetch-AC-data.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        user_id: userID,
-                        power: powerStatus
+                        user_id: "<?php echo $_SESSION['user_id']; ?>",
+                        power: powerState // Only power field sent
                     })
-                })
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log("Power status updated:", data);
-                    })
-                    .catch(error => {
-                        console.error("Error updating power status:", error);
-                    });
+                }).catch(error => console.error("Power update error:", error));
             }
 
-            // Update AC settings on the server.
-            // Parameters: temp, fan, mode, swing, timer, power
-            function updateACSettings(temp, fan, mode, swing, timer, power) {
-                const userID = "<?php echo $_SESSION['user_id']; ?>";
-                $.ajax({
-                    url: '../scripts/fetch-AC-data.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        user_id: userID,
-                        temp: temp,
-                        fan: fan,
-                        mode: mode,
-                        swing: swing,
-                        timer: timer,
-                        power: power
-                    }),
-                    success: function (response) {
-                        if (response.success) {
-                            $("#ACtemp").text(response.temp + " °C");
-                            console.log("AC Settings Updated:", response);
-                        } else {
-                            console.error("Error updating AC settings:", response.error);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("AJAX Error:", xhr.responseText);
-                    }
-                });
-            }
-
-            // New function: Send power state to Lambda API via API Gateway
+            // ============== MODIFIED LAMBDA INTEGRATION ============== //
             function sendPowerStateLambda(userId, powerState) {
-                const requestData = {
-                    data: {
-                        user_id: userId,
-                        power: powerState
-                    }
-                };
-
                 fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                })
-                    .then(response => response.json())
-                    .then(responseData => {
-                        console.log('Power Lambda response:', responseData);
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        data: {
+                            user_id: userId,
+                            power: powerState // Only power state sent
+                        }
                     })
-                    .catch(error => {
-                        console.error("Error updating power status on Lambda:", error);
-                    });
-            }
-
-            // Initialize switch state on page load.
-            document.addEventListener("DOMContentLoaded", function () {
-                const switchElement = document.getElementById("airconFFSwitch");
-                const remoteContainer = document.querySelector(".remote-container");
-
-                if (switchElement.checked) {
-                    remoteContainer.classList.add("enabled");
-                    remoteContainer.classList.remove("disabled");
-                    showControls();
-                } else {
-                    remoteContainer.classList.add("disabled");
-                    remoteContainer.classList.remove("enabled");
-                    hideControls();
-                }
-
-                // Attach the toggle function to the power switch change event.
-                if (switchElement) {
-                    switchElement.addEventListener("change", toggleAirconFF);
-                }
-            });
-
-            // Helper functions to show/hide AC controls.
-            function showControls() {
-                const elementsToShow = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
-                elementsToShow.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = "block";
-                });
-            }
-            function hideControls() {
-                const elementsToHide = ["ACpower", "ACtemp", "ACtimer", "ACmode", "ACfan", "ACswing", "ACRCTemp"];
-                elementsToHide.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = "none";
                 });
             }
 
+            // Removed completely from your code:
+            // - setDefaults() function
+            // - updateACSettings() calls
+            // - page reload functionality
+            // - Any database updates for temp/mode/fan/swing in power toggle
         </script>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            // Function to fetch AC settings from the database and update the UI
-            function fetchACLog() {
-                $.ajax({
-                    url: '../scripts/fetch-AC-data.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        // Update UI with fetched data
-                        $("#ACpower").text(data.power);
-                        $("#ACtemp").text(data.temp + " °C");
-                        $("#ACtimer").text(data.timer);
-                        $("#ACmode").text(data.mode);
-                        $("#ACfan").text(data.fan);
-                        $("#ACswing").text(data.swing);
-                        $("#ACRCTemp").text(data.temp); // Update the element with the DB temperature
+            // ============== ADD THESE GLOBAL VARIABLES ============== //
+            let previousACData = null;
+            let isFetching = false;
 
-                        console.log("AC Log Updated:", data);
+            // ============== REPLACE fetchACLog WITH THIS ============== //
+            async function optimizedPoll() {
+                if (isFetching) return;
+                isFetching = true;
 
-                        // Update the switch state if needed...
-                        const switchElement = document.getElementById("airconFFSwitch");
-                        if (switchElement) {
-                            switchElement.checked = (data.power === "On");
-                        }
+                try {
+                    const response = await fetch(`../scripts/fetch-AC-data.php?cache=${Date.now()}`);
+                    const newData = await response.json();
 
-                        // Save the power state globally
-                        window.currentPower = data.power;
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error fetching AC log:", error);
+                    // Update UI only if data changed
+                    if (!previousACData || JSON.stringify(newData) !== JSON.stringify(previousACData)) {
+                        updateUI(newData);
+                        previousACData = newData;
                     }
-                });
+                } catch (error) {
+                    console.error("Polling error:", error);
+                } finally {
+                    isFetching = false;
+                    setTimeout(optimizedPoll, 1000); // 1-second polling
+                }
             }
 
-            $(document).ready(function () {
-                // Initial fetch on page load
-                fetchACLog();
-                // Refresh every 3 seconds
-                setInterval(fetchACLog, 3000);
+            // ============== MODIFIED UI UPDATE FUNCTION ============== //
+            function updateUI(data) {
+                // Update all UI elements
+                $("#ACpower").text(data.power);
+                $("#ACtemp").text(data.temp + " °C");
+                $("#ACtimer").text(data.timer);
+                $("#ACmode").text(data.mode);
+                $("#ACfan").text(data.fan);
+                $("#ACswing").text(data.swing);
+                $("#ACRCTemp").text(data.temp);
 
-                // Attach click event listeners to interactive elements so that after each click, we fetch the AC log
+                // Update power switch
+                const switchElement = document.getElementById("airconFFSwitch");
+                if (switchElement) {
+                    switchElement.checked = (data.power === "On");
+                }
+
+                // Maintain global power state
+                window.currentPower = data.power;
+            }
+
+            // ============== MODIFIED DOCUMENT READY ============== //
+            $(document).ready(function () {
+                // Initial fetch
+                optimizedPoll();
+
+                // Update interactive elements
                 const interactiveSelectors = [
                     ".tempbarLow",
                     ".tempbarHigh",
                     ".fanCont",
                     ".modeCont",
                     ".swingCont",
-                    ".sleep"  // if sleep images are interactive
+                    ".sleep"
                 ];
-                const interactiveElements = document.querySelectorAll(interactiveSelectors.join(", "));
-                interactiveElements.forEach(el => {
-                    el.addEventListener("click", function () {
-                        // Optionally, use a small delay to ensure any UI changes complete before re-fetching.
-                        setTimeout(fetchACLog, 100);
+
+                document.querySelectorAll(interactiveSelectors.join(", ")).forEach(el => {
+                    el.addEventListener("click", () => {
+                        // Refresh faster after interaction
+                        setTimeout(optimizedPoll, 100);
                     });
                 });
             });
         </script>
-
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

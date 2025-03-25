@@ -674,15 +674,15 @@ input:checked + .slider:before {
 .modeDry {
   width: 10% !important;
   height: 10% !important;
-  top: 45%;
-  left: 2%;
+  top: 57.5%;
+  left: 10%;
 }
 
 .modeFan {
   width: 10% !important;
   height: 10% !important;
-  top: 57.5%;
-  left: 10%;
+  top: 45%;
+  left: 2%;
 }
 
 .swingOn {

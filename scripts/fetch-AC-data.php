@@ -47,7 +47,33 @@ try {
         $input = json_decode(file_get_contents('php://input'), true);
         if (!$input) {
             throw new Exception("Invalid JSON input.");
-        }   
+        }
+
+        // ============== NEW: POWER OFF RESET LOGIC ============== //
+        $isPowerOff = isset($input['power']) && $input['power'] === 'Off';
+        if ($isPowerOff) {
+            // Force default values regardless of input
+            $forcedDefaults = [
+                'fan'   => 'High',
+                'mode'  => 'Cool',
+                'swing' => 'Off',
+                'sleep' => 'Off',
+                'timer' => '0',
+                'temp'  => 16
+            ];
+            // Merge forced defaults with existing input
+            $input = array_merge($input, $forcedDefaults);
+        
+            // Reset local session variables to the forced defaults
+            $_SESSION['fan']   = $forcedDefaults['fan'];
+            $_SESSION['mode']  = $forcedDefaults['mode'];
+            $_SESSION['swing'] = $forcedDefaults['swing'];
+            $_SESSION['sleep'] = $forcedDefaults['sleep'];
+            $_SESSION['timer'] = $forcedDefaults['timer'];
+            $_SESSION['temp']  = $forcedDefaults['temp'];
+        }
+        
+        // ========================================================= //
 
         // Check if a record for this user exists.
         $stmt = $conn->prepare("SELECT COUNT(*) FROM acRemote WHERE user_id = :user_id");
@@ -57,7 +83,7 @@ try {
         if (!$exists) {
             // Insert default values for a new user.
             $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, sleep, timestamp) 
-                                    VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', 'Off', NOW())");
+                                    VALUES (:user_id, 'Off', 16, '0', 'Cool', 'High', 'On', 'Off', NOW())");
             $stmt->execute([':user_id' => $user_id]);
         }
 
@@ -102,6 +128,13 @@ try {
             $updateParts[] = "sleep = 'Off'";
             $updateParts[] = "sleeptime = NOW()"; // Update sleeptime when sleep is forced off
         }
+
+        // ============== NEW: COOL MODE FAN ENFORCEMENT ============== //
+        if (isset($input['mode']) && $input['mode'] === "Cool") {
+            $updateParts[] = "fan = 'High'";
+            $updateParts[] = "fantime = NOW()";
+        }
+        // ============================================================= //
 
         // Validate temperature range if provided.
         if (isset($params['temp'])) {
