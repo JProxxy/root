@@ -247,7 +247,7 @@ if (!isset($_SESSION['user_id'])) {
 
 
                         <div class="cameraFF">
-                            <a href="../templates/FirstFloorOD-Camera.php">
+                            <a href="https://172.20.10.2">
                                 <img src="../assets/images/camera.png" alt="Camera" class="cameraImage">
                             </a>
                             <p>Camera</p>
