@@ -8,6 +8,7 @@
 
 .h1 {
   margin-top: 3%;
+  margin-left: 5%;
   text-align: left; /* Ensures heading is centered */
   font-size: 24px; /* Adjust size as needed */
   margin-bottom: 15px; /* Adds space between heading and controls */
@@ -181,7 +182,8 @@ input:checked + .slider:before {
     #667b7b 100%
   );
   background-repeat: no-repeat;
-  background-size: 0% 100%;
+  /* Use the CSS variable for the progress; default to 0% if not set */
+  background-size: var(--slider-progress, 0%) 100%;
   outline: none;
   position: relative;
 }
@@ -246,6 +248,7 @@ input:checked + .slider:before {
 }
 
 /* Non-sliding bar */
+/* Non-sliding bar with gradient */
 .non-sliding .slider-bar {
   width: 92%;
   height: 35px;
@@ -262,9 +265,41 @@ input:checked + .slider:before {
     #667b7b 100%
   );
   background-repeat: no-repeat;
-  background-size: 50% 100%; /* You can adjust the fill size here if needed */
-  margin: 5px 0;
+  background-size: var(--current-level, 50%) 100%; /* Dynamic background size */
+  position: relative;
+  transition: all 0.5s ease;
+  overflow: hidden;
 }
+
+/* Add this pseudo-element for the progress */
+.non-sliding .slider-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--current-level, 50%);
+  background-image: linear-gradient(
+    90deg,
+    #39b09e 0%,
+    #50968d 17.5%,
+    #5b8884 36%,
+    #618280 54%,
+    #637f7d 71.5%,
+    #657d7c 85.75%,
+    #667b7b 100%
+  );
+  transition: width 0.5s ease;
+}
+
+ /* .non-sliding .slider-bar {
+  height: 35px;
+  border-radius: 25px;
+  background: #4CAF50; 
+  position: absolute;
+  left: 0;
+  transition: width 0.5s ease;
+} */
 
 /* AIRCON */
 
