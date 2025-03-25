@@ -431,7 +431,7 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                     elementsToHide.forEach(id => {
                         const el = document.getElementById(id);
                         if (el) el.style.display = "block";
-                    });
+                    }); 
                 } else {
                     // Disable controls.
                     remoteContainer.classList.remove("enabled");
