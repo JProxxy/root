@@ -205,7 +205,7 @@ require_once '../app/config/connection.php';
                                             } else {
                                                 verifyBtn.addEventListener('click', () => {
                                                     // Initiate verification process
-                                                    window.location.href = '/verify-email';
+                                                    window.location.href = '/verify-email.php';
                                                 });
                                             }
                                         })
