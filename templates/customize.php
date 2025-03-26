@@ -232,7 +232,7 @@
                                         })
                                     };
 
-                                    fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                                    fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify(payload)
@@ -382,7 +382,7 @@
                 })
             };
 
-            fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
+            fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
