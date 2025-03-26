@@ -1,6 +1,6 @@
 <?php
 // Include the connection.php file to use the existing database connection
-require '../app/config/connection.php'; // Make sure the path to connection.php is correct
+include __DIR__ . '/../../app/config/connection.php';
 
 try {
     // Fetch the latest WaterPercentage from the water_tank table
