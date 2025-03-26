@@ -154,7 +154,7 @@
                     <div class="settemprange">Set Temperature Range</div>
                     <div class="sliderACCont">
                         <div class="minimumGroup">
-                        <span>
+                            <span>
                                 Maximum Room Temperature
                             </span>
                             <!-- AC Minimum Temperature Slider -->
@@ -193,6 +193,7 @@
 
 
                             <script>
+                                // 1. Temperature Update: Now only passes the current temperature to updateACValuesLambda
                                 function updateCurrentRoomTemp() {
                                     fetch('../scripts/customize_AC.php')
                                         .then(response => {
@@ -201,22 +202,59 @@
                                         })
                                         .then(data => {
                                             const temperature = parseFloat(data.temperature);
+                                            const minTemp = parseFloat(data.minTemp);
+                                            const maxTemp = parseFloat(data.maxTemp);
+
                                             if (isNaN(temperature) || temperature < 0 || temperature > 50) {
                                                 throw new Error(`Invalid temperature value received: ${data.temperature}`);
                                             }
-                                            // Calculate percentage based on a 0 to 50 range.
+
+                                            // UPDATE UI
                                             const percentage = (temperature / 50) * 100;
                                             const sliderBar = document.getElementById('showCurrentTemp');
                                             sliderBar.style.setProperty('--current-level', percentage + '%');
-
-                                            // Update the displayed temperature.
                                             const roomTempDiv = document.querySelector('.range-slider.non-slidingAC .roomTemp');
                                             roomTempDiv.innerText = temperature + '°C';
+
+                                            // Pass current temperature and threshold values to updateACValuesLambda
+                                            updateACValuesLambda(temperature, minTemp, maxTemp);
                                         })
                                         .catch(error => {
                                             console.error('Room temperature update failed:', error);
                                         });
                                 }
+
+                                // 2. AWS Lambda Update: Checks if temperature is out of range and sends JSON if so
+                                function updateACValuesLambda(currentTemp, minTemp, maxTemp) {
+                                    // Log the current temperature values for debugging
+                                    console.log(`Current Temperature: ${currentTemp}°C, Min: ${minTemp}°C, Max: ${maxTemp}°C`);
+
+                                    // Check if current temperature is outside allowed thresholds
+                                    if (currentTemp < minTemp || currentTemp > maxTemp) {
+                                        // Prepare the payload
+                                        const payload = {
+                                            body: JSON.stringify({
+                                                alert: `Temperature (${currentTemp}°C) is out of range!`,
+                                                minTemp: minTemp,
+                                                maxTemp: maxTemp,
+                                                currentTemp: currentTemp
+                                            })
+                                        };
+
+                                        fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(payload)
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => console.log('AWS Lambda Alert Sent:', data))
+                                            .catch(error => console.error('Lambda Alert Error:', error));
+                                    } else {
+                                        console.log(`Temperature (${currentTemp}°C) is within the allowed range.`);
+                                    }
+                                }
+
+                                // INITIALIZE FUNCTION ON PAGE LOAD and update every 5 seconds
                                 updateCurrentRoomTemp();
                                 setInterval(updateCurrentRoomTemp, 5000);
                             </script>
@@ -487,52 +525,30 @@
                 .catch(error => console.error('DB error:', error));
         }
 
-        // 5. NEW: Update AC Values in AWS Lambda
-        function updateACValuesLambda() {
-            const payload = {
-                body: JSON.stringify({
-                    data: {
-                        minTemp: acMinSlider.value,
-                        maxTemp: acMaxSlider.value
-                    }
-                })
-            };
-
-            fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json())
-                .then(data => console.log('AWS Lambda response:', data))
-                .catch(error => console.error('Lambda error:', error));
-        }
-
-        // 6. Handle Slider Input Events
+        // 5. Handle Slider Input Events
         function handleSliderInput() {
             updateSlider(acMinSlider, acMinTooltip);
             updateSlider(acMaxSlider, acMaxTooltip);
             updateACValues(); // Update local database on every change
         }
 
-        // 7. Modified AC Switch Handler
+        // 6. Modified AC Switch Handler
         acSwitch.addEventListener('change', function () {
             const isActive = this.checked;
             acMinSlider.disabled = !isActive;
             acMaxSlider.disabled = !isActive;
 
-            // When turning OFF the AC, update both DB and AWS
+            // When turning OFF the AC, update the local database only.
             if (!isActive) {
-                updateACValues();       // Update local database
-                updateACValuesLambda(); // Update AWS Lambda
+                updateACValues();
             }
         });
 
-        // 8. Add Event Listeners for the Sliders
+        // 7. Add Event Listeners for the Sliders
         acMinSlider.addEventListener('input', handleSliderInput);
         acMaxSlider.addEventListener('input', handleSliderInput);
 
-        // 9. Fetch Initial Values from Server
+        // 8. Fetch Initial Values from Server
         function fetchACValues() {
             fetch('../scripts/fetch_customizeAC.php')
                 .then(response => {
@@ -547,7 +563,7 @@
                 .catch(error => console.error('Fetch error:', error));
         }
 
-        // 10. Initialize on Page Load
+        // 9. Initialize on Page Load
         fetchACValues();
     });
 </script>
