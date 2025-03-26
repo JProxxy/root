@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Include the connection.php file to use the existing database connection
-require '../app/config/connection.php'; // Make sure the path to connection.php is correct
+include '../app/config/connection.php'; // Ensure this uses PDO
 
 try {
     // Fetch the latest temperature for the device 'ffRoom-temp'
