@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Include the connection.php file to use the existing database connection
 require '../app/config/connection.php'; // Make sure the path to connection.php is correct
 
