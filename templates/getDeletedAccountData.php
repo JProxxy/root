@@ -49,39 +49,65 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/dashboard.css" />
-    <link rel="stylesheet" href="../assets/css/settings.css" />
-    <link rel="stylesheet" href="../assets/css/settings-profile.css" />
-    <link rel="stylesheet" href="../assets/css/settings-password.css" />
-    <link rel="stylesheet" href="../assets/css/sa.css" />
+    <title>Deleted Accounts Backups</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome for icons (optional) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: #f7f7f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            font-size: 1.25rem;
+        }
+        .list-group-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .list-group-item a:hover {
+            text-decoration: underline;
+        }
+        .no-files {
+            font-size: 1.1rem;
+            color: #777;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="bgMain">
-        <?php include '../partials/bgMain.php'; ?>
-        <div class="containerPart">
-            <!-- Header -->
-            <h1>Deleted Accounts Backups</h1>
-    <?php if (empty($files)): ?>
-        <p>No backup files found.</p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($files as $file): ?>
-                <li>
-                    <a href="?file=<?php echo urlencode($file); ?>">
-                        <?php echo htmlspecialchars($file); ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-header text-center">
+                <i class="fa-solid fa-database me-2"></i>Deleted Accounts Backups
+            </div>
+            <div class="card-body">
+                <?php if (empty($files)): ?>
+                    <p class="text-center no-files">No backup files found.</p>
+                <?php else: ?>
+                    <ul class="list-group">
+                        <?php foreach ($files as $file): ?>
+                            <li class="list-group-item">
+                                <a href="?file=<?php echo urlencode($file); ?>">
+                                    <i class="fa-solid fa-download me-2"></i><?php echo htmlspecialchars($file); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
-
