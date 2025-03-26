@@ -103,7 +103,6 @@
                         <img class="control-icon" src="../assets/images/ac.png" alt="Air Conditioning">
                         <h3>Air Conditioning</h3>
 
-
                         <!-- LAMBDA NG TEMP -->
                         <?php
                         include '../app/config/connection.php';
@@ -222,22 +221,17 @@
 
                                 // If temperature is out-of-range and alert hasn't been sent, send alert.
                                 if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
-                                    const payload = {
-                                        body: JSON.stringify({
-                                            alert: `Temperature (${currentTemp}°C) is out of range!`,
-                                            minTemp: minTemp,
-                                            maxTemp: maxTemp,
-                                            currentTemp: currentTemp
-                                        })
+                                    // Construct the desired payload exactly as specified.
+                                    const payloadObj = {
+                                        minTemp: minTemp.toString(),
+                                        maxTemp: maxTemp.toString(),
+                                        Temperature: currentTemp.toString()
                                     };
 
                                     // Set up the IoT message parameters.
-                                    // Wrap the payload in a top-level "body" key.
                                     const params = {
                                         topic: '/esp32/SubETW/AC',
-                                        payload: JSON.stringify({
-                                            body: JSON.stringify(JSON.parse(payload.body))
-                                        }),
+                                        payload: JSON.stringify(payloadObj),
                                         qos: 0,
                                     };
 
