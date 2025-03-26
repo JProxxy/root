@@ -48,30 +48,33 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
     <title>Deleted Accounts Backups</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #eef2f3;
             margin: 0;
+            padding: 0;
+            background: #eef2f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .bgMain {
+            width: 100%;
+        }
+        .containerPart {
             padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .links-container {
-            max-height: 70vh;
-            /* Adjust the height as needed */
-            overflow-y: auto;
-            padding: 10px;
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 4px;
             margin: 20px auto;
-            width: 90%;
-            max-width: 600px;
+            max-width: 800px;
         }
-
+        .links-container {
+            max-height: 60vh; /* Container becomes scrollable if too many links */
+            overflow-y: auto;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
         .links-container a {
             display: block;
             padding: 10px;
@@ -80,14 +83,12 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
             color: #007BFF;
             border: 1px solid transparent;
             border-radius: 4px;
-            transition: all 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
-
         .links-container a:hover {
-            background: #f0f8ff;
+            background: #e9f5ff;
             border-color: #007BFF;
         }
-
         .no-files {
             text-align: center;
             color: #666;
@@ -97,23 +98,23 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
 </head>
 
 <body>
-    <div class="bgMain">
-        <?php include '../partials/bgMain.php'; ?>
-        <div class="containerPart">
-            <h1>Deleted Accounts Backups</h1>
-            <div class="links-container">
-                <?php if (empty($files)): ?>
-                    <p class="no-files">No backup files found.</p>
-                <?php else: ?>
-                    <?php foreach ($files as $file): ?>
-                        <a href="?file=<?php echo urlencode($file); ?>">
-                            <?php echo htmlspecialchars($file); ?>
-                        </a>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
+<div class="bgMain">
+    <?php include '../partials/bgMain.php'; ?>
+    <div class="containerPart">
+        <h1>Deleted Accounts Backups</h1>
+        <div class="links-container">
+            <?php if (empty($files)): ?>
+                <p class="no-files">No backup files found.</p>
+            <?php else: ?>
+                <?php foreach ($files as $file): ?>
+                    <a href="?file=<?php echo urlencode($file); ?>">
+                        <?php echo htmlspecialchars($file); ?>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
+</div>
 </body>
 
 </html>
