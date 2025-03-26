@@ -253,12 +253,12 @@ if (!isset($_SESSION['user_id'])) {
                             <p>Camera</p>
                             <span>Outdoor</span>
 
-                            <div class="switch-container">
+                            <!-- <div class="switch-container">
                                 <label class="switch">
                                     <input type="checkbox">
                                     <span class="slider"></span>
                                 </label>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

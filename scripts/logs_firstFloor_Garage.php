@@ -15,7 +15,7 @@ try {
     $stmt->execute();
 
     $logs = [];
-    
+
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Build an associative array of update messages with their corresponding time (as Unix timestamp)
         $updates = [];
@@ -88,10 +88,7 @@ try {
         // Build the final message: Only output the most recent update if available.
         if ($latestUpdate !== null) {
             $message = $row['username'] . " - " . $latestUpdate['message'];
-        } else {
-            $message = $row['username'] . " - No recent update available";
-        }
-        
+
         $logs[] = [
             "time" => date("h:i A", strtotime($row['timestamp'])),
             "message" => $message,

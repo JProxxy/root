@@ -331,12 +331,12 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                             <p>Camera</p>
                             <span>Outdoor</span>
 
-                            <div class="switch-containerTwo">
+                            <!-- <div class="switch-containerTwo">
                                 <label class="switch">
                                     <input type="checkbox">
                                     <span class="slider"></span>
                                 </label>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>

@@ -311,21 +311,21 @@ if (!isset($_SESSION['user_id'])) {
                             <span>Room 1</span>
 
                             <!-- Air Conditioner Control Switch Containers -->
-                            <div class="switch-containerTwo" id="switch_SFAC1" style="display:none;">
+                            <!-- <div class="switch-containerTwo" id="switch_SFAC1" style="display:none;">
                                 <label class="switchTwo">
                                     <input type="checkbox" id="airconSFOne" onchange="toggleAircon('airconSFOne')"
                                         style="display:none;">
                                     <span class="slider"></span>
                                 </label>
-                            </div>
+                            </div> -->
 
-                            <div class="switch-containerTwo" id="switch_SFAC2" style="display:none;">
+                            <!-- <div class="switch-containerTwo" id="switch_SFAC2" style="display:none;">
                                 <label class="switchTwo">
                                     <input type="checkbox" id="airconSFTwo" onchange="toggleAircon('airconSFTwo')"
                                         style="display:none;">
                                     <span class="slider"></span>
                                 </label>
-                            </div>
+                            </div> -->
                         </div>
 
 
@@ -336,12 +336,12 @@ if (!isset($_SESSION['user_id'])) {
                             <p>Camera</p>
                             <span>Outdoor</span>
 
-                            <div class="switch-containerTwo">
+                            <!-- <div class="switch-containerTwo">
                                 <label class="switch">
                                     <input type="checkbox">
                                     <span class="slider"></span>
                                 </label>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
