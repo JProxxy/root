@@ -151,42 +151,59 @@
                         </script>
 
                         <script>
-                            // 1. Temperature Update: Fetch current temperature and thresholds.
-                            function updateCurrentRoomTemp() {
+                            // Combined update: fetch temperature and then thresholds.
+                            function updateCurrentRoomTempAndThresholds() {
+                                // Fetch current temperature from customize_AC.php
                                 fetch('../scripts/customize_AC.php')
                                     .then(response => {
                                         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                                         return response.json();
                                     })
-                                    .then(data => {
-                                        const temperature = parseFloat(data.temperature);
-                                        const minTemp = parseFloat(data.minTemp);
-                                        const maxTemp = parseFloat(data.maxTemp);
-
+                                    .then(tempData => {
+                                        const temperature = parseFloat(tempData.temperature);
                                         if (isNaN(temperature) || temperature < 0 || temperature > 50) {
-                                            throw new Error(`Invalid temperature value received: ${data.temperature}`);
+                                            throw new Error(`Invalid temperature value received: ${tempData.temperature}`);
                                         }
+                                        // Now fetch the minTemp and maxTemp from fetch_customize.php
+                                        fetch('../scripts/fetch_customize.php')
+                                            .then(response => {
+                                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                                return response.json();
+                                            })
+                                            .then(thresholdData => {
+                                                const minTemp = parseFloat(thresholdData.minTemp);
+                                                const maxTemp = parseFloat(thresholdData.maxTemp);
+                                                if (isNaN(minTemp) || isNaN(maxTemp)) {
+                                                    console.error("Received invalid threshold values. Using fallback defaults.");
+                                                }
+                                                // Fallback defaults in case thresholds are missing:
+                                                const finalMinTemp = !isNaN(minTemp) ? minTemp : 35;
+                                                const finalMaxTemp = !isNaN(maxTemp) ? maxTemp : 50;
 
-                                        // UPDATE UI
-                                        const percentage = (temperature / 50) * 100;
-                                        const sliderBar = document.getElementById('showCurrentTemp');
-                                        if (sliderBar) {
-                                            sliderBar.style.setProperty('--current-level', percentage + '%');
-                                        }
-                                        const roomTempDiv = document.querySelector('.range-slider.non-slidingAC .roomTemp');
-                                        if (roomTempDiv) {
-                                            roomTempDiv.innerText = temperature + '°C';
-                                        }
+                                                // Update UI with current temperature.
+                                                const percentage = (temperature / 50) * 100;
+                                                const sliderBar = document.getElementById('showCurrentTemp');
+                                                if (sliderBar) {
+                                                    sliderBar.style.setProperty('--current-level', percentage + '%');
+                                                }
+                                                const roomTempDiv = document.querySelector('.range-slider.non-slidingAC .roomTemp');
+                                                if (roomTempDiv) {
+                                                    roomTempDiv.innerText = temperature + '°C';
+                                                }
 
-                                        // Pass values to updateACValuesLambda
-                                        updateACValuesLambda(temperature, minTemp, maxTemp);
+                                                // Now update Lambda alert logic.
+                                                updateACValuesLambda(temperature, finalMinTemp, finalMaxTemp);
+                                            })
+                                            .catch(error => {
+                                                console.error('Threshold fetch failed:', error);
+                                            });
                                     })
                                     .catch(error => {
                                         console.error('Room temperature update failed:', error);
                                     });
                             }
 
-                            // 2. AWS Lambda Update: Send alert only once if temperature is out of range.
+                            // AWS Lambda Update: Send alert only once if temperature is out of range.
                             // Reset the alert flag when temperature returns within range.
                             function updateACValuesLambda(currentTemp, minTemp, maxTemp) {
                                 // If power is on, do not send any alert.
@@ -230,10 +247,11 @@
                                 }
                             }
 
-                            // INITIALIZE: Call update function on page load and update every 5 seconds.
-                            updateCurrentRoomTemp();
-                            setInterval(updateCurrentRoomTemp, 5000);
+                            // INITIALIZE: Call the combined update function on page load and every 5 seconds.
+                            updateCurrentRoomTempAndThresholds();
+                            setInterval(updateCurrentRoomTempAndThresholds, 5000);
                         </script>
+
 
 
 
@@ -243,7 +261,7 @@
                     <div class="sliderACCont">
                         <div class="minimumGroup">
                             <span>
-                                Maximum Room Temperature
+                                Minimum Room Temperature
                             </span>
                             <!-- AC Minimum Temperature Slider -->
                             <div class="range-slider"
@@ -254,7 +272,7 @@
                                 <div class="end-tooltip">35</div>
                             </div>
                             <span>
-                                Minimum Room Temperature
+                                Maximum Room Temperature
                             </span>
                             <!-- AC Maximum Temperature Slider -->
                             <div class="range-slider"
