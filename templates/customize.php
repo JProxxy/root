@@ -103,6 +103,7 @@
                         <img class="control-icon" src="../assets/images/ac.png" alt="Air Conditioning">
                         <h3>Air Conditioning</h3>
 
+
                         <!-- LAMBDA NG TEMP -->
                         <?php
                         include '../app/config/connection.php';
@@ -221,29 +222,23 @@
 
                                 // If temperature is out-of-range and alert hasn't been sent, send alert.
                                 if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
-                                    // Construct the desired payload exactly as specified.
-                                    const payloadObj = {
-                                        minTemp: minTemp.toString(),
-                                        maxTemp: maxTemp.toString(),
-                                        Temperature: currentTemp.toString()
+                                    // CORRECTED PAYLOAD STRUCTURE
+                                    const payload = {
+                                        minTemp: minTemp,
+                                        maxTemp: maxTemp,
+                                        Temperature: currentTemp
                                     };
 
-                                    // Set up the IoT message parameters.
-                                    const params = {
-                                        topic: '/esp32/SubETW/AC',
-                                        payload: JSON.stringify(payloadObj),
-                                        qos: 0,
-                                    };
-
+                                    // Send DIRECT payload without IoT params wrapper
                                     fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(params)
+                                        body: JSON.stringify(payload) // Send temperature data directly
                                     })
                                         .then(response => response.json())
                                         .then(data => {
                                             console.log('AWS Lambda Alert Sent:', data);
-                                            lambdaAlertSent = true; // Mark that alert has been sent.
+                                            lambdaAlertSent = true;
                                         })
                                         .catch(error => console.error('Lambda Alert Error:', error));
                                 }
