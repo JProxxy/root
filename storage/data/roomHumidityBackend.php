@@ -1,6 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // Include the connection.php file to use the existing database connection
-include '../app/config/connection.php'; // Ensure this uses PDO
+include '../../app/config/connection.php';
 
 try {
     // Query to fetch the latest humidity value
