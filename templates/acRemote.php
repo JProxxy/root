@@ -413,6 +413,8 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
         </script>
 
         <script>
+            // Global flag to indicate if the power state is being set on initial load.
+            let initialPowerLoad = true;
 
             // Revised POWER TOGGLE FUNCTION with persistence and timer UI reset when off
             function toggleAirconFF() {
@@ -454,9 +456,14 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                     }
                 }
 
-                // Only send power state to backend - no other data
-                updatePowerStatus(powerState);
-                sendPowerStateLambda("<?php echo $_SESSION['user_id']; ?>", powerState);
+                // Only send power state to backend and Lambda if not during the initial load.
+                if (!initialPowerLoad) {
+                    updatePowerStatus(powerState);
+                    sendPowerStateLambda("<?php echo $_SESSION['user_id']; ?>", powerState);
+                } else {
+                    // Disable the flag after the initial update.
+                    initialPowerLoad = false;
+                }
             }
 
             // On page load, check localStorage for a saved power state and apply it.
@@ -498,12 +505,6 @@ $power = isset($acData['power']) ? $acData['power'] : 'Off';
                     })
                 });
             }
-
-            // Removed completely from your code:
-            // - setDefaults() function
-            // - updateACSettings() calls
-            // - page reload functionality
-            // - Any database updates for temp/mode/fan/swing in power toggle
         </script>
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
