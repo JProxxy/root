@@ -140,7 +140,7 @@
                                 const acMinSlider = document.querySelector(".acMinimumLevel");
                                 const acMaxSlider = document.querySelector(".acMaximumLevel");
 
-                                // If power is "on", disable the acSwitch and sliders (per your logic).
+                                // If power is "on", disable the acSwitch and sliders.
                                 if (powerStatus === "on") {
                                     acSwitch.disabled = true;
                                     acMinSlider.disabled = true;
@@ -211,7 +211,7 @@
                                     return;
                                 }
 
-                                // Log conditions
+                                // Additional logging to indicate condition.
                                 if (currentTemp < minTemp) {
                                     console.log(`Temperature (${currentTemp}°C) is below the minimum threshold (${minTemp}°C).`);
                                 } else if (currentTemp > maxTemp) {
@@ -224,7 +224,6 @@
                                 if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
                                     const payload = {
                                         body: JSON.stringify({
-                                            user_id: userId, // if defined, or include later in outer JSON
                                             alert: `Temperature (${currentTemp}°C) is out of range!`,
                                             minTemp: minTemp,
                                             maxTemp: maxTemp,
@@ -232,14 +231,12 @@
                                         })
                                     };
 
-                                    // Publish the payload wrapped under a top-level "body" key.
+                                    // Set up the IoT message parameters.
+                                    // Wrap the payload in a top-level "body" key.
                                     const params = {
                                         topic: '/esp32/SubETW/AC',
                                         payload: JSON.stringify({
-                                            body: JSON.stringify({
-                                                user_id: userId,
-                                                ...payload.body ? JSON.parse(payload.body) : {}
-                                            })
+                                            body: JSON.stringify(JSON.parse(payload.body))
                                         }),
                                         qos: 0,
                                     };
@@ -256,7 +253,7 @@
                                         })
                                         .catch(error => console.error('Lambda Alert Error:', error));
                                 }
-                                // If temperature returns to normal, reset the alert flag so a new alert can be sent later.
+                                // If temperature returns to normal, reset the alert flag.
                                 else if (currentTemp >= minTemp && currentTemp <= maxTemp) {
                                     if (lambdaAlertSent) {
                                         console.log("Temperature is back within range. Resetting alert flag.");
