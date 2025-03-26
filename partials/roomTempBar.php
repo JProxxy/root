@@ -13,15 +13,14 @@ try {
     $temperature = isset($row['temperature']) ? $row['temperature'] : null;
 
 } catch (PDOException $e) {
-    // Handle connection errors or query issues
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Database query failed: ' . $e->getMessage()]);
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -34,10 +33,9 @@ try {
             font-family: 'Poppins', Arial;
             box-sizing: border-box;
         }
-
         .wrapper {
             box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
+                        -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
             width: 240px;
             padding: 30px 0;
             display: flex;
@@ -47,7 +45,6 @@ try {
             border-radius: 7px;
             background-color: #e8f0f7;
         }
-
         .circular-bar {
             width: 160px;
             height: 160px;
@@ -57,11 +54,10 @@ try {
             align-items: center;
             justify-content: center;
             box-shadow: 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
+                        -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
             margin-bottom: 30px;
             position: relative;
         }
-
         .circular-bar::before {
             content: "";
             position: absolute;
@@ -70,21 +66,20 @@ try {
             background: #e8f0f7;
             border-radius: 50%;
             box-shadow: inset 6px 6px 10px -1px rgba(0, 0, 0, 0.15),
-                inset -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
+                        inset -6px -6px 10px -1px rgba(255, 255, 255, 0.7);
         }
-
         .degree {
             z-index: 10;
             font-size: 20px;
             font-weight: bold;
         }
-
         label {
             font-size: 16px;
         }
     </style>
+    <!-- Load jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
 
     <div class="wrapper">
@@ -96,39 +91,50 @@ try {
 
     <script>
         // Pass the temperature value directly from PHP to JavaScript
-        let currentTemperature = <?php echo $temperature; ?>;
+        let currentTemperature = <?php echo $temperature ? $temperature : 0; ?>;
 
-        // Set up initial values for the progress bar
+        // Set up initial values for the progress bar elements
         let CircularBar = document.querySelector(".circular-bar");
         let DegreeValue = document.querySelector(".degree");
 
-        // Function to smoothly update the circular progress bar
+        // Function to update the circular progress bar based on the temperature
         function updateBar() {
             // Map the temperature directly to a portion of the circular progress bar
-            // Adjust the angle (e.g., 100°C = 360 degrees)
-            let angle = currentTemperature * 3.6; // 1°C = 3.6 degrees
+            // For example: 1°C corresponds to 3.6 degrees (100°C = 360 degrees)
+            let angle = currentTemperature * 3.6;
             CircularBar.style.background = `conic-gradient(#4285f4 ${angle}deg, #e8f0f7 0deg)`;
 
-            // Update the temperature displayed in the center
+            // Update the displayed temperature
             DegreeValue.innerHTML = Math.round(currentTemperature) + "°C";
         }
 
-        // Call updateBar once to display the temperature initially
+        // Call updateBar once initially
         updateBar();
 
-        // Set an interval to fetch the latest temperature from the server and update the progress bar
-        setInterval(() => {
-            // Fetch the latest temperature using AJAX from the server-side PHP script
-            fetch('../storage/data/roomTempBackend.php') // Ensure this path is correct
-                .then(response => response.json())
-                .then(data => {
-                    currentTemperature = data.temperature; // Update current temperature
-                    updateBar(); // Update the bar only if the temperature has changed
-                })
-                .catch(error => console.error('Error fetching temperature:', error));
-        }, 5000); // Update every 5 seconds
+        // Function to fetch temperature data via jQuery AJAX
+        function fetchTemperature() {
+            $.ajax({
+                url: '../storage/data/roomTempBackend.php', // Ensure this path is correct
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Check if the data contains a temperature value
+                    if(data.temperature !== undefined) {
+                        currentTemperature = data.temperature;
+                        updateBar();
+                    } else {
+                        console.error('Temperature not found in response:', data);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error fetching temperature:', textStatus, errorThrown);
+                }
+            });
+        }
+
+        // Set an interval to update the temperature every 5 seconds using AJAX
+        setInterval(fetchTemperature, 5000);
     </script>
 
 </body>
-
 </html>
