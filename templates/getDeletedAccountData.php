@@ -19,11 +19,11 @@ if (!is_dir($backupDir)) {
 if (isset($_GET['file'])) {
     $requestedFile = basename($_GET['file']);
     $filePath = $backupDir . $requestedFile;
-    
+
     if (!file_exists($filePath)) {
         die("File not found.");
     }
-    
+
     header('Content-Description: File Transfer');
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="' . $requestedFile . '"');
@@ -41,6 +41,7 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,12 +53,15 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
             color: #333;
         }
+
         .links-container {
-            max-height: 70vh; /* Adjust the height as needed */
+            max-height: 70vh;
+            /* Adjust the height as needed */
             overflow-y: auto;
             padding: 10px;
             background: #fff;
@@ -67,6 +71,7 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
             width: 90%;
             max-width: 600px;
         }
+
         .links-container a {
             display: block;
             padding: 10px;
@@ -77,10 +82,12 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
             border-radius: 4px;
             transition: all 0.2s;
         }
+
         .links-container a:hover {
             background: #f0f8ff;
             border-color: #007BFF;
         }
+
         .no-files {
             text-align: center;
             color: #666;
@@ -88,18 +95,25 @@ $files = array_diff(scandir($backupDir), array('.', '..'));
         }
     </style>
 </head>
+
 <body>
-    <h1>Deleted Accounts Backups</h1>
-    <div class="links-container">
-        <?php if (empty($files)): ?>
-            <p class="no-files">No backup files found.</p>
-        <?php else: ?>
-            <?php foreach ($files as $file): ?>
-                <a href="?file=<?php echo urlencode($file); ?>">
-                    <?php echo htmlspecialchars($file); ?>
-                </a>
-            <?php endforeach; ?>
-        <?php endif; ?>
+    <div class="bgMain">
+        <?php include '../partials/bgMain.php'; ?>
+        <div class="containerPart">
+            <h1>Deleted Accounts Backups</h1>
+            <div class="links-container">
+                <?php if (empty($files)): ?>
+                    <p class="no-files">No backup files found.</p>
+                <?php else: ?>
+                    <?php foreach ($files as $file): ?>
+                        <a href="?file=<?php echo urlencode($file); ?>">
+                            <?php echo htmlspecialchars($file); ?>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </body>
+
 </html>
