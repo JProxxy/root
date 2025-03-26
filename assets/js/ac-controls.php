@@ -600,7 +600,6 @@
                 // If timer was running, resume countdown.
                 if (timerStatus === "running" && totalTime > 0) {
                     isRunning = true;
-                    airconSwitch.checked = true; // Ensure switch is ON
                     startCountdown();
                 } 
                 updateTimer();
