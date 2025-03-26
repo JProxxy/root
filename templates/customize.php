@@ -142,7 +142,7 @@
                                 const acMaxSlider = document.querySelector(".acMaximumLevel");
 
                                 // If power is "off", disable the acSwitch and sliders.
-                                if (powerStatus === "off") {
+                                if (powerStatus === "on") {
                                     acSwitch.disabled = true;
                                     acMinSlider.disabled = true;
                                     acMaxSlider.disabled = true;
@@ -164,8 +164,8 @@
                                         if (isNaN(temperature) || temperature < 0 || temperature > 50) {
                                             throw new Error(`Invalid temperature value received: ${tempData.temperature}`);
                                         }
-                                        // Now fetch the minTemp and maxTemp from fetch_customize.php
-                                        fetch('../scripts/fetch_customize.php')
+                                        // Now fetch the minTemp and maxTemp from fetch_customizeAC.php
+                                        fetch('../scripts/fetch_customizeAC.php')
                                             .then(response => {
                                                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                                                 return response.json();
@@ -212,7 +212,14 @@
                                     return;
                                 }
 
-                                console.log(`Current Temperature: ${currentTemp}°C, Min: ${minTemp}°C, Max: ${maxTemp}°C`);
+                                // Additional logging to indicate if temperature is too low, too high, or within range.
+                                if (currentTemp < minTemp) {
+                                    console.log(`Temperature (${currentTemp}°C) is below the minimum threshold (${minTemp}°C).`);
+                                } else if (currentTemp > maxTemp) {
+                                    console.log(`Temperature (${currentTemp}°C) is above the maximum threshold (${maxTemp}°C).`);
+                                } else {
+                                    console.log(`Temperature (${currentTemp}°C) is within the allowed range (${minTemp}°C to ${maxTemp}°C).`);
+                                }
 
                                 // If temperature is out-of-range and alert hasn't been sent, send alert.
                                 if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
@@ -243,7 +250,6 @@
                                         console.log("Temperature is back within range. Resetting alert flag.");
                                         lambdaAlertSent = false;
                                     }
-                                    console.log(`Temperature (${currentTemp}°C) is within the allowed range.`);
                                 }
                             }
 
@@ -251,8 +257,6 @@
                             updateCurrentRoomTempAndThresholds();
                             setInterval(updateCurrentRoomTempAndThresholds, 5000);
                         </script>
-
-
 
 
                     </div>
