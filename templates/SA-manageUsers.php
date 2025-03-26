@@ -181,21 +181,20 @@
                                         else if (headerInfo.title === "Role") {
                                             const select = document.createElement('select');
 
-                                            // Define available roles with their numeric role_id values
                                             const roles = [
-                                                { value: 1, text: "Super Admin", disabled: true },
-                                                { value: 2, text: "First Floor Admin" },
-                                                { value: 3, text: "Second Floor Admin" },
-                                                { value: 4, text: "Third Floor Admin" },
-                                                { value: 5, text: "Fourth Floor Admin" },
-                                                { value: 6, text: "Fifth Floor Admin" },
-                                                { value: 7, text: "General User" },
-                                                { value: 8, text: "Guest User" },
-                                                { value: 9, text: "Maintenance Staff" },
-                                                { value: 10, text: "Security Admin" },
-                                                { value: 11, text: "IoT Technician" },
-                                                { value: 12, text: "Pending User" },
-                                                { value: 13, text: "Blocked User" }
+                                                { value: "super_admin", text: "Super Admin", disabled: true },
+                                                { value: "first_floor_admin", text: "First Floor Admin" },
+                                                { value: "second_floor_admin", text: "Second Floor Admin" },
+                                                { value: "third_floor_admin", text: "Third Floor Admin" },
+                                                { value: "fourth_floor_admin", text: "Fourth Floor Admin" },
+                                                { value: "fifth_floor_admin", text: "Fifth Floor Admin" },
+                                                { value: "general_user", text: "General User" },
+                                                { value: "guest_user", text: "Guest User" },
+                                                { value: "maintenance_staff", text: "Maintenance Staff" },
+                                                { value: "security_admin", text: "Security Admin" },
+                                                { value: "iot_technician", text: "IoT Technician" },
+                                                { value: "pending_user", text: "Pending User" },
+                                                { value: "blocked_user", text: "Blocked User" }
                                             ];
 
                                             roles.forEach(role => {
