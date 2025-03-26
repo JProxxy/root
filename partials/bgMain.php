@@ -229,7 +229,7 @@ if (!empty($user_data['profile_picture'])) {
                     <img src="../assets/images/rivanLogo.png" alt="Logo" class="iconLogo" />
                 </div>
 
-                <div class="middleItems">w
+                <div class="middleItems">
                     <div class="middleItem" onclick="window.location.href='../templates/FirstFloor-Outdoor.php'">
                         <img src="../assets/images/officeSpace.png" alt="Office Space" class="icon" />
                         <span>Office<br>Space</span>

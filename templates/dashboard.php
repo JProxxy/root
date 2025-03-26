@@ -151,60 +151,55 @@
                         </div>
 
                     </div>
-
                     <div class="dashboardLog">
-                        <div class="headerLog">
-                            <p>User Activity Log</p>
-                            <a href="../templates/userActLogPage.php">
-                                <img src="../assets/images/next.png" alt="next icon" class="next" />
-                            </a>
+    <div class="headerLog">
+        <p>User Activity Log</p>
+        <a href="../templates/userActLogPage.php">
+            <img src="../assets/images/next.png" alt="next icon" class="next" />
+        </a>
+    </div>
 
-                        </div>
+    <table class="userLogTable">
+        <tr>
+            <th>User Name</th>
+            <th>Timestamp</th>
+        </tr>
+        <tbody id="latestUserActivities">
+            <!-- Latest 4 user activities will be inserted here dynamically -->
+        </tbody>
+    </table>
+</div>
 
-                        <table class="userLogTable">
-                            <tr>
-                                <th>User Name</th>
-                                <th>Timestamp</th>
-                            </tr>
-                            <tr>
-                                <td class="userLog">
-                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                    <span class="userName">John Doe</span>
-                                </td>
-                                <td class="userTime">
-                                    <span class="logTime">10:45 AM</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="userLog">
-                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                    <span class="userName">Jane Smith</span>
-                                </td>
-                                <td class="userTime">
-                                    <span class="logTime">10:50 AM</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="userLog">
-                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                    <span class="userName">Michael Johnson</span>
-                                </td>
-                                <td class="userTime">
-                                    <span class="logTime">10:55 AM</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="userLog">
-                                    <img src="../assets/images/defaultProfile.png" alt="User Icon" class="userIcon" />
-                                    <span class="userName">Emily Davis</span>
-                                </td>
-                                <td class="userTime">
-                                    <span class="logTime">11:00 AM</span>
-                                </td>
-                            </tr>
-                            <!-- Add more rows as needed -->
-                        </table>
-                    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('../scripts/userActLogDASHBOARD.php') // Replace with actual PHP file path
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const activityContainer = document.getElementById('latestUserActivities');
+                    activityContainer.innerHTML = ''; // Clear previous data
+
+                    data.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="userLog">
+                                <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
+                                <span class="userName">${user.username}</span>
+                            </td>
+                            <td class="userTime">
+                                <span class="logTime">${user.timestamp}</span>
+                            </td>
+                        `;
+                        activityContainer.appendChild(row);
+                    });
+                } else {
+                    console.error("Error: Invalid data format", data);
+                }
+            })
+            .catch(error => console.error('Error fetching user activities:', error));
+    });
+</script>
+
                 </div>
 
             </div>
