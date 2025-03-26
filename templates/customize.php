@@ -103,6 +103,9 @@
                         <img class="control-icon" src="../assets/images/ac.png" alt="Air Conditioning">
                         <h3>Air Conditioning</h3>
 
+
+
+                        <!-- LAMBDA NG TEMP -->
                         <?php
                         include '../app/config/connection.php';
 
@@ -114,7 +117,7 @@
                             // Determine power status: default to "off" if not found.
                             $powerStatus = ($row && strtolower(trim($row['power'])) === 'on') ? 'on' : 'off';
                         } catch (PDOException $e) {
-                            // In case of an error, default to "off" (or handle as needed)
+                            // In case of an error, default to "off"
                             $powerStatus = 'off';
                         }
                         ?>
@@ -126,12 +129,13 @@
                             </label>
                         </div>
 
-
                         <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                // Get the power status from PHP.
-                                const powerStatus = <?php echo json_encode($powerStatus); ?>;
+                            // Make powerStatus global.
+                            const powerStatus = <?php echo json_encode($powerStatus); ?>;
+                            // Global flag to prevent sending multiple alerts until conditions reset.
+                            let lambdaAlertSent = false;
 
+                            document.addEventListener("DOMContentLoaded", function () {
                                 // Select elements
                                 const acSwitch = document.querySelector("#acSwitch input[type='checkbox']");
                                 const acMinSlider = document.querySelector(".acMinimumLevel");
@@ -146,6 +150,90 @@
                             });
                         </script>
 
+                        <script>
+                            // 1. Temperature Update: Fetch current temperature and thresholds.
+                            function updateCurrentRoomTemp() {
+                                fetch('../scripts/customize_AC.php')
+                                    .then(response => {
+                                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        const temperature = parseFloat(data.temperature);
+                                        const minTemp = parseFloat(data.minTemp);
+                                        const maxTemp = parseFloat(data.maxTemp);
+
+                                        if (isNaN(temperature) || temperature < 0 || temperature > 50) {
+                                            throw new Error(`Invalid temperature value received: ${data.temperature}`);
+                                        }
+
+                                        // UPDATE UI
+                                        const percentage = (temperature / 50) * 100;
+                                        const sliderBar = document.getElementById('showCurrentTemp');
+                                        if (sliderBar) {
+                                            sliderBar.style.setProperty('--current-level', percentage + '%');
+                                        }
+                                        const roomTempDiv = document.querySelector('.range-slider.non-slidingAC .roomTemp');
+                                        if (roomTempDiv) {
+                                            roomTempDiv.innerText = temperature + '°C';
+                                        }
+
+                                        // Pass values to updateACValuesLambda
+                                        updateACValuesLambda(temperature, minTemp, maxTemp);
+                                    })
+                                    .catch(error => {
+                                        console.error('Room temperature update failed:', error);
+                                    });
+                            }
+
+                            // 2. AWS Lambda Update: Send alert only once if temperature is out of range.
+                            // Reset the alert flag when temperature returns within range.
+                            function updateACValuesLambda(currentTemp, minTemp, maxTemp) {
+                                // If power is on, do not send any alert.
+                                if (powerStatus === "on") {
+                                    console.log("Power is on; lambda alert will not be sent.");
+                                    return;
+                                }
+
+                                console.log(`Current Temperature: ${currentTemp}°C, Min: ${minTemp}°C, Max: ${maxTemp}°C`);
+
+                                // If temperature is out-of-range and alert hasn't been sent, send alert.
+                                if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
+                                    const payload = {
+                                        body: JSON.stringify({
+                                            alert: `Temperature (${currentTemp}°C) is out of range!`,
+                                            minTemp: minTemp,
+                                            maxTemp: maxTemp,
+                                            currentTemp: currentTemp
+                                        })
+                                    };
+
+                                    fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(payload)
+                                    })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log('AWS Lambda Alert Sent:', data);
+                                            lambdaAlertSent = true; // Mark that alert has been sent.
+                                        })
+                                        .catch(error => console.error('Lambda Alert Error:', error));
+                                }
+                                // If temperature returns to normal, reset the alert flag so a new alert can be sent later.
+                                else if (currentTemp >= minTemp && currentTemp <= maxTemp) {
+                                    if (lambdaAlertSent) {
+                                        console.log("Temperature is back within range. Resetting alert flag.");
+                                        lambdaAlertSent = false;
+                                    }
+                                    console.log(`Temperature (${currentTemp}°C) is within the allowed range.`);
+                                }
+                            }
+
+                            // INITIALIZE: Call update function on page load and update every 5 seconds.
+                            updateCurrentRoomTemp();
+                            setInterval(updateCurrentRoomTemp, 5000);
+                        </script>
 
 
 
@@ -190,76 +278,6 @@
                                 <div class="start-tooltip">0</div>
                                 <div class="end-tooltip">50</div>
                             </div>
-
-
-                            <script>
-                                // 1. Temperature Update: Now only passes the current temperature to updateACValuesLambda
-                                function updateCurrentRoomTemp() {
-                                    fetch('../scripts/customize_AC.php')
-                                        .then(response => {
-                                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                                            return response.json();
-                                        })
-                                        .then(data => {
-                                            const temperature = parseFloat(data.temperature);
-                                            const minTemp = parseFloat(data.minTemp);
-                                            const maxTemp = parseFloat(data.maxTemp);
-
-                                            if (isNaN(temperature) || temperature < 0 || temperature > 50) {
-                                                throw new Error(`Invalid temperature value received: ${data.temperature}`);
-                                            }
-
-                                            // UPDATE UI
-                                            const percentage = (temperature / 50) * 100;
-                                            const sliderBar = document.getElementById('showCurrentTemp');
-                                            sliderBar.style.setProperty('--current-level', percentage + '%');
-                                            const roomTempDiv = document.querySelector('.range-slider.non-slidingAC .roomTemp');
-                                            roomTempDiv.innerText = temperature + '°C';
-
-                                            // Pass current temperature and threshold values to updateACValuesLambda
-                                            updateACValuesLambda(temperature, minTemp, maxTemp);
-                                        })
-                                        .catch(error => {
-                                            console.error('Room temperature update failed:', error);
-                                        });
-                                }
-
-                                // 2. AWS Lambda Update: Checks if temperature is out of range and sends JSON if so
-                                function updateACValuesLambda(currentTemp, minTemp, maxTemp) {
-                                    // Log the current temperature values for debugging
-                                    console.log(`Current Temperature: ${currentTemp}°C, Min: ${minTemp}°C, Max: ${maxTemp}°C`);
-
-                                    // Check if current temperature is outside allowed thresholds
-                                    if (currentTemp < minTemp || currentTemp > maxTemp) {
-                                        // Prepare the payload
-                                        const payload = {
-                                            body: JSON.stringify({
-                                                alert: `Temperature (${currentTemp}°C) is out of range!`,
-                                                minTemp: minTemp,
-                                                maxTemp: maxTemp,
-                                                currentTemp: currentTemp
-                                            })
-                                        };
-
-                                        fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify(payload)
-                                        })
-                                            .then(response => response.json())
-                                            .then(data => console.log('AWS Lambda Alert Sent:', data))
-                                            .catch(error => console.error('Lambda Alert Error:', error));
-                                    } else {
-                                        console.log(`Temperature (${currentTemp}°C) is within the allowed range.`);
-                                    }
-                                }
-
-                                // INITIALIZE FUNCTION ON PAGE LOAD and update every 5 seconds
-                                updateCurrentRoomTemp();
-                                setInterval(updateCurrentRoomTemp, 5000);
-                            </script>
-
-
 
 
 
