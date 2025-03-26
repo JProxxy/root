@@ -61,7 +61,7 @@
                                 </a>
                             </li> -->
                             <li>
-                                <a href="../classes/getDeletedAccountData.php" class="nav-link link-body-emphasis">
+                                <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
                                         height="16" class="me-2" />
                                     Deleted User Logs
