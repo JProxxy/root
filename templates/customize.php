@@ -104,7 +104,6 @@
                         <h3>Air Conditioning</h3>
 
 
-
                         <!-- LAMBDA NG TEMP -->
                         <?php
                         include '../app/config/connection.php';
@@ -141,7 +140,7 @@
                                 const acMinSlider = document.querySelector(".acMinimumLevel");
                                 const acMaxSlider = document.querySelector(".acMaximumLevel");
 
-                                // If power is "off", disable the acSwitch and sliders.
+                                // If power is "on", disable the acSwitch and sliders (per your logic).
                                 if (powerStatus === "on") {
                                     acSwitch.disabled = true;
                                     acMinSlider.disabled = true;
@@ -212,7 +211,7 @@
                                     return;
                                 }
 
-                                // Additional logging to indicate if temperature is too low, too high, or within range.
+                                // Log conditions
                                 if (currentTemp < minTemp) {
                                     console.log(`Temperature (${currentTemp}°C) is below the minimum threshold (${minTemp}°C).`);
                                 } else if (currentTemp > maxTemp) {
@@ -225,6 +224,7 @@
                                 if ((currentTemp < minTemp || currentTemp > maxTemp) && !lambdaAlertSent) {
                                     const payload = {
                                         body: JSON.stringify({
+                                            user_id: userId, // if defined, or include later in outer JSON
                                             alert: `Temperature (${currentTemp}°C) is out of range!`,
                                             minTemp: minTemp,
                                             maxTemp: maxTemp,
@@ -232,10 +232,22 @@
                                         })
                                     };
 
+                                    // Publish the payload wrapped under a top-level "body" key.
+                                    const params = {
+                                        topic: '/esp32/SubETW/AC',
+                                        payload: JSON.stringify({
+                                            body: JSON.stringify({
+                                                user_id: userId,
+                                                ...payload.body ? JSON.parse(payload.body) : {}
+                                            })
+                                        }),
+                                        qos: 0,
+                                    };
+
                                     fetch('https://uev5bzg84f.execute-api.ap-southeast-1.amazonaws.com/dev-AcTemp/AcTemp', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(payload)
+                                        body: JSON.stringify(params)
                                     })
                                         .then(response => response.json())
                                         .then(data => {
