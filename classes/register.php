@@ -93,7 +93,7 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert the new user into the database
 try {
-    $stmt = $conn->prepare("INSERT INTO users (username, password, email, phoneNumber, created_at, updated_at, role_id) VALUES (:username, :password, :email, :phoneNumber, NOW(), NOW(), 2)");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, email, phoneNumber, created_at, updated_at, role_id) VALUES (:username, :password, :email, :phoneNumber, NOW(), NOW(), 12)");
     $stmt->execute([':username' => $username, ':password' => $hashedPassword, ':email' => $email, ':phoneNumber' => $phoneNumber]);
 
     // On success, output a JavaScript alert and then redirect to the login page when "OK" is clicked.
