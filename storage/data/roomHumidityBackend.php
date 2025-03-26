@@ -1,6 +1,6 @@
 <?php
 // Include the connection.php file to use the existing database connection
-require '../app/config/connection.php'; // Make sure the path to connection.php is correct
+include '../app/config/connection.php'; // Ensure this uses PDO
 
 try {
     // Query to fetch the latest humidity value
