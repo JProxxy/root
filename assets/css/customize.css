@@ -39,6 +39,7 @@
   height: 80%;
   padding: 20px;
   background: #f3f3f3;
+  /* background: #9e9d9d; */
   border-radius: 25px;
 
   align-items: flex-start; /* Align items to the top */
@@ -341,9 +342,10 @@ input:checked + .slider:before {
 .acMinimumLevel,
 .acMaximumLevel {
   -webkit-appearance: none;
-  width: 92%;
+  width: 88%;
   height: 35px; /* Thick track */
-  border-radius: 30px 0px 0px 30px; /* Updated border radius */
+  border-radius: 30px; /* Updated border radius */
+  background-color: white !important;
   background: linear-gradient(
     90.01deg,
     #39b09e 0.01%,
@@ -362,6 +364,7 @@ input:checked + .slider:before {
   outline: none;
   position: relative;
 }
+
 
 /* Custom thumb */
 .acMinimumLevel::-webkit-slider-thumb,
@@ -422,23 +425,39 @@ input:checked + .slider:before {
   right: 3%;
 }
 
-/* Non-sliding bar */
-.non-slidingAC .slider-bar {
-  width: 92%;
+
+
+
+.slider-barTemp {
+  position: relative; /* Make sure this is set */
+  width: 84%;
   height: 35px;
-  border-radius: 25px;
   background: #f3f3f3;
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+.slider-barTemp::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--current-level, 50%);
   background-image: linear-gradient(
     90deg,
-    #39b09e 0%,
-    #50968d 17.5%,
-    #5b8884 36%,
-    #618280 54%,
-    #637f7d 71.5%,
-    #657d7c 85.75%,
-    #667b7b 100%
+    #39b09e 0.01%,
+    #519f8f 20.07%,
+    #659183 37.16%,
+    #7b8176 55.74%,
+    #927168 74.32%,
+    #a8615b 92.89%,
+    #ea3232 111.47%,
+    #ea3232 127.82%,
+    #ea3232 143.42%,
+    #ea3232 147.88%
   );
-  background-repeat: no-repeat;
-  background-size: 50% 100%; /* You can adjust the fill size here if needed */
-  margin: 5px 0;
+  transition: width 0.5s ease;
 }
+
+

@@ -21,7 +21,7 @@ try {
     $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
-        // FETCH AC DATA for the authenticated user (including sleep state).
+        // FETCH AC DATA for the authenticated user.
         $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing, sleep FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,7 +29,7 @@ try {
         if ($acData) {
             echo json_encode($acData);
         } else {
-            // INSERT DEFAULT VALUES for this user, now with a default sleep value ("Off").
+            // INSERT DEFAULT VALUES for this user.
             $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, sleep, timestamp) 
                                     VALUES (:user_id, 'Off', 26, '0', 'Cool', 'High', 'On', 'Off', NOW())");
             $stmt->execute([':user_id' => $user_id]);
@@ -49,10 +49,9 @@ try {
             throw new Exception("Invalid JSON input.");
         }
 
-        // ============== NEW: POWER OFF RESET LOGIC ============== //
-        $isPowerOff = isset($input['power']) && $input['power'] === 'Off';
-        if ($isPowerOff) {
-            // Force default values regardless of input
+        // ============== POWER OFF RESET LOGIC ============== //
+        if (isset($input['power']) && $input['power'] === 'Off') {
+            // Force default values regardless of input.
             $forcedDefaults = [
                 'fan'   => 'High',
                 'mode'  => 'Cool',
@@ -61,10 +60,10 @@ try {
                 'timer' => '0',
                 'temp'  => 16
             ];
-            // Merge forced defaults with existing input
+            // Merge forced defaults with existing input.
             $input = array_merge($input, $forcedDefaults);
-        
-            // Reset local session variables to the forced defaults
+
+            // Reset local session variables to the forced defaults.
             $_SESSION['fan']   = $forcedDefaults['fan'];
             $_SESSION['mode']  = $forcedDefaults['mode'];
             $_SESSION['swing'] = $forcedDefaults['swing'];
@@ -72,90 +71,91 @@ try {
             $_SESSION['timer'] = $forcedDefaults['timer'];
             $_SESSION['temp']  = $forcedDefaults['temp'];
         }
-        
-        // ========================================================= //
+        // ==================================================== //
 
-        // Check if a record for this user exists.
+        // Ensure the record for the current user exists.
         $stmt = $conn->prepare("SELECT COUNT(*) FROM acRemote WHERE user_id = :user_id");
         $stmt->execute([':user_id' => $user_id]);
         $exists = $stmt->fetchColumn();
 
         if (!$exists) {
-            // Insert default values for a new user.
             $stmt = $conn->prepare("INSERT INTO acRemote (user_id, power, temp, timer, mode, fan, swing, sleep, timestamp) 
                                     VALUES (:user_id, 'Off', 16, '0', 'Cool', 'High', 'On', 'Off', NOW())");
             $stmt->execute([':user_id' => $user_id]);
         }
 
-        // Build the dynamic update query.
+        // List of fields that share the same AC.
         $fields = ['power', 'temp', 'timer', 'mode', 'fan', 'swing', 'sleep'];
-        $updateParts = [];
-        $params = [];
 
+        // Prepare arrays to build global update (for all rows) and local update (for timestamp only).
+        $globalUpdateParts = [];
+        $globalParams = [];
+        $localTimestampUpdateParts = [];
+
+        // Mapping field to its timestamp column.
+        $timestampMapping = [
+            'power' => 'powertime',
+            'temp'  => 'temptime',
+            'timer' => 'timertime',
+            'mode'  => 'modetime',
+            'fan'   => 'fantime',
+            'swing' => 'swingtime',
+            'sleep' => 'sleeptime'
+        ];
+
+        // Loop through each field to update if provided.
         foreach ($fields as $field) {
             if (isset($input[$field])) {
-                $updateParts[] = "$field = :$field";
-                $params[$field] = $input[$field];
-
-                switch ($field) {
-                    case 'power':
-                        $updateParts[] = "powertime = NOW()";
-                        break;
-                    case 'temp':
-                        $updateParts[] = "temptime = NOW()";
-                        break;
-                    case 'timer':
-                        $updateParts[] = "timertime = NOW()";
-                        break;
-                    case 'mode':
-                        $updateParts[] = "modetime = NOW()";
-                        break;
-                    case 'fan':
-                        $updateParts[] = "fantime = NOW()";
-                        break;
-                    case 'swing':
-                        $updateParts[] = "swingtime = NOW()";
-                        break;
-                    case 'sleep':
-                        $updateParts[] = "sleeptime = NOW()"; // Update sleeptime only if sleep changes
-                        break;
-                }
+                $globalUpdateParts[] = "$field = :$field";
+                $globalParams[$field] = $input[$field];
+                // Add the corresponding timestamp update for the current user.
+                $localTimestampUpdateParts[] = $timestampMapping[$field] . " = NOW()";
             }
         }
 
-        // If mode is being changed to "Dry" or "Fan", force sleep to "Off"
+        // Additional Business Logic:
+        // If mode is being changed to "Dry" or "Fan", force sleep to "Off".
         if (isset($input['mode']) && ($input['mode'] === "Dry" || $input['mode'] === "Fan")) {
-            $updateParts[] = "sleep = 'Off'";
-            $updateParts[] = "sleeptime = NOW()"; // Update sleeptime when sleep is forced off
+            $globalUpdateParts[] = "sleep = 'Off'";
+            $localTimestampUpdateParts[] = "sleeptime = NOW()";
         }
 
-        // ============== NEW: COOL MODE FAN ENFORCEMENT ============== //
+        // If mode is being changed to "Cool", force fan to "High".
         if (isset($input['mode']) && $input['mode'] === "Cool") {
-            $updateParts[] = "fan = 'High'";
-            $updateParts[] = "fantime = NOW()";
+            $globalUpdateParts[] = "fan = 'High'";
+            $localTimestampUpdateParts[] = "fantime = NOW()";
         }
-        // ============================================================= //
 
         // Validate temperature range if provided.
-        if (isset($params['temp'])) {
-            $temp = (int)$params['temp'];
+        if (isset($globalParams['temp'])) {
+            $temp = (int)$globalParams['temp'];
             if ($temp < 16 || $temp > 32) {
                 throw new Exception("Temperature must be between 16 and 32°C.");
             }
         }
 
-        $params['user_id'] = $user_id;
-
-        if (!empty($updateParts)) {
-            $sql = "UPDATE acRemote SET " . implode(", ", $updateParts) . " WHERE user_id = :user_id";
-            error_log("Dynamic Update SQL: " . $sql);
-            $stmt = $conn->prepare($sql);
-            $stmt->execute($params);
-        } else {
+        if (empty($globalUpdateParts)) {
             throw new Exception("No valid fields provided for update.");
         }
 
-        // Fetch the updated AC settings.
+        // ===================== GLOBAL UPDATE =====================
+        // Update all records in the acRemote table with the new values.
+        $sqlGlobal = "UPDATE acRemote SET " . implode(", ", $globalUpdateParts);
+        $stmt = $conn->prepare($sqlGlobal);
+        $stmt->execute($globalParams);
+        // ==========================================================
+
+        // ===================== LOCAL TIMESTAMP UPDATE =====================
+        // Update the timestamp fields only for the current user.
+        if (!empty($localTimestampUpdateParts)) {
+            $sqlLocal = "UPDATE acRemote SET " . implode(", ", $localTimestampUpdateParts) . " WHERE user_id = :user_id";
+            $localParams = [':user_id' => $user_id];
+            $stmt = $conn->prepare($sqlLocal);
+            $stmt->execute($localParams);
+        }
+        // =================================================================
+
+        // Fetch the updated AC settings for the current user.
         $stmt = $conn->prepare("SELECT power, temp, timer, mode, fan, swing, sleep FROM acRemote WHERE user_id = :user_id LIMIT 1");
         $stmt->execute([':user_id' => $user_id]);
         $acData = $stmt->fetch(PDO::FETCH_ASSOC);
