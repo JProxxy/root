@@ -202,12 +202,16 @@
                                     });
                             }
 
+                        
                             // AWS Lambda Update: Send alert only once if temperature is out of range.
                             // Reset the alert flag when temperature returns within range.
                             function updateACValuesLambda(currentTemp, minTemp, maxTemp) {
-                                // If power is on, do not send any alert.
-                                if (powerStatus === "on") {
-                                    console.log("Power is on; lambda alert will not be sent.");
+                                // Get the acSwitch element from the DOM.
+                                const acSwitch = document.querySelector("#acSwitch input[type='checkbox']");
+
+                                // If the switch is off, do not send any alert.
+                                if (!acSwitch.checked) {
+                                    console.log("acSwitch is off aws will not send data");
                                     return;
                                 }
 
@@ -250,6 +254,7 @@
                                     }
                                 }
                             }
+
 
                             // INITIALIZE: Call the combined update function on page load and every 5 seconds.
                             updateCurrentRoomTempAndThresholds();

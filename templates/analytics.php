@@ -62,16 +62,35 @@ if (!isset($_SESSION['user_id'])) {
                         <option value="4thFloor">Room Temp - 4th Floor</option>
                     </select>
                 </div>
-
                 <div class="chartRoomCont">
-                    <div class="roomTemp">
-                        <?php include '../partials/roomTempBar.php'; ?>
+                    <div class="roomTemp" id="roomTempContainer">
+                        <!-- Content will be loaded here via AJAX -->
                     </div>
 
-                    <div class="roomHum">
-                        <?php include '../partials/roomHumBar.php'; ?>
+                    <div class="roomHum" id="roomHumContainer">
+                        <!-- Content will be loaded here via AJAX -->
                     </div>
                 </div>
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    $(document).ready(function () {
+                        // Load the room temperature partial into its container
+                        $("#roomTempContainer").load("../partials/roomTempBar.php", function (response, status, xhr) {
+                            if (status == "error") {
+                                console.error("Error loading roomTempBar.php: " + xhr.status + " " + xhr.statusText);
+                            }
+                        });
+
+                        // Load the room humidity partial into its container
+                        $("#roomHumContainer").load("../partials/roomHumBar.php", function (response, status, xhr) {
+                            if (status == "error") {
+                                console.error("Error loading roomHumBar.php: " + xhr.status + " " + xhr.statusText);
+                            }
+                        });
+                    });
+                </script>
+
             </div>
 
             <!-- SMART LIGHTS -->
