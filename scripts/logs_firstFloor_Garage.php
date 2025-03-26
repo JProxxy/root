@@ -88,6 +88,7 @@ try {
         // Build the final message: Only output the most recent update if available.
         if ($latestUpdate !== null) {
             $message = $row['username'] . " - " . $latestUpdate['message'];
+        } 
 
         $logs[] = [
             "time" => date("h:i A", strtotime($row['timestamp'])),

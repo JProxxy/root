@@ -61,6 +61,167 @@ if (!empty($user_data['profile_picture'])) {
 </head>
 
 <body>
+
+    <?php
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+
+        // Query to retrieve the user's role_id
+        $query = "SELECT role_id FROM users WHERE user_id = :user_id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Only output the pending overlay if the user has role_id 12
+        if ($user && $user['role_id'] == 12) {
+            ?>
+            <div class="pendingCont">
+                <img src="../assets/images/bg_pending.png" alt="Pending Background" />
+                <img src="../assets/images/pending-modal.png" alt="Pending Modal" class="pending-modal" />
+                <img src="../assets/images/pending-logout.png" alt="Pending Logout" class="pending-logout"
+                    onclick="logoutUser()" />
+            </div>
+
+            <script>
+                function logoutUser() {
+                    // Redirect to the logout script
+                    window.location.href = '../scripts/logout.php';
+                }
+            </script>
+            <?php
+        }
+    }
+    ?>
+
+
+
+<style>
+  .pendingCont {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2147483647 !important; /* Very high z-index */
+  }
+
+  /* Background image covers entire page */
+  .pendingCont img:nth-of-type(1) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* Pending modal image: smaller and centered */
+  .pendingCont .pending-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; /* Adjust size as needed */
+    height: auto;
+    pointer-events: none;
+  }
+
+  /* Pending logout image: smaller, centered, and slightly below the modal */
+  .pendingCont .pending-logout {
+    position: absolute;
+    top: calc(50% + 60px); /* Adjust vertical offset as needed */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px; /* Adjust size as needed */
+    height: auto;
+    z-index: 2147483648 !important; /* Even higher than container */
+    pointer-events: auto; /* Allow clicks on the logout image */
+  }
+</style>
+
+<?php
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+
+        // Query to retrieve the user's role_id
+        $query = "SELECT role_id FROM users WHERE user_id = :user_id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Only output the pending overlay if the user has role_id 12
+        if ($user && $user['role_id'] == 13) {
+            ?>
+            <div class="pendingCont">
+                <img src="../assets/images/ban_bg.png" alt="ban Background" />
+                <img src="../assets/images/ban-modal.png" alt="Pending Modal" class="pending-modal" />
+                <img src="../assets/images/pending-logout.png" alt="Pending Logout" class="pending-logout"
+                    onclick="logoutUser()" />
+            </div>
+
+            <script>
+                function logoutUser() {
+                    // Redirect to the logout script
+                    window.location.href = '../scripts/logout.php';
+                }
+            </script>
+            <?php
+        }
+    }
+    ?>
+
+
+
+<style>
+  .pendingCont {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2147483647 !important; /* Very high z-index */
+  }
+
+  /* Background image covers entire page */
+  .pendingCont img:nth-of-type(1) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* Pending modal image: smaller and centered */
+  .pendingCont .pending-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; /* Adjust size as needed */
+    height: auto;
+    pointer-events: none;
+  }
+
+  /* Pending logout image: smaller, centered, and slightly below the modal */
+  .pendingCont .pending-logout {
+    position: absolute;
+    top: calc(50% + 60px); /* Adjust vertical offset as needed */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px; /* Adjust size as needed */
+    height: auto;
+    z-index: 2147483648 !important; /* Even higher than container */
+    pointer-events: auto; /* Allow clicks on the logout image */
+  }
+</style>
+
     <div class="mainContainer">
         <div class="sidePanel">
             <div class="topBar">
@@ -68,7 +229,7 @@ if (!empty($user_data['profile_picture'])) {
                     <img src="../assets/images/rivanLogo.png" alt="Logo" class="iconLogo" />
                 </div>
 
-                <div class="middleItems">
+                <div class="middleItems">w
                     <div class="middleItem" onclick="window.location.href='../templates/FirstFloor-Outdoor.php'">
                         <img src="../assets/images/officeSpace.png" alt="Office Space" class="icon" />
                         <span>Office<br>Space</span>
