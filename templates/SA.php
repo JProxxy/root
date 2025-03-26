@@ -54,7 +54,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="../storage/logs/globalLogs.php" class="nav-link link-body-emphasis">
+                                <a href="../templates/globalLogs.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-logs.png" alt="Logs" width="16" height="16"
                                         class="me-2" />
                                     Logs
