@@ -152,36 +152,36 @@
 
                     </div>
                     <div class="dashboardLog">
-    <div class="headerLog">
-        <p>User Activity Log</p>
-        <a href="../templates/userActLogPage.php">
-            <img src="../assets/images/next.png" alt="next icon" class="next" />
-        </a>
-    </div>
+                        <div class="headerLog">
+                            <p>User Activity Log</p>
+                            <a href="../templates/userActLogPage.php">
+                                <img src="../assets/images/next.png" alt="next icon" class="next" />
+                            </a>
+                        </div>
 
-    <table class="userLogTable">
-        <tr>
-            <th>User Name</th>
-            <th>Timestamp</th>
-        </tr>
-        <tbody id="latestUserActivities">
-            <!-- Latest 4 user activities will be inserted here dynamically -->
-        </tbody>
-    </table>
-</div>
+                        <table class="userLogTable">
+                            <tr>
+                                <th>User Name</th>
+                                <th>Timestamp</th>
+                            </tr>
+                            <tbody id="latestUserActivities">
+                                <!-- Latest 4 user activities will be inserted here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        fetch('../scripts/userActLogDASHBOARD.php') // Replace with actual PHP file path
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    const activityContainer = document.getElementById('latestUserActivities');
-                    activityContainer.innerHTML = ''; // Clear previous data
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            fetch('../scripts/userActLogDASHBOARD.php') // Replace with actual PHP file path
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (Array.isArray(data)) {
+                                        const activityContainer = document.getElementById('latestUserActivities');
+                                        activityContainer.innerHTML = ''; // Clear previous data
 
-                    data.forEach(user => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                                        data.forEach(user => {
+                                            const row = document.createElement('tr');
+                                            row.innerHTML = `
                             <td class="userLog">
                                 <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
                                 <span class="userName">${user.username}</span>
@@ -190,15 +190,15 @@
                                 <span class="logTime">${user.timestamp}</span>
                             </td>
                         `;
-                        activityContainer.appendChild(row);
-                    });
-                } else {
-                    console.error("Error: Invalid data format", data);
-                }
-            })
-            .catch(error => console.error('Error fetching user activities:', error));
-    });
-</script>
+                                            activityContainer.appendChild(row);
+                                        });
+                                    } else {
+                                        console.error("Error: Invalid data format", data);
+                                    }
+                                })
+                                .catch(error => console.error('Error fetching user activities:', error));
+                        });
+                    </script>
 
                 </div>
 
@@ -249,68 +249,68 @@
 
     </script>
 
+<script>
+$(document).ready(function () {
+    function loadNotifications() {
+        $.ajax({
+            url: '../scripts/fetch_notifs.php', // Ensure correct PHP file path
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                if (!response || response.length === 0) {
+                    return;
+                }
+                
+                // Clear container if you want to remove all old notifications on every load
+                // $('.notifCont').empty();
 
-    <script>
-        $(document).ready(function () {
-            function loadNotifications() {
-                $.ajax({
-                    url: '../scripts/fetch_notifs.php', // Ensure correct PHP file path
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        if (!response || response.length === 0) {
-                            return;
-                        }
-
-                        response.reverse().forEach((notif) => { // Reverse to maintain order
-                            let notifClass = `notif-item ${notif.type}`;
-                            let notifHtml = `
+                // Process notifications in reverse order so the newest appears on top
+                response.reverse().forEach((notif) => {
+                    // Use the type provided from backend; default to 'info' if missing
+                    let type = notif.type ? notif.type : 'info';
+                    let notifClass = `notif-item ${type}`;
+                    let notifHtml = `
                         <div class="${notifClass}" style="display: none;"> 
                             <span class="close-btn">&times;</span> 
                             <strong>${notif.title}</strong>
                             <p>${notif.message}</p>
                         </div>
                     `;
-
-                            // **Check if notification already exists**
-                            if (!$('.notifCont').find(`.notif-item:contains("${notif.message}")`).length) {
-                                let $newNotif = $(notifHtml);
-
-                                // **Add new notification on top**
-                                $('.notifCont').prepend($newNotif);
-
-                                // **Animate only if it’s a new notification**
-                                if (!$newNotif.is(':visible')) {
-                                    $newNotif.slideDown(400); // **Smooth slide-in animation**
-                                }
-                            }
-                        });
-
-                        // **Keep only the latest 10 notifications**
-                        $('.notif-item').slice(10).fadeOut(300, function () { $(this).remove(); });
-                    },
-                    error: function () {
-                        console.error("Failed to load notifications.");
+                    
+                    // Check if the notification already exists to avoid duplicates
+                    if (!$('.notifCont').find(`.notif-item:contains("${notif.message}")`).length) {
+                        let $newNotif = $(notifHtml);
+                        // Prepend so new notifications appear on top
+                        $('.notifCont').prepend($newNotif);
+                        // Animate the notification (slide down)
+                        if (!$newNotif.is(':visible')) {
+                            $newNotif.slideDown(400);
+                        }
                     }
                 });
+                
+                // Keep only the latest 10 notifications (if more than 10, remove the extras)
+                $('.notif-item').slice(10).fadeOut(300, function () { $(this).remove(); });
+            },
+            error: function () {
+                console.error("Failed to load notifications.");
             }
-
-            // **Close button animation**
-            $('.notifCont').on('click', '.close-btn', function () {
-                $(this).parent().fadeOut(300, function () {
-                    $(this).remove();
-                });
-            });
-
-            // **Initial load without animation**
-            loadNotifications();
-
-            // **Fetch new notifications every 10 seconds**
-            setInterval(loadNotifications, 10000);
         });
+    }
 
+    // Close button functionality: click to fade out and remove the notification
+    $('.notifCont').on('click', '.close-btn', function () {
+        $(this).parent().fadeOut(300, function () {
+            $(this).remove();
+        });
+    });
 
-    </script>
+    // Initial load of notifications
+    loadNotifications();
+    // Fetch new notifications every 10 seconds
+    setInterval(loadNotifications, 10000);
+});
+</script>
 
 
 

@@ -53,13 +53,13 @@
                                     Manage Users
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a href="../templates/globalLogs.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-logs.png" alt="Logs" width="16" height="16"
                                         class="me-2" />
                                     Logs
                                 </a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a href="../classes/getDeletedAccountData.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"

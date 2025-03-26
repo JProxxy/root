@@ -203,25 +203,34 @@
 .notif-item:last-child {
   border-bottom: none;
 }
-
-.error {
+/* Notification Types - Add these */
+.notif-item.error {
   background: #ffdddd;
   color: #d9534f;
+  border-left: 4px solid #d9534f; /* Add accent border */
 }
 
-.info {
+.notif-item.info {
   background: #d9edf7;
   color: #31708f;
+  border-left: 4px solid #31708f;
 }
 
-.warning {
+.notif-item.warning {
   background: #fcf8e3;
   color: #8a6d3b;
+  border-left: 4px solid #8a6d3b;
 }
 
-.success {
+.notif-item.success {
   background: #dff0d8;
   color: #3c763d;
+  border-left: 4px solid #3c763d;
+}
+
+/* Remove these standalone classes (optional) */
+.error, .info, .warning, .success {
+  /* Delete these rules or they might conflict */
 }
 .notifPage {
   margin-top: 5%;
