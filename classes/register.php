@@ -19,6 +19,9 @@ $retypePassword    = trim($_POST['retype_password'] ?? '');
 $roleSelect        = trim($_POST['roleSelect'] ?? '');
 $recaptchaResponse = $_POST['recaptcha_response'] ?? '';
 
+// Extract username from email (remove the "@rivaniot.online" portion)
+$username = strstr($email, '@', true);
+
 // Initialize an array for error messages
 $errors = [];
 
@@ -88,14 +91,17 @@ if (!empty($errors)) {
     exit;
 }
 
-// Check if a user with the same email already exists
+// Check if a user with the same email or username already exists
 try {
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
-    $stmt->execute([':email' => $email]);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email OR username = :username LIMIT 1");
+    $stmt->execute([
+        ':email' => $email,
+        ':username' => $username
+    ]);
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($existingUser) {
-        echo "<script>alert('Email already exists. Please try a different one.');</script>";
+        echo "<script>alert('Email or Username already exists. Please try a different one.');</script>";
         exit;
     }
 } catch (PDOException $e) {
@@ -107,10 +113,11 @@ try {
 // Hash the password using a secure algorithm
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-// Insert the new user into the database
+// Insert the new user into the database (including the username)
 try {
-    $stmt = $conn->prepare("INSERT INTO users (email, password, role_id, created_at, updated_at) VALUES (:email, :password, :role_id, NOW(), NOW())");
+    $stmt = $conn->prepare("INSERT INTO users (username, email, password, role_id, created_at, updated_at) VALUES (:username, :email, :password, :role_id, NOW(), NOW())");
     $stmt->execute([
+        ':username' => $username,
         ':email'    => $email,
         ':password' => $hashedPassword,
         ':role_id'  => $roleSelect
@@ -126,5 +133,4 @@ try {
     echo "<script>alert('Database Insert Error: " . addslashes($e->getMessage()) . "');</script>";
     exit;
 }
-
 ?>
