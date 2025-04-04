@@ -123,8 +123,8 @@ try {
           </script>";
     exit;
 } catch (PDOException $e) {
-    error_log("Database Insert Error: " . $e->getMessage());
-    echo "<script>alert('System error. Please try again later.');</script>";
+    echo "<script>alert('Database Insert Error: " . addslashes($e->getMessage()) . "');</script>";
     exit;
 }
+
 ?>
