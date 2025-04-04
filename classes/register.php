@@ -63,6 +63,18 @@ if ($password !== $retypePassword) {
 
 if (empty($roleSelect)) {
     $errors[] = "Role selection is required.";
+} else {
+    // Map dropdown values to numeric role IDs
+    $roleMap = [
+        "admin"   => 1,
+        "staff"   => 2,
+        "student" => 3
+    ];
+    if (array_key_exists($roleSelect, $roleMap)) {
+        $roleSelect = $roleMap[$roleSelect];
+    } else {
+        $errors[] = "Invalid role selection.";
+    }
 }
 
 // If there are errors, output them via alert and stop processing
