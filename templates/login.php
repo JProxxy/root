@@ -354,6 +354,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
     }
 
+    function validateInput(inputType) {
+        let inputElement = document.getElementById(inputType);
+        let errorMessage = document.querySelector(`.${inputType}-error`);
+
+        if (!inputElement.checkValidity()) {
+            errorMessage.style.display = "block"; // Show error message
+        } else {
+            errorMessage.style.display = "none"; // Hide error message
+        }
+    }
 
 
     // Validate Password and Retype Password Match
@@ -448,8 +458,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         strengthBar.style.width = strength + '%';
         strengthBar.style.backgroundColor =
             strength >= 75 ? '#28a745' : // Green (Strong)
-            strength >= 50 ? '#ffc107' : // Yellow (Medium)
-                             '#dc3545'; // Red (Weak)
+                strength >= 50 ? '#ffc107' : // Yellow (Medium)
+                    '#dc3545'; // Red (Weak)
 
         // Show/hide error message based on strength
         if (errorSpan) {
