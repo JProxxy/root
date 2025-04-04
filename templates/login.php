@@ -119,11 +119,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     <?php if (!empty($errorMessage)): ?>
                         <div class="error"><?php echo htmlspecialchars($errorMessage); ?></div>
                     <?php endif; ?>
+
+                    <div class="toggle-container">
+                        <!-- Radio buttons (hidden) -->
+                        <input type="radio" name="toggle" id="user" checked>
+                        <input type="radio" name="toggle" id="admin">
+
+                        <!-- The pill toggle itself -->
+                        <div class="toggle-pill">
+                            <!-- Labels that act like buttons -->
+                            <label for="user" class="option">User</label>
+                            <label for="admin" class="option">Admin</label>
+                            <!-- The slider that moves between options -->
+                            <span class="slider"></span>
+                        </div>
+                    </div>
+
+                    <!-- User Login Container -->
                     <div class="box">
-                        <h2 class="loginTitle">USER LOGIN</h2>
                         <div class="input-container">
                             <i class="fas fa-user user-icon"></i>
-
                             <input type="text" id="username" name="username" placeholder="Username" required
                                 autocomplete="username" minlength="3" maxlength="30">
                         </div>
@@ -136,58 +151,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <input type="checkbox" id="showLoginPassword" onclick="toggleLoginPassword()">
                             <label for="showLoginPassword">Show Password</label>
                         </div>
-
-                        <div class="divider">
-                            <span>OR</span>
-                        </div>
-
-                        <div id="g_id_onload"
-                            data-client_id="460368018991-8r0gteoh0c639egstdjj7tedj912j4gv.apps.googleusercontent.com"
-                            data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse"
-                            data-auto_prompt="false">
-                        </div>
-
-                        <div class="ContGoogle">
-                            <div class="g_id_signin" data-type="standard" data-theme="icon" data-size="large"
-                                data-shape="pill" data-text="signin_with">
-                            </div>
-                        </div>
-
-                        <script>
-                            function handleCredentialResponse(response) {
-                                const token = response.credential;
-                                console.log("Google Token:", token);
-
-                                // Send the token to google-auth.php using fetch
-                                fetch('../scripts/google-auth.php', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ token: token })
-                                })
-                                    .then(resp => resp.text())  // Use text() first for debugging
-                                    .then(data => {
-                                        console.log("Raw Server Response:", data);
-                                        try {
-                                            // Parse the JSON after confirming that it's complete
-                                            let parsedData = JSON.parse(data);
-                                            console.log("Parsed Data:", parsedData);
-                                            if (parsedData.success) {
-                                                // Alert the user and then redirect on OK
-                                                alert("User data is already here!");
-                                                window.location.href = "../templates/dashboard.php";
-                                            } else {
-                                                alert("Google authentication failed: " + parsedData.message);
-                                            }
-                                        } catch (error) {
-                                            console.error("JSON Parse Error:", error);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error("Fetch Error:", error);
-                                    });
-                            }
-
-                        </script>
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
@@ -196,15 +159,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 Account</a>
                         </div>
                         <div class="link-container">
-                            <a href="../templates/forgot-password.php" class="forgotPass">Forgot
-                                Password?</a>
+                            <a href="../templates/forgot-password.php" class="forgotPass">Forgot Password?</a>
                         </div>
+                    </div>
 
+                    <!-- Admin Login Container -->
+                    <div class="admin-box hidden">
+                        <div class="input-container admin-input-container">
+                            <i class="fas fa-envelope icon-inside"></i>
+                            <input type="email" id="adminEmailVer" name="adminEmailVer" class="adminEmailVer"
+                                placeholder="Admin Email" required>
+                            <i class="fas fa-arrow-right arrow-button"></i>
+                        </div>
                     </div>
 
 
 
+
                 </form>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('user').addEventListener('change', toggleLoginType);
+                        document.getElementById('admin').addEventListener('change', toggleLoginType);
+
+                        function toggleLoginType() {
+                            if (document.getElementById('admin').checked) {
+                                document.querySelector('.box').classList.add('hidden');
+                                document.querySelector('.admin-box').classList.remove('hidden');
+                            } else {
+                                document.querySelector('.box').classList.remove('hidden');
+                                document.querySelector('.admin-box').classList.add('hidden');
+                            }
+                        }
+
+                        // Optionally, run on page load to ensure correct container is shown
+                        toggleLoginType();
+                    });
+
+                </script>
             </div>
 
             <div class="signUpContainer" id="signUpContainer" style="display: none;">
@@ -215,15 +208,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     <div class="boxTwo">
                         <h2 class="signUpTitle">USER SIGN UP</h2>
 
-                        <!-- Username Field -->
-                        <div class="inputsign-container">
-                            <i class="fas fa-user"></i>
-                            <input type="text" id="SignUpUsername" name="SignUpUsername" placeholder="Username" required
-                                pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters (letters, numbers, underscores)"
-                                oninput="validateInput('SignUpUsername')">
-                            <span class="error-message SignUpUsername-error">Invalid username</span>
-                        </div>
-
                         <!-- Email Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-envelope"></i>
@@ -231,17 +215,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="validateInput('email')">
                             <span class="error-message email-error">Invalid email format</span>
                         </div>
-
-                        <!-- Phone Number Field -->
-                        <div class="inputsign-container">
-                            <i class="fas fa-phone"></i>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required
-                                pattern="[0-9]{11}" title="11-digit phone number"
-                                oninput="validateInput('phoneNumber')">
-                            <span class="error-message phone-error">Enter an 11-digit phone number</span>
-                        </div>
-
-
                         <!-- Password Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>
@@ -280,12 +253,68 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                             <span class="password-match-error">Passwords do not match</span>
                         </div>
 
+
+                        <div class="input-container admin-input-container">
+                            <!-- Left Icon -->
+                            <img src="../assets/images/icon-select_role.png" class="icon-inside" alt="Role Icon">
+
+                            <!-- Custom Dropdown -->
+                            <div class="custom-dropdown">
+                                <div class="selected">
+                                    <span>Select Role</span>
+                                    <i class="fas fa-chevron-down arrow-button"></i>
+                                </div>
+                                <ul class="dropdown-menu">
+                                    <li data-value="admin">Administrator</li>
+                                    <li data-value="staff">Staff Member</li>
+                                    <li data-value="student">Student</li>
+                                </ul>
+                            </div>
+
+                            <!-- Hidden input to store the selected value -->
+                            <input type="hidden" id="roleSelect" name="roleSelect">
+                        </div>
+
+
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                const dropdown = document.querySelector(".custom-dropdown");
+                                const selected = dropdown.querySelector(".selected span");
+                                const menu = dropdown.querySelector(".dropdown-menu");
+                                const input = document.getElementById("roleSelect");
+
+                                dropdown.addEventListener("click", () => {
+                                    dropdown.classList.toggle("active");
+                                });
+
+                                menu.querySelectorAll("li").forEach(item => {
+                                    item.addEventListener("click", function () {
+                                        selected.textContent = this.textContent;
+                                        input.value = this.getAttribute("data-value");
+                                        dropdown.classList.remove("active");
+                                    });
+                                });
+
+                                // Close dropdown when clicking outside
+                                document.addEventListener("click", (e) => {
+                                    if (!dropdown.contains(e.target)) {
+                                        dropdown.classList.remove("active");
+                                    }
+                                });
+                            });
+
+                        </script>
+
+
                         <button type="submit" class="signupButton">SIGN UP</button>
 
                         <div class="link-container">
                             <a href="javascript:void(0);" onclick="toggleContainers()" class="backToLogin">Log In
                                 Account</a>
                         </div>
+
+
+
                     </div>
                 </form>
             </div>
@@ -315,7 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 </body>
 
 
-
+<!-- THIS IS FOR SIGNUP -->
 <script>
     function toggleContainers() {
         const login = document.getElementById('logInContainer');
@@ -357,54 +386,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 </html>
 
-
+<!-- THIS IS FOR CREATING USER ACCOUNT AS ADMIN -->
 <script>
-    // Real-time validation for Username
-    document.querySelector('input[name="SignUpUsername"]').addEventListener('input', function () {
-        const SignUpUsername = this.value;
-        const regex = /^[a-zA-Z0-9]{3,12}$/; // Only letters and numbers, 3-12 characters
-        const errorSpan = this.nextElementSibling;
-
-        if (!regex.test(SignUpUsername)) {
-            errorSpan.textContent = "Invalid username. Only letters & numbers (3-12 characters).";
-            errorSpan.style.display = "block";
-        } else {
-            errorSpan.style.display = "none";
-        }
-    });
-
     // Real-time validation for Email
     document.querySelector('input[name="email"]').addEventListener('input', function () {
         const email = this.value;
-        const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/; // Standard email pattern
         const errorSpan = this.nextElementSibling;
 
-        if (!regex.test(email)) {
-            errorSpan.textContent = "Invalid email format.";
-            errorSpan.style.display = "block";
-        } else {
+        if (email === "") {
+            // If the input is empty, remove the error message
             errorSpan.style.display = "none";
+        } else {
+            // Only accept emails ending with @rivaniot.online
+            const regex = /^[a-z0-9._%+-]+@rivaniot\.online$/;
+            if (!regex.test(email)) {
+                errorSpan.textContent = "Invalid email format. Only @rivaniot.online emails are accepted.";
+                errorSpan.style.display = "block";
+            } else {
+                errorSpan.style.display = "none";
+            }
         }
     });
-
-    // Real-time validation for Phone Number
-    document.querySelector('input[name="phoneNumber"]').addEventListener('input', function () {
-        const phone = this.value;
-        const regex = /^[0-9]{11}$/; // Must be 11-digit numeric
-        const errorSpan = this.nextElementSibling;
-
-        if (!regex.test(phone)) {
-            errorSpan.textContent = "Invalid phone number. Must be 11 digits.";
-            errorSpan.style.display = "block";
-        } else {
-            errorSpan.style.display = "none";
-        }
-    });
-
 
     // Real-time validation for Password
     document.getElementById('password').addEventListener('input', function () {
-        checkPasswordStrength(this.value);
+        const password = this.value;
+
+        // Only check password strength if password is not empty
+        if (password !== "") {
+            checkPasswordStrength(password);
+        } else {
+            // If the password is empty, hide any strength message
+            const errorSpan = document.querySelector('.password-strength-message');
+            errorSpan.style.display = "none";
+
+            // Hide the strength bar
+            const strengthBar = document.querySelector('.strength-bar');
+            strengthBar.style.width = "0%";
+        }
+
         validatePasswordMatch();
     });
 
@@ -428,8 +448,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         strengthBar.style.width = strength + '%';
         strengthBar.style.backgroundColor =
             strength >= 75 ? '#28a745' : // Green (Strong)
-                strength >= 50 ? '#ffc107' : // Yellow (Medium)
-                    '#dc3545'; // Red (Weak)
+            strength >= 50 ? '#ffc107' : // Yellow (Medium)
+                             '#dc3545'; // Red (Weak)
 
         // Show/hide error message based on strength
         if (errorSpan) {
@@ -438,17 +458,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         }
     }
 
-
     // Validate Password Match
     function validatePasswordMatch() {
         const password = document.getElementById('password').value;
         const retype = document.getElementById('retype_password').value;
         const errorSpan = document.querySelector('.password-match-error');
 
-        if (password && retype && password !== retype) {
+        if (password === "" || retype === "") {
+            // If either field is empty, hide the error
+            errorSpan.style.display = "none";
+        } else if (password !== retype) {
+            // If the passwords do not match, show the error
             errorSpan.textContent = "Passwords do not match!";
             errorSpan.style.display = "block";
         } else {
+            // If passwords match, hide the error
             errorSpan.style.display = "none";
         }
     }

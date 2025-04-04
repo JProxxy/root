@@ -85,7 +85,7 @@ try {
         ]);
         $user_id = $conn->lastInsertId();
         if (!$user_id) {
-            throw new Exception("Failed to get user ID.");
+            throw new Exception(message: "Failed to get user ID.");
         }
     } else {
         $user_id = $user['user_id'];

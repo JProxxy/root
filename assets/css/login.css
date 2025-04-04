@@ -89,6 +89,7 @@ body {
   width: 100%;
   max-width: 335px;
   margin-bottom: 20px;
+
 }
 
 .input-container input {
@@ -102,8 +103,8 @@ body {
   text-align: left; /* Align text to the left */
   text-indent: 10%;
   font-size: 1.05rem;
+  padding-right: 10%;
 }
-
 
 .input-container input::placeholder {
   color: #ffffff;
@@ -249,33 +250,31 @@ body {
   text-align: center;
 }
 
-
 .SignUpUsername-error,
 .email-error,
 .phone-error {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 93%;
-    background-color: #f8d7da;
-    color: #d9534f;
-    text-align: left;
-    font-size: 0.9rem;
-    padding: 5px 10px;  /* Reduced padding to prevent overlap */
-    border: 1px solid #f5c6cb;
-    border-radius: 15px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10;  /* Ensures it appears above inputs */
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 93%;
+  background-color: #f8d7da;
+  color: #d9534f;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 5px 10px; /* Reduced padding to prevent overlap */
+  border: 1px solid #f5c6cb;
+  border-radius: 15px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 10; /* Ensures it appears above inputs */
 }
 
 .inputsign-container {
-  position: relative;  /* Ensure error message positions correctly */
+  position: relative; /* Ensure error message positions correctly */
   width: 100%;
   margin-bottom: 20px; /* Add space for floating error messages */
 }
-
 
 .password-match-error {
   display: none;
@@ -344,7 +343,6 @@ body {
   cursor: pointer;
 }
 
-
 /* Strength colors */
 .strength-bar.weak {
   background-color: #dc3545;
@@ -372,4 +370,209 @@ body {
   border-radius: 15px;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* newly added bs */
+
+/* Container to hold the radios and the pill */
+.toggle-container {
+  position: relative;
+  display: block;
+  width: auto; /* Let it auto-size */
+  margin: 0 auto; /* Center the container */
+  text-align: center;
+  margin-left: 20%;
+  margin-top: 15%;
+}
+
+/* Hide the radio inputs */
+.toggle-container input[type="radio"] {
+  display: none;
+  width: 100%;
+}
+
+/* The pill wrapper */
+.toggle-pill {
+  position: relative;
+  display: flex;
+  margin: 0 auto 10%;
+  width: 70%; /* Adjust width as needed */
+  height: 45px; /* Adjust height as needed */
+  background: #f5f5f5;
+  border-radius: 50px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Each option (User / Admin) */
+.option {
+  flex: 1;
+  text-align: center;
+  line-height: 45px; /* Match .toggle-pill height */
+  font-weight: 600;
+  font-family: "Kodchasan", sans-serif;
+  color: #f5f5f5; /* Default color */
+  position: relative;
+  z-index: 2; /* Keep text on top of slider */
+}
+
+/* The moving slider */
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%; /* Half the .toggle-pill width */
+  height: 100%;
+  background: #2d8b96; /* Navy background */
+  border-radius: 50px;
+  transition: left 0.3s ease;
+  z-index: 1; /* Below the text */
+}
+
+/* When #user is checked, slider stays on the left */
+#user:checked ~ .toggle-pill .slider {
+  left: 0;
+}
+
+/* When #admin is checked, slider slides to the right */
+#admin:checked ~ .toggle-pill .slider {
+  left: 50%;
+}
+
+/* Color settings when slider is on User */
+#user:checked ~ .toggle-pill label.option:nth-child(1) {
+  color: #f5f5f5; /* User text on slider */
+}
+#user:checked ~ .toggle-pill label.option:nth-child(2) {
+  color: #2d8b96; /* Admin text off slider */
+}
+
+/* Color settings when slider is on Admin */
+#admin:checked ~ .toggle-pill label.option:nth-child(1) {
+  color: #2d8b96; /* User text off slider */
+}
+#admin:checked ~ .toggle-pill label.option:nth-child(2) {
+  color: #f5f5f5; /* Admin text on slider */
+}
+.hidden {
+  display: none !important;
+}
+
+form {
+  /* background-color: red; */
+
+  height: 90%;
+}
+
+
+/* Custom Dropdown Container */
+.custom-dropdown {
+  width: 100%;
+  background-color: #39b09e;
+  border-radius: 25px;
+  color: #fff;
+  font-family: "Kodchasan", sans-serif;
+  cursor: pointer;
+  position: relative;
+  padding-left: 25px;
+}
+
+.custom-dropdown span {
+  color: #ffffffd5;
+  font-size: 1rem;
+  font-family: "Kodchasan", sans-serif;
+}
+
+
+.icon-inside {
+  position: absolute;
+  left: 7%; /* Make sure the icon is properly aligned */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 25px; /* Adjust as needed */
+  height: 20px;
+  pointer-events: none; /* Ensure the icon doesn't block clicks */
+  z-index: 1; /* Ensure icon is above the background */
+}
+
+
+.selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 30px;
+  border-radius: 25px;
+  position: relative;
+  margin-left: 5%;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 1rem;
+}
+
+
+.arrow-button {
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  cursor: pointer;
+  z-index: 1; 
+}
+
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  width: 100%;
+  background: #8ac8bf;
+  color: white;
+  border-radius: 10px;
+  margin-top: 0px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  list-style: none;
+  padding: 0;
+  z-index: 10;
+  margin-left: -7.5%;
+}
+
+
+.dropdown-menu li {
+  padding: 10px 15px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+
+.dropdown-menu li:hover {
+  background: #2e9485;
+  color: white;
+}
+
+
+.custom-dropdown.active .dropdown-menu {
+  display: block;
+}
+
+
+
+/* ADMIN EMAIL */
+.admin-box {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  width: 100%;
+  margin-top: 15%;
+  margin-left: 10%;
+
+}
+
+.adminEmailVer {
+  width: calc(100% - 20%); /* Subtract space for icons */
+  padding-right: 20%; /* Adds space on the right to prevent overlap */
+  text-align: center;
+}
+
+
+.icon-inside {
+  color: white;
 }
