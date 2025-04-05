@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.example.com'; // Replace with your SMTP server
+            $mail->Host       = 'smtp.hostinger.com'; // Replace with your SMTP server
             $mail->SMTPAuth   = true;
             $mail->Username   = 'jpenarubia.a0001@rivaniot.online'; // Your email
             $mail->Password   = 'ExcelAltH0103!'; // Your email password
