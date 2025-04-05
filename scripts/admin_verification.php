@@ -3,7 +3,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php'; // Load PHPMailer
-require 'db_connection.php'; // Your database connection
+require_once '../app/config/connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $adminEmail = trim($_POST['adminEmailVer']);
@@ -26,8 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host       = 'smtp.example.com'; // Replace with your SMTP server
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'your-email@example.com'; // Your email
-            $mail->Password   = 'your-email-password'; // Your email password
+            $mail->Username   = 'jpenarubia.a0001@rivaniot.online'; // Your email
+            $mail->Password   = 'ExcelAltH0103!'; // Your email password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 

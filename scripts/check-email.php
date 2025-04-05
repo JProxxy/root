@@ -47,8 +47,8 @@ try {
             $mail->SMTPDebug = 0;
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'jpenarubia.a0001@rivaniot.online';  // Replace with your Gmail
-            $mail->Password = 'ExcelAltH0103!'; // Use an App Password (NOT your real password)
+            $mail->Username = 'jproxxyv1@gmail.com';  // Replace with your Gmail
+            $mail->Password = 'cohw zplj ztag sifm'; // Use an App Password (NOT your real password)
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
