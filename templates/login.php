@@ -34,6 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
+            // Check if the user's role is allowed (role_id must equal 1)
+            if ($user['role_id'] != 3 && $user['role_id'] != 4) {
+                // Display alert and redirect if role is not permitted
+                echo "<script>
+                    alert('Access denied. Your role does not allow login through this portal.');
+                    window.location.href = '../templates/login.php';
+                </script>";
+                exit();
+            }            
+
             $hashedPassword = $user['password'];
             $failedAttempts = $user['failed_attempts'];
             $lockUntil = $user['lock_until'];
@@ -50,8 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 echo "<script>alert('Account is locked. Try again after $remainingTime seconds.'); window.location.href = '../templates/login.php';</script>";
                 exit(); // Ensure no further code execution
             }
-
-
 
             // Check password (if user has no Google ID)
             if ((!empty($hashedPassword) && password_verify($password, $hashedPassword)) || (!empty($user['google_id']) && empty($hashedPassword))) {
@@ -93,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
         $errorMessage = "System error. Please try again later.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
