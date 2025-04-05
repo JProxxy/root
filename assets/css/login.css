@@ -537,7 +537,6 @@ form {
   margin-left: -7.5%;
 }
 
-
 .dropdown-menu li {
   padding: 10px 15px;
   color: white;
@@ -577,4 +576,18 @@ form {
 
 .icon-inside {
   color: white;
+}
+
+
+
+
+.logInAdmin{
+
+  font-size: 1.3rem;
+  color: #2d8b96;
+  font-family: "Kodchasan", sans-serif;
+  font-weight: 400;
+  margin-bottom: 5%;
+  margin-left: 15%;
+  margin-top: 18%;
 }

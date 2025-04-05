@@ -120,20 +120,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <div class="error"><?php echo htmlspecialchars($errorMessage); ?></div>
                     <?php endif; ?>
 
-                    <div class="toggle-container">
-                        <!-- Radio buttons (hidden) -->
+
+                    <h2 class="logInAdmin">ADMIN LOG IN</h2>
+                    <!-- <div class="toggle-container">
+
                         <input type="radio" name="toggle" id="user" checked>
                         <input type="radio" name="toggle" id="admin">
 
-                        <!-- The pill toggle itself -->
+
                         <div class="toggle-pill">
-                            <!-- Labels that act like buttons -->
+
                             <label for="user" class="option">User</label>
                             <label for="admin" class="option">Admin</label>
-                            <!-- The slider that moves between options -->
+
                             <span class="slider"></span>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- User Login Container -->
                     <div class="box">
