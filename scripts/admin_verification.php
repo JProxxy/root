@@ -17,13 +17,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    // Check if email exists in users table and has role_id = 1
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email AND role_id = 1");
+    // Check if email exists in users table (no longer filtering by role here)
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
     $stmt->bindParam(':email', $adminEmail, PDO::PARAM_STR);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch one row
 
     if ($result) {
+        // Determine the correct confirmation link based on the role_id
+        if ($result['role_id'] == 2) {
+            $confirmationLink = "https://rivaniot.online/templates/loginAdmin.php";
+        } elseif ($result['role_id'] == 1) {
+            $confirmationLink = "https://rivaniot.online/templates/loginSuperAdmin.php";
+        } else {
+            echo json_encode(["status" => "error", "message" => "Your email isn’t registered for admin access. Please use the correct admin email."]);
+            exit;
+        }
+
         // Send Email with Confirmation Link
         $mail = new PHPMailer(true);
         try {
@@ -38,14 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->setFrom('jpenarubia.a0001@rivaniot.online', 'Admin Verification');
             $mail->addAddress($adminEmail);
 
-            $confirmationLink = "https://rivaniot.online/templates/loginAdmin.php";
             $mail->isHTML(true);
             $mail->Subject = "Admin Verification";
             $mail->Body = "
-            Please <a href='$confirmationLink'>click here</a> to go to admin access. <br><br>
-            If you didn't request this verification, please disregard this email. If you encounter any issues, feel free to reach out to our support team for assistance. We take your security seriously and are here to help every step of the way.
-        ";
-
+                Please <a href='$confirmationLink'>click here</a> to proceed with admin access. <br><br>
+                If you didn't request this verification, please disregard this email. If you encounter any issues, feel free to reach out to our support team for assistance.
+            ";
 
             $mail->send();
             echo json_encode(["status" => "success", "message" => "We've sent a confirmation to your email. Please check your inbox to confirm."]);

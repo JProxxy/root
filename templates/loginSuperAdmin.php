@@ -157,10 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <div class="input-container">
                             <button type="submit" class="loginButton">LOGIN</button>
                         </div>
-                        <!-- <div class="link-container">
+                        <div class="link-container">
                             <a href="javascript:void(0);" onclick="toggleContainers()" class="createAcc">Create
                                 Account</a>
-                        </div> -->
+                        </div>
                         <div class="link-container">
                             <a href="../templates/forgot-password.php" class="forgotPass">Forgot Password?</a>
                         </div>
