@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
-            $mail->setFrom('your-email@example.com', 'Admin Verification');
+            $mail->setFrom('jpenarubia.a0001@rivaniot.online', 'Admin Verification');
             $mail->addAddress($adminEmail);
 
             $confirmationLink = "http://localhost/root/templates/login.php";
