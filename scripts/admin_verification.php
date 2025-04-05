@@ -38,11 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->setFrom('jpenarubia.a0001@rivaniot.online', 'Admin Verification');
             $mail->addAddress($adminEmail);
 
-            $confirmationLink = "http://localhost/root/templates/login.php";
+            $confirmationLink = "https://rivaniot.online/templates/loginAdmin.php";
             $mail->isHTML(true);
             $mail->Subject = "Admin Verification";
             $mail->Body = "
-            Thank you for requesting admin access! <br> 
             Please <a href='$confirmationLink'>click here</a> to go to admin access. <br><br>
             If you didn't request this verification, please disregard this email. If you encounter any issues, feel free to reach out to our support team for assistance. We take your security seriously and are here to help every step of the way.
         ";
