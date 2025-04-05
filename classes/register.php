@@ -73,9 +73,9 @@ if (empty($roleSelect)) {
 } else {
     // Map dropdown values to numeric role IDs
     $roleMap = [
-        "admin"   => 1,
-        "staff"   => 2,
-        "student" => 3
+        "admin"   => 2,
+        "staff"   => 3,
+        "student" => 4
     ];
     if (array_key_exists($roleSelect, $roleMap)) {
         $roleSelect = $roleMap[$roleSelect];

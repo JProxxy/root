@@ -122,7 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
 
                     <h2 class="logInAdmin">ADMIN LOG IN</h2>
-                    <!-- <div class="toggle-container">
+
+                    <div class="toggle-container">
 
                         <input type="radio" name="toggle" id="user" checked>
                         <input type="radio" name="toggle" id="admin">
@@ -135,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
 
                             <span class="slider"></span>
                         </div>
-                    </div> -->
+                    </div>
 
                     <!-- User Login Container -->
                     <div class="box">
