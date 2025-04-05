@@ -168,12 +168,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                         <div class="input-container admin-input-container">
                             <i class="fas fa-envelope icon-inside"></i>
                             <input type="email" id="adminEmailVer" name="adminEmailVer" class="adminEmailVer"
-                                placeholder="Admin Email" required>
+                                placeholder="Admin Email">
                             <i class="fas fa-arrow-right arrow-button"></i>
                         </div>
                     </div>
 
+                    <script>
+                        document.querySelector(".arrow-button").addEventListener("click", function () {
+                            let emailInput = document.querySelector("#adminEmailVer").value;
 
+                            fetch("../scripts/admin_verification.php", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                body: `adminEmailVer=${encodeURIComponent(emailInput)}`
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    alert(data.message); // Show success or error message
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+
+                    </script>
 
 
                 </form>
@@ -215,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                                 pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="validateInput('email')">
                             <span class="error-message email-error">Invalid email format</span>
                         </div>
+
                         <!-- Password Field -->
                         <div class="inputsign-container">
                             <i class="fas fa-lock"></i>

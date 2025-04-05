@@ -64,6 +64,7 @@ body {
   padding-top: 5%;
   padding-left: 10%;
   padding-bottom: 0px;
+  z-index:10;
 }
 
 .loginTitle {
@@ -248,6 +249,7 @@ body {
   border: 1px solid #f5c6cb;
   border-radius: 8px;
   text-align: center;
+  
 }
 
 .SignUpUsername-error,
