@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // Load PHPMailer
+require '../vendor/autoload.php';  // Load PHPMailer
 require_once '../app/config/connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
