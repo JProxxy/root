@@ -222,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     <input type="hidden" name="recaptcha_response" id="recaptchaResponse"> <!-- reCAPTCHA Token -->
 
                     <div class="boxTwo">
-                        <h2 class="signUpTitle">USER SIGN UP</h2>
+                        <h2 class="signUpTitle">CREATE USER ACCOUNT</h2>
 
                         <!-- Email Field -->
                         <div class="inputsign-container">
