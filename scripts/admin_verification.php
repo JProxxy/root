@@ -28,12 +28,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.hostinger.com'; // Replace with your SMTP server
-            $mail->SMTPAuth   = true;
-            $mail->Username   = 'jpenarubia.a0001@rivaniot.online'; // Your email
-            $mail->Password   = 'ExcelAltH0103!'; // Your email password
+            $mail->Host = 'smtp.hostinger.com'; // Replace with your SMTP server
+            $mail->SMTPAuth = true;
+            $mail->Username = 'jpenarubia.a0001@rivaniot.online'; // Your email
+            $mail->Password = 'ExcelAltH0103!'; // Your email password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Port = 587;
 
             $mail->setFrom('jpenarubia.a0001@rivaniot.online', 'Admin Verification');
             $mail->addAddress($adminEmail);
@@ -41,7 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $confirmationLink = "http://localhost/root/templates/login.php";
             $mail->isHTML(true);
             $mail->Subject = "Admin Verification";
-            $mail->Body    = "We've sent a confirmation to your email. <br> Please <a href='$confirmationLink'>click here</a> to confirm.";
+            $mail->Body = "
+            Thank you for requesting admin access! <br> 
+            Please <a href='$confirmationLink'>click here</a> to go to admin access. <br><br>
+            If you didn't request this verification, please disregard this email. If you encounter any issues, feel free to reach out to our support team for assistance. We take your security seriously and are here to help every step of the way.
+        ";
+
 
             $mail->send();
             echo json_encode(["status" => "success", "message" => "We've sent a confirmation to your email. Please check your inbox to confirm."]);
@@ -51,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         echo json_encode(["status" => "error", "message" => "Your email isn’t registered for admin access. Please use the correct admin email."]);
     }
-    
+
     $stmt->closeCursor(); // Use closeCursor() instead of close() for PDO
     $conn = null; // Close connection
 }
