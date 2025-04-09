@@ -32,8 +32,9 @@ if (isset($_POST['password'])) {
         // If password is correct, proceed with file recovery
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $file = $_POST['file'];
+            $file = trim($_POST['file']);
             $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+            echo "Backup Directory (realpath): " . realpath($backupDir) . "<br>";
             $filePath = $backupDir . $file;
 
             echo "Looking for file: $filePath<br>";  // Debugging: Print the full file path
