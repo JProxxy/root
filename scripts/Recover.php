@@ -24,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 foreach ($lines as $line) {
-                    if (trim($line) === '')
-                        continue;
+                    if (trim($line) === '') continue;
 
                     $data = str_getcsv($line);
                     if (count($data) === $columnCount) {
@@ -42,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
 
-
+    
                 if (unlink($filePath)) {
                     echo "File recovered successfully, data restored, and CSV deleted.";
                 } else {
@@ -57,23 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Invalid filename format.";
         }
     } else {
-        echo "❌ File not found.\n";
-        echo "🔍 Expected path: $filePath\n";
-        echo "📍 Current working directory: " . getcwd() . "\n";
-        echo "📂 Directory exists? " . (is_dir($backupDir) ? 'YES' : 'NO') . "\n";
-        echo "📄 Full file path realpath(): " . realpath($filePath) . "\n";
-        echo "📄 File exists via realpath()? " . (file_exists(realpath($filePath)) ? 'YES' : 'NO') . "\n";
-
-        // Optional: List directory contents for more clues
-        if (is_dir($backupDir)) {
-            echo "📁 Files in directory:\n";
-            $files = scandir($backupDir);
-            foreach ($files as $f) {
-                echo "- $f\n";
-            }
-        } else {
-            echo "⚠️ Backup directory is missing or not accessible.\n";
-        }
+        echo "File not found: $filePath";  // More detailed output for debugging
     }
 } else {
     echo "Invalid request.";

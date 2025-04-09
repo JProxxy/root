@@ -400,7 +400,8 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     alert("Recovery successful.");
                     window.location.reload();
                 } else {
-                    alert("Recovery failed: " + text);
+                    console.error("Recovery failed:", text);
+                    alert("⚠️ Recovery failed.\n\nDetails from server:\n" + text);
                 }
             } catch (error) {
                 alert("An error occurred while recovering the account.");
