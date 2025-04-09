@@ -3,7 +3,7 @@ include '../app/config/connection.php';  // Include the database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $file = $_POST['file'];
-    $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+    echo $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
     $filePath = $backupDir . $file;
 
     if (file_exists($filePath)) {
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
 
-                // ✅ Delete file after successful restore
+    
                 if (unlink($filePath)) {
                     echo "File recovered successfully, data restored, and CSV deleted.";
                 } else {
