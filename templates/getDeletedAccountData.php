@@ -396,47 +396,48 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
         }
 
         document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const password = document.getElementById("recoverPasswordInput").value;
-    const file = document.getElementById("recoverFilename").value;
+            e.preventDefault();
+            const password = document.getElementById("recoverPasswordInput").value;
+            const file = document.getElementById("recoverFilename").value;
 
-    const formData = new FormData();
-    formData.append("password", password);
-    formData.append("file", file);
+            console.log("Recover form submitted.", { password, file });
 
-    try {
-        const response = await fetch('../scripts/Recover.php', {
-            method: 'POST',
-            body: formData
+            const formData = new FormData();
+            formData.append("password", password);
+            formData.append("file", file);
+
+            // Debug: List all keys in the formData
+            for (let pair of formData.entries()) {
+                console.log("Form Data:", pair[0], pair[1]);
+            }
+
+            try {
+                const response = await fetch('../scripts/Recover.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log("Fetch response status:", response.status);
+                const text = await response.text();
+                console.log("Server response text:", text);
+
+                if (response.ok && text.includes("successfully")) {
+                    alert("Recovery successful.");
+                    window.location.reload();
+                } else {
+                    console.error("Recovery failed:", text);
+                    // Get the file path (we only have the file name here; if you want full path information, it must be provided from the server)
+                    alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
+                }
+            } catch (error) {
+                console.error("Error during fetch:", error);
+                alert("An error occurred while recovering the account: " + error.message);
+            }
+
+            const recoverModalEl = document.getElementById('recoverPasswordModal');
+            const modal = bootstrap.Modal.getInstance(recoverModalEl);
+            modal.hide();
         });
-
-        const text = await response.text();
-
-        // Log the full response and any additional debugging info
-        console.log("Response Status: " + response.status); // Add response status
-        console.log("Server Response Text: " + text); // Full server response
-        console.log("Requested file: " + file); // The file you requested
-        console.log("Server responded with: " + text);
-
-        if (response.ok && text.includes("successfully")) {
-            alert("Recovery successful.");
-            window.location.reload();
-        } else {
-            console.error("Recovery failed:", text); // Detailed error logging
-            alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
-        }
-
-    } catch (error) {
-        console.error("Error during recovery:", error); // Detailed error log in case of fetch failure
-        alert("An error occurred while recovering the account.");
-    }
-
-    // Close the modal after attempt
-    const recoverModalEl = document.getElementById('recoverPasswordModal');
-    const modal = bootstrap.Modal.getInstance(recoverModalEl);
-    modal.hide();
-});
-
 
     </script>
 
