@@ -216,7 +216,6 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
-
                                                 <th>Account</th>
                                                 <th>Date</th>
                                                 <th>Action</th>
@@ -232,15 +231,16 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                     $date = str_replace('-', ' ', $matches[3]); // Formatting timestamp
                                                 } else {
                                                     continue; // Skip invalid filenames
-                                                } 
+                                                }
                                                 ?>
                                                 <tr>
-
                                                     <td><?php echo htmlspecialchars($email); ?></td>
                                                     <td><?php echo htmlspecialchars($date); ?></td>
                                                     <td>
-                                                        <a href="<?php echo urlencode($file); ?>" class="btn btn-secondary"
-                                                            download="<?php echo basename($file); ?>">
+                                                        <!-- Set true file name for download, but display a user-friendly name on the link -->
+                                                        <a href="storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
+                                                            class="btn btn-secondary"
+                                                            download="<?php echo htmlspecialchars($file); ?>">
                                                             Download
                                                         </a>
                                                     </td>
@@ -251,6 +251,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                 </div> <!-- End of the scrollable container -->
                             <?php endif; ?>
                         </div>
+
 
 
                         <style>
