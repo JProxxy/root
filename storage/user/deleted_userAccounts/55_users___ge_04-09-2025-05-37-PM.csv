@@ -1,0 +1,2 @@
+user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status
+55,,,,jesaminamina,$2y$10$/ejTqkFvNSyFibTTKeTi5uSDCSgmEXwY1H4TEzl6VJVAvmcb5q9s2,09777752335,ge@rivaniot.online,2,"2025-03-26 21:32:26","2025-04-09 14:27:29",,active,N/A,,,,,,,,,0,,,,,,,yes,unblock

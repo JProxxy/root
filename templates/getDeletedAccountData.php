@@ -40,7 +40,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
     if (count($usersData) > 0) {
         // Set headers to download the CSV file with dynamic filename
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
 
         // Open PHP output stream for CSV
         $output = fopen('php://output', 'w');
@@ -216,19 +216,31 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
-                                                <th>No.</th>
-                                                <th>File Name</th>
+
+                                                <th>Account</th>
+                                                <th>Date</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach ($files as $index => $file): ?>
+                                                <?php
+                                                // Extract the email and timestamp from the filename
+                                                $pattern = '/(\d+)_users_.*?_(.*?)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[APM]{2})\.csv/';
+                                                if (preg_match($pattern, $file, $matches)) {
+                                                    $email = ltrim($matches[2], '_') . '@rivaniot.online'; // Remove leading underscore
+                                                    $date = str_replace('-', ' ', $matches[3]); // Formatting timestamp
+                                                } else {
+                                                    continue; // Skip invalid filenames
+                                                }
+                                                ?>
                                                 <tr>
-                                                    <td><?php echo $index + 1; ?></td>
-                                                    <td><?php echo htmlspecialchars($file); ?></td>
+
+                                                    <td><?php echo htmlspecialchars($email); ?></td>
+                                                    <td><?php echo htmlspecialchars($date); ?></td>
                                                     <td>
-                                                        <a href="?file=<?php echo urlencode($file); ?>"
-                                                            class="btn btn-secondary" download>
+                                                        <a href="<?php echo urlencode($file); ?>" class="btn btn-secondary"
+                                                            download="<?php echo basename($file); ?>">
                                                             Download
                                                         </a>
                                                     </td>
@@ -239,6 +251,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                 </div> <!-- End of the scrollable container -->
                             <?php endif; ?>
                         </div>
+
 
                         <style>
                             /* Add the following styles to make the table scrollable */
