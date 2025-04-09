@@ -232,7 +232,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                     $date = str_replace('-', ' ', $matches[3]); // Formatting timestamp
                                                 } else {
                                                     continue; // Skip invalid filenames
-                                                }
+                                                } 
                                                 ?>
                                                 <tr>
 
