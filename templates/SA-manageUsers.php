@@ -2,109 +2,99 @@
 session_start();
 // Retrieve the current user id from session
 $currentUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-$currentUserRoleId = 0;
 
-if ($currentUserId) {
-    // Include your database connection file (using PDO)
-    include '../app/config/connection.php';
-
-    // Prepare the PDO statement to get the current user's role
-    $stmt = $conn->prepare("SELECT role_id FROM users WHERE user_id = ?");
-    $stmt->execute([$currentUserId]);
-    $currentUserRoleId = $stmt->fetchColumn();
+if (!$currentUserId) {
+    // If the user is not logged in, deny access
+    header('HTTP/1.1 403 Forbidden');
+    echo "Access denied. Please log in.";
+    exit;
 }
 
 // Check if the "download_csv" flag is set in the URL
 if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
-    // Fetch specific user data from the database (only the columns needed for export)
-    $stmt = $conn->prepare("SELECT 
-        user_id, first_name, middle_name, last_name, username, phoneNumber, email, role_id, 
-        created_at, status, gender, street_address, city, postal_code, barangay, soc_med, mu_status 
-        FROM users");
+    // Include PhpSpreadsheet
+    require 'vendor/autoload.php';  // Make sure the path to autoload.php is correct
+
+    // Fetch user data from the database (adjust the SQL query as needed)
+    include '../app/config/connection.php';
+    $stmt = $conn->prepare("
+        SELECT 
+            user_id, first_name, middle_name, last_name, username, phoneNumber, email, role_id, 
+            created_at, status, gender, street_address, city, postal_code, barangay, soc_med, mu_status 
+        FROM users
+    ");
     $stmt->execute();
     $usersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Generate the dynamic filename based on the current date and time
+    // Generate the dynamic filename
     $date = new DateTime();
-    $formattedDate = $date->format('m-d-Y-H-i-A'); // Changed format for cleaner filename
-    $csvFilename = 'MU-' . $formattedDate . '.csv';
-    $zipFilename = 'MU-' . $formattedDate . '.zip';
+    $formattedDate = $date->format('m-d-Y-H-i-A'); // Date format
+    $filename = 'MU-' . $formattedDate . '.xlsx';
 
-    // Generate CSV
-    if (count($usersData) > 0) {
-        // Set headers to download the CSV file with dynamic filename
-        $output = fopen($csvFilename, 'w');
+    // Create a new spreadsheet
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
 
-        // Write the table headers (titles) to the CSV
-        $headers = [
-            "No.", "First Name", "Middle Name", "Last Name", "Username", "Phone Number", 
-            "Email", "Role", "Created At", "Status", "Gender", "Street Address", "City", 
-            "Postal", "Barangay", "Social Media", "Action"
-        ];
+    // Set headers for the Excel file
+    $headers = [
+        "No.", "First Name", "Middle Name", "Last Name", "Username", "Phone Number", 
+        "Email", "Role", "Created At", "Status", "Gender", "Street Address", "City", 
+        "Postal", "Barangay", "Social Media", "Action"
+    ];
 
-        fputcsv($output, $headers);
-
-        // Write each row of user data to the CSV
-        $counter = 1; // Counter for the "No." column
-        foreach ($usersData as $user) {
-            $csvRow = [
-                $counter++, 
-                $user['first_name'], 
-                $user['middle_name'], 
-                $user['last_name'], 
-                $user['username'], 
-                $user['phoneNumber'], 
-                $user['email'], 
-                $user['role_id'], 
-                $user['created_at'], 
-                $user['status'], 
-                $user['gender'], 
-                $user['street_address'], 
-                $user['city'], 
-                $user['postal_code'], 
-                $user['barangay'], 
-                $user['soc_med'], 
-                $user['mu_status'] // This is the "Action" column
-            ];
-
-            fputcsv($output, $csvRow);
-        }
-
-        fclose($output);
-
-        // Now, create a password-protected zip of the CSV
-        $password = $currentUserId;  // Using user_id as the password for the zip file
-
-        // Create the zip file
-        $zip = new ZipArchive();
-        if ($zip->open($zipFilename, ZipArchive::CREATE) === TRUE) {
-            // Add the CSV file to the zip
-            $zip->addFile($csvFilename);
-            $zip->close();
-
-            // Now, password-protect the zip file using the `zip` command-line utility
-            $cmd = "zip -P $password $zipFilename $csvFilename";
-            shell_exec($cmd);  // Execute the command to create a password-protected zip
-
-            // Now, send the zip file to the user for download
-            header('Content-Type: application/zip');
-            header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
-            readfile($zipFilename);
-
-            // Cleanup by deleting the generated files
-            unlink($csvFilename);
-            unlink($zipFilename);
-
-            exit;
-        } else {
-            die('Failed to create zip file.');
-        }
-    } else {
-        echo "No user data found.";
+    // Write the headers to the first row
+    $column = 'A';
+    foreach ($headers as $header) {
+        $sheet->setCellValue($column . '1', $header);
+        $column++;
     }
+
+    // Write the user data into the spreadsheet
+    $row = 2;  // Start from the second row (below the headers)
+    $counter = 1;
+    foreach ($usersData as $user) {
+        $sheet->setCellValue('A' . $row, $counter++);
+        $sheet->setCellValue('B' . $row, $user['first_name']);
+        $sheet->setCellValue('C' . $row, $user['middle_name']);
+        $sheet->setCellValue('D' . $row, $user['last_name']);
+        $sheet->setCellValue('E' . $row, $user['username']);
+        $sheet->setCellValue('F' . $row, $user['phoneNumber']);
+        $sheet->setCellValue('G' . $row, $user['email']);
+        $sheet->setCellValue('H' . $row, $user['role_id']);
+        $sheet->setCellValue('I' . $row, $user['created_at']);
+        $sheet->setCellValue('J' . $row, $user['status']);
+        $sheet->setCellValue('K' . $row, $user['gender']);
+        $sheet->setCellValue('L' . $row, $user['street_address']);
+        $sheet->setCellValue('M' . $row, $user['city']);
+        $sheet->setCellValue('N' . $row, $user['postal_code']);
+        $sheet->setCellValue('O' . $row, $user['barangay']);
+        $sheet->setCellValue('P' . $row, $user['soc_med']);
+        $sheet->setCellValue('Q' . $row, $user['mu_status']);
+        $row++;
+    }
+
+    // Apply password protection to the Excel file
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    // Apply password protection
+    $spreadsheet->getSecurity()->setPassword($currentUserId);  // Set the password as the user's ID
+
+    // Save the Excel file to a temporary location
+    $tempFile = tempnam(sys_get_temp_dir(), 'excel_') . '.xlsx';
+    $writer->save($tempFile);
+
+    // Set headers to force download
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    readfile($tempFile);
+
+    // Delete the temporary file after download
+    unlink($tempFile);
+    exit;
 }
 ?>
-    
+
+
 
 <!DOCTYPE html>
 <html lang="en">
