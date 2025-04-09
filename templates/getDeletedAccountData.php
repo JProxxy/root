@@ -197,31 +197,47 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                         <div class="whiteLine"></div>
                         <!-- Roles Container with Dynamic Table -->
                         <div class="rolesCont">
-                         
-                            <!-- PUT THE DELETED ACCOUNTS HEREEEEEEEEEEEEEEEEEEEEE -->
-                            <?php
-                            // Define the backup directory (adjust the path as needed)
-                            $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+    <!-- PUT THE DELETED ACCOUNTS HEREEEEEEEEEEEEEEEEEEEEE -->
+    <?php
+    // Define the backup directory (adjust the path as needed)
+    $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
 
-                            // Check if the backup directory exists
-                            if (!is_dir($backupDir)) {
-                                die("Backup directory not found.");
-                            }
+    // Check if the backup directory exists
+    if (!is_dir($backupDir)) {
+        die("Backup directory not found.");
+    }
 
-                            // Get all files in the backup directory (excluding . and ..)
-                            $files = array_diff(scandir($backupDir), array('.', '..'));
+    // Get all files in the backup directory (excluding . and ..)
+    $files = array_diff(scandir($backupDir), array('.', '..'));
 
-                            if (empty($files)): ?>
-                                <p>No backup files found.</p>
-                            <?php else: ?>
-                                <ul>
-                                    <?php foreach ($files as $file): ?>
-                                     <a href="?file=<?php echo urlencode($file); ?>"><?php echo htmlspecialchars($file); ?></a>
-                                       
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </div>
+    if (empty($files)): ?>
+        <p>No backup files found.</p>
+    <?php else: ?>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>File Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($files as $index => $file): ?>
+                    <tr>
+                        <td><?php echo $index + 1; ?></td>
+                        <td><?php echo htmlspecialchars($file); ?></td>
+                        <td>
+                            <a href="?file=<?php echo urlencode($file); ?>" class="btn btn-secondary" download>
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>
+
 
                         
                     </div>
