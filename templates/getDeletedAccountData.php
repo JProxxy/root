@@ -197,82 +197,82 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                         <div class="whiteLine"></div>
                         <!-- Roles Container with Dynamic Table -->
                         <div class="rolesCont">
-    <?php
-    // Define the backup directory (adjust the path as needed)
-    $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-    
-    // Check if the backup directory exists
-    if (!is_dir($backupDir)) {
-        die("Backup directory not found.");
-    }
+                            <?php
+                            // Define the backup directory (adjust the path as needed)
+                            $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
 
-    // Get all files in the backup directory (excluding . and ..)
-    $files = array_diff(scandir($backupDir), array('.', '..'));
+                            // Check if the backup directory exists
+                            if (!is_dir($backupDir)) {
+                                die("Backup directory not found.");
+                            }
 
-    if (empty($files)): ?>
-        <p>No backup files found.</p>
-    <?php else: ?>
-        <div class="scrollable-table-container"> <!-- Add the scrollable container -->
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Account</th>
-                        <th>Date</th>
-                        <th>Action</th> <!-- Action column for both Download and Recover -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($files as $index => $file): ?>
-                        <?php
-                        /* 
-                          Expected filename format:
-                          [user_id]_[table]___[emailPart]_[timestamp].csv
-                          Example: 51_users___eaquierdojeraldine_04-09-2025-07-21-PM.csv
+                            // Get all files in the backup directory (excluding . and ..)
+                            $files = array_diff(scandir($backupDir), array('.', '..'));
 
-                          We'll use a regex that captures:
-                            Group 1: user_id (digits)
-                            Group 2: table name (any characters except underscore)
-                            Group 3: email part (any characters except underscore)
-                            Group 4: timestamp (matches the pattern of two digits - two digits - four digits - two digits - two digits - [AM|PM])
-                        */
-                        $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
-                        if (preg_match($pattern, $file, $matches)) {
-                            // Build the account email as "table_emailPart@rivaniot.online"
-                            $tableName = $matches[2];          // e.g., "users"
-                            $emailPart = $matches[3];          // e.g., "eaquierdojeraldine"
-                            $account = strtolower($tableName . '_' . $emailPart) . '@rivaniot.online';
+                            if (empty($files)): ?>
+                                <p>No backup files found.</p>
+                            <?php else: ?>
+                                <div class="scrollable-table-container"> <!-- Add the scrollable container -->
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Account</th>
+                                                <th>Date</th>
+                                                <th>Action</th> <!-- Action column for both Download and Recover -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($files as $index => $file): ?>
+                                                <?php
+                                                /* 
+                                                  Expected filename format:
+                                                  [user_id]_[table]___[emailPart]_[timestamp].csv
+                                                  Example: 51_users___eaquierdojeraldine_04-09-2025-07-21-PM.csv
 
-                            // Format the timestamp (replace '-' with space)
-                            $rawTimestamp = $matches[4];       // e.g., "04-09-2025-07-21-PM"
-                            $formattedDate = str_replace('-', ' ', $rawTimestamp);  // "04 09 2025 07 21 PM"
-                        } else {
-                            // For files that don't match, skip this iteration.
-                            continue;
-                        }
-                        ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($account); ?></td>
-                            <td><?php echo htmlspecialchars($formattedDate); ?></td>
-                            <td>
-                                <!-- Download button -->
-                                <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
-                                   class="btn btn-secondary"
-                                   download="<?php echo htmlspecialchars($file); ?>">
-                                    Download
-                                </a>
-                                <!-- Recover button (calls your JS modal for recovery) -->
-                                <button type="button" class="btn btn-primary"
-                                    onclick="showRecoverModal('<?php echo htmlspecialchars($account); ?>', '<?php echo htmlspecialchars($file); ?>')">
-                                    Recover
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div> <!-- End of the scrollable container -->
-    <?php endif; ?>
-</div>
+                                                  We'll use a regex that captures:
+                                                    Group 1: user_id (digits)
+                                                    Group 2: table name (any characters except underscore)
+                                                    Group 3: email part (any characters except underscore)
+                                                    Group 4: timestamp (matches the pattern of two digits - two digits - four digits - two digits - two digits - [AM|PM])
+                                                */
+                                                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+                                                if (preg_match($pattern, $file, $matches)) {
+                                                    // Build the account email as "table_emailPart@rivaniot.online"
+                                                    $tableName = $matches[2];          // e.g., "users"
+                                                    $emailPart = $matches[3];          // e.g., "eaquierdojeraldine"
+                                                    $account = strtolower($tableName . '_' . $emailPart) . '@rivaniot.online';
+
+                                                    // Format the timestamp (replace '-' with space)
+                                                    $rawTimestamp = $matches[4];       // e.g., "04-09-2025-07-21-PM"
+                                                    $formattedDate = str_replace('-', ' ', $rawTimestamp);  // "04 09 2025 07 21 PM"
+                                                } else {
+                                                    // For files that don't match, skip this iteration.
+                                                    continue;
+                                                }
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($account); ?></td>
+                                                    <td><?php echo htmlspecialchars($formattedDate); ?></td>
+                                                    <td>
+                                                        <!-- Download button -->
+                                                        <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
+                                                            class="btn btn-secondary"
+                                                            download="<?php echo htmlspecialchars($file); ?>">
+                                                            Download
+                                                        </a>
+                                                        <!-- Recover button (calls your JS modal for recovery) -->
+                                                        <button type="button" class="btn btn-primary"
+                                                            onclick="showRecoverModal('<?php echo htmlspecialchars($account); ?>', '<?php echo htmlspecialchars($file); ?>')">
+                                                            Recover
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div> <!-- End of the scrollable container -->
+                            <?php endif; ?>
+                        </div>
 
 
                         <style>
@@ -386,6 +386,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
         });
 
         function showRecoverModal(email, file) {
+            console.log("showRecoverModal called with:", { email, file });
             document.getElementById("modalRecoverEmail").textContent = email;
             document.getElementById("recoverPasswordInput").value = "";
             document.getElementById("recoverFilename").value = file;
@@ -399,9 +400,16 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
             const password = document.getElementById("recoverPasswordInput").value;
             const file = document.getElementById("recoverFilename").value;
 
+            console.log("Recover form submitted.", { password, file });
+
             const formData = new FormData();
             formData.append("password", password);
             formData.append("file", file);
+
+            // Debug: List all keys in the formData
+            for (let pair of formData.entries()) {
+                console.log("Form Data:", pair[0], pair[1]);
+            }
 
             try {
                 const response = await fetch('../scripts/recover.php', {
@@ -409,7 +417,9 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     body: formData
                 });
 
+                console.log("Fetch response status:", response.status);
                 const text = await response.text();
+                console.log("Server response text:", text);
 
                 if (response.ok && text.includes("successfully")) {
                     alert("Recovery successful.");
@@ -418,8 +428,8 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     console.error("Recovery failed:", text);
                     alert("⚠️ Recovery failed.\n\nDetails from server:\n" + text);
                 }
-
             } catch (error) {
+                console.error("Error during fetch:", error);
                 alert("An error occurred while recovering the account.");
             }
 
@@ -427,6 +437,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
             const modal = bootstrap.Modal.getInstance(recoverModalEl);
             modal.hide();
         });
+
     </script>
 
 
