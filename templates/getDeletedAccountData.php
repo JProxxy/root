@@ -358,86 +358,48 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
 
     <!-- Modal Event Handlers -->
     <script>
-        // Handle confirmation from the generic (block/unblock) modal
-        document.getElementById("actionConfirmBtn").addEventListener("click", async function () {
-            // Hide the modal
-            const actionModalEl = document.getElementById('actionConfirmModal');
-            const actionModal = bootstrap.Modal.getInstance(actionModalEl);
-            actionModal.hide();
+
+        document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const password = document.getElementById("recoverPasswordInput").value;
+            const file = document.getElementById("recoverFilename").value;
+
+            const formData = new FormData();
+            formData.append("password", password);
+            formData.append("file", file);
 
             try {
-                const payload = { username: actionUsername, user_id: actionUserId, action: currentAction };
-                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                const response = await fetch('../scripts/recover.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
-                const updateResult = await updateResponse.json();
-                if (updateResult.success) {
-                    alert("Action executed successfully!");
+
+                const text = await response.text();
+
+                // Log the full response and any additional debugging info
+                console.log("Response Status: " + response.status); // Add response status
+                console.log("Server Response Text: " + text); // Full server response
+                console.log("Requested file: " + file); // The file you requested
+                console.log("Server responded with: " + text);
+
+                if (response.ok && text.includes("successfully")) {
+                    alert("Recovery successful.");
                     window.location.reload();
                 } else {
-                    alert("Failed to execute action: " + updateResult.message);
+                    console.error("Recovery failed:", text); // Detailed error logging
+                    alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
                 }
+
             } catch (error) {
-                alert("An error occurred while executing the action.");
+                console.error("Error during recovery:", error); // Detailed error log in case of fetch failure
+                alert("An error occurred while recovering the account.");
             }
-            if (actionSelectElement) actionSelectElement.value = "";
+
+            // Close the modal after attempt
+            const recoverModalEl = document.getElementById('recoverPasswordModal');
+            const modal = bootstrap.Modal.getInstance(recoverModalEl);
+            modal.hide();
         });
-
-        function showRecoverModal(email, file) {
-    console.log("showRecoverModal called with:", { email, file });
-    document.getElementById("modalRecoverEmail").textContent = email;
-    document.getElementById("recoverPasswordInput").value = "";
-    document.getElementById("recoverFilename").value = file;
-
-    const recoverModal = new bootstrap.Modal(document.getElementById('recoverPasswordModal'));
-    recoverModal.show();
-}
-
-document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const password = document.getElementById("recoverPasswordInput").value;
-    const file = document.getElementById("recoverFilename").value;
-
-    console.log("Recover form submitted.", { password, file });
-
-    const formData = new FormData();
-    formData.append("password", password);
-    formData.append("file", file);
-
-    // Debug: List all keys in the formData
-    for (let pair of formData.entries()) {
-        console.log("Form Data:", pair[0], pair[1]);
-    }
-
-    try {
-        const response = await fetch('../scripts/recover.php', {
-            method: 'POST',
-            body: formData
-        });
-
-        console.log("Fetch response status:", response.status);
-        const text = await response.text();
-        console.log("Server response text:", text);
-
-        if (response.ok && text.includes("successfully")) {
-            alert("Recovery successful.");
-            window.location.reload();
-        } else {
-            console.error("Recovery failed:", text);
-            // Get the file path (we only have the file name here; if you want full path information, it must be provided from the server)
-            alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
-        }
-    } catch (error) {
-        console.error("Error during fetch:", error);
-        alert("An error occurred while recovering the account: " + error.message);
-    }
-
-    const recoverModalEl = document.getElementById('recoverPasswordModal');
-    const modal = bootstrap.Modal.getInstance(recoverModalEl);
-    modal.hide();
-});
 
     </script>
 
