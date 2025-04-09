@@ -358,6 +358,32 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
 
     <!-- Modal Event Handlers -->
     <script>
+        // Handle confirmation from the generic (block/unblock) modal
+        document.getElementById("actionConfirmBtn").addEventListener("click", async function () {
+            // Hide the modal
+            const actionModalEl = document.getElementById('actionConfirmModal');
+            const actionModal = bootstrap.Modal.getInstance(actionModalEl);
+            actionModal.hide();
+
+            try {
+                const payload = { username: actionUsername, user_id: actionUserId, action: currentAction };
+                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    alert("Action executed successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to execute action: " + updateResult.message);
+                }
+            } catch (error) {
+                alert("An error occurred while executing the action.");
+            }
+            if (actionSelectElement) actionSelectElement.value = "";
+        });
 
         document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
             e.preventDefault();
