@@ -403,6 +403,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     console.error("Recovery failed:", text);
                     alert("⚠️ Recovery failed.\n\nDetails from server:\n" + text);
                 }
+
             } catch (error) {
                 alert("An error occurred while recovering the account.");
             }

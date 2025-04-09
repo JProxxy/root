@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
 
-    
                 if (unlink($filePath)) {
                     echo "File recovered successfully, data restored, and CSV deleted.";
                 } else {
@@ -56,7 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Invalid filename format.";
         }
     } else {
-        echo "File not found: $filePath";  // More detailed output for debugging
+        // Provide more detailed debugging
+        echo "File not found: $filePath";  // Add more detailed output for debugging
     }
 } else {
     echo "Invalid request.";
