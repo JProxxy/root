@@ -41,7 +41,7 @@ if (isset($_POST['password'])) {
             if (file_exists($filePath)) {
                 echo "File exists: $filePath<br>";  // Debugging: Confirm file exists
 
-                $pattern = '/(\d+)_.*?_(.*?)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[APM]{2})\.csv/';
+                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
                 if (preg_match($pattern, $file, $matches)) {
                     echo "Pattern matched. Matches found:<br>";
                     var_dump($matches);  // Debugging: Show the match results
