@@ -3,15 +3,10 @@ include '../app/config/connection.php';  // Include the database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $file = $_POST['file'];
-
     $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-    $recoveryDir = __DIR__ . '/../storage/user/recovered_userAccounts/';
+    $filePath = $backupDir . $file;
 
-    if (file_exists($backupDir . $file)) {
-        if (!is_dir($recoveryDir)) {
-            mkdir($recoveryDir, 0777, true);
-        }
-
+    if (file_exists($filePath)) {
         $pattern = '/(\d+)_.*?_(.*?)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[APM]{2})\.csv/';
         if (preg_match($pattern, $file, $matches)) {
             $email = ltrim($matches[2], '_') . '@rivaniot.online';
@@ -19,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $table = (strpos($file, 'acRemote') !== false) ? 'acRemote' : 'users';
 
-            $filePath = $backupDir . $file;
             $fileData = file_get_contents($filePath);
             $lines = explode("\n", $fileData);
 
@@ -47,13 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
 
-                // Move file to recovery directory
-                if (rename($filePath, $recoveryDir . $file)) {
-                    // Then delete the file from recovery directory after confirming move success
-                    unlink($recoveryDir . $file);
+                // ✅ Delete file after successful restore
+                if (unlink($filePath)) {
                     echo "File recovered successfully, data restored, and CSV deleted.";
                 } else {
-                    echo "Data restored but error moving the file to recovery directory.";
+                    echo "Data restored, but failed to delete the CSV file.";
                 }
 
             } catch (PDOException $e) {
@@ -64,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Invalid filename format.";
         }
     } else {
-        echo "File not found in the backup directory.";
+        echo "File not found: $filePath";  // More detailed output for debugging
     }
 } else {
     echo "Invalid request.";
