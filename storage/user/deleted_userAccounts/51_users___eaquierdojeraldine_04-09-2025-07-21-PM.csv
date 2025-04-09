@@ -1,2 +1,2 @@
 user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status
-40,,,,Jose,$2y$10$l4c9tO.7fM.NgNQyEswCGO2R7TvETUnX.6dGOKYyKCxk3hKVlH7HO,0928827382,jose@rivaniot.online,12,"2025-03-15 01:24:48","2025-04-09 14:27:29",,active,N/A,,,,,,,,,0,,,,,,,no,unblock
+51,,,,Jeraldine,$2y$10$Qwqn.WZbqdahd8jhBqR5uO.88U74A9aF93.Amy1DTPAOeqtDlQPpy,09777612818,eaquierdojeraldine@rivaniot.online,2,"2025-03-17 07:12:48","2025-04-09 14:27:29",,active,N/A,,,,,,,,,0,,,,106660099309952844896,38903,"2025-03-19 13:44:41",no,unblock
