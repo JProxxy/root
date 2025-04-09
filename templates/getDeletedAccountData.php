@@ -166,14 +166,14 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                 </a>
                             </li>
                             <li>
-                                <a href="../templates/SA-manageUsers.php" class="nav-link active">
+                                <a href="../templates/SA-manageUsers.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-users.png" alt="Manage Users" width="16" height="16"
                                         class="me-2" />
                                     Manage Users
                                 </a>
                             </li>
                             <li>
-                                <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
+                                <a href="../templates/getDeletedAccountData.php" class="nav-link active">
                                     <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
                                         height="16" class="me-2" />
                                     Deleted User Logs
@@ -218,7 +218,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                             <tr>
                                                 <th>Account</th>
                                                 <th>Date</th>
-                                                <th>Action</th> <!-- Action column for both Download and Recover -->
+                                                <th class="action-column">Action</th> <!-- Add a class for centering -->
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -228,12 +228,6 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                   Expected filename format:
                                                   [user_id]_[table]___[emailPart]_[timestamp].csv
                                                   Example: 51_users___eaquierdojeraldine_04-09-2025-07-21-PM.csv
-
-                                                  We'll use a regex that captures:
-                                                    Group 1: user_id (digits)
-                                                    Group 2: table name (any characters except underscore)
-                                                    Group 3: email part (any characters except underscore)
-                                                    Group 4: timestamp (matches the pattern of two digits - two digits - four digits - two digits - two digits - [AM|PM])
                                                 */
                                                 $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
                                                 if (preg_match($pattern, $file, $matches)) {
@@ -253,15 +247,15 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($account); ?></td>
                                                     <td><?php echo htmlspecialchars($formattedDate); ?></td>
-                                                    <td>
+                                                    <td class="action-column">
                                                         <!-- Download button -->
                                                         <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
-                                                            class="btn btn-secondary"
+                                                            class="btn btn-download"
                                                             download="<?php echo htmlspecialchars($file); ?>">
                                                             Download
                                                         </a>
                                                         <!-- Recover button (calls your JS modal for recovery) -->
-                                                        <button type="button" class="btn btn-primary"
+                                                        <button type="button" class="btn btn-recover"
                                                             onclick="showRecoverModal('<?php echo htmlspecialchars($account); ?>', '<?php echo htmlspecialchars($file); ?>')">
                                                             Recover
                                                         </button>
@@ -274,25 +268,80 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             <?php endif; ?>
                         </div>
 
-
                         <style>
-                            /* Add the following styles to make the table scrollable */
-                            .scrollable-table-container {
-                                max-height: 400px;
-                                /* Adjust the height as needed */
-                                overflow-y: auto;
-                            }
+                        /* Reset Bootstrap's table striped effect */
+.table-striped tbody tr:nth-of-type(odd),
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #FFFFFF !important; /* Force both odd and even rows to have white background */
+}
 
-                            .table th {
-                                position: sticky;
-                                top: 0;
-                                background-color: #fff;
-                                /* Optional: makes header background white */
-                                z-index: 1;
-                                /* Ensure the header stays on top of the table rows */
-                            }
+/* Set the background color for the entire table to white */
+.table {
+    background-color: #FFFFFF !important; /* Make sure the entire table background is white */
+    color: #0B3236 !important; /* Ensure text color stays dark */
+    border-collapse: collapse !important; /* Ensure borders collapse properly */
+}
+
+/* Set the background color of table headers and cells to white */
+.table th, .table td {
+    background-color: #FFFFFF !important; /* White background for all cells */
+    border: 1px solid #FFFFFF !important; /* White border to blend with background */
+    padding: 8px 16px;
+    text-align: center;
+}
+
+/* Sticky header styling */
+.table th {
+    position: sticky;
+    top: 0;
+    background-color: #FFFFFF !important; /* Sticky header stays white */
+    z-index: 1; /* Ensure the header stays on top */
+}
+
+/* Ensure the Action column is centered */
+.action-column {
+    text-align: center !important; /* Force content to be centered */
+}
+
+.action-column button,
+.action-column a {
+    margin: 0 5px; /* Space between buttons */
+}
+
+/* Styles for the Download button */
+.btn-download {
+    background-color: #CFDBDD;
+    color: #0B3236;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 40px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-download:hover {
+    background-color: #B9C6C8; /* Darker green on hover */
+}
+
+/* Styles for the Recover button */
+.btn-recover {
+    background-color: #95C0C5;
+    color: #FFFFFF;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 40px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-recover:hover {
+    background-color: #739A9E; /* Darker blue on hover */
+}
+
                         </style>
-
 
 
                     </div>

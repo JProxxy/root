@@ -227,3 +227,91 @@
   padding-right: 20px;
   border-radius: 10px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* DELETE RECOVER */
+
+        /* Reset Bootstrap's table striped effect */
+        .table-striped tbody tr:nth-of-type(odd),
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #FFFFFF !important; /* Force both odd and even rows to have white background */
+        }
+        
+        /* Set the background color for the entire table to white */
+        .table {
+            background-color: #FFFFFF !important; /* Make sure the entire table background is white */
+            color: #0B3236 !important; /* Ensure text color stays dark */
+            border-collapse: collapse !important; /* Ensure borders collapse properly */
+        }
+        
+        /* Set the background color of table headers and cells to white */
+        .table th, .table td {
+            background-color: #FFFFFF !important; /* White background for all cells */
+            border: 1px solid #FFFFFF !important; /* White border to blend with background */
+            padding: 8px 16px;
+            text-align: center;
+        }
+        
+        /* Sticky header styling */
+        .table th {
+            position: sticky;
+            top: 0;
+            background-color: #FFFFFF !important; /* Sticky header stays white */
+            z-index: 1; /* Ensure the header stays on top */
+        }
+        
+        /* Ensure the Action column is centered */
+        .action-column {
+            text-align: center !important; /* Force content to be centered */
+        }
+        
+        .action-column button,
+        .action-column a {
+            margin: 0 5px; /* Space between buttons */
+        }
+        
+        /* Styles for the Download button */
+        .btn-download {
+            background-color: #CFDBDD;
+            color: #0B3236;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 40px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-download:hover {
+            background-color: #B9C6C8; /* Darker green on hover */
+        }
+        
+        /* Styles for the Recover button */
+        .btn-recover {
+            background-color: #95C0C5;
+            color: #FFFFFF;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 40px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-recover:hover {
+            background-color: #739A9E; /* Darker blue on hover */
+        }
