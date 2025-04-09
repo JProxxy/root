@@ -200,7 +200,8 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             <?php
                             // Define the backup directory (adjust the path as needed)
                             $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-
+                            $recoveryDir = __DIR__ . '/../storage/user/recovered_userAccounts/'; // Directory to restore files
+                            
                             // Check if the backup directory exists
                             if (!is_dir($backupDir)) {
                                 die("Backup directory not found.");
@@ -218,7 +219,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                             <tr>
                                                 <th>Account</th>
                                                 <th>Date</th>
-                                                <th>Action</th>
+                                                <th>Action</th> <!-- Action column for both Download and Recover -->
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -237,12 +238,17 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                     <td><?php echo htmlspecialchars($email); ?></td>
                                                     <td><?php echo htmlspecialchars($date); ?></td>
                                                     <td>
-                                                        <!-- Set true file name for download, but display a user-friendly name on the link -->
+                                                        <!-- Both Download and Recover buttons under the Action column -->
                                                         <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
                                                             class="btn btn-secondary"
                                                             download="<?php echo htmlspecialchars($file); ?>">
                                                             Download
                                                         </a>
+                                                        <button type="button" class="btn btn-primary"
+                                                            onclick="showRecoverModal('<?php echo htmlspecialchars($email); ?>', '<?php echo htmlspecialchars($file); ?>')">
+                                                            Recover
+                                                        </button>
+
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -305,33 +311,35 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
     </div>
 
 
-    <!-- Delete Confirmation Modal with Password Input -->
-    <div class="modal fade" id="deletePasswordModal" tabindex="-1" aria-labelledby="deletePasswordModalLabel"
+    <!-- Recover Confirmation Modal with Password Input -->
+    <div class="modal fade" id="recoverPasswordModal" tabindex="-1" aria-labelledby="recoverPasswordModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form id="deletePasswordForm">
+                <form id="recoverPasswordForm">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="deletePasswordModalLabel">Confirm Deletion</h5>
+                        <h5 class="modal-title" id="recoverPasswordModalLabel">Confirm Recovery</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Please enter your password to confirm deletion of <strong id="modalDeleteUsername"></strong>:
+                        <p>Please enter your password to confirm recovery of <strong id="modalRecoverEmail"></strong>:
                         </p>
                         <div class="mb-3">
-                            <label for="passwordInput" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="passwordInput" required />
+                            <label for="recoverPasswordInput" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="recoverPasswordInput" required />
+                            <input type="hidden" id="recoverFilename" />
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                        <button type="submit" class="btn btn-primary">Confirm Recovery</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    </div>
+
+
 
     <!-- Modal Event Handlers -->
     <script>
@@ -362,40 +370,51 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
             if (actionSelectElement) actionSelectElement.value = "";
         });
 
-        // Update delete modal username when shown
-        const deleteModalEl = document.getElementById('deletePasswordModal');
-        deleteModalEl.addEventListener('show.bs.modal', function () {
-            document.getElementById("modalDeleteUsername").textContent = actionUsername;
-        });
+        function showRecoverModal(email, file) {
+            document.getElementById("modalRecoverEmail").textContent = email;
+            document.getElementById("recoverPasswordInput").value = "";
+            document.getElementById("recoverFilename").value = file;
 
-        // Handle deletion from the delete modal form
-        document.getElementById("deletePasswordForm").addEventListener("submit", async function (e) {
+            const recoverModal = new bootstrap.Modal(document.getElementById('recoverPasswordModal'));
+            recoverModal.show();
+        }
+
+        document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
             e.preventDefault();
-            const password = document.getElementById("passwordInput").value;
-            const deleteModal = bootstrap.Modal.getInstance(deleteModalEl);
-            deleteModal.hide();
+            const password = document.getElementById("recoverPasswordInput").value;
+            const file = document.getElementById("recoverFilename").value;
+
+            const formData = new FormData();
+            formData.append("password", password);
+            formData.append("file", file);
 
             try {
-                const payload = { username: actionUsername, user_id: actionUserId, action: "delete", password: password };
-                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                const response = await fetch('../scripts/recover.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
-                const updateResult = await updateResponse.json();
-                if (updateResult.success) {
-                    alert("Action executed successfully!");
+
+                const text = await response.text();
+
+                if (response.ok && text.includes("successfully")) {
+                    alert("Recovery successful.");
                     window.location.reload();
                 } else {
-                    alert("Failed to execute action: " + updateResult.message);
+                    alert("Recovery failed: " + text);
                 }
             } catch (error) {
-                alert("An error occurred while executing the action.");
+                alert("An error occurred while recovering the account.");
             }
-            document.getElementById("passwordInput").value = "";
-            if (actionSelectElement) actionSelectElement.value = "";
+
+            const recoverModalEl = document.getElementById('recoverPasswordModal');
+            const modal = bootstrap.Modal.getInstance(recoverModalEl);
+            modal.hide();
         });
     </script>
+
+
+
+
 </body>
 
 </html>
