@@ -216,7 +216,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             <?php else: ?>
                                 <ul>
                                     <?php foreach ($files as $file): ?>
-                                     <ahref="?file=<?php echo urlencode($file); ?>"><?php echo htmlspecialchars($file); ?></a>
+                                     <a href="?file=<?php echo urlencode($file); ?>"><?php echo htmlspecialchars($file); ?></a>
                                        
                                     <?php endforeach; ?>
                                 </ul>
