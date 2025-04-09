@@ -405,7 +405,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
     formData.append("file", file);
 
     try {
-        const response = await fetch('../scripts/recover.php', {
+        const response = await fetch('../scripts/Recover.php', {
             method: 'POST',
             body: formData
         });
