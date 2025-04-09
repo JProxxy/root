@@ -62,37 +62,7 @@ if (!empty($user_data['profile_picture'])) {
 
 <body>
 
-    <?php
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
 
-        // Query to retrieve the user's role_id
-        $query = "SELECT role_id FROM users WHERE user_id = :user_id";
-        $stmt = $conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Only output the pending overlay if the user has role_id 12
-        if ($user && $user['role_id'] == 12) {
-            ?>
-            <div class="pendingCont">
-                <img src="../assets/images/bg_pending.png" alt="Pending Background" />
-                <img src="../assets/images/pending-modal.png" alt="Pending Modal" class="pending-modal" />
-                <img src="../assets/images/pending-logout.png" alt="Pending Logout" class="pending-logout"
-                    onclick="logoutUser()" />
-            </div>
-
-            <script>
-                function logoutUser() {
-                    // Redirect to the logout script
-                    window.location.href = '../scripts/logout.php';
-                }
-            </script>
-            <?php
-        }
-    }
-    ?>
 
 
 
@@ -143,36 +113,35 @@ if (!empty($user_data['profile_picture'])) {
 </style>
 
 <?php
-    if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
 
-        // Query to retrieve the user's role_id
-        $query = "SELECT role_id FROM users WHERE user_id = :user_id";
-        $stmt = $conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Only output the pending overlay if the user has role_id 12
-        if ($user && $user['role_id'] == 13) {
-            ?>
-            <div class="pendingCont">
-                <img src="../assets/images/ban_bg.png" alt="ban Background" />
-                <img src="../assets/images/ban-modal.png" alt="Pending Modal" class="pending-modal" />
-                <img src="../assets/images/pending-logout.png" alt="Pending Logout" class="pending-logout"
-                    onclick="logoutUser()" />
-            </div>
+// Fetch user's mu_status (block or not) from the database using PDO
+$query = "SELECT mu_status FROM users WHERE user_id = :user_id";
+$stmt = $conn->prepare($query);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            <script>
-                function logoutUser() {
-                    // Redirect to the logout script
-                    window.location.href = '../scripts/logout.php';
-                }
-            </script>
-            <?php
-        }
-    }
+// Only output the block overlay if the user has mu_status = 'block'
+if ($user_data && $user_data['mu_status'] === 'block') {
     ?>
+    <div class="pendingCont">
+        <img src="../assets/images/ban_bg.png" alt="ban Background" />
+        <img src="../assets/images/ban-modal.png" alt="Blocked Modal" class="pending-modal" />
+        <img src="../assets/images/pending-logout.png" alt="Pending Logout" class="pending-logout"
+            onclick="logoutUser()" />
+    </div>
+
+    <script>
+        function logoutUser() {
+            // Redirect to the logout script
+            window.location.href = '../scripts/logout.php';
+        }
+    </script>
+    <?php
+}
+?>
+
 
 
 
@@ -279,7 +248,7 @@ if (!empty($user_data['profile_picture'])) {
                 
                 // Show the sysad block only if role_id is 1
                 if ($role_id === 1 || $role_id === 2): ?>
-                    <a href="../templates/SA.php">
+                    <a href="../templates/SA-manageUsers.php">
                         <div class="sysad">
                             <img src="../assets/images/sysad.png" alt="sysad" class="sysadButton" />
                         </div>

@@ -158,13 +158,13 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary" style="width: 100%;">
                         <ul class="nav nav-pills flex-column mb-auto">
                             <br>
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a href="../templates/SA.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-roles.png" alt="Manage Roles" width="16" height="16"
                                         class="me-2" />
                                     Manage Roles
                                 </a>
-                            </li>
+                            </li> -->
                             <li>
                                 <a href="../templates/SA-manageUsers.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-users.png" alt="Manage Users" width="16" height="16"
@@ -172,6 +172,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                     Manage Users
                                 </a>
                             </li>
+                            <?php if ($role_id == 1): ?>
                             <li>
                                 <a href="../templates/getDeletedAccountData.php" class="nav-link active">
                                     <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
@@ -179,6 +180,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                     Deleted User Logs
                                 </a>
                             </li>
+                            <?php endif; ?>
                             <br><br><br><br><br><br><br><br><br><br>
                         </ul>
                     </div>
@@ -194,12 +196,53 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             this period, they will be permanently deleted and cannot be recovered.
 
                         </div>
-                        <div class="whiteLine"></div>
+
+                        <div class="delete-all-container">
+                            <button type="button" class="btn btn-delete-all" onclick="deleteAllFiles()">Delete
+                                all</button>
+                        </div>
+
+                        <br>
+
                         <!-- Roles Container with Dynamic Table -->
                         <div class="rolesCont">
                             <?php
                             // Define the backup directory (adjust the path as needed)
                             $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+
+                            // Check if the backup directory exists
+                            if (!is_dir($backupDir)) {
+                                die("Backup directory not found.");
+                            }
+
+                            // Get all files in the backup directory (excluding . and ..)
+                            $files = array_diff(scandir($backupDir), array('.', '..'));
+
+                            // Get current time
+                            $currentTime = time();
+
+                            $oldFiles = [];
+
+                            foreach ($files as $file) {
+                                // Expected filename format: [user_id]_[table]___[emailPart]_[timestamp].csv
+                                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+                                if (preg_match($pattern, $file, $matches)) {
+                                    $rawTimestamp = $matches[4]; // "04-09-2025-07-21-PM"
+                                    $formattedDate = str_replace('-', ' ', $rawTimestamp); // "04 09 2025 07 21 PM"
+                            
+                                    // Convert timestamp to Unix timestamp
+                                    $timestamp = strtotime(str_replace(['AM', 'PM'], ['am', 'pm'], $formattedDate));
+
+                                    // Check if the file is older than 30 days
+                                    if (($currentTime - $timestamp) > 30 * 24 * 60 * 60) { // 30 days in seconds
+                                        $oldFiles[] = [
+                                            'account' => strtolower($matches[2] . '_' . $matches[3]) . '@rivaniot.online',
+                                            'file' => $file,
+                                            'date' => $formattedDate
+                                        ];
+                                    }
+                                }
+                            }
 
                             // Check if the backup directory exists
                             if (!is_dir($backupDir)) {
@@ -269,78 +312,129 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                         </div>
 
                         <style>
-                        /* Reset Bootstrap's table striped effect */
-.table-striped tbody tr:nth-of-type(odd),
-.table-striped tbody tr:nth-of-type(even) {
-    background-color: #FFFFFF !important; /* Force both odd and even rows to have white background */
-}
+                            /* Add a solid line below the titles of Account, Date, Action, but make it shorter on the right */
+                            .table thead tr {
+                                position: relative;
+                                /* To position the pseudo-element relative to the row */
+                            }
 
-/* Set the background color for the entire table to white */
-.table {
-    background-color: #FFFFFF !important; /* Make sure the entire table background is white */
-    color: #0B3236 !important; /* Ensure text color stays dark */
-    border-collapse: collapse !important; /* Ensure borders collapse properly */
-}
+                            .table thead tr::after {
+                                content: '';
+                                position: absolute;
+                                bottom: 0;
+                                left: 0px;
+                                width: 95%;
+                                /* Adjust this to control how short the line is */
+                                border-bottom: 2px solid #797979;
+                            }
 
-/* Set the background color of table headers and cells to white */
-.table th, .table td {
-    background-color: #FFFFFF !important; /* White background for all cells */
-    border: 1px solid #FFFFFF !important; /* White border to blend with background */
-    padding: 8px 16px;
-    text-align: center;
-}
+                            /* Reset Bootstrap's table striped effect */
+                            /* Remove Bootstrap table striped effect */
+                            .table-striped tbody tr:nth-of-type(odd) {
+                                background-color: transparent !important;
+                            }
 
-/* Sticky header styling */
-.table th {
-    position: sticky;
-    top: 0;
-    background-color: #FFFFFF !important; /* Sticky header stays white */
-    z-index: 1; /* Ensure the header stays on top */
-}
+                            /* Reset padding and other styles for table cells */
+                            .table>:not(caption)>*>* {
+                                padding: 0.5rem !important;
+                                background-color: transparent !important;
+                                color: inherit !important;
+                                box-shadow: none !important;
+                            }
 
-/* Ensure the Action column is centered */
-.action-column {
-    text-align: center !important; /* Force content to be centered */
-}
+                            /* Set the background color of table headers and cells to white */
+                            .table th,
+                            .table td {
+                                background-color: #FFFFFF !important;
+                                /* White background for all cells */
+                                border: 1px solid #FFFFFF !important;
+                                /* White border to blend with background */
+                                padding: 8px 16px;
 
-.action-column button,
-.action-column a {
-    margin: 0 5px; /* Space between buttons */
-}
+                            }
 
-/* Styles for the Download button */
-.btn-download {
-    background-color: #CFDBDD;
-    color: #0B3236;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 40px;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+                            .table thead th {
+                                font-weight: 600;
+                                /* Set the font weight to 400 (normal) */
+                            }
 
-.btn-download:hover {
-    background-color: #B9C6C8; /* Darker green on hover */
-}
+                            /* Sticky header styling */
+                            .table th {
+                                position: sticky;
+                                top: 0;
+                                background-color: #FFFFFF !important;
+                                /* Sticky header stays white */
+                                z-index: 1;
+                                /* Ensure the header stays on top */
+                            }
 
-/* Styles for the Recover button */
-.btn-recover {
-    background-color: #95C0C5;
-    color: #FFFFFF;
-    padding: 8px 20px;
-    border: none;
-    border-radius: 40px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+                            /* Ensure the Action column is centered */
+                            .action-column {
+                                text-align: center !important;
+                                /* Force content to be centered */
+                            }
 
-.btn-recover:hover {
-    background-color: #739A9E; /* Darker blue on hover */
-}
+                            .action-column button,
+                            .action-column a {
+                                margin: 0 5px;
+                                /* Space between buttons */
+                            }
 
+                            /* Styles for the Download button */
+                            .btn-download {
+                                background-color: #CFDBDD;
+                                color: #0B3236;
+                                padding: 8px 16px;
+                                border: none;
+                                border-radius: 40px;
+                                font-size: 14px;
+                                text-decoration: none;
+                                cursor: pointer;
+                                transition: background-color 0.3s ease;
+                            }
+
+                            .btn-download:hover {
+                                background-color: #B9C6C8;
+                                /* Darker green on hover */
+                            }
+
+                            /* Styles for the Recover button */
+                            .btn-recover {
+                                background-color: #95C0C5;
+                                color: #FFFFFF;
+                                padding: 8px 20px;
+                                border: none;
+                                border-radius: 40px;
+                                font-size: 14px;
+                                cursor: pointer;
+                                transition: background-color 0.3s ease;
+                            }
+
+                            .btn-recover:hover {
+                                background-color: #739A9E;
+                                /* Darker blue on hover */
+                            }
+
+                            .delete-all-container {
+                                text-align: right;
+                                margin-right: 6.5%;
+
+                            }
+
+                            .btn-delete-all {
+                                background-color: #F89F89;
+                                color: #511D1B;
+                                padding: 8px 16px;
+                                border: none;
+                                border-radius: 25px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                transition: background-color 0.3s ease;
+                            }
+
+                            .btn-delete-all:hover {
+                                background-color: #D9836E;
+                            }
                         </style>
 
 
@@ -352,6 +446,119 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
             </div>
         </div>
     </div>
+
+    <!-- Delete Files Modal -->
+    <div class="modal fade" id="deleteFilesModal" tabindex="-1" aria-labelledby="deleteFilesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFilesModalLabel">Select Files to Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="deleteFilesForm">
+                        <div class="form-group">
+                            <ul id="deleteFilesList" class="list-group">
+                                <!-- Dynamically populate this list with PHP -->
+                                <?php foreach ($oldFiles as $file): ?>
+                                    <li class="list-group-item">
+                                        <input type="checkbox" name="filesToDelete[]" value="<?php echo $file['file']; ?>">
+                                        <?php echo $file['account']; ?> - <?php echo $file['date']; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmDeletion()">Delete Selected
+                        Files</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Confirmation Modal for Deletion -->
+    <div class="modal fade" id="passwordConfirmationModal" tabindex="-1"
+        aria-labelledby="passwordConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="passwordConfirmationForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="passwordConfirmationModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter your password to confirm the deletion of the selected files.</p>
+                        <div class="mb-3">
+                            <label for="adminPasswordInput" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="adminPasswordInput" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Define the deleteAllFiles function
+        function deleteAllFiles() {
+            // Show the modal for selecting files to delete
+            const deleteFilesModal = new bootstrap.Modal(document.getElementById('deleteFilesModal'));
+            deleteFilesModal.show(); // Display the modal to select files for deletion
+        }
+
+
+        function confirmDeletion() {
+            // Show the password confirmation modal
+            const deleteFilesModal = new bootstrap.Modal(document.getElementById('deleteFilesModal'));
+            deleteFilesModal.hide(); // Close the first modal
+
+            const passwordConfirmationModal = new bootstrap.Modal(document.getElementById('passwordConfirmationModal'));
+            passwordConfirmationModal.show(); // Show the second modal
+        }
+
+        // Handle form submission for password confirmation
+        document.getElementById('passwordConfirmationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const password = document.getElementById('adminPasswordInput').value;
+            const selectedFiles = Array.from(document.querySelectorAll('input[name="filesToDelete[]"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (selectedFiles.length === 0) {
+                alert('Please select at least one file to delete.');
+                return;
+            }
+
+            // Send password and selected files to the server for validation and deletion
+            try {
+                const response = await fetch('../scripts/deleteAllFiles.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, files: selectedFiles })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Deletion successful!');
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete files: ' + result.message);
+                }
+            } catch (error) {
+                alert('An error occurred while deleting files.');
+            }
+        });
+
+    </script>
 
     <!-- Generic Action Confirmation Modal for Block/Unblock -->
     <div class="modal fade" id="actionConfirmModal" tabindex="-1" aria-labelledby="actionConfirmModalLabel"
@@ -489,10 +696,6 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
         });
 
     </script>
-
-
-
-
 </body>
 
 </html>

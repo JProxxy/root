@@ -39,15 +39,15 @@
                     <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary" style="width: 100%;">
                         <ul class="nav nav-pills flex-column mb-auto">
                             <br>
-                            <li class="nav-item">
-                                <a href="../templates/SA.php" class="nav-link active">
+                            <!-- <li class="nav-item">
+                                <a href="../templates/SA.php" class="nav-link ">
                                     <img src="../assets/images/icon-roles.png" alt="Manage Roles" width="16" height="16"
                                         class="me-2" />
                                     Manage Roles
                                 </a>
-                            </li>
+                            </li> -->
                             <li>
-                                <a href="../templates/SA-manageUsers.php" class="nav-link link-body-emphasis">
+                                <a href="../templates/SA-manageUsers.php" class="nav-link active">
                                     <img src="../assets/images/icon-users.png" alt="Manage Users" width="16" height="16"
                                         class="me-2" />
                                     Manage Users
