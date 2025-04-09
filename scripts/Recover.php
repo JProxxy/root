@@ -1,15 +1,21 @@
 <?php
+// Enable error reporting for all errors
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 include '../app/config/connection.php';  // Include the database connection
 session_start();  // Start the session
 
 // Check if user is logged in and has a valid session
 if (!isset($_SESSION['user_id'])) {
+    echo "<script>console.error('User not logged in. Attempted file recovery.');</script>";
     echo "You must be logged in to recover files.";
     exit;
 }
 
 // Check if password is provided
 if (!isset($_POST['password'])) {
+    echo "<script>console.error('Password not provided.');</script>";
     echo "Password not provided.<br>";
     exit;
 }
@@ -29,11 +35,13 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($user) {
     echo "User found: [" . $user['password'] . "]<br>";  // Debug: print hashed password
 } else {
+    echo "<script>console.error('User with ID $user_id not found in the database.');</script>";
     echo "User not found.<br>";
     exit;
 }
 
 if (!password_verify($password, $user['password'])) {
+    echo "<script>console.error('Incorrect password attempt for user $user_id.');</script>";
     echo "Incorrect password.<br>";
     exit;
 }
@@ -111,16 +119,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (PDOException $e) {
                 $conn->rollBack();
+                echo "<script>console.error('Error restoring data: " . $e->getMessage() . "');</script>";
                 echo "Error restoring the data: " . $e->getMessage();
             }
         } else {
+            echo "<script>console.error('Invalid filename format for file: $file');</script>";
             echo "Invalid filename format.<br>";
         }
     } else {
+        echo "<script>console.error('File not found: $filePath');</script>";
         echo "File not found: [$filePath]<br>";
         echo "Checking file existence with file_exists(): " . (file_exists($filePath) ? 'Yes' : 'No') . "<br>";
     }
 } else {
+    echo "<script>console.error('Invalid request method.');</script>";
     echo "Invalid request.<br>";
 }
 ?>
