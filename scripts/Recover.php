@@ -3,7 +3,7 @@ include '../app/config/connection.php';  // Include the database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $file = $_POST['file'];
-    echo $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+    $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
     $filePath = $backupDir . $file;
 
     if (file_exists($filePath)) {
@@ -56,8 +56,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Invalid filename format.";
         }
     } else {
-        echo "File not found: $filePath";  // More detailed output for debugging
+        echo "❌ File not found.\n";
+        echo "🔍 Expected path: $filePath\n";
+        echo "📍 Current working directory: " . getcwd() . "\n";
+        echo "📂 Directory exists? " . (is_dir($backupDir) ? 'YES' : 'NO') . "\n";
+        echo "📄 Full file path realpath(): " . realpath($filePath) . "\n";
+        echo "📄 File exists via realpath()? " . (file_exists(realpath($filePath)) ? 'YES' : 'NO') . "\n";
+
+        // Optional: List directory contents for more clues
+        if (is_dir($backupDir)) {
+            echo "📁 Files in directory:\n";
+            $files = scandir($backupDir);
+            foreach ($files as $f) {
+                echo "- $f\n";
+            }
+        } else {
+            echo "⚠️ Backup directory is missing or not accessible.\n";
+        }
     }
-} else {
-    echo "Invalid request.";
-}
+
