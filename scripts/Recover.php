@@ -34,11 +34,12 @@ if (isset($_POST['password'])) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file = trim($_POST['file']);
             $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+            echo "Backup Directory (raw): $backupDir<br>";
             echo "Backup Directory (realpath): " . realpath($backupDir) . "<br>";
-            $filePath = $backupDir . $file;
-
-            echo "Looking for file: $filePath<br>";  // Debugging: Print the full file path
-
+            
+            $filePath = $backupDir . trim($_POST['file']);
+            echo "Looking for file: $filePath<br>";
+            
             if (file_exists($filePath)) {
                 echo "File exists: $filePath<br>";  // Debugging: Confirm file exists
 
