@@ -385,47 +385,58 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
             if (actionSelectElement) actionSelectElement.value = "";
         });
 
+        function showRecoverModal(email, file) {
+            console.log("showRecoverModal called with:", { email, file });
+            document.getElementById("modalRecoverEmail").textContent = email;
+            document.getElementById("recoverPasswordInput").value = "";
+            document.getElementById("recoverFilename").value = file;
+
+            const recoverModal = new bootstrap.Modal(document.getElementById('recoverPasswordModal'));
+            recoverModal.show();
+        }
+
         document.getElementById("recoverPasswordForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const password = document.getElementById("recoverPasswordInput").value;
-            const file = document.getElementById("recoverFilename").value;
+    e.preventDefault();
+    const password = document.getElementById("recoverPasswordInput").value;
+    const file = document.getElementById("recoverFilename").value;
 
-            const formData = new FormData();
-            formData.append("password", password);
-            formData.append("file", file);
+    const formData = new FormData();
+    formData.append("password", password);
+    formData.append("file", file);
 
-            try {
-                const response = await fetch('../scripts/recover.php', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const text = await response.text();
-
-                // Log the full response and any additional debugging info
-                console.log("Response Status: " + response.status); // Add response status
-                console.log("Server Response Text: " + text); // Full server response
-                console.log("Requested file: " + file); // The file you requested
-                console.log("Server responded with: " + text);
-
-                if (response.ok && text.includes("successfully")) {
-                    alert("Recovery successful.");
-                    window.location.reload();
-                } else {
-                    console.error("Recovery failed:", text); // Detailed error logging
-                    alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
-                }
-
-            } catch (error) {
-                console.error("Error during recovery:", error); // Detailed error log in case of fetch failure
-                alert("An error occurred while recovering the account.");
-            }
-
-            // Close the modal after attempt
-            const recoverModalEl = document.getElementById('recoverPasswordModal');
-            const modal = bootstrap.Modal.getInstance(recoverModalEl);
-            modal.hide();
+    try {
+        const response = await fetch('../scripts/recover.php', {
+            method: 'POST',
+            body: formData
         });
+
+        const text = await response.text();
+
+        // Log the full response and any additional debugging info
+        console.log("Response Status: " + response.status); // Add response status
+        console.log("Server Response Text: " + text); // Full server response
+        console.log("Requested file: " + file); // The file you requested
+        console.log("Server responded with: " + text);
+
+        if (response.ok && text.includes("successfully")) {
+            alert("Recovery successful.");
+            window.location.reload();
+        } else {
+            console.error("Recovery failed:", text); // Detailed error logging
+            alert("⚠️ Recovery failed.\n\nFile path: " + file + "\n\nDetails from server:\n" + text);
+        }
+
+    } catch (error) {
+        console.error("Error during recovery:", error); // Detailed error log in case of fetch failure
+        alert("An error occurred while recovering the account.");
+    }
+
+    // Close the modal after attempt
+    const recoverModalEl = document.getElementById('recoverPasswordModal');
+    const modal = bootstrap.Modal.getInstance(recoverModalEl);
+    modal.hide();
+});
+
 
     </script>
 
