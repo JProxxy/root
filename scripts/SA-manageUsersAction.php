@@ -69,7 +69,8 @@ $adminUsername = $user['username'];
 $adminRoleId = $user['role_id'];
 
 // Function to generate description based on action
-function generateDescription($action, $user_id, $adminUsername) {
+function generateDescription($action, $user_id, $adminUsername)
+{
     switch ($action) {
         case 'block':
             return "Admin $adminUsername blocked user with ID $user_id";
@@ -83,19 +84,18 @@ function generateDescription($action, $user_id, $adminUsername) {
 }
 
 // Handle "delete" action
-// Handle "delete" action
 if ($action === 'delete') {
     if (!isset($data['password']) || empty($data['password'])) {
         error_log("Password missing for delete action for user_id: $user_id");
         echo json_encode(['success' => false, 'message' => 'Password is required for deletion.']);
         exit;
     }
-    
+
     // Retrieve the admin user's hashed password from the database
     $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
     $stmt->execute([$adminUserId]);
     $hashedPassword = $stmt->fetchColumn();
-    
+
     if (!$hashedPassword || !password_verify($data['password'], $hashedPassword)) {
         error_log("Invalid password for admin user ID: $adminUserId");
         echo json_encode(['success' => false, 'message' => 'Invalid password.']);
@@ -104,7 +104,7 @@ if ($action === 'delete') {
 
     // Begin the transaction to ensure data integrity
     $conn->beginTransaction();
-    
+
     try {
         // Backup configuration
         $backupDir = '../storage/user/deleted_userAccounts/';
@@ -146,15 +146,31 @@ if ($action === 'delete') {
                 $rows = $backupStmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (!empty($rows)) {
-                    $filename = sprintf('%s%d_%s_%s_%d.csv',
-                        $backupDir,
-                        $user_id,
-                        $sanitizedEmail,
-                        $tableName,
-                        time()
+                    // Sanitize first name, last name, and email for filename
+                    $stmt = $conn->prepare("SELECT first_name, last_name, email FROM users WHERE user_id = ?");
+                    $stmt->execute([$user_id]);
+                    $userDetails = $stmt->fetch();
+                    // Check if values are null and replace with empty string if necessary
+                    $fname = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $userDetails['first_name'] ?? ''); // Use empty string if null
+                    $lname = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $userDetails['last_name'] ?? '');  // Use empty string if null
+                    $email = preg_replace('/[^a-zA-Z0-9_@.-]/', '_', explode('@', $userDetails['email'] ?? '')[0]); // Use empty string if null
+
+                    // Get current timestamp and format it as 'MM-DD-YYYY-hh-mm-AM/PM'
+                    $timestamp = date('m-d-Y-h-i-A', time()); // Format like: 04-09-2025-03-22-PM
+
+                    // Generate the filename
+                    $filename = sprintf(
+                        '%d_%s_%s_%s_%s_%s.csv',
+                        $user_id,  // USER_ID
+                        $tableName, // TABLE
+                        $fname,     // FNAME
+                        $lname,     // LNAME
+                        $email,     // EMAIL
+                        $timestamp  // TIMESTAMP
                     );
 
-                    $file = fopen($filename, 'w');
+                    // Create the backup file path
+                    $file = fopen($backupDir . $filename, 'w');
                     if ($file === false || fputcsv($file, array_keys($rows[0])) === false) {
                         $backupSuccess = false;
                         break;
@@ -170,6 +186,7 @@ if ($action === 'delete') {
                 }
             }
         }
+
 
         if (!$backupSuccess) {
             throw new Exception('Backup failed. Account deletion aborted.');
@@ -226,19 +243,19 @@ if ($action === 'delete') {
 
 // Handle "block" or "unblock" actions
 if ($action === 'block' || $action === 'unblock') {
-    $newStatus = $action; 
-    
+    $newStatus = $action;
+
     // Update mu_status to the action value
     $stmt = $conn->prepare("UPDATE users SET mu_status = ? WHERE user_id = ?");
     $result = $stmt->execute([$newStatus, $user_id]);
-    
+
     if ($result) {
         // Log the action into the manageuser table
         $description = generateDescription($action, $user_id, $adminUsername);
         $stmt = $conn->prepare("INSERT INTO manageuser (user_id, username, role_id, type_of_action, to_whom, date, description)
             VALUES (?, ?, ?, ?, ?, NOW(), ?)");
         $stmt->execute([$adminUserId, $adminUsername, $adminRoleId, $action, $user_id, $description]);
-        
+
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to update user status.']);
