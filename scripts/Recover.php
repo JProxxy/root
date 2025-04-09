@@ -24,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             try {
                 foreach ($lines as $line) {
-                    if (trim($line) === '') continue;
+                    if (trim($line) === '')
+                        continue;
 
                     $data = str_getcsv($line);
                     if (count($data) === $columnCount) {
@@ -41,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
 
-    
+
                 if (unlink($filePath)) {
                     echo "File recovered successfully, data restored, and CSV deleted.";
                 } else {
@@ -74,4 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "⚠️ Backup directory is missing or not accessible.\n";
         }
     }
-
+} else {
+    echo "Invalid request.";
+}
