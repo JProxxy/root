@@ -8,12 +8,104 @@ if ($currentUserId) {
     // Include your database connection file (using PDO)
     include '../app/config/connection.php';
 
-    // Prepare the PDO statement
+    // Prepare the PDO statement to get the current user's role
     $stmt = $conn->prepare("SELECT role_id FROM users WHERE user_id = ?");
     $stmt->execute([$currentUserId]);
     $currentUserRoleId = $stmt->fetchColumn();
 }
+
+// Check if the "download_csv" flag is set in the URL
+if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
+    // Fetch specific user data from the database (only the columns needed for export)
+    $stmt = $conn->prepare("SELECT 
+        user_id, first_name, middle_name, last_name, username, phoneNumber, email, role_id, 
+        created_at, status, gender, street_address, city, postal_code, barangay, soc_med, mu_status 
+        FROM users");
+    $stmt->execute();
+    $usersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Generate the dynamic filename based on the current date and time
+    $date = new DateTime();
+    $formattedDate = $date->format('m-d-Y-H-i-A'); // Changed format for cleaner filename
+    $csvFilename = 'MU-' . $formattedDate . '.csv';
+    $zipFilename = 'MU-' . $formattedDate . '.zip';
+
+    // Generate CSV
+    if (count($usersData) > 0) {
+        // Set headers to download the CSV file with dynamic filename
+        $output = fopen($csvFilename, 'w');
+
+        // Write the table headers (titles) to the CSV
+        $headers = [
+            "No.", "First Name", "Middle Name", "Last Name", "Username", "Phone Number", 
+            "Email", "Role", "Created At", "Status", "Gender", "Street Address", "City", 
+            "Postal", "Barangay", "Social Media", "Action"
+        ];
+
+        fputcsv($output, $headers);
+
+        // Write each row of user data to the CSV
+        $counter = 1; // Counter for the "No." column
+        foreach ($usersData as $user) {
+            $csvRow = [
+                $counter++, 
+                $user['first_name'], 
+                $user['middle_name'], 
+                $user['last_name'], 
+                $user['username'], 
+                $user['phoneNumber'], 
+                $user['email'], 
+                $user['role_id'], 
+                $user['created_at'], 
+                $user['status'], 
+                $user['gender'], 
+                $user['street_address'], 
+                $user['city'], 
+                $user['postal_code'], 
+                $user['barangay'], 
+                $user['soc_med'], 
+                $user['mu_status'] // This is the "Action" column
+            ];
+
+            fputcsv($output, $csvRow);
+        }
+
+        fclose($output);
+
+        // Now, create a password-protected zip of the CSV
+        $password = $currentUserId;  // Using user_id as the password for the zip file
+
+        // Create the zip file
+        $zip = new ZipArchive();
+        if ($zip->open($zipFilename, ZipArchive::CREATE) === TRUE) {
+            // Add the CSV file to the zip
+            $zip->addFile($csvFilename);
+            $zip->close();
+
+            // Now, password-protect the zip file using the `zip` command-line utility
+            $cmd = "zip -P $password $zipFilename $csvFilename";
+            shell_exec($cmd);  // Execute the command to create a password-protected zip
+
+            // Now, send the zip file to the user for download
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
+            readfile($zipFilename);
+
+            // Cleanup by deleting the generated files
+            unlink($csvFilename);
+            unlink($zipFilename);
+
+            exit;
+        } else {
+            die('Failed to create zip file.');
+        }
+    } else {
+        echo "No user data found.";
+    }
+}
 ?>
+    
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,9 +138,18 @@ if ($currentUserId) {
                     </a>
                 </div>
                 <div class="headerGroup">
-                    <div class="headerText">Manage Users</div>
+                    <div class="headerText" id="manageUsersBtn">
+                        Manage Users
+                    </div>
                 </div>
             </div>
+
+            <script>
+                document.getElementById('manageUsersBtn').addEventListener('click', function () {
+                    // Trigger the CSV download
+                    window.location.href = window.location.href + "?download_csv=true";  // Append download flag to URL
+                });
+            </script>
             <!-- Content Wrapper (Side Panel + Profile Main) -->
             <div class="contentWrapper">
                 <!-- Sidebar -->
@@ -450,11 +551,11 @@ if ($currentUserId) {
         rows.forEach(row => {
             // Get all the text content from each row excluding the Action column (just for searching row data)
             const rowText = row.textContent.toLowerCase();
-            
+
             // Get the selected value of the action dropdown in the row
             const actionSelect = row.querySelector('select');
             const actionValue = actionSelect ? actionSelect.options[actionSelect.selectedIndex].text.toLowerCase() : '';
-            
+
             // Check if the filter matches row text or the action value
             if (rowText.indexOf(filter) > -1 || actionValue.indexOf(filter) > -1) {
                 row.style.display = ""; // Show row if filter matches
