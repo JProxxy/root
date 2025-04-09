@@ -1,114 +1,351 @@
 <?php
 session_start();
+// Retrieve the current user id from session
+$currentUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+$currentUserRoleId = 0;
 
-// Require authentication
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../templates/login.php");
-    exit;
+if ($currentUserId) {
+    // Include your database connection file (using PDO)
+    include '../app/config/connection.php';
+
+    // Prepare the PDO statement to get the current user's role
+    $stmt = $conn->prepare("SELECT role_id FROM users WHERE user_id = ?");
+    $stmt->execute([$currentUserId]);
+    $currentUserRoleId = $stmt->fetchColumn();
 }
 
-// Define the backup directory (adjust the path as needed)
-$backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-
-// Check if the backup directory exists
-if (!is_dir($backupDir)) {
-    die("Backup directory not found.");
-}
-
-// If a file is requested via GET, serve it for download.
-if (isset($_GET['file'])) {
-    $requestedFile = basename($_GET['file']);
-    $filePath = $backupDir . $requestedFile;
-
-    if (!file_exists($filePath)) {
-        die("File not found.");
+// Check if the "download_csv" flag is set in the URL and user has role_id = 1
+if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
+    // Check if the current user has role_id 1 (only allow them to download)
+    if ($currentUserRoleId != 1) {
+        die("You do not have permission to download the CSV.");
     }
 
-    header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename="' . $requestedFile . '"');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: ' . filesize($filePath));
-    flush();
-    readfile($filePath);
-    exit;
+    // Fetch specific user data from the database (only the columns needed for export)
+    $stmt = $conn->prepare("
+        SELECT 
+            user_id, first_name, middle_name, last_name, username, phoneNumber, email, role_id, 
+            created_at, status, gender, street_address, city, postal_code, barangay, soc_med, mu_status 
+        FROM users
+    ");
+    $stmt->execute();
+    $usersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Generate the dynamic filename based on the current date and time
+    $date = new DateTime();
+    $formattedDate = $date->format('m-d-Y-H-i-A'); // Changed format for cleaner filename
+    $filename = 'MU-' . $formattedDate . '.csv';
+
+    // Generate CSV
+    if (count($usersData) > 0) {
+        // Set headers to download the CSV file with dynamic filename
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        // Open PHP output stream for CSV
+        $output = fopen('php://output', 'w');
+
+        // Write the table headers (titles) to the CSV
+        $headers = [
+            "No.",
+            "First Name",
+            "Middle Name",
+            "Last Name",
+            "Username",
+            "Phone Number",
+            "Email",
+            "Role",
+            "Created At",
+            "Status",
+            "Gender",
+            "Street Address",
+            "City",
+            "Postal",
+            "Barangay",
+            "Social Media",
+            "Action"
+        ];
+
+        // Write headers to the CSV
+        fputcsv($output, $headers);
+
+        // Write each row of user data to the CSV
+        $counter = 1; // Counter for the "No." column
+        foreach ($usersData as $user) {
+            $csvRow = [
+                $counter++,
+                $user['first_name'],
+                $user['middle_name'],
+                $user['last_name'],
+                $user['username'],
+                $user['phoneNumber'],
+                $user['email'],
+                $user['role_id'],
+                $user['created_at'],
+                $user['status'],
+                $user['gender'],
+                $user['street_address'],
+                $user['city'],
+                $user['postal_code'],
+                $user['barangay'],
+                $user['soc_med'],
+                $user['mu_status'] // This is the "Action" column
+            ];
+
+            fputcsv($output, $csvRow);
+        }
+
+        // Close the output stream
+        fclose($output);
+        exit;  // Stop further execution
+    } else {
+        echo "No user data found.";
+    }
 }
-
-$files = array_diff(scandir($backupDir), array('.', '..'));
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deleted Accounts Backups</title>
-
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <link rel="stylesheet" href="../assets/css/settings.css" />
+    <link rel="stylesheet" href="../assets/css/settings-profile.css" />
+    <link rel="stylesheet" href="../assets/css/settings-password.css" />
+    <link rel="stylesheet" href="../assets/css/SA-manageUsers.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
-<div class="bgMain" style="position: relative; min-height: 100vh;">
-    <?php include '../partials/bgMain.php'; ?>
-    <div class="center-container" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="bgMain">
+        <?php include '../partials/bgMain.php'; ?>
         <div class="containerPart">
-            <h1>Deleted Accounts Backups</h1>
-            <div class="links-container">
-                <?php if (empty($files)): ?>
-                    <p class="no-files">No backup files found.</p>
-                <?php else: ?>
-                    <?php foreach ($files as $file): ?>
-                        <a href="?file=<?php echo urlencode($file); ?>">
-                            <?php echo htmlspecialchars($file); ?>
-                        </a>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+            <!-- Header -->
+            <div class="headbackCont">
+                <div class="imgBack">
+                    <a href="../templates/dashboard.php">
+                        <img src="../assets/images/back.png" alt="back" class="backIcon" />
+                    </a>
+                </div>
+                <div class="headerGroup">
+                    <div class="headerText" id="manageUsersBtn" style="cursor: pointer;">
+                        Manage Users
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.getElementById('manageUsersBtn').addEventListener('click', function () {
+                    // Trigger the CSV download only if the user has role_id = 1
+                    <?php if ($currentUserRoleId == 1): ?>
+                        window.location.href = window.location.href + "?download_csv=true";  // Append download flag to URL
+                    <?php else: ?>
+                        alert("You do not have permission to download the CSV.");
+                    <?php endif; ?>
+                });
+            </script>
+            <!-- Content Wrapper (Side Panel + Profile Main) -->
+            <div class="contentWrapper">
+                <!-- Sidebar -->
+                <div class="sidepanel">
+                    <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary" style="width: 100%;">
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <br>
+                            <li class="nav-item">
+                                <a href="../templates/SA.php" class="nav-link link-body-emphasis">
+                                    <img src="../assets/images/icon-roles.png" alt="Manage Roles" width="16" height="16"
+                                        class="me-2" />
+                                    Manage Roles
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../templates/SA-manageUsers.php" class="nav-link active">
+                                    <img src="../assets/images/icon-users.png" alt="Manage Users" width="16" height="16"
+                                        class="me-2" />
+                                    Manage Users
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
+                                    <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
+                                        height="16" class="me-2" />
+                                    Deleted User Logs
+                                </a>
+                            </li>
+                            <br><br><br><br><br><br><br><br><br><br>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Main Profile Section -->
+                <div class="profile-main">
+                    <div class="flex-containerOneSA">
+                        <div class="headerSACont">
+                            <br>
+                            Deleted Accounts Backups
+                            <br><br>
+                            Any accounts that are deleted will remain in a deactivated state for up to 30 days. After
+                            this period, they will be permanently deleted and cannot be recovered.
+
+                        </div>
+                        <div class="whiteLine"></div>
+                        <!-- Roles Container with Dynamic Table -->
+                        <div class="rolesCont">
+                         
+                            <!-- PUT THE DELETED ACCOUNTS HEREEEEEEEEEEEEEEEEEEEEE -->
+                            <?php
+                            // Define the backup directory (adjust the path as needed)
+                            $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+
+                            // Check if the backup directory exists
+                            if (!is_dir($backupDir)) {
+                                die("Backup directory not found.");
+                            }
+
+                            // Get all files in the backup directory (excluding . and ..)
+                            $files = array_diff(scandir($backupDir), array('.', '..'));
+
+                            if (empty($files)): ?>
+                                <p>No backup files found.</p>
+                            <?php else: ?>
+                                <ul>
+                                    <?php foreach ($files as $file): ?>
+                                     <ahref="?file=<?php echo urlencode($file); ?>"><?php echo htmlspecialchars($file); ?></a>
+                                       
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                        </div>
+
+                        
+                    </div>
+                    <!-- Dynamic Table Script -->
+
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Inline CSS for simple design -->
-<style>
-    .containerPart {
-        padding: 20px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    .links-container {
-        max-height: 60vh;
-        overflow-y: auto;
-        padding: 10px;
-        background: #f9f9f9;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    .links-container a {
-        display: block;
-        padding: 10px;
-        margin: 5px 0;
-        text-decoration: none;
-        color: #007BFF;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        transition: background 0.2s, border-color 0.2s;
-    }
-    .links-container a:hover {
-        background: #e9f5ff;
-        border-color: #007BFF;
-    }
-    .no-files {
-        text-align: center;
-        color: #666;
-        padding: 20px;
-    }
-</style>
+    <!-- Generic Action Confirmation Modal for Block/Unblock -->
+    <div class="modal fade" id="actionConfirmModal" tabindex="-1" aria-labelledby="actionConfirmModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionConfirmModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="actionModalText"></p>
+                </div>
+                <div class="modal-footer">
 
+                    <button id="actionConfirmBtn" type="button" class="btn btn-primary">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Delete Confirmation Modal with Password Input -->
+    <div class="modal fade" id="deletePasswordModal" tabindex="-1" aria-labelledby="deletePasswordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="deletePasswordForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePasswordModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter your password to confirm deletion of <strong id="modalDeleteUsername"></strong>:
+                        </p>
+                        <div class="mb-3">
+                            <label for="passwordInput" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="passwordInput" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal Event Handlers -->
+    <script>
+        // Handle confirmation from the generic (block/unblock) modal
+        document.getElementById("actionConfirmBtn").addEventListener("click", async function () {
+            // Hide the modal
+            const actionModalEl = document.getElementById('actionConfirmModal');
+            const actionModal = bootstrap.Modal.getInstance(actionModalEl);
+            actionModal.hide();
+
+            try {
+                const payload = { username: actionUsername, user_id: actionUserId, action: currentAction };
+                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    alert("Action executed successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to execute action: " + updateResult.message);
+                }
+            } catch (error) {
+                alert("An error occurred while executing the action.");
+            }
+            if (actionSelectElement) actionSelectElement.value = "";
+        });
+
+        // Update delete modal username when shown
+        const deleteModalEl = document.getElementById('deletePasswordModal');
+        deleteModalEl.addEventListener('show.bs.modal', function () {
+            document.getElementById("modalDeleteUsername").textContent = actionUsername;
+        });
+
+        // Handle deletion from the delete modal form
+        document.getElementById("deletePasswordForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const password = document.getElementById("passwordInput").value;
+            const deleteModal = bootstrap.Modal.getInstance(deleteModalEl);
+            deleteModal.hide();
+
+            try {
+                const payload = { username: actionUsername, user_id: actionUserId, action: "delete", password: password };
+                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    alert("Action executed successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to execute action: " + updateResult.message);
+                }
+            } catch (error) {
+                alert("An error occurred while executing the action.");
+            }
+            document.getElementById("passwordInput").value = "";
+            if (actionSelectElement) actionSelectElement.value = "";
+        });
+    </script>
 </body>
 
 </html>

@@ -278,7 +278,7 @@ if (!empty($user_data['profile_picture'])) {
                 $role_id = $user_data['role_id'] ?? null; // Fetch role_id or set to null if not found
                 
                 // Show the sysad block only if role_id is 1
-                if ($role_id === 1): ?>
+                if ($role_id === 1 || $role_id === 2): ?>
                     <a href="../templates/SA.php">
                         <div class="sysad">
                             <img src="../assets/images/sysad.png" alt="sysad" class="sysadButton" />
