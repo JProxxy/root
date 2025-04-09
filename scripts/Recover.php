@@ -8,107 +8,119 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Check if password is correct
-if (isset($_POST['password'])) {
-    $password = $_POST['password'];
-    $user_id = $_SESSION['user_id']; // Get the user_id from the session
+// Check if password is provided
+if (!isset($_POST['password'])) {
+    echo "Password not provided.<br>";
+    exit;
+}
 
-    echo "User ID: $user_id<br>";  // Debugging: Print user_id to ensure it's being retrieved
+$password = $_POST['password'];
+$user_id = $_SESSION['user_id']; // Get the user_id from the session
 
-    // Fetch the hashed password from the database for this user
-    $sql = "SELECT password FROM users WHERE user_id = :user_id LIMIT 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute(['user_id' => $user_id]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+echo "User ID: [$user_id]<br>";  // Debug: Print user_id
 
-    // Debugging: Check if user was fetched successfully
-    if ($user) {
-        echo "User found: " . $user['password'] . "<br>";  // Print the hashed password (ensure it's safe to display)
-    } else {
-        echo "User not found.<br>";
-    }
+// Fetch the hashed password from the database for this user
+$sql = "SELECT password FROM users WHERE user_id = :user_id LIMIT 1";
+$stmt = $conn->prepare($sql);
+$stmt->execute(['user_id' => $user_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user['password'])) {
-        // If password is correct, proceed with file recovery
+// Debug: Check if user was fetched successfully
+if ($user) {
+    echo "User found: [" . $user['password'] . "]<br>";  // Debug: print hashed password
+} else {
+    echo "User not found.<br>";
+    exit;
+}
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $file = trim($_POST['file']);
-            $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-            echo "Backup Directory (raw): $backupDir<br>";
-            echo "Backup Directory (realpath): " . realpath($backupDir) . "<br>";
-            
-            $filePath = $backupDir . trim($_POST['file']);
-            echo "Looking for file: $filePath<br>";
-            
-            if (file_exists($filePath)) {
-                echo "File exists: $filePath<br>";  // Debugging: Confirm file exists
+if (!password_verify($password, $user['password'])) {
+    echo "Incorrect password.<br>";
+    exit;
+}
 
-                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
-                if (preg_match($pattern, $file, $matches)) {
-                    echo "Pattern matched. Matches found:<br>";
-                    var_dump($matches);  // Debugging: Show the match results
+// At this point, password is correct, so we proceed with file recovery.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $file = trim($_POST['file']);
+    echo "Received filename: [$file]<br>";  // Debug the received filename
 
-                    $email = ltrim($matches[2], '_') . '@rivaniot.online';
-                    $date = $matches[3];
+    $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
+    echo "Backup Directory (raw): [$backupDir]<br>";
+    echo "Backup Directory (realpath): [" . realpath($backupDir) . "]<br>";
 
-                    $table = (strpos($file, 'acRemote') !== false) ? 'acRemote' : 'users';
+    $filePath = $backupDir . $file;
+    echo "Looking for file: [$filePath]<br>";
 
-                    $fileData = file_get_contents($filePath);
-                    $lines = explode("\n", $fileData);
+    if (file_exists($filePath)) {
+        echo "File exists: [$filePath]<br>";  // Debug: Confirm file exists
 
-                    $header = str_getcsv(array_shift($lines));
-                    $columnCount = count($header);
+        // Parse the filename
+        // Expected format: 51_users___eaquierdojeraldine_04-09-2025-07-43-PM.csv
+        // This pattern:
+        // Group 1: user_id (digits)
+        // Group 2: table name (any characters except underscore)
+        // Group 3: email portion (rest of characters until the next underscore)
+        // Group 4: timestamp in the format XX-XX-XXXX-XX-XX-[AP]M
+        $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+        if (preg_match($pattern, $file, $matches)) {
+            echo "Pattern matched. Matches found:<br>";
+            var_dump($matches);  // Debug: Display the matches
 
-                    echo "Header: " . implode(', ', $header) . "<br>";  // Debugging: Print the header
+            // Construct account: table_emailPart@rivaniot.online, e.g. "users_eaquierdojeraldine@rivaniot.online"
+            $tableName = $matches[2];      // e.g., "users"
+            $emailPart = $matches[3];      // e.g., "eaquierdojeraldine"
+            $account = strtolower($tableName . '_' . $emailPart) . '@rivaniot.online';
+            $timestamp = $matches[4];      // e.g., "04-09-2025-07-43-PM"
+            $formattedDate = str_replace('-', ' ', $timestamp); // e.g., "04 09 2025 07 43 PM"
 
-                    $conn->beginTransaction();
+            // Determine the destination table from the filename
+            // In this dynamic scenario, the table is from the filename (group 2)
+            $table = $tableName;
 
-                    try {
-                        foreach ($lines as $line) {
-                            if (trim($line) === '') continue;
+            echo "Parsed Account: [$account]<br>";
+            echo "Parsed Date: [$formattedDate]<br>";
+            echo "Destination Table: [$table]<br>";
 
-                            $data = str_getcsv($line);
-                            if (count($data) === $columnCount) {
-                                foreach ($data as &$value) {
-                                    $value = ($value === '') ? null : $value;
-                                }
+            $fileData = file_get_contents($filePath);
+            $lines = explode("\n", $fileData);
+            // Get CSV header
+            $header = str_getcsv(array_shift($lines));
+            $columnCount = count($header);
+            echo "CSV Header: " . implode(', ', $header) . "<br>";
 
-                                $placeholders = implode(',', array_fill(0, $columnCount, '?'));
-                                $sql = "INSERT INTO `$table` (" . implode(',', $header) . ") VALUES ($placeholders)";
-                                $stmt = $conn->prepare($sql);
-                                $stmt->execute($data);
-                            }
+            $conn->beginTransaction();
+            try {
+                foreach ($lines as $line) {
+                    if (trim($line) === '') continue;
+                    $data = str_getcsv($line);
+                    if (count($data) === $columnCount) {
+                        foreach ($data as &$value) {
+                            $value = ($value === '') ? null : $value;
                         }
-
-                        $conn->commit();
-
-                        if (unlink($filePath)) {
-                            echo "File recovered successfully, data restored, and CSV deleted.";
-                        } else {
-                            echo "Data restored, but failed to delete the CSV file.";
-                        }
-
-                    } catch (PDOException $e) {
-                        $conn->rollBack();
-                        echo "Error restoring the data: " . $e->getMessage();
+                        $placeholders = implode(',', array_fill(0, $columnCount, '?'));
+                        $sql = "INSERT INTO `$table` (" . implode(',', $header) . ") VALUES ($placeholders)";
+                        $stmt = $conn->prepare($sql);
+                        $stmt->execute($data);
                     }
-                } else {
-                    echo "Invalid filename format.<br>";
                 }
-            } else {
-                // Provide more detailed debugging
-                echo "File not found: $filePath<br>";  // Add more detailed output for debugging
-                // Check if the file exists with file_exists() directly
-                echo "Checking if file exists with file_exists(): " . (file_exists($filePath) ? 'Yes' : 'No') . "<br>";
+                $conn->commit();
+
+                if (unlink($filePath)) {
+                    echo "File recovered successfully, data restored, and CSV deleted.";
+                } else {
+                    echo "Data restored, but failed to delete the CSV file.";
+                }
+            } catch (PDOException $e) {
+                $conn->rollBack();
+                echo "Error restoring the data: " . $e->getMessage();
             }
         } else {
-            echo "Invalid request.<br>";
+            echo "Invalid filename format.<br>";
         }
     } else {
-        // Password is incorrect
-        echo "Incorrect password.<br>";
+        echo "File not found: [$filePath]<br>";
+        echo "Checking file existence with file_exists(): " . (file_exists($filePath) ? 'Yes' : 'No') . "<br>";
     }
 } else {
-    echo "Password not provided.<br>";
+    echo "Invalid request.<br>";
 }
 ?>
