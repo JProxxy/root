@@ -1,3 +1,19 @@
+<?php
+session_start();
+// Retrieve the current user id from session
+$currentUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+$currentUserRoleId = 0;
+
+if ($currentUserId) {
+    // Include your database connection file (using PDO)
+    include '../app/config/connection.php';
+
+    // Prepare the PDO statement
+    $stmt = $conn->prepare("SELECT role_id FROM users WHERE user_id = ?");
+    $stmt->execute([$currentUserId]);
+    $currentUserRoleId = $stmt->fetchColumn();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,9 +27,11 @@
     <link rel="stylesheet" href="../assets/css/settings-profile.css" />
     <link rel="stylesheet" href="../assets/css/settings-password.css" />
     <link rel="stylesheet" href="../assets/css/SA-manageUsers.css" />
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -28,8 +46,7 @@
                     </a>
                 </div>
                 <div class="headerGroup">
-                    <div class="headerText">Admin</div>
-
+                    <div class="headerText">Manage Users</div>
                 </div>
             </div>
             <!-- Content Wrapper (Side Panel + Profile Main) -->
@@ -53,13 +70,6 @@
                                     Manage Users
                                 </a>
                             </li>
-                            <!-- <li>
-                                <a href="../templates/globalLogs.php" class="nav-link link-body-emphasis">
-                                    <img src="../assets/images/icon-logs.png" alt="Logs" width="16" height="16"
-                                        class="me-2" />
-                                    Logs
-                                </a>
-                            </li> -->
                             <li>
                                 <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
                                     <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
@@ -76,7 +86,6 @@
                     <div class="flex-containerOneSA">
                         <div class="headerSACont">
                             <div class="searchContainer">
-                                <input type="text" id="searchInputX" placeholder=" " class="searchInput" />
                                 <button onclick="performSearch()" class="searchButton">
                                     <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -85,6 +94,7 @@
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
                                 </button>
+                                <input type="text" id="searchInputX" placeholder=" " class="searchInput" />
                             </div>
                         </div>
                         <div class="whiteLine"></div>
@@ -95,58 +105,55 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Dynamic Table Script with Debug Logging -->
+                    <!-- Dynamic Table Script -->
                     <script>
+                        // Set current user's role id from the PHP query result
+                        const currentUserRoleId = <?php echo json_encode($currentUserRoleId); ?>;
+                        console.log("Current User Role ID:", currentUserRoleId);
+
+                        // Global variables for holding action details
+                        let currentAction = "";
+                        let actionUsername = "";
+                        let actionUserId = "";
+                        let actionSelectElement = null;
+
                         document.addEventListener("DOMContentLoaded", async function () {
                             try {
-                                // Fetch the JSON data from SA-globalUserAll.php (which includes the role_id for each user)
+                                // Fetch the JSON data from SA-globalUserAll.php
                                 const response = await fetch('../scripts/SA-globalUserAll.php');
                                 console.log("HTTP Status:", response.status);
-
-                                // Read and log the raw response text
                                 const text = await response.text();
                                 console.log("Raw Response Text:", text);
-
-                                // Parse the response JSON
                                 const result = JSON.parse(text);
                                 console.log("Parsed Response:", result);
-
-                                // Log backend debug info to the console if available
                                 if (result.debug) {
                                     console.log("Backend Debug Info:", result.debug);
                                 }
-
-                                // Use the "data" field for table construction
                                 const data = result.data;
 
                                 // Create table element and assign the CSS class
                                 const table = document.createElement('table');
                                 table.classList.add("custom-table");
 
-                                // Define headers based on the provided columns plus a dropdown column at the end.
+                                // Define headers
                                 const headers = [
                                     { title: "No.", class: "col-no" },
-                                    { title: "User ID", class: "col-user_id" },
                                     { title: "First Name", class: "col-first_name" },
                                     { title: "Middle Name", class: "col-middle_name" },
                                     { title: "Last Name", class: "col-last_name" },
                                     { title: "Username", class: "col-username" },
                                     { title: "Phone Number", class: "col-phoneNumber" },
                                     { title: "Email", class: "col-email" },
-                                    { title: "Role ID", class: "col-role_id" },
+                                    { title: "Role", class: "col-role_id" },
                                     { title: "Created At", class: "col-created_at" },
                                     { title: "Status", class: "col-status" },
                                     { title: "Gender", class: "col-gender" },
                                     { title: "City", class: "col-city" },
                                     { title: "Street Address", class: "col-street_address" },
-                                    { title: "Postal Code", class: "col-postal_code" },
-                                    { title: "Country", class: "col-country" },
+                                    { title: "Postal", class: "col-postal_code" },
                                     { title: "Barangay", class: "col-barangay" },
-                                    { title: "Bio", class: "col-bio" },
                                     { title: "Social Media", class: "col-soc_med" },
-                                    { title: "Google ID", class: "col-google_id" },
-                                    { title: "Email Verified", class: "col-isEmailVerified" },
-                                    { title: "Role", class: "col-role" } // This column contains the dropdown
+                                    { title: "Action", class: "col-action" }
                                 ];
 
                                 // Build table header
@@ -165,150 +172,295 @@
                                 const tbody = document.createElement('tbody');
                                 data.forEach((row, index) => {
                                     const tr = document.createElement('tr');
-                                    // Store the username in a data attribute for use in updating roles
+                                    // Store data attributes
                                     tr.dataset.username = row.username;
+                                    tr.dataset.user_id = row.user_id;
 
-                                    // Build each cell based on the headers
                                     headers.forEach(headerInfo => {
                                         const td = document.createElement('td');
                                         td.className = headerInfo.class;
 
-                                        // For "No." column
                                         if (headerInfo.title === "No.") {
                                             td.textContent = index + 1;
-                                        }
-                                        // For "Role" column, create a dropdown
-                                        else if (headerInfo.title === "Role") {
+                                        } else if (headerInfo.title === "Action") {
                                             const select = document.createElement('select');
+                                            select.style.minWidth = "110px";
+                                            select.style.padding = "4px";
+                                            select.style.borderRadius = "4px";
 
-                                            const roles = [
-                                                { value: "super_admin", text: "Super Admin", disabled: true },
-                                                { value: "first_floor_admin", text: "First Floor Admin" },
-                                                { value: "second_floor_admin", text: "Second Floor Admin" },
-                                                { value: "third_floor_admin", text: "Third Floor Admin" },
-                                                { value: "fourth_floor_admin", text: "Fourth Floor Admin" },
-                                                { value: "fifth_floor_admin", text: "Fifth Floor Admin" },
-                                                { value: "general_user", text: "General User" },
-                                                { value: "guest_user", text: "Guest User" },
-                                                { value: "maintenance_staff", text: "Maintenance Staff" },
-                                                { value: "security_admin", text: "Security Admin" },
-                                                { value: "iot_technician", text: "IoT Technician" },
-                                                { value: "pending_user", text: "Pending User" },
-                                                { value: "blocked_user", text: "Blocked User" }
-                                            ];
+                                            const statusOptions = ['block', 'unblock', 'delete'];
+                                            const currentStatus = row.mu_status;
 
-                                            roles.forEach(role => {
+                                            statusOptions.forEach(optionValue => {
+                                                if (optionValue === "delete" && currentUserRoleId != 1) return;
                                                 const option = document.createElement('option');
-                                                option.value = role.value; // Numeric role_id
-                                                option.textContent = role.text;
-                                                if (role.disabled) {
-                                                    option.disabled = true;
-                                                }
-                                                // If the row's role_id (from the database) matches this role's numeric value, select it.
-                                                if (row.role_id == role.value) {
+                                                option.value = optionValue;
+                                                option.textContent = optionValue.charAt(0).toUpperCase() + optionValue.slice(1);
+                                                if (currentStatus === optionValue) {
                                                     option.selected = true;
                                                 }
                                                 select.appendChild(option);
                                             });
+
+                                            // Apply color based on the selected status
+                                            updateSelectStyle(select, currentStatus);
+
                                             td.appendChild(select);
-                                        }
-                                        // For all other columns, use the key derived from the header class (removing "col-")
-                                        else {
+
+                                        } else {
                                             const key = headerInfo.class.replace("col-", "");
-                                            td.textContent = row[key] || "";
+                                            let value = row[key] || "";
+                                            if (key === "soc_med") {
+                                                try {
+                                                    const socMedObj = JSON.parse(value);
+                                                    value = Object.entries(socMedObj)
+                                                        .map(([platform, link]) => `${platform}: ${link}`)
+                                                        .join(", ");
+                                                } catch (e) { /* Use raw value on failure */ }
+                                            }
+                                            td.textContent = value;
+                                            if (key !== "email" && key !== "action") {
+                                                td.title = value;
+                                                td.style.whiteSpace = "nowrap";
+                                                td.style.overflow = "hidden";
+                                                td.style.textOverflow = "ellipsis";
+                                                td.style.maxWidth = "200px";
+                                            }
                                         }
                                         tr.appendChild(td);
                                     });
-
                                     tbody.appendChild(tr);
                                 });
                                 table.appendChild(tbody);
 
-                                // Insert the table into the container (clearing any existing content)
+                                // Insert table in container
                                 const container = document.getElementById('table-container');
                                 container.innerHTML = '';
                                 container.appendChild(table);
 
-                                // Add change event listeners to all dropdowns in the table
+                                // Add event listeners to all dropdowns for actions
                                 table.querySelectorAll('select').forEach(select => {
-                                    select.addEventListener('change', async function () {
-                                        const newRole = this.value;
-                                        // Retrieve the username from the row's data attribute
+                                    select.addEventListener('change', function () {
+                                        const action = this.value;
+                                        updateSelectStyle(this, action);
                                         const tr = this.closest('tr');
                                         const username = tr.dataset.username;
-
-                                        // Prepare the payload with the username and the new numeric role_id
-                                        const payload = {
-                                            username: username,
-                                            role: newRole
-                                        };
-
-                                        try {
-                                            // Send a POST request to update the role using SA-manageUsersRole.php
-                                            const updateResponse = await fetch('../scripts/SA-manageUsersRole.php', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify(payload)
-                                            });
-
-                                            const updateResult = await updateResponse.json();
-                                            if (updateResult.success) {
-                                                console.log("Role updated successfully for user:", username);
-                                                alert("Role updated successfully!");
-                                                window.location.reload();
-                                            } else {
-                                                console.error("Failed to update role:", updateResult.message);
-                                                alert("Failed to update role: " + updateResult.message);
-                                            }
-                                        } catch (error) {
-                                            console.error("Error updating role:", error);
-                                            alert("An error occurred while updating the role.");
+                                        const userId = tr.dataset.user_id;
+                                        // Store values globally for modal use
+                                        currentAction = action;
+                                        actionUsername = username;
+                                        actionUserId = userId;
+                                        actionSelectElement = this;
+                                        // Determine which modal to show based on the selected action
+                                        if (action === "delete") {
+                                            // Show delete modal which includes the password input
+                                            const deleteModal = new bootstrap.Modal(document.getElementById('deletePasswordModal'));
+                                            deleteModal.show();
+                                        } else {
+                                            // For block and unblock, show confirmation modal
+                                            const actionModal = new bootstrap.Modal(document.getElementById('actionConfirmModal'));
+                                            // Update modal text with username and action details
+                                            document.getElementById('actionModalText').textContent =
+                                                `Are you sure you want to ${action} "${username}"?`;
+                                            actionModal.show();
                                         }
                                     });
                                 });
                             } catch (error) {
                                 console.error("Error fetching dynamic table data:", error);
                             }
+
                         });
+                    </script>
+
+                    <script>
+
+                        function updateSelectStyle(select, value) {
+
+                            select.style.borderRadius = "10px";
+
+                            switch (value) {
+                                case "block":
+                                    select.style.backgroundColor = "#FFD1A6"; // orange
+                                    select.style.color = "#552900"; // black text
+                                    break;
+                                case "unblock":
+                                    select.style.backgroundColor = "#BFFFBF"; // green
+                                    select.style.color = "#002E00"; // white text
+                                    break;
+                                case "delete":
+                                    select.style.backgroundColor = "#FFBFBF"; // red
+                                    select.style.color = "#680404"; // white text
+                                    break;
+                                default:
+                                    select.style.backgroundColor = ""; // reset
+                                    select.style.color = "";
+                            }
+                        }
+
                     </script>
 
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Generic Action Confirmation Modal for Block/Unblock -->
+    <div class="modal fade" id="actionConfirmModal" tabindex="-1" aria-labelledby="actionConfirmModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionConfirmModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="actionModalText"></p>
+                </div>
+                <div class="modal-footer">
+
+                    <button id="actionConfirmBtn" type="button" class="btn btn-primary">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Delete Confirmation Modal with Password Input -->
+    <div class="modal fade" id="deletePasswordModal" tabindex="-1" aria-labelledby="deletePasswordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="deletePasswordForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePasswordModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please enter your password to confirm deletion of <strong id="modalDeleteUsername"></strong>:
+                        </p>
+                        <div class="mb-3">
+                            <label for="passwordInput" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="passwordInput" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Search Script -->
+    <script>
+        document.getElementById("searchInputX").addEventListener("input", performSearch);
+        function performSearch() {
+            const filter = document.getElementById("searchInputX").value.toLowerCase();
+            const table = document.querySelector("table.custom-table");
+            if (!table) return;
+            const rows = table.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.indexOf(filter) > -1 ? "" : "none";
+            });
+        }
+    </script>
+
+    <!-- Modal Event Handlers -->
+    <script>
+        // Handle confirmation from the generic (block/unblock) modal
+        document.getElementById("actionConfirmBtn").addEventListener("click", async function () {
+            // Hide the modal
+            const actionModalEl = document.getElementById('actionConfirmModal');
+            const actionModal = bootstrap.Modal.getInstance(actionModalEl);
+            actionModal.hide();
+
+            try {
+                const payload = { username: actionUsername, user_id: actionUserId, action: currentAction };
+                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    alert("Action executed successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to execute action: " + updateResult.message);
+                }
+            } catch (error) {
+                alert("An error occurred while executing the action.");
+            }
+            if (actionSelectElement) actionSelectElement.value = "";
+        });
+
+        // Update delete modal username when shown
+        const deleteModalEl = document.getElementById('deletePasswordModal');
+        deleteModalEl.addEventListener('show.bs.modal', function () {
+            document.getElementById("modalDeleteUsername").textContent = actionUsername;
+        });
+
+        // Handle deletion from the delete modal form
+        document.getElementById("deletePasswordForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const password = document.getElementById("passwordInput").value;
+            const deleteModal = bootstrap.Modal.getInstance(deleteModalEl);
+            deleteModal.hide();
+
+            try {
+                const payload = { username: actionUsername, user_id: actionUserId, action: "delete", password: password };
+                const updateResponse = await fetch('../scripts/SA-manageUsersAction.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    alert("Action executed successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Failed to execute action: " + updateResult.message);
+                }
+            } catch (error) {
+                alert("An error occurred while executing the action.");
+            }
+            document.getElementById("passwordInput").value = "";
+            if (actionSelectElement) actionSelectElement.value = "";
+        });
+    </script>
 </body>
 
 </html>
+
 
 <script>
     // Attach an event listener to the search input field
     document.getElementById("searchInputX").addEventListener("input", performSearch);
 
     function performSearch() {
-        // Get the search query in lowercase
         const filter = document.getElementById("searchInputX").value.toLowerCase();
-
-        // Select the table; make sure it exists
         const table = document.querySelector("table.custom-table");
         if (!table) return;
-
-        // Get all rows in the table body
         const rows = table.querySelectorAll("tbody tr");
-
-        // Loop through all rows and hide those that don't match the query
         rows.forEach(row => {
-            // Combine the text content of all cells in this row into one string
+            // Get all the text content from each row excluding the Action column (just for searching row data)
             const rowText = row.textContent.toLowerCase();
-
-            // If the row text includes the filter, display the row; otherwise hide it.
-            if (rowText.indexOf(filter) > -1) {
-                row.style.display = "";
+            
+            // Get the selected value of the action dropdown in the row
+            const actionSelect = row.querySelector('select');
+            const actionValue = actionSelect ? actionSelect.options[actionSelect.selectedIndex].text.toLowerCase() : '';
+            
+            // Check if the filter matches row text or the action value
+            if (rowText.indexOf(filter) > -1 || actionValue.indexOf(filter) > -1) {
+                row.style.display = ""; // Show row if filter matches
             } else {
-                row.style.display = "none";
+                row.style.display = "none"; // Hide row if no match
             }
         });
     }
-
 </script>

@@ -1,6 +1,7 @@
 .contentWrapper,
 .headbackCont {
-  background-color: #f2f7fa;
+  background-color: #ffffff;
+  border-radius: 25px;
 }
 .headerGroup {
   display: flex;
@@ -27,8 +28,7 @@
   margin-left: 4%;
   color: #595959;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-radius: 25px;
 }
 
 /* SEARCH BAR */
@@ -112,12 +112,24 @@
  }
 
 
-.custom-table thead {
+ .custom-table thead {
   position: sticky;
   top: 0;
-  background-color: #f2f2f2;
+  background-color: #ffffff;
   z-index: 2;
 }
+
+.custom-table thead::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background-color: black;
+}
+
 
 /* Remove display:block and fixed width from tbody */
 /* .custom-table tbody {

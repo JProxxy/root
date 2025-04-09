@@ -1,0 +1,2 @@
+user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status
+33,,,,MaryGrace,$2y$10$OuFikfReRonhpfi.BSsCVunKHlxVLdwFlfa3XdNEAM7r5TXTJPjUC,9288173821,marygrace@gmail.com,3,"2025-03-14 19:40:55","2025-04-09 12:32:53",,active,N/A,,,,,,,,,0,,,,,,,no,block
