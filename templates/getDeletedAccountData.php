@@ -238,7 +238,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                     <td><?php echo htmlspecialchars($date); ?></td>
                                                     <td>
                                                         <!-- Set true file name for download, but display a user-friendly name on the link -->
-                                                        <a href="storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
+                                                        <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
                                                             class="btn btn-secondary"
                                                             download="<?php echo htmlspecialchars($file); ?>">
                                                             Download
