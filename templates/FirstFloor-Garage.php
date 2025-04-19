@@ -24,6 +24,7 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../assets/css/FirstFloor-Garage.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="module" src="https://unpkg.com/@google/model-viewer"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 </head>
@@ -527,6 +528,33 @@ if (!isset($_SESSION['user_id'])) {
             }
 
         </script>
+
+        <!-- LIGHTS UPDATE -->
+        <script>
+            $(document).ready(function () {
+                $.ajax({
+                    url: '.../scripts/get_lights_statuses.php',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.success && Array.isArray(response.devices)) {
+                            response.devices.forEach(function (device) {
+                                const checkbox = $('#lightSwitch_' + device.device_name);
+                                if (checkbox.length) {
+                                    checkbox.prop('checked', device.status.trim().toUpperCase() === 'ON');
+                                }
+                            });
+                        } else {
+                            console.error('Invalid data format from server');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX error:', error);
+                    }
+                });
+            });
+        </script>
+
 
     </div>
 </body>
