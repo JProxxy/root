@@ -149,7 +149,7 @@ $gateLogsQuery = "
 SELECT g.*, u.email 
 FROM gateAccess_logs g
 JOIN users u ON g.user_id = u.user_id
-ORDER BY g.timestamp DESC
+ORDER BY g.timestamp ASC
 LIMIT 1
 ";
 
