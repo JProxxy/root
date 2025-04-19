@@ -104,7 +104,7 @@ try {
         FROM device_logs dl
         JOIN users u ON dl.user_id = u.user_id
         WHERE dl.floor_id = 1  -- You can modify this condition as needed
-        ORDER BY dl.last_updated DESC
+        ORDER BY dl.last_updated ASC
     ";
 
     $deviceStmt = $conn->prepare($deviceLogsQuery);
