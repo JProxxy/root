@@ -458,75 +458,80 @@ if (!isset($_SESSION['user_id'])) {
 
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            $(document).ready(function () {
                 loadNotifications();
             });
 
             function loadNotifications() {
-                fetch("../scripts/logs_firstFloor_Garage.php")
-                    .then(response => response.json())
-                    .then(data => {
-                        let logContainer = document.querySelector(".firstFloorLog");
+                $.ajax({
+                    url: "../scripts/logs_firstFloor_Garage.php",
+                    method: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        let logContainer = $(".firstFloorLog");
 
-                        // Ensure the button exists and is properly placed
-                        let downloadButton = document.getElementById("downloadExcel");
-                        if (!downloadButton) {
-                            downloadButton = document.createElement("button");
-                            downloadButton.id = "downloadExcel";
-                            downloadButton.className = "downloadBtn";
-                            downloadButton.innerHTML = '<span class="material-icons">download</span>';
-                            logContainer.appendChild(downloadButton);
+                        // Ensure the button exists
+                        let downloadButton = $("#downloadExcel");
+                        if (downloadButton.length === 0) {
+                            downloadButton = $("<button>", {
+                                id: "downloadExcel",
+                                class: "downloadBtn",
+                                html: '<span class="material-icons">download</span>'
+                            });
+                            logContainer.append(downloadButton);
                         }
 
-                        // Make sure the event listener is attached
-                        downloadButton.addEventListener("click", downloadExcel);
+                        // Ensure event listener is attached
+                        downloadButton.off("click").on("click", downloadExcel);
 
                         let logHTML = '<table class="ffLogTable">';
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
-                    <tr>
-                        <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
-                        <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
-                    </tr>`;
+                        <tr>
+                            <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
+                            <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
+                        </tr>`;
 
                             if (index !== data.length - 1) {
                                 logHTML += `
-                    <tr>
-                        <td colspan="2">
-                            <div class="line-with-circle"></div>
-                        </td>
-                    </tr>`;
+                        <tr>
+                            <td colspan="2">
+                                <div class="line-with-circle"></div>
+                            </td>
+                        </tr>`;
                             }
                         });
-
                         logHTML += "</table>";
 
-                        // Remove old logs but keep the button
-                        let existingLogs = logContainer.querySelector("table");
-                        if (existingLogs) {
-                            existingLogs.remove();
-                        }
-                        logContainer.insertAdjacentHTML("beforeend", logHTML);
-                    })
-                    .catch(error => console.error("Error fetching notifications:", error));
+                        // Replace existing table
+                        logContainer.find("table").remove();
+                        logContainer.append(logHTML);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching notifications:", error);
+                    }
+                });
             }
 
             function downloadExcel() {
-                fetch("../scripts/logs_firstFloor_Garage.php")
-                    .then(response => response.json())
-                    .then(data => {
-                        let worksheetData = [["Time", "Message"]]; // Header row
+                $.ajax({
+                    url: "../scripts/logs_firstFloor_Garage.php",
+                    method: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        let worksheetData = [["Time", "Message"]];
                         data.forEach(log => worksheetData.push([log.time, log.message]));
 
                         let ws = XLSX.utils.aoa_to_sheet(worksheetData);
                         let wb = XLSX.utils.book_new();
                         XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
-
                         XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
-                    })
-                    .catch(error => console.error("Error fetching data:", error));
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error downloading Excel:", error);
+                    }
+                });
             }
-
         </script>
 
         <!-- LIGHTS UPDATE -->
