@@ -531,28 +531,26 @@ if (!isset($_SESSION['user_id'])) {
 
         <!-- LIGHTS UPDATE -->
         <script>
-            $(document).ready(function () {
-                $.ajax({
-                    url: '../scripts/get_lights_statuses.php',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.success && Array.isArray(response.devices)) {
-                            response.devices.forEach(function (device) {
-                                const checkbox = $('#lightSwitch_' + device.device_name);
-                                if (checkbox.length) {
-                                    checkbox.prop('checked', device.status.trim().toUpperCase() === 'ON');
-                                }
-                            });
-                        } else {
-                            console.error('Invalid data format from server');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('AJAX error:', error);
+            function updateSwitches() {
+                $.getJSON('../scripts/get_device_statuses.php', function (response) {
+                    if (response.success) {
+                        response.devices.forEach(device => {
+                            const checkbox = document.getElementById('lightSwitch_' + device.device_name);
+                            if (checkbox) {
+                                checkbox.checked = device.status.toUpperCase() === 'ON';
+                            }
+                        });
+                    } else {
+                        console.error('Error loading devices:', response.message);
                     }
                 });
-            });
+            }
+
+            // Initial fetch
+            updateSwitches();
+
+            // Refresh every 5 seconds (5000ms)
+            setInterval(updateSwitches, 5000);
         </script>
 
 
