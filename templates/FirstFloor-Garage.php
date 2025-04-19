@@ -485,7 +485,7 @@ if (!isset($_SESSION['user_id'])) {
                         downloadButton.off("click").on("click", downloadExcel);
 
                         let logHTML = '<table class="ffLogTable">';
-                        data.reverse().forEach((notif, index) => {
+                        data.forEach((notif, index) => {
                             logHTML += `
                         <tr>
                             <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
