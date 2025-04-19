@@ -143,6 +143,35 @@ try {
         ];
     }
 
+
+    // Retrieve logs from gateAccess_logs
+    $gateLogsQuery = "
+SELECT g.*, u.email 
+FROM gateAccess_logs g
+JOIN users u ON g.user_id = u.user_id
+ORDER BY g.timestamp DESC
+";
+
+    $gateStmt = $conn->prepare($gateLogsQuery);
+    $gateStmt->execute();
+
+    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+        // Extract email prefix
+        $emailUsername = explode('@', $gateRow['email'])[0];
+
+        // Format the gate log message
+        $message = "(" . $emailUsername . ") has opened the gate";
+
+        // Add to logs
+        $logs[] = [
+            "time" => date("h:i A", strtotime($gateRow['timestamp'])),
+            "message" => $message,
+            "device" => "Access Gate",
+            "full_data" => $gateRow  // optional for debugging
+        ];
+    }
+
+
     echo json_encode($logs);
 
 } catch (PDOException $e) {
