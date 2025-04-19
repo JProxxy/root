@@ -59,36 +59,43 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Update the user_id in the device_logs table for the most recent log entry
-    // Get the latest log's exact timestamp down to the second
+    // 5) Get the latest log entry that does not have NULL user_id
     $logSql = "
         SELECT dl.user_id, dl.last_updated
           FROM device_logs dl
          WHERE dl.device_name = :device_name
+           AND dl.user_id IS NOT NULL
       ORDER BY dl.last_updated DESC
          LIMIT 1
     ";
+
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([ ':device_name' => $deviceName ]);
     $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
 
-    // Get the exact timestamp from the latest log entry (including seconds precision)
-    $latestTimestamp = $latestLog['last_updated'];
+    if ($latestLog) {
+        // We found the latest valid log entry
+        $latestTimestamp = $latestLog['last_updated'];
 
-    // Now update the device_logs with the user_id for the most recent log entry
-    $logUpdateSql = "
-        UPDATE device_logs dl
-           SET dl.user_id = :user_id
-         WHERE dl.device_name = :device_name
-           AND dl.last_updated = :last_updated
-    ";
+        // Now update the device_logs with the user_id for the most recent valid log entry
+        $logUpdateSql = "
+            UPDATE device_logs dl
+               SET dl.user_id = :user_id
+             WHERE dl.device_name = :device_name
+               AND dl.last_updated = :last_updated
+        ";
 
-    $logUpdateStmt = $conn->prepare($logUpdateSql);
-    $logUpdateStmt->execute([
-        ':user_id' => $_SESSION['user_id'],  // Log the user ID from session
-        ':device_name' => $deviceName,
-        ':last_updated' => $latestTimestamp   // Update the log entry that matches the precise timestamp
-    ]);
+        $logUpdateStmt = $conn->prepare($logUpdateSql);
+        $logUpdateStmt->execute([
+            ':user_id' => $_SESSION['user_id'],  // Log the user ID from session
+            ':device_name' => $deviceName,
+            ':last_updated' => $latestTimestamp   // Update the log entry that matches the precise timestamp
+        ]);
+    } else {
+        // If no valid log entry was found, handle this case
+        echo json_encode(['error' => 'No valid log entry found']);
+        exit;
+    }
 
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
