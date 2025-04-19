@@ -59,13 +59,20 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Find the latest entry in device_logs for this device and update the user_id
+    // 5) Update the user_id in the device_logs table for the most recent log entry
+    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
+    $utcDate = new DateTime('now', new DateTimeZone('UTC'));
+    $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
+
+    // Now, we can use this PH time in the SQL query
+    $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
+
     $logSql = "
         UPDATE device_logs
            SET user_id = :user_id
          WHERE device_name = :device_name
            AND last_updated = (
-               SELECT MAX(last_updated)
+               SELECT MAX(last_updated) 
                  FROM device_logs
                 WHERE device_name = :device_name
            )
