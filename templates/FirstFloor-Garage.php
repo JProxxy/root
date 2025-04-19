@@ -459,7 +459,8 @@ if (!isset($_SESSION['user_id'])) {
 
         <script>
             $(document).ready(function () {
-                loadNotifications();
+                loadNotifications(); // Initial load of notifications
+                setInterval(loadNotifications, 5000); // Refresh notifications every 5 seconds
             });
 
             function loadNotifications() {
@@ -487,18 +488,18 @@ if (!isset($_SESSION['user_id'])) {
                         let logHTML = '<table class="ffLogTable">';
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
-                        <tr>
-                            <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
-                            <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
-                        </tr>`;
+                    <tr>
+                        <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
+                        <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
+                    </tr>`;
 
                             if (index !== data.length - 1) {
                                 logHTML += `
-                        <tr>
-                            <td colspan="2">
-                                <div class="line-with-circle"></div>
-                            </td>
-                        </tr>`;
+                    <tr>
+                        <td colspan="2">
+                            <div class="line-with-circle"></div>
+                        </td>
+                    </tr>`;
                             }
                         });
                         logHTML += "</table>";
