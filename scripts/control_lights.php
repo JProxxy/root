@@ -59,7 +59,7 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Get the latest log entry's time and user_id (if any)
+    // 5) Get the latest log entry for the device to check user_id
     $logSql = "
         SELECT dl.user_id
           FROM device_logs dl
@@ -67,30 +67,20 @@ try {
       ORDER BY dl.last_updated DESC
          LIMIT 1
     ";
+
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([ ':device_name' => $deviceName ]);
     $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
 
-    // If there is no user_id or it's NULL, wait 5 seconds
+    // 6) Use session user_id or NULL if no user found
     $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
 
-    // If user_id is NULL, wait for 5 seconds to check again
-    if ($userId === NULL) {
-        // Sleep for 5 seconds
-        sleep(5);
-
-        // Try fetching again after waiting
-        $logStmt->execute([ ':device_name' => $deviceName ]);
-        $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
-        $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
-    }
-
-    // If user_id is still NULL after the wait, set it to NULL in the log
+    // If user_id is still NULL after fetching, no need to delay, just set it as NULL
     if ($userId === NULL) {
         $userId = NULL;
     }
 
-    // Update the device_logs table with the user_id (or NULL if not found)
+    // 7) Update the device_logs table with user_id or NULL
     $updateLogSql = "
         UPDATE device_logs dl
            JOIN (
