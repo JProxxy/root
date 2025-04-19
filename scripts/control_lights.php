@@ -41,10 +41,11 @@ if (!in_array($command, ['ON', 'OFF'], true)) {
     exit;
 }
 
-// 4) Update the database
+// 4) Update the Devices table
 try {
     require_once '../app/config/connection.php'; // Assumes $conn is defined here
 
+    // Update the Devices table
     $sql = "
         UPDATE Devices
            SET status = :status,
@@ -58,6 +59,24 @@ try {
         ':deviceName' => $deviceName
     ]);
 
+    // 5) Find the latest entry in device_logs for this device and update the user_id
+    $logSql = "
+        UPDATE device_logs
+           SET user_id = :user_id
+         WHERE device_name = :device_name
+           AND last_updated = (
+               SELECT MAX(last_updated)
+                 FROM device_logs
+                WHERE device_name = :device_name
+           )
+    ";
+
+    $logStmt = $conn->prepare($logSql);
+    $logStmt->execute([
+        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
+        ':device_name' => $deviceName
+    ]);
+
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
     http_response_code(500);
@@ -66,3 +85,4 @@ try {
         'details' => $e->getMessage()
     ]);
 }
+?>
