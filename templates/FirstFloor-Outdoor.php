@@ -239,22 +239,27 @@ if (!isset($_SESSION['user_id'])) {
 
                             <div class="switch-container">
                                 <label class="switch">
-                                    <!-- onchange stays! -->
                                     <input type="checkbox" id="accessGateSwitch" onchange="toggleAccessGate()">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
                             <script>
-                                // this flag tells us if the OFF toggle is programmatic
-                                let suppressOff = false;
+                                // Flag to suppress toggleAccessGate() for programmatic OFF
+                                let suppressNext = false;
 
                                 function toggleAccessGate() {
                                     const gateSwitch = document.getElementById('accessGateSwitch');
 
-                                    // Only respond to ON
+                                    // If OFF triggered programmatically, ignore it
+                                    if (!gateSwitch.checked && suppressNext) {
+                                        suppressNext = false; // reset flag
+                                        return;
+                                    }
+
+                                    // Only proceed when switch is turned ON by user
                                     if (gateSwitch.checked) {
-                                        // 1) Trigger your gate logic / log
+                                        // 1) Log or perform gate toggle logic
                                         fetch('../scripts/log_access_gate.php', {
                                             method: 'POST',
                                             credentials: 'include'
@@ -269,14 +274,11 @@ if (!isset($_SESSION['user_id'])) {
                                             })
                                             .catch(err => console.error("Error:", err));
 
-                                        // 2) Automatically turn it OFF after 1 second without re-logging
+                                        // 2) Auto reset switch to OFF after 1s
                                         setTimeout(() => {
-                                            suppressOff = true;         // temporarily ignore the OFF state
+                                            suppressNext = true;
                                             gateSwitch.checked = false;
                                         }, 1000);
-                                    } else if (suppressOff) {
-                                        // We ignore this OFF event
-                                        suppressOff = false;
                                     }
                                 }
                             </script>
