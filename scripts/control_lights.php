@@ -64,7 +64,15 @@ try {
     $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
     $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
 
-    // 5) Immediately insert a new log entry into the device_logs table
+    // 5) Insert a new log entry into the device_logs table
+    // Check if the user is logged in
+    $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : NULL;
+
+    // If no user is logged in, mark the action as "system" or "automated"
+    if ($userId === NULL) {
+        $userId = 0; // Special value to indicate automated action (like a physical switch)
+    }
+
     $logSql = "
         INSERT INTO device_logs (device_name, user_id, status, last_updated)
         VALUES (:device_name, :user_id, :status, :last_updated)
@@ -73,7 +81,7 @@ try {
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
         ':device_name' => $deviceName,
-        ':user_id' => $_SESSION['user_id'],  // Log the user ID from session
+        ':user_id' => $userId,  // Log the user ID (0 for automated actions)
         ':status' => $command,
         ':last_updated' => $ph_time
     ]);
