@@ -143,33 +143,50 @@ try {
         ];
     }
 
-    // Retrieve multiple gate access logs
-    $gateLogsQuery = "
+// Retrieve multiple gate access logs
+$gateLogsQuery = "
 SELECT g.*, u.email 
 FROM gateAccess_logs g
-JOIN users u ON g.user_id = u.user_id
+LEFT JOIN users u 
+  ON g.user_id = u.user_id
 ORDER BY g.timestamp DESC
 LIMIT 5
 ";
+$gateStmt = $conn->prepare($gateLogsQuery);
+$gateStmt->execute();
 
-    $gateStmt = $conn->prepare($gateLogsQuery);
-    $gateStmt->execute();
+while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+    // Convert timestamp to Manila time
+    $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+    $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+    $timeStr = $dt->format("h:i A");
 
-    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        $emailUsername = explode('@', $gateRow['email'])[0];
-        $message = "" . $emailUsername . " has opened the gate";
+    // Figure out “open” vs “denied” from the `result` column
+    $isDenied = ($gateRow['result'] === 'denied');
 
-        // Convert to Philippine Time
-        $datetime = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
-        $datetime->setTimezone(new DateTimeZone('Asia/Manila'));
-
-        $logs[] = [
-            "time" => $datetime->format("h:i A"),
-            "message" => $message,
-            "device" => "Access Gate",
-            "full_data" => $gateRow
-        ];
+    if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
+        // Unknown user
+        if ($isDenied) {
+            $message = "An unknown person tried to access the gate";
+        } else {
+            $message = "An unknown person has opened the gate";
+        }
+    } else {
+        // Known user
+        $username = explode('@', $gateRow['email'])[0];
+        $action   = $isDenied
+                    ? 'failed to open'
+                    : 'has opened';
+        $message = "{$username} {$action} the gate";
     }
+
+    $logs[] = [
+        "time"      => $timeStr,
+        "message"   => $message,
+        "device"    => "Access Gate",
+        "full_data" => $gateRow
+    ];
+}
 
 
 
