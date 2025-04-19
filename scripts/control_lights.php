@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // 1) Authenticate session
-// If there's no session 'user_id', set it to 0 (default)
+// Use user_id from session, default to 0 if no session is found
 $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
 // 2) Read and parse incoming JSON
@@ -30,6 +30,14 @@ if (
 
 $deviceName = $body['data']['deviceName'];
 $command    = strtoupper($body['data']['command']); // Normalize to ON/OFF
+
+// Check the topic to determine the correct user_id
+$topic = isset($payload['topic']) ? $payload['topic'] : '';  // Assuming topic is in the payload
+if ($topic === '/building/1/status') {
+    // If the topic is '/building/1/status', it means the light was physically turned off
+    // Therefore, set user_id to 0
+    $userId = 0;
+}
 
 // 3) Validate command
 if (!in_array($command, ['ON', 'OFF'], true)) {
@@ -79,7 +87,7 @@ try {
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
-        ':user_id' => $userId,  // Use the valid user_id (from session or default to 0)
+        ':user_id' => $userId,  // Use the correct user_id (0 for physical turn-off, session value otherwise)
         ':device_name' => $deviceName
     ]);
 
