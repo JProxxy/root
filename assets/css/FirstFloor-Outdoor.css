@@ -267,10 +267,22 @@
   font-weight: 400;
   font-size: 0.9rem;
   padding-left: 10px; /* Small padding to move it slightly right */
-  width: 75%; /* Control its width */
+  width: 90% !important; /* Increase the width for testing */
   background-color: rgba(0, 0, 255, 0);
+  
+  /* Added styles for ellipsis */
+  display: inline-block; /* Change display to inline-block */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide the overflowed text */
+  text-overflow: ellipsis; /* Add ellipsis when content overflows */
 }
 
+/* Hover effect */
+.ffuserLog:hover {
+  white-space: normal; /* Allow text to wrap */
+  overflow: visible; /* Make the overflowed text visible */
+  background-color: rgba(0, 0, 255, 0); /* Optional: Add a slight background color change for better visibility */
+}
 
 
 /* Floating button inside */

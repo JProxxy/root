@@ -49,7 +49,7 @@ try {
     $sql = "
         UPDATE Devices
            SET status = :status,
-               last_updated = NOW()
+               last_updated = NOW(3)  -- Use NOW() with precision up to milliseconds
          WHERE device_name = :deviceName
     ";
 
@@ -60,30 +60,34 @@ try {
     ]);
 
     // 5) Update the user_id in the device_logs table for the most recent log entry
-    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
-    $utcDate = new DateTime('now', new DateTimeZone('UTC'));
-    $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
-
-    // Now, we can use this PH time in the SQL query
-    $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
-
-    // Update device_logs table by joining it on the latest log entry
+    // Get the latest log's exact timestamp down to the second
     $logSql = "
+        SELECT dl.user_id, dl.last_updated
+          FROM device_logs dl
+         WHERE dl.device_name = :device_name
+      ORDER BY dl.last_updated DESC
+         LIMIT 1
+    ";
+    $logStmt = $conn->prepare($logSql);
+    $logStmt->execute([ ':device_name' => $deviceName ]);
+    $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Get the exact timestamp from the latest log entry (including seconds precision)
+    $latestTimestamp = $latestLog['last_updated'];
+
+    // Now update the device_logs with the user_id for the most recent log entry
+    $logUpdateSql = "
         UPDATE device_logs dl
-           JOIN (
-                SELECT MAX(last_updated) AS latest_time
-                  FROM device_logs
-                 WHERE device_name = :device_name
-            ) AS latest_log
-           ON dl.last_updated = latest_log.latest_time
-          AND dl.device_name = :device_name
            SET dl.user_id = :user_id
+         WHERE dl.device_name = :device_name
+           AND dl.last_updated = :last_updated
     ";
 
-    $logStmt = $conn->prepare($logSql);
-    $logStmt->execute([
-        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
-        ':device_name' => $deviceName
+    $logUpdateStmt = $conn->prepare($logUpdateSql);
+    $logUpdateStmt->execute([
+        ':user_id' => $_SESSION['user_id'],  // Log the user ID from session
+        ':device_name' => $deviceName,
+        ':last_updated' => $latestTimestamp   // Update the log entry that matches the precise timestamp
     ]);
 
     echo json_encode(['success' => true]);
