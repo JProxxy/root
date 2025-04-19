@@ -39,6 +39,11 @@ if ($topic === '/building/1/status') {
     $userId = 0;
 }
 
+// Ensure that user_id is not NULL, use session value if NULL
+if ($userId === null) {
+    $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;  // Default to session user_id or 0
+}
+
 // 3) Validate command
 if (!in_array($command, ['ON', 'OFF'], true)) {
     http_response_code(400);
@@ -84,6 +89,11 @@ try {
           AND dl.device_name = :device_name
            SET dl.user_id = :user_id
     ";
+
+    // Ensure user_id is not NULL
+    if ($userId === null) {
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;  // Default to session user_id or 0
+    }
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
