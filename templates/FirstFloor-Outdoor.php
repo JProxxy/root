@@ -239,36 +239,48 @@ if (!isset($_SESSION['user_id'])) {
 
                             <div class="switch-container">
                                 <label class="switch">
+                                    <!-- onchange stays! -->
                                     <input type="checkbox" id="accessGateSwitch" onchange="toggleAccessGate()">
                                     <span class="slider"></span>
                                 </label>
                             </div>
 
-
                             <script>
-                                document.addEventListener('DOMContentLoaded', () => {
+                                // this flag tells us if the OFF toggle is programmatic
+                                let suppressOff = false;
+
+                                function toggleAccessGate() {
                                     const gateSwitch = document.getElementById('accessGateSwitch');
-                                    let suppressEvent = false;
 
-                                    gateSwitch.addEventListener('change', () => {
-                                        // if this was a programmatic toggle, ignore it
-                                        if (suppressEvent) return;
+                                    // Only respond to ON
+                                    if (gateSwitch.checked) {
+                                        // 1) Trigger your gate logic / log
+                                        fetch('../scripts/log_access_gate.php', {
+                                            method: 'POST',
+                                            credentials: 'include'
+                                        })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    console.log("Gate toggled ON, log ID:", data.insertedId);
+                                                } else {
+                                                    console.error("Logging failed:", data.error);
+                                                }
+                                            })
+                                            .catch(err => console.error("Error:", err));
 
-                                        // only react when switch goes ON
-                                        if (gateSwitch.checked) {
-                                            // 1) call your existing toggleAccessGate() to log & trigger the gate
-                                            toggleAccessGate();
-
-                                            // 2) schedule the bounce‑back after 5s
-                                            setTimeout(() => {
-                                                suppressEvent = true;        // temporarily ignore the next change event
-                                                gateSwitch.checked = false;  // flip back to OFF
-                                                suppressEvent = false;       // re‑enable logging for future user clicks
-                                            }, 1000);
-                                        }
-                                    });
-                                });
+                                        // 2) Automatically turn it OFF after 1 second without re-logging
+                                        setTimeout(() => {
+                                            suppressOff = true;         // temporarily ignore the OFF state
+                                            gateSwitch.checked = false;
+                                        }, 1000);
+                                    } else if (suppressOff) {
+                                        // We ignore this OFF event
+                                        suppressOff = false;
+                                    }
+                                }
                             </script>
+
                         </div>
 
 
