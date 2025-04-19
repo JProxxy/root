@@ -59,31 +59,23 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Update the user_id in the device_logs table for the most recent log entry
-    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
+    // Get the current UTC time and convert it to PH time
     $utcDate = new DateTime('now', new DateTimeZone('UTC'));
     $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
-
-    // Now, we can use this PH time in the SQL query
     $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
 
-    // Update device_logs table by joining it on the latest log entry
+    // 5) Immediately insert a new log entry into the device_logs table
     $logSql = "
-        UPDATE device_logs dl
-           JOIN (
-                SELECT MAX(last_updated) AS latest_time
-                  FROM device_logs
-                 WHERE device_name = :device_name
-            ) AS latest_log
-           ON dl.last_updated = latest_log.latest_time
-          AND dl.device_name = :device_name
-           SET dl.user_id = :user_id
+        INSERT INTO device_logs (device_name, user_id, status, last_updated)
+        VALUES (:device_name, :user_id, :status, :last_updated)
     ";
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
-        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
-        ':device_name' => $deviceName
+        ':device_name' => $deviceName,
+        ':user_id' => $_SESSION['user_id'],  // Log the user ID from session
+        ':status' => $command,
+        ':last_updated' => $ph_time
     ]);
 
     echo json_encode(['success' => true]);
