@@ -264,7 +264,7 @@ if (!isset($_SESSION['user_id'])) {
                                                 suppressEvent = true;        // temporarily ignore the next change event
                                                 gateSwitch.checked = false;  // flip back to OFF
                                                 suppressEvent = false;       // re‑enable logging for future user clicks
-                                            }, 5000);
+                                            }, 1000);
                                         }
                                     });
                                 });
