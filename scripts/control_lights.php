@@ -59,28 +59,48 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Get the latest log entry for the device to check user_id
+    // 5) Get the latest log entry's time and user_id (if any)
     $logSql = "
-        SELECT dl.user_id
+        SELECT dl.user_id, dl.last_updated
           FROM device_logs dl
          WHERE dl.device_name = :device_name
       ORDER BY dl.last_updated DESC
          LIMIT 1
     ";
-
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([ ':device_name' => $deviceName ]);
     $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
 
-    // 6) Use session user_id or NULL if no user found
+    // If no user_id or it's NULL, wait 5 seconds and recheck
     $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
+    $lastUpdated = isset($latestLog['last_updated']) ? $latestLog['last_updated'] : null;
 
-    // If user_id is still NULL after fetching, no need to delay, just set it as NULL
+    // If user_id is NULL, wait for 5 seconds to check again
+    if ($userId === NULL) {
+        // Sleep for 5 seconds
+        sleep(5);
+
+        // Try fetching again after waiting
+        $logStmt->execute([ ':device_name' => $deviceName ]);
+        $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Get the updated values
+        $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
+        $lastUpdatedNew = isset($latestLog['last_updated']) ? $latestLog['last_updated'] : null;
+
+        // If the last_updated timestamp has changed in those 5 seconds, recheck
+        if ($lastUpdatedNew !== $lastUpdated) {
+            $lastUpdated = $lastUpdatedNew;
+            // Possibly log the timestamp change for debugging
+        }
+    }
+
+    // If user_id is still NULL after the wait, set it to NULL in the log
     if ($userId === NULL) {
         $userId = NULL;
     }
 
-    // 7) Update the device_logs table with user_id or NULL
+    // Update the device_logs table with the user_id (or NULL if not found)
     $updateLogSql = "
         UPDATE device_logs dl
            JOIN (
