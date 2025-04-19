@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 include '../app/config/connection.php';
 
 try {
-    // Query to get AC remote logs with username
+    // First, we query for the AC remote logs with username
     $query = "SELECT 
                 r.*, 
                 u.username 
@@ -16,8 +16,8 @@ try {
 
     $logs = [];
 
+    // Process the AC remote logs first
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Build an associative array of update messages with their corresponding time (as Unix timestamp)
         $updates = [];
 
         // For Temperature
@@ -52,7 +52,7 @@ try {
             ];
         }
 
-        // For Sleep (only output if sleep is on)
+        // For Sleep
         if (!empty($row['sleep']) && $row['sleep'] === 'on' && !empty($row['sleeptime'])) {
             $updates['sleep'] = [
                 'message' => "Sleep mode enabled",
@@ -60,7 +60,7 @@ try {
             ];
         }
 
-        // For Timer (if applicable)
+        // For Timer
         if (!empty($row['timer']) && !empty($row['timertime'])) {
             $updates['timer'] = [
                 'message' => "Timer set to " . $row['timer'],
@@ -68,7 +68,7 @@ try {
             ];
         }
 
-        // For Power (if applicable)
+        // For Power
         if (!empty($row['power']) && !empty($row['powertime'])) {
             $powerStatus = ($row['power'] === 'on') ? "Power ON" : "Power OFF";
             $updates['power'] = [
@@ -77,7 +77,7 @@ try {
             ];
         }
 
-        // Determine the most recent update based on the associated timestamps
+        // Determine the most recent update
         $latestUpdate = null;
         foreach ($updates as $update) {
             if ($latestUpdate === null || $update['time'] > $latestUpdate['time']) {
@@ -85,16 +85,39 @@ try {
             }
         }
 
-        // Build the final message: Only output the most recent update if available.
+        // Build the final message
         if ($latestUpdate !== null) {
             $message = $row['username'] . " - " . $latestUpdate['message'];
-        } 
+        }
 
         $logs[] = [
             "time" => date("h:i A", strtotime($row['timestamp'])),
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
+        ];
+    }
+
+    // Now, let's retrieve logs from the device_logs table
+    $deviceLogsQuery = "
+        SELECT dl.*, u.username
+        FROM device_logs dl
+        JOIN users u ON dl.user_id = u.user_id
+        WHERE dl.floor_id = 1  -- You can modify this condition as needed
+        ORDER BY dl.last_updated DESC
+    ";
+
+    $deviceStmt = $conn->prepare($deviceLogsQuery);
+    $deviceStmt->execute();
+
+    // Process the device logs
+    while ($deviceRow = $deviceStmt->fetch(PDO::FETCH_ASSOC)) {
+        // Add a log for device status change
+        $logs[] = [
+            "time" => date("h:i A", strtotime($deviceRow['last_updated'])),
+            "message" => $deviceRow['username'] . " - " . ucfirst($deviceRow['device_name']) . " is now " . $deviceRow['status'],
+            "device" => $deviceRow['device_name'],
+            "full_data" => $deviceRow  // Optional: include all raw data for debugging
         ];
     }
 
