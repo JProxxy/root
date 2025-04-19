@@ -143,30 +143,33 @@ try {
         ];
     }
 
-
-// Retrieve only the latest gate access log
-$gateLogsQuery = "
+    // Retrieve multiple gate access logs
+    $gateLogsQuery = "
 SELECT g.*, u.email 
 FROM gateAccess_logs g
 JOIN users u ON g.user_id = u.user_id
-ORDER BY g.timestamp ASC
-LIMIT 1
+ORDER BY g.timestamp DESC
+LIMIT 5
 ";
 
-$gateStmt = $conn->prepare($gateLogsQuery);
-$gateStmt->execute();
+    $gateStmt = $conn->prepare($gateLogsQuery);
+    $gateStmt->execute();
 
-if ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-    $emailUsername = explode('@', $gateRow['email'])[0];
-    $message = "(" . $emailUsername . ") has opened the gate";
+    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+        $emailUsername = explode('@', $gateRow['email'])[0];
+        $message = "" . $emailUsername . " has opened the gate";
 
-    $logs[] = [
-        "time" => date("h:i A", strtotime($gateRow['timestamp'])),
-        "message" => $message,
-        "device" => "Access Gate",
-        "full_data" => $gateRow
-    ];
-}
+        // Convert to Philippine Time
+        $datetime = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+        $datetime->setTimezone(new DateTimeZone('Asia/Manila'));
+
+        $logs[] = [
+            "time" => $datetime->format("h:i A"),
+            "message" => $message,
+            "device" => "Access Gate",
+            "full_data" => $gateRow
+        ];
+    }
 
 
 

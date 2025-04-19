@@ -243,45 +243,57 @@ if (!isset($_SESSION['user_id'])) {
                                     <span class="slider"></span>
                                 </label>
                             </div>
-
                             <script>
-                                // Flag to suppress toggleAccessGate() for programmatic OFF
-                                let suppressNext = false;
+    // Flag to suppress toggleAccessGate() for programmatic OFF
+    let suppressNext = false;
 
-                                function toggleAccessGate() {
-                                    const gateSwitch = document.getElementById('accessGateSwitch');
+    function toggleAccessGate() {
+        const gateSwitch = document.getElementById('accessGateSwitch');
 
-                                    // If OFF triggered programmatically, ignore it
-                                    if (!gateSwitch.checked && suppressNext) {
-                                        suppressNext = false; // reset flag
-                                        return;
-                                    }
+        // Log the state of the switch to ensure we're handling the correct state
+        console.log("Switch checked before toggle:", gateSwitch.checked);
 
-                                    // Only proceed when switch is turned ON by user
-                                    if (gateSwitch.checked) {
-                                        // 1) Log or perform gate toggle logic
-                                        fetch('../scripts/log_access_gate.php', {
-                                            method: 'POST',
-                                            credentials: 'include'
-                                        })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    console.log("Gate toggled ON, log ID:", data.insertedId);
-                                                } else {
-                                                    console.error("Logging failed:", data.error);
-                                                }
-                                            })
-                                            .catch(err => console.error("Error:", err));
+        // If the switch is turned OFF programmatically, don't proceed
+        if (!gateSwitch.checked && suppressNext) {
+            suppressNext = false; // Reset the flag to avoid ignoring the OFF
+            console.log("Switch was turned off programmatically, ignoring.");
+            return;
+        }
 
-                                        // 2) Auto reset switch to OFF after 1s
-                                        setTimeout(() => {
-                                            suppressNext = true;
-                                            gateSwitch.checked = false;
-                                        }, 1000);
-                                    }
-                                }
-                            </script>
+        // Only proceed when switch is turned ON by the user
+        if (gateSwitch.checked) {
+            // 1) Log or perform gate toggle logic
+            fetch('../scripts/log_access_gate.php', {
+                method: 'POST',
+                credentials: 'include'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Gate toggled ON, log ID:", data.insertedId);
+                    } else {
+                        console.error("Logging failed:", data.error);
+                    }
+                })
+                .catch(err => console.error("Error:", err));
+
+            // 2) Auto-reset switch to OFF after 2 seconds
+            setTimeout(() => {
+                console.log("Resetting the switch to OFF.");
+
+                suppressNext = true;  // Prevent immediate action when turning off
+
+                // Direct manipulation of the checkbox state using setAttribute
+                gateSwitch.checked = false;  // Reset to OFF
+                gateSwitch.setAttribute('checked', false);  // Explicitly update the attribute
+
+                // Log to confirm the action
+                console.log("Switch should now be OFF:", gateSwitch.checked);
+            }, 2000); // Wait 2 seconds
+        }
+    }
+</script>
+
 
                         </div>
 
@@ -370,75 +382,94 @@ if (!isset($_SESSION['user_id'])) {
 
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                loadNotifications();
-            });
+    document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
+    });
 
-            function loadNotifications() {
-                fetch("../scripts/logs_firstFloor_Garage.php")
-                    .then(response => response.json())
-                    .then(data => {
-                        let logContainer = document.querySelector(".firstFloorLog");
+    function loadNotifications() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "../scripts/logs_firstFloor_Garage.php", true);
 
-                        // Ensure the button exists and is properly placed
-                        let downloadButton = document.getElementById("downloadExcel");
-                        if (!downloadButton) {
-                            downloadButton = document.createElement("button");
-                            downloadButton.id = "downloadExcel";
-                            downloadButton.className = "downloadBtn";
-                            downloadButton.innerHTML = '<span class="material-icons">download</span>';
-                            logContainer.appendChild(downloadButton);
-                        }
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const logContainer = document.querySelector(".firstFloorLog");
 
-                        // Make sure the event listener is attached
-                        downloadButton.addEventListener("click", downloadExcel);
+                // Ensure the button exists and is properly placed
+                let downloadButton = document.getElementById("downloadExcel");
+                if (!downloadButton) {
+                    downloadButton = document.createElement("button");
+                    downloadButton.id = "downloadExcel";
+                    downloadButton.className = "downloadBtn";
+                    downloadButton.innerHTML = '<span class="material-icons">download</span>';
+                    logContainer.appendChild(downloadButton);
+                }
 
-                        let logHTML = '<table class="ffLogTable">';
-                        data.reverse().forEach((notif, index) => {
-                            logHTML += `
-                <tr>
-                    <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
-                    <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
-                </tr>`;
+                // Avoid re-attaching multiple click handlers
+                downloadButton.onclick = downloadExcel;
 
-                            if (index !== data.length - 1) {
-                                logHTML += `
-                <tr>
-                    <td colspan="2">
-                        <div class="line-with-circle"></div>
-                    </td>
-                </tr>`;
-                            }
-                        });
+                let logHTML = '<table class="ffLogTable">';
+                data.reverse().forEach((notif, index) => {
+                    logHTML += `
+                        <tr>
+                            <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
+                            <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
+                        </tr>`;
 
-                        logHTML += "</table>";
+                    if (index !== data.length - 1) {
+                        logHTML += `
+                        <tr>
+                            <td colspan="2">
+                                <div class="line-with-circle"></div>
+                            </td>
+                        </tr>`;
+                    }
+                });
+                logHTML += "</table>";
 
-                        // Remove old logs but keep the button
-                        let existingLogs = logContainer.querySelector("table");
-                        if (existingLogs) {
-                            existingLogs.remove();
-                        }
-                        logContainer.insertAdjacentHTML("beforeend", logHTML);
-                    })
-                    .catch(error => console.error("Error fetching notifications:", error));
+                // Remove old logs but keep the button
+                let existingLogs = logContainer.querySelector("table");
+                if (existingLogs) {
+                    existingLogs.remove();
+                }
+                logContainer.insertAdjacentHTML("beforeend", logHTML);
             }
+        };
 
-            function downloadExcel() {
-                fetch("../scripts/logs_firstFloor_Garage.php")
-                    .then(response => response.json())
-                    .then(data => {
-                        let worksheetData = [["Time", "Message"]]; // Header row
-                        data.forEach(log => worksheetData.push([log.time, log.message]));
+        xhr.onerror = function () {
+            console.error("Error fetching notifications.");
+        };
 
-                        let ws = XLSX.utils.aoa_to_sheet(worksheetData);
-                        let wb = XLSX.utils.book_new();
-                        XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
+        xhr.send();
+    }
 
-                        XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
-                    })
-                    .catch(error => console.error("Error fetching data:", error));
+    function downloadExcel() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "../scripts/logs_firstFloor_Garage.php", true);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const worksheetData = [["Time", "Message"]];
+
+                data.forEach(log => worksheetData.push([log.time, log.message]));
+
+                const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
+
+                XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
             }
-        </script>
+        };
+
+        xhr.onerror = function () {
+            console.error("Error fetching data for Excel.");
+        };
+
+        xhr.send();
+    }
+</script>
+
 
     </div>
 </body>
