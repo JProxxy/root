@@ -238,62 +238,56 @@ if (!isset($_SESSION['user_id'])) {
                             <span>Outdoor</span>
 
                             <div class="switch-container">
-                                <label class="switch">
-                                    <input type="checkbox" id="accessGateSwitch" onchange="toggleAccessGate()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+  <label class="switch">
+    <input type="checkbox" id="accessGateSwitch">
+    <span class="slider"></span>
+  </label>
+</div>
 
-                            <script>
-                                // Flag to suppress toggleAccessGate() when turning off the switch programmatically
-                                let suppressNext = false;
+<script>
+  const gateSwitch = document.getElementById('accessGateSwitch');
 
-                                function toggleAccessGate() {
-                                    const gateSwitch = document.getElementById('accessGateSwitch');
+  gateSwitch.addEventListener('change', function() {
+    // only when user turns it ON:
+    if (!this.checked) return;
 
-                                    // Log the state of the switch to ensure we're handling the correct state
-                                    console.log("Switch checked before toggle:", gateSwitch.checked);
+    // disable so you can't spam‑click
+    this.disabled = true;
 
-                                    // If the switch is turned OFF programmatically, don't proceed
-                                    if (!gateSwitch.checked && suppressNext) {
-                                        suppressNext = false; // Reset the flag to avoid ignoring the OFF
-                                        console.log("Switch was turned off programmatically, ignoring.");
-                                        return;
-                                    }
+    // 1) Notify AWS
+    fetch('https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'open',
+        user_id: sessionStorage.getItem('user_id') || 'unknown_user'
+      })
+    })
+    .then(r => r.json())
+    .then(d => console.log('Gate API response:', d))
+    .catch(e => console.error('Gate API error:', e));
 
-                                    // Only proceed when switch is turned ON by the user
-                                    if (gateSwitch.checked) {
-                                        // 1) Log or perform gate toggle logic
-                                        fetch('../scripts/log_access_gate.php', {
-                                            method: 'POST',
-                                            credentials: 'include'  // so PHP can read the session
-                                        })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    console.log("Gate toggled ON, log ID:", data.insertedId);
-                                                } else {
-                                                    console.error("Logging failed:", data.error);
-                                                }
-                                            })
-                                            .catch(err => console.error("Error:", err));
+    // 2) Log locally
+    fetch('../scripts/log_access_gate.php', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    .then(r => r.json())
+    .then(j => {
+      if (j.success) console.log('Logged locally, id=', j.insertedId);
+      else           console.error('Local log failed:', j.error);
+    })
+    .catch(e => console.error('Logging error:', e));
 
-                                        // 2) Auto-reset switch to OFF after 2 seconds
-                                        setTimeout(() => {
-                                            console.log("Resetting the switch to OFF.");
-                                            suppressNext = true;  // Prevent immediate action when turning off
+    // 3) After 2 seconds, reset visually & re-enable
+    setTimeout(() => {
+      gateSwitch.checked = false;  // this flips the UI slider back
+      gateSwitch.disabled = false; // allow new clicks
+      console.log('Switch reset to OFF automatically');
+    }, 2000);
+  });
+</script>
 
-                                            // Direct manipulation of the checkbox state to OFF
-                                            gateSwitch.checked = false;  // Reset to OFF
-                                            // Ensure the checkbox visually updates
-                                            gateSwitch.dispatchEvent(new Event('change'));  // Trigger change event to reflect UI update
-
-                                            // Log to confirm the action
-                                            console.log("Switch should now be OFF:", gateSwitch.checked);
-                                        }, 2000); // Wait 2 seconds before turning off
-                                    }
-                                }
-                            </script>
 
 
 
@@ -384,10 +378,6 @@ if (!isset($_SESSION['user_id'])) {
 
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                loadNotifications();
-            });
-
             function loadNotifications() {
                 const xhr = new XMLHttpRequest();
                 xhr.open("GET", "../scripts/logs_firstFloor_Garage.php", true);
@@ -406,10 +396,9 @@ if (!isset($_SESSION['user_id'])) {
                             downloadButton.innerHTML = '<span class="material-icons">download</span>';
                             logContainer.appendChild(downloadButton);
                         }
-
-                        // Avoid re-attaching multiple click handlers
                         downloadButton.onclick = downloadExcel;
 
+                        // Build the log table
                         let logHTML = '<table class="ffLogTable">';
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
@@ -417,7 +406,6 @@ if (!isset($_SESSION['user_id'])) {
                             <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
                             <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
                         </tr>`;
-
                             if (index !== data.length - 1) {
                                 logHTML += `
                         <tr>
@@ -429,11 +417,9 @@ if (!isset($_SESSION['user_id'])) {
                         });
                         logHTML += "</table>";
 
-                        // Remove old logs but keep the button
-                        let existingLogs = logContainer.querySelector("table");
-                        if (existingLogs) {
-                            existingLogs.remove();
-                        }
+                        // Swap old table for new
+                        const existingTable = logContainer.querySelector("table");
+                        if (existingTable) existingTable.remove();
                         logContainer.insertAdjacentHTML("beforeend", logHTML);
                     }
                 };
@@ -453,7 +439,6 @@ if (!isset($_SESSION['user_id'])) {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         const data = JSON.parse(xhr.responseText);
                         const worksheetData = [["Time", "Message"]];
-
                         data.forEach(log => worksheetData.push([log.time, log.message]));
 
                         const ws = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -470,6 +455,12 @@ if (!isset($_SESSION['user_id'])) {
 
                 xhr.send();
             }
+
+            // Refresh logs immediately and then every 3 seconds
+            document.addEventListener('DOMContentLoaded', () => {
+                loadNotifications();
+                setInterval(loadNotifications, 3000);
+            });
         </script>
 
 
