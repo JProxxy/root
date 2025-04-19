@@ -243,6 +243,32 @@ if (!isset($_SESSION['user_id'])) {
                                     <span class="slider"></span>
                                 </label>
                             </div>
+
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const gateSwitch = document.getElementById('accessGateSwitch');
+                                    let suppressEvent = false;
+
+                                    gateSwitch.addEventListener('change', () => {
+                                        // if this was a programmatic toggle, ignore it
+                                        if (suppressEvent) return;
+
+                                        // only react when switch goes ON
+                                        if (gateSwitch.checked) {
+                                            // 1) call your existing toggleAccessGate() to log & trigger the gate
+                                            toggleAccessGate();
+
+                                            // 2) schedule the bounce‑back after 5s
+                                            setTimeout(() => {
+                                                suppressEvent = true;        // temporarily ignore the next change event
+                                                gateSwitch.checked = false;  // flip back to OFF
+                                                suppressEvent = false;       // re‑enable logging for future user clicks
+                                            }, 5000);
+                                        }
+                                    });
+                                });
+                            </script>
                         </div>
 
 
