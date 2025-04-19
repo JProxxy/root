@@ -356,36 +356,58 @@ if (!isset($_SESSION['user_id'])) {
             });
 
 
-            // Function to toggle light state
             function toggleLightSwitch(lightId) {
                 const lightSwitch = document.getElementById('lightSwitch_' + lightId);
-                const status = lightSwitch.checked ? 'ON' : 'OFF'; // Capture the status based on checkbox state
-                console.log(lightId + " turned " + status); // Debugging in the console
+                const status = lightSwitch.checked ? 'ON' : 'OFF';
 
-                // Prepare the data to send to the Lambda API via API Gateway in the required format
+                console.log(`${lightId} turned ${status}`);
+
                 const requestData = {
                     body: JSON.stringify({
                         data: {
-                            deviceName: lightId,  // Sending deviceName
-                            command: status      // Sending the command (ON/OFF)
+                            deviceName: lightId,
+                            command: status
                         }
                     })
                 };
 
-                // Make the fetch request to the API Gateway endpoint to control the device
+                // First call: AWS Lambda via API Gateway
                 fetch('https://y9saie9s20.execute-api.ap-southeast-1.amazonaws.com/dev/controlDevice', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestData) // Send the data in the required format
+                    body: JSON.stringify(requestData)
                 })
-                    .then(response => response.json()) // Handle the response from Lambda
-                    .then(responseData => {
-                        console.log('Device control response:', responseData);
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('AWS call failed');
+                        }
+                        return response.json();
+                    })
+                    .then(awsData => {
+                        console.log('AWS IoT response:', awsData);
+
+                        // Second call: local PHP to update MySQL
+                        return fetch('../scripts/control_device.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(requestData)
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Local DB update failed');
+                        }
+                        return response.json();
+                    })
+                    .then(dbData => {
+                        console.log('Local DB update response:', dbData);
                     })
                     .catch(error => {
-                        console.error("Error updating device status:", error);
+                        console.error('Error in device control flow:', error);
                     });
             }
 

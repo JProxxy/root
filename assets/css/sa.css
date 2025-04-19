@@ -27,7 +27,7 @@
   height: 100%;
   margin-left: 4%;
   color: #595959;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   border-radius: 25px;
 }
 
@@ -78,12 +78,12 @@
   color: #555;
 }
 
-.whiteLine {
+/* .whiteLine {
   background-color: #f2f7fa;
   width: 100%;
   height: 10px;
   box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+} */
 .rolesCont {
   width: 100%;
 }
@@ -109,16 +109,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
- }
+}
 
-
- .custom-table thead {
+.custom-table thead {
   position: sticky;
   top: 0;
   background-color: #ffffff;
   z-index: 2;
 }
-
+/* 
 .custom-table thead::after {
   content: "";
   display: block;
@@ -128,8 +127,7 @@
   width: 90%;
   height: 1px;
   background-color: black;
-}
-
+} */
 
 /* Remove display:block and fixed width from tbody */
 /* .custom-table tbody {
@@ -140,9 +138,9 @@
   background-color: #f9f9f9;
 }
 
-.custom-table tr:hover {
-  background-color: #ddd;
-}
+/* .custom-table tr:hover {
+  background-color: #af3737;
+} */
 
 .custom-table select {
   width: 100%;
@@ -153,8 +151,167 @@
 }
 
 /* Column width classes */
-.col-no { width: 5%; }
-.col-username { width: 20%; }
-.col-email { width: 25%; }
-.col-phone { width: 15%; }
-.col-role { width: 15%; }
+.col-no {
+  width: 5%;
+}
+.col-username {
+  width: 20%;
+}
+.col-email {
+  width: 25%;
+}
+.col-phone {
+  width: 15%;
+}
+.col-role {
+  width: 15%;
+}
+
+/* CHANGE COLOR BASED ON ROLES */
+.role-superadmin,
+.role-admin,
+.role-staff,
+.role-student {
+  display: inline-block;
+  width: 140px;
+  padding: 6px 0;
+  border-radius: 25px;
+  /* font-weight: bold; */
+  text-align: center;
+}
+
+/* Role-specific colors */
+.role-superadmin {
+  color: #65652E;
+  background-color: #FFF698;
+}
+
+.role-admin {
+  color: #0B3236;
+  background-color: #2D8B96;
+}
+
+.role-staff {
+  color: #024202;
+  background-color: #CEFFC2;
+}
+
+.role-student {
+  color: #7c0505;
+  background-color: #ffcece;
+}
+
+
+
+/* MODAL */
+
+/* 1) Make sure the backdrop stays behind your modal */
+.modal-backdrop {
+  z-index: 1040 !important;     /* default is 1040, but if you overrode it before, force it back down */
+}
+
+/* and push your modal in front */
+.modal {
+  z-index: 1050 !important;     /* default is 1050; again, force it above the backdrop */
+}
+
+/* 2) Don’t let the backdrop intercept any mouse/keyboard events */
+.modal-backdrop {
+  pointer-events: none !important;
+}
+
+/* (optional) ensure your modal still gets all pointer-events) */
+.modal, 
+.modal * {
+  pointer-events: auto !important;
+}
+
+
+/* ---------- layout tweaks ---------- */
+#editModal .modal-dialog {
+  max-width: 1100px !important;
+}
+
+/* make plaintext inputs look “flat” */
+#editModal .form-control-plaintext {
+  background: transparent;
+  border: none;
+  padding-left: 0;
+  font-weight: 600;
+}
+
+#modalProfilePic {
+  object-fit: cover;
+  border: 2px solid #ddd;
+  margin-left: 55px !important;
+}
+
+#modalRfid {
+  display: inline-block;
+  width: 120px !important;        /* set whatever fixed width you need */
+  max-width: 100% !important;     /* won’t grow beyond its container */
+  border: none;
+  border-bottom: 2px solid #ccc;
+  background: transparent;
+  font-size: 1.2rem;
+  margin-right: 10px !important;
+}
+
+#modalRfid:focus {
+  border-color: #999;
+  box-shadow: none;
+}
+
+
+
+/* Save button */
+#editModal .btn-success {
+  background-color: #aecfc4;
+  border: none;
+}
+
+#editModal .btn-outline-secondary {
+  background-color: #f1f1f1;
+  color: #333;
+  border: none;
+}
+
+
+#modalRole {
+  display: inline-block;
+  width: 140px;
+  padding: 6px 0;
+  border-radius: 25px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+
+/* Modal Footer: Center buttons and ensure equal width */
+#editModal .modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Optional: Adjust gap between the buttons */
+}
+
+#editModal .modal-footer .btn {
+  flex: 1; /* Ensure both buttons take up equal width */
+  max-width: 200px; /* Optional: Set a max width if needed */
+  border-radius: 25px;
+}
+
+/* Save button */
+#editModal .btn-success {
+  background-color: #95C0C5; /* Updated color */
+  border: none;
+  color: #FFFFFF; /* Ensure the text is white for contrast */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow on the bottom and right */
+}
+
+/* Outline secondary button (discard) */
+#editModal .btn-outline-secondary {
+  background-color: #CFDBDD;
+  color: #0B3236;
+  border: none;
+}

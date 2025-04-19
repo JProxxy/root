@@ -7,7 +7,9 @@ try {
     $query = "SELECT 
                 r.*, 
                 u.username, 
-                u.profile_picture 
+                u.profile_picture,
+                u.email,
+                u.role_id
               FROM rivan_iot.acRemote r
               JOIN users u ON r.user_id = u.user_id
               ORDER BY r.timestamp DESC";
@@ -97,7 +99,6 @@ try {
         $dt = new DateTime($row['timestamp']);
         $formattedTime = $dt->format('l, F jS, Y h:i:s A');
 
-
         // Use a robust check to ensure the profile picture is valid:
         // If it's empty or not a valid URL, assign a dummy image.
         if (empty(trim($row['profile_picture'])) || !filter_var($row['profile_picture'], FILTER_VALIDATE_URL)) {
@@ -106,9 +107,11 @@ try {
 
         // Map the AC remote log data to your expected user activity log structure.
         $logs[] = [
-            "id" => $row['id'],  // Assumes your acRemote table has an 'id' field
-            "name" => $row['username'],
-            "profile_picture" => $row['profile_picture'],
+            "Role" => $row['role_id'],  // Include Role information from users table
+            "Username" => [
+                "profile_picture" => $row['profile_picture'],
+                "email" => $row['email']
+            ],
             "action" => $message,
             "timestamp" => $formattedTime,
             "status" => "authorized"  // Set a default status; adjust if needed

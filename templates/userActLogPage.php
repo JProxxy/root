@@ -36,8 +36,8 @@
             <div class="searchContainer">
               <input type="text" id="searchInputX" placeholder=" " class="searchInput">
               <button onclick="filterTable()" class="searchButton">
-                <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -65,15 +65,16 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>User Name</th>
+              <th>Role</th>
+              <th>Username</th>
+              <th>Floor</th>
               <th>Action Taken</th>
               <th>Timestamp</th>
-              <th>Status</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
-            <!-- Data will be inserted here -->
+          <tbody id="tableBody"></tbody>
+
+          <!-- Data will be inserted here -->
           </tbody>
         </table>
       </div>
@@ -94,22 +95,23 @@
 
             data.forEach(user => {
               const row = document.createElement("tr");
-              row.innerHTML =
-                `<td class="log-id">${user.id}</td>
-                <td class="username">
-                  <img src="${user.profile_picture}" alt="Profile Picture" class="profile-pic">
-                  ${user.name}
-                </td>
-                <td class="action">${user.action}</td>
-                <td class="log-time">${user.timestamp}</td>
-                <td>
-                  <div class="${user.status === 'authorized' ? 'status-authorized' : 'status-unauthorized'}">
-                    ${user.status}
-                  </div>
-                </td>`;
+              row.innerHTML = `
+      <td class="role">${user.role_id}</td>
+      <td class="username">
+        <img src="${user.profile_picture}" alt="Profile Picture" class="profile-pic">
+        <div>
+          <div>${user.name}</div>
+          <div style="font-size: 0.9em; color: gray;">${user.email}</div>
+        </div>
+      </td>
+      <td class="floor">${user.floor || '-'}</td>
+      <td class="action">${user.action}</td>
+      <td class="log-time">${user.timestamp}</td>
+    `;
               tableBody.appendChild(row);
             });
           }
+
 
           // Basic search filter for the search input field
           window.filterTable = function () {
