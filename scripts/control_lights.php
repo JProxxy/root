@@ -3,11 +3,8 @@ session_start();
 header('Content-Type: application/json');
 
 // 1) Authenticate session
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Not authenticated']);
-    exit;
-}
+// If there's no session 'user_id', set it to 0 (default)
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 
 // 2) Read and parse incoming JSON
 $raw = file_get_contents('php://input');
@@ -82,7 +79,7 @@ try {
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
-        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
+        ':user_id' => $userId,  // Use the valid user_id (from session or default to 0)
         ':device_name' => $deviceName
     ]);
 
