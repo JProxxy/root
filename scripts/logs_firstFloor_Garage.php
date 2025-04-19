@@ -144,32 +144,30 @@ try {
     }
 
 
-    // Retrieve logs from gateAccess_logs
-    $gateLogsQuery = "
+// Retrieve only the latest gate access log
+$gateLogsQuery = "
 SELECT g.*, u.email 
 FROM gateAccess_logs g
 JOIN users u ON g.user_id = u.user_id
 ORDER BY g.timestamp DESC
+LIMIT 1
 ";
 
-    $gateStmt = $conn->prepare($gateLogsQuery);
-    $gateStmt->execute();
+$gateStmt = $conn->prepare($gateLogsQuery);
+$gateStmt->execute();
 
-    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        // Extract email prefix
-        $emailUsername = explode('@', $gateRow['email'])[0];
+if ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+    $emailUsername = explode('@', $gateRow['email'])[0];
+    $message = "(" . $emailUsername . ") has opened the gate";
 
-        // Format the gate log message
-        $message = "(" . $emailUsername . ") has opened the gate";
+    $logs[] = [
+        "time" => date("h:i A", strtotime($gateRow['timestamp'])),
+        "message" => $message,
+        "device" => "Access Gate",
+        "full_data" => $gateRow
+    ];
+}
 
-        // Add to logs
-        $logs[] = [
-            "time" => date("h:i A", strtotime($gateRow['timestamp'])),
-            "message" => $message,
-            "device" => "Access Gate",
-            "full_data" => $gateRow  // optional for debugging
-        ];
-    }
 
 
     echo json_encode($logs);
