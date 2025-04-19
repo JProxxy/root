@@ -533,7 +533,7 @@ if (!isset($_SESSION['user_id'])) {
         <script>
             $(document).ready(function () {
                 $.ajax({
-                    url: '.../scripts/get_lights_statuses.php',
+                    url: '../scripts/get_lights_statuses.php',
                     method: 'GET',
                     dataType: 'json',
                     success: function (response) {
