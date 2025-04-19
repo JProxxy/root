@@ -59,31 +59,31 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // Get the current UTC time and convert it to PH time
+    // 5) Update the user_id in the device_logs table for the most recent log entry
+    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
     $utcDate = new DateTime('now', new DateTimeZone('UTC'));
     $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
+
+    // Now, we can use this PH time in the SQL query
     $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
 
-    // 5) Insert a new log entry into the device_logs table
-    // Check if the user is logged in
-    $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : NULL;
-
-    // If no user is logged in, mark the action as "system" or "automated"
-    if ($userId === NULL) {
-        $userId = 0; // Special value to indicate automated action (like a physical switch)
-    }
-
+    // Update device_logs table by joining it on the latest log entry
     $logSql = "
-        INSERT INTO device_logs (device_name, user_id, status, last_updated)
-        VALUES (:device_name, :user_id, :status, :last_updated)
+        UPDATE device_logs dl
+           JOIN (
+                SELECT MAX(last_updated) AS latest_time
+                  FROM device_logs
+                 WHERE device_name = :device_name
+            ) AS latest_log
+           ON dl.last_updated = latest_log.latest_time
+          AND dl.device_name = :device_name
+           SET dl.user_id = :user_id
     ";
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([
-        ':device_name' => $deviceName,
-        ':user_id' => $userId,  // Log the user ID (0 for automated actions)
-        ':status' => $command,
-        ':last_updated' => $ph_time
+        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
+        ':device_name' => $deviceName
     ]);
 
     echo json_encode(['success' => true]);
