@@ -390,7 +390,7 @@ if (!isset($_SESSION['user_id'])) {
                         console.log('AWS IoT response:', awsData);
 
                         // Second call: local PHP to update MySQL
-                        return fetch('../scripts/control_device.php', {
+                        return fetch('../scripts/control_lights.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
