@@ -22,8 +22,8 @@ if (!($conn instanceof PDO)) {
 
 try {
     // 3) Lookup RFID for this user (or NULL)
-    $stmt = $conn->prepare("SELECT rfid FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
+    $stmt = $conn->prepare("SELECT rfid FROM users WHERE user_id = ?");
+    $stmt->execute([$userId]);    
     $rfid = $stmt->fetchColumn() ?: null;
 
     // 4) Insert into gateAccess_logs
