@@ -59,16 +59,39 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Update the user_id in the device_logs table for the most recent log entry
-    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
-    $utcDate = new DateTime('now', new DateTimeZone('UTC'));
-    $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
-
-    // Now, we can use this PH time in the SQL query
-    $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
-
-    // Update device_logs table by joining it on the latest log entry
+    // 5) Get the latest log entry's time and user_id (if any)
     $logSql = "
+        SELECT dl.user_id
+          FROM device_logs dl
+         WHERE dl.device_name = :device_name
+      ORDER BY dl.last_updated DESC
+         LIMIT 1
+    ";
+    $logStmt = $conn->prepare($logSql);
+    $logStmt->execute([ ':device_name' => $deviceName ]);
+    $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
+
+    // If there is no user_id or it's NULL, wait 5 seconds
+    $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
+
+    // If user_id is NULL, wait for 5 seconds to check again
+    if ($userId === NULL) {
+        // Sleep for 5 seconds
+        sleep(5);
+
+        // Try fetching again after waiting
+        $logStmt->execute([ ':device_name' => $deviceName ]);
+        $latestLog = $logStmt->fetch(PDO::FETCH_ASSOC);
+        $userId = isset($latestLog['user_id']) ? $latestLog['user_id'] : NULL;
+    }
+
+    // If user_id is still NULL after the wait, set it to NULL in the log
+    if ($userId === NULL) {
+        $userId = NULL;
+    }
+
+    // Update the device_logs table with the user_id (or NULL if not found)
+    $updateLogSql = "
         UPDATE device_logs dl
            JOIN (
                 SELECT MAX(last_updated) AS latest_time
@@ -80,9 +103,9 @@ try {
            SET dl.user_id = :user_id
     ";
 
-    $logStmt = $conn->prepare($logSql);
-    $logStmt->execute([
-        ':user_id' => $_SESSION['user_id'], // Log the user ID from session
+    $updateLogStmt = $conn->prepare($updateLogSql);
+    $updateLogStmt->execute([
+        ':user_id' => $userId,
         ':device_name' => $deviceName
     ]);
 
