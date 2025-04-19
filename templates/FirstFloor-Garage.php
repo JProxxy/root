@@ -532,7 +532,7 @@ if (!isset($_SESSION['user_id'])) {
         <!-- LIGHTS UPDATE -->
         <script>
             function updateSwitches() {
-                $.getJSON('../scripts/get_device_statuses.php', function (response) {
+                $.getJSON('../scripts/get_lights_statuses.php', function (response) {
                     if (response.success) {
                         response.devices.forEach(device => {
                             const checkbox = document.getElementById('lightSwitch_' + device.device_name);
