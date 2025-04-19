@@ -291,39 +291,37 @@ if (!isset($_SESSION['user_id'])) {
                 .catch(error => console.error('Error fetching user ID:', error));
 
             function toggleAccessGate() {
-                const accessGateSwitch = document.getElementById('accessGateSwitch');
-                // Determine command based on the switch state
-                const action = accessGateSwitch.checked ? 'open' : 'close';
-                console.log("Access Gate toggled: " + action);
+                const sw = document.getElementById('accessGateSwitch');
+                const action = sw.checked ? 'open' : 'close';
+                console.log("Access Gate toggled:", action);
 
-                // Retrieve the user_id from session storage
-                const userId = sessionStorage.getItem('user_id') || 'unknown_user';
-                console.log("User ID:", userId);
-
-                // Prepare the payload to send to Lambda
-                const payload = {
-                    action: action,
-                    user_id: userId
-                };
-
-                // API Gateway endpoint URL for the POST /accessgate resource
-                const apiUrl = 'https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate';
-
-                // Send the payload to your API Gateway endpoint
-                fetch(apiUrl, {
+                // 1) Notify AWS (unchanged)
+                fetch('https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                    .then(response => response.json())
-                    .then(responseData => {
-                        console.log('Gate access response:', responseData);
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        user_id: sessionStorage.getItem('user_id') || 'unknown_user'
                     })
-                    .catch(error => {
-                        console.error("Error updating gate access status:", error);
-                    });
+                })
+                    .then(res => res.json())
+                    .then(data => console.log('Gate API response:', data))
+                    .catch(err => console.error('Gate API error:', err));
+
+                // 2) Log locally in your MySQL table
+                fetch('../scripts/log_access_gate.php', {
+                    method: 'POST',
+                    credentials: 'include'  // so PHP can read the session
+                })
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.success) {
+                            console.log('Logged to gateAccess_logs, new id:', json.insertedId);
+                        } else {
+                            console.error('Logging failed:', json.error);
+                        }
+                    })
+                    .catch(err => console.error('Logging fetch error:', err));
             }
         </script>
 
