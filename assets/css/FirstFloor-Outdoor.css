@@ -374,14 +374,24 @@
 
 
 
-.accessGateImage,
-.cameraImage {
+.accessGateImage {
   margin-top: 5%;
   margin-left: 5%;
   width: 55px;
   height: 55px;
   object-fit: contain; 
 }
+
+
+
+.cameraImage {
+  margin-top: 18%;
+  margin-left: 18%;
+  width: 55px;
+  height: 55px;
+  object-fit: contain; 
+}
+
 
 
 .accessGate p{
