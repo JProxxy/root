@@ -107,16 +107,37 @@ try {
     ORDER BY dl.last_updated ASC
     ";
 
-
     $deviceStmt = $conn->prepare($deviceLogsQuery);
     $deviceStmt->execute();
 
+    // Device name mapping
+    $deviceNames = [
+        'FFLightOne' => 'Front Gate Lights',
+        'FFLightTwo' => 'Front Garage Lights',
+        'FFLightThree' => 'Rear Garage Lights'
+    ];
+
     // Process the device logs
     while ($deviceRow = $deviceStmt->fetch(PDO::FETCH_ASSOC)) {
+        // Check if username is null (i.e., if there's no user associated with the log)
+        $username = $deviceRow['username'] ? $deviceRow['username'] : "Unknown User";
+
+        // Map device name to a friendly name
+        $deviceName = isset($deviceNames[$deviceRow['device_name']]) ? $deviceNames[$deviceRow['device_name']] : ucfirst($deviceRow['device_name']);
+
+        // Build message for device logs
+        if ($deviceRow['username']) {
+            // If there is a user associated, display the username
+            $message = $username . " - " . $deviceName . " is now " . $deviceRow['status'];
+        } else {
+            // If no user, indicate it was a physical switch
+            $message = "Physical switch in " . $deviceName . " is now " . $deviceRow['status'];
+        }
+
         // Add a log for device status change
         $logs[] = [
             "time" => date("h:i A", strtotime($deviceRow['last_updated'])),
-            "message" => $deviceRow['username'] . " - " . ucfirst($deviceRow['device_name']) . " is now " . $deviceRow['status'],
+            "message" => $message,
             "device" => $deviceRow['device_name'],
             "full_data" => $deviceRow  // Optional: include all raw data for debugging
         ];
