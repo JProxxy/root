@@ -531,26 +531,33 @@ if (!isset($_SESSION['user_id'])) {
 
         <!-- LIGHTS UPDATE -->
         <script>
+            // Function to update switches from the server
             function updateSwitches() {
                 $.getJSON('../scripts/get_lights_statuses.php', function (response) {
                     if (response.success) {
                         response.devices.forEach(device => {
                             const checkbox = document.getElementById('lightSwitch_' + device.device_name);
                             if (checkbox) {
-                                checkbox.checked = device.status.toUpperCase() === 'ON';
+                                // Only update the checkbox if the state is different to prevent unnecessary UI updates
+                                if (checkbox.checked !== (device.status.toUpperCase() === 'ON')) {
+                                    checkbox.checked = device.status.toUpperCase() === 'ON';
+                                }
                             }
                         });
                     } else {
                         console.error('Error loading devices:', response.message);
                     }
-                });
+                })
+                    .fail(function () {
+                        console.error("Error fetching device statuses from the server.");
+                    });
             }
 
-            // Initial fetch
+            // Initial fetch to set the correct states
             updateSwitches();
 
-            // Refresh every 5 seconds (5000ms)
-            setInterval(updateSwitches, 5000);
+            // Poll the server every 3 seconds (3000ms)
+            setInterval(updateSwitches, 3000);
         </script>
 
 
