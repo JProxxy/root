@@ -67,15 +67,17 @@ try {
     // Now, we can use this PH time in the SQL query
     $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
 
+    // Update device_logs table by joining it on the latest log entry
     $logSql = "
-        UPDATE device_logs
-           SET user_id = :user_id
-         WHERE device_name = :device_name
-           AND last_updated = (
-               SELECT MAX(last_updated) 
-                 FROM device_logs
-                WHERE device_name = :device_name
-           )
+        UPDATE device_logs dl
+           JOIN (
+                SELECT MAX(last_updated) AS latest_time
+                  FROM device_logs
+                 WHERE device_name = :device_name
+            ) AS latest_log
+           ON dl.last_updated = latest_log.latest_time
+          AND dl.device_name = :device_name
+           SET dl.user_id = :user_id
     ";
 
     $logStmt = $conn->prepare($logSql);
