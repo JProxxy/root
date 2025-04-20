@@ -19,6 +19,7 @@ if (!empty($selectedRole)) {
 // Base queries with conditional logic for action filter
 $queries = [];
 
+// device_logs subquery
 if ($selectedAction === '' || $selectedAction === 'device_logs') {
   $q = "
     SELECT 
@@ -28,7 +29,7 @@ if ($selectedAction === '' || $selectedAction === 'device_logs') {
         NULL AS minWater, NULL AS maxWater, NULL AS waterCustomizeTime,
         NULL AS gateMethod, NULL AS gateResult, NULL AS gateTimestamp
     FROM users u
-    LEFT JOIN device_logs d ON u.user_id = d.user_id
+    INNER JOIN device_logs d ON u.user_id = d.user_id
   ";
   if ($whereClauses)
     $q .= ' WHERE ' . implode(' AND ', $whereClauses);
