@@ -417,7 +417,42 @@ function url_exists(string $url): bool
 
         </script>
 
-        <img src="../assets/images/csv.png" alt="csv" class="topRightOptions" />
+        <img src="../assets/images/csv.png" alt="csv" class="topRightOptions" onclick="downloadCSV()"
+          style="cursor:pointer;" />
+
+        <script>
+          function downloadCSV() {
+            const table = document.querySelector("table.custom-table");
+            if (!table) return;
+
+            // Gather only visible rows: include header + body
+            const rows = Array.from(table.querySelectorAll("thead tr, tbody tr"))
+              .filter(r => r.style.display !== "none");
+            const csv = rows.map(row => {
+              return Array.from(row.querySelectorAll("th, td"))
+                .map(cell => {
+                  // Escape quotes and wrap in quotes
+                  const txt = cell.textContent.trim().replace(/"/g, '""');
+                  return `"${txt}"`;
+                })
+                .join(",");
+            }).join("\r\n");
+
+            // Build a blob & download link
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const today = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `activity_log_${today}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }
+
+        </script>
+
       </div>
       <br>
 
