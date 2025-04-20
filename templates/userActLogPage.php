@@ -64,30 +64,21 @@ if ($selectedAction === '' || $selectedAction === 'customizeWater') {
 }
 
 if ($selectedAction === '' || $selectedAction === 'gateAccess_logs') {
-
   $q = "
-SELECT 
-  COALESCE(u.user_id, 0)    AS user_id,
-  u.role_id,
-  u.first_name,
-  u.last_name,
-  u.profile_picture,
-  u.email,
-  NULL, NULL, NULL,        -- for device/customize water/AC columns
-  NULL, NULL, NULL,
-  NULL, NULL, NULL,
-  ga.method   AS gateMethod,
-  ga.result   AS gateResult,
-  ga.timestamp AS timestamp
-FROM gateAccess_logs ga
-LEFT JOIN users u ON u.user_id = ga.user_id
-";
-  if ($whereClauses) {
-
+    SELECT 
+        u.user_id, u.role_id, u.first_name, u.last_name, u.profile_picture, u.email,
+        NULL, NULL, NULL, ga.timestamp,
+        NULL, NULL, NULL,
+        NULL, NULL, NULL,
+        ga.method   AS gateMethod,
+        ga.result   AS gateResult,
+        ga.timestamp AS timestamp
+        FROM gateAccess_logs ga
+        LEFT JOIN users u ON u.user_id = ga.user_id        
+  ";
+  if ($whereClauses)
     $q .= ' WHERE ' . implode(' AND ', $whereClauses);
-  }
   $queries[] = $q;
-
 }
 
 $query = implode(" UNION ALL ", $queries) . " ORDER BY timestamp DESC";
