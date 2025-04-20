@@ -4,6 +4,10 @@ include '../app/config/connection.php';
 $selectedRole = $_GET['role'] ?? '';
 $selectedAction = $_GET['action'] ?? '';
 
+$selectedDateFrom = $_GET['date_from'] ?? '';
+$selectedDateTo = $_GET['date_to'] ?? '';
+
+
 $whereClauses = [];
 $params = [];
 
@@ -81,7 +85,29 @@ if ($selectedAction === '' || $selectedAction === 'gateAccess_logs') {
   $queries[] = $q;
 }
 
-$query = implode(" UNION ALL ", $queries) . " ORDER BY timestamp DESC";
+// 2a) Build the raw UNION
+$unionSql = implode(" UNION ALL ", $queries);
+
+// 2b) Wrap it so we can filter on the alias “timestamp”
+$query = "SELECT * FROM ({$unionSql}) AS all_logs";
+
+// 2c) Add date filters if present
+$outerClauses = [];
+if (!empty($selectedDateFrom)) {
+  $outerClauses[] = "all_logs.timestamp >= :date_from";
+  $params[':date_from'] = $selectedDateFrom . ' 00:00:00';
+}
+if (!empty($selectedDateTo)) {
+  $outerClauses[] = "all_logs.timestamp <= :date_to";
+  $params[':date_to'] = $selectedDateTo . ' 23:59:59';
+}
+if ($outerClauses) {
+  $query .= ' WHERE ' . implode(' AND ', $outerClauses);
+}
+
+// 2d) Finally order
+$query .= " ORDER BY all_logs.timestamp DESC";
+
 
 $stmt = $conn->prepare($query);
 $stmt->execute($params);
@@ -328,8 +354,70 @@ function url_exists(string $url): bool
 
         </script>
 
-        <img src="../assets/images/date.png" alt="filter" class="topRightOptions" />
-        <img src="../assets/images/csv.png" alt="filter" class="topRightOptions" />
+        <img src="../assets/images/date.png" alt="date" class="topRightOptions" onclick="openDateModal()"
+          style="cursor:pointer;" />
+
+
+        <!-- Date Filter Modal -->
+        <div id="dateModal" style="display:none;
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.4);
+            z-index:1000;">
+          <div style="background:#fff;
+              width:400px; max-width:90%;
+              padding:20px;
+              border-radius:10px;
+              position:fixed;
+              top:50%; left:50%;
+              transform:translate(-50%, -50%);">
+            <h4 style="margin-top:10px; color:#666;">Filter by Date</h4>
+
+            <label for="dateFrom">From</label>
+            <input type="date" id="dateFrom" value="<?= htmlspecialchars($selectedDateFrom) ?>"
+              style="width:100%; padding:8px; margin-bottom:15px;" />
+
+            <label for="dateTo">To</label>
+            <input type="date" id="dateTo" value="<?= htmlspecialchars($selectedDateTo) ?>"
+              style="width:100%; padding:8px; margin-bottom:20px;" />
+
+            <div style="text-align:right;">
+              <button onclick="applyDateFilter()" style="margin-right:10px;">Apply</button>
+              <button onclick="closeDateModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          function openDateModal() {
+            document.getElementById('dateModal').style.display = 'block';
+          }
+          function closeDateModal() {
+            document.getElementById('dateModal').style.display = 'none';
+          }
+          function applyDateFilter() {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            const params = new URLSearchParams(window.location.search);
+
+            if (from) params.set('date_from', from);
+            else params.delete('date_from');
+
+            if (to) params.set('date_to', to);
+            else params.delete('date_to');
+
+            // preserve role/action if set
+            if (params.toString()) {
+              window.location.search = params.toString();
+            } else {
+              window.location.search = '';
+            }
+          }
+
+        </script>
+
+        <img src="../assets/images/csv.png" alt="csv" class="topRightOptions" />
       </div>
       <br>
 
