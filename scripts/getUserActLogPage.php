@@ -3,8 +3,10 @@ header('Content-Type: application/json');
 include '../app/config/connection.php';
 
 try {
-    // Query to get AC remote logs along with user details
-    $query = "SELECT 
+    $logs = [];
+
+    // 1. Fetch logs from acRemote
+    $query1 = "SELECT 
                 r.*, 
                 u.username, 
                 u.profile_picture,
@@ -14,64 +16,48 @@ try {
               JOIN users u ON r.user_id = u.user_id
               ORDER BY r.timestamp DESC";
 
-    $stmt = $conn->prepare($query);
-    $stmt->execute();
+    $stmt1 = $conn->prepare($query1);
+    $stmt1->execute();
 
-    $logs = [];
-
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Build an associative array of update messages with their corresponding time (as Unix timestamp)
+    while ($row = $stmt1->fetch(PDO::FETCH_ASSOC)) {
         $updates = [];
 
-        // For Temperature
         if (!empty($row['temp']) && !empty($row['temptime'])) {
             $updates['temp'] = [
                 'message' => "Temp set to " . $row['temp'] . "°C",
                 'time' => strtotime($row['temptime'])
             ];
         }
-
-        // For Mode
         if (!empty($row['mode']) && !empty($row['modetime'])) {
             $updates['mode'] = [
                 'message' => "Mode: " . $row['mode'],
                 'time' => strtotime($row['modetime'])
             ];
         }
-
-        // For Fan
         if (!empty($row['fan']) && !empty($row['fantime'])) {
             $updates['fan'] = [
                 'message' => "Fan: " . $row['fan'],
                 'time' => strtotime($row['fantime'])
             ];
         }
-
-        // For Swing
         if (!empty($row['swing']) && !empty($row['swingtime'])) {
             $updates['swing'] = [
                 'message' => "Swing: " . $row['swing'],
                 'time' => strtotime($row['swingtime'])
             ];
         }
-
-        // For Sleep (only output if sleep is on)
         if (!empty($row['sleep']) && $row['sleep'] === 'on' && !empty($row['sleeptime'])) {
             $updates['sleep'] = [
                 'message' => "Sleep mode enabled",
                 'time' => strtotime($row['sleeptime'])
             ];
         }
-
-        // For Timer (if applicable)
         if (!empty($row['timer']) && !empty($row['timertime'])) {
             $updates['timer'] = [
                 'message' => "Timer set to " . $row['timer'],
                 'time' => strtotime($row['timertime'])
             ];
         }
-
-        // For Power (if applicable)
         if (!empty($row['power']) && !empty($row['powertime'])) {
             $powerStatus = ($row['power'] === 'on') ? "Power ON" : "Power OFF";
             $updates['power'] = [
@@ -80,7 +66,6 @@ try {
             ];
         }
 
-        // Determine the most recent update based on the associated timestamps
         $latestUpdate = null;
         foreach ($updates as $update) {
             if ($latestUpdate === null || $update['time'] > $latestUpdate['time']) {
@@ -88,35 +73,66 @@ try {
             }
         }
 
-        // Build the final message: Only output the most recent update if available.
-        if ($latestUpdate !== null) {
-            $message = $row['username'] . " - " . $latestUpdate['message'];
-        } else {
-            $message = $row['username'] . " - Temp set to 16°C";
-        }
+        $message = $row['username'] . " - " . ($latestUpdate['message'] ?? "Temp set to 16°C");
 
-        // Format the main timestamp for display (e.g., "03:45 PM")
         $dt = new DateTime($row['timestamp']);
         $formattedTime = $dt->format('l, F jS, Y h:i:s A');
 
-        // Use a robust check to ensure the profile picture is valid:
-        // If it's empty or not a valid URL, assign a dummy image.
         if (empty(trim($row['profile_picture'])) || !filter_var($row['profile_picture'], FILTER_VALIDATE_URL)) {
             $row['profile_picture'] = "https://ui-avatars.com/api/?name=" . urlencode($row['username']) . "&size=40";
         }
 
-        // Map the AC remote log data to your expected user activity log structure.
         $logs[] = [
-            "Role" => $row['role_id'],  // Include Role information from users table
+            "user_id" => $row['user_id'],
+            "Role" => $row['role_id'],
             "Username" => [
                 "profile_picture" => $row['profile_picture'],
-                "email" => $row['email']
+                "email" => $row['email'],
+                "name" => $row['username']
             ],
             "action" => $message,
             "timestamp" => $formattedTime,
-            "status" => "authorized"  // Set a default status; adjust if needed
+            "status" => "authorized"
         ];
     }
+
+    // 2. Fetch logs from device_logs
+    $query2 = "SELECT d.*, u.username, u.profile_picture, u.email, u.role_id
+               FROM rivan_iot.device_logs d
+               JOIN users u ON d.user_id = u.user_id
+               ORDER BY d.last_updated DESC";
+
+    $stmt2 = $conn->prepare($query2);
+    $stmt2->execute();
+
+    while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+        $dt = new DateTime($row['last_updated']);
+        $formattedTime = $dt->format('l, F jS, Y h:i:s A');
+
+        if (empty(trim($row['profile_picture'])) || !filter_var($row['profile_picture'], FILTER_VALIDATE_URL)) {
+            $row['profile_picture'] = "https://ui-avatars.com/api/?name=" . urlencode($row['username']) . "&size=40";
+        }
+
+        $message = $row['username'] . " - " . $row['device_name'] . " turned " . $row['status'];
+
+        $logs[] = [
+            "user_id" => $row['user_id'],
+            "Role" => $row['role_id'],
+            "Username" => [
+                "profile_picture" => $row['profile_picture'],
+                "email" => $row['email'],
+                "name" => $row['username']
+            ],
+            "action" => $message,
+            "timestamp" => $formattedTime,
+            "status" => "authorized"
+        ];
+    }
+
+    // Sort combined logs by timestamp descending
+    usort($logs, function ($a, $b) {
+        return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+    });
 
     echo json_encode($logs);
 
@@ -126,4 +142,3 @@ try {
         "message" => "Database error: " . $e->getMessage()
     ]);
 }
-?>

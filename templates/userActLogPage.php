@@ -1,233 +1,510 @@
+<?php
+include '../app/config/connection.php';
+
+$selectedRole = $_GET['role'] ?? '';
+$selectedAction = $_GET['action'] ?? '';
+
+$whereClauses = [];
+$params = [];
+
+if (!empty($selectedRole)) {
+  $whereClauses[] = "u.role_id = :role";
+  $params[':role'] = $selectedRole;
+}
+
+// Base queries with conditional logic for action filter
+$queries = [];
+
+if ($selectedAction === '' || $selectedAction === 'device_logs') {
+  $q = "
+    SELECT 
+        u.user_id, u.role_id, u.first_name, u.last_name, u.profile_picture, u.email,
+        d.device_name, d.status, d.where AS location, d.last_updated AS timestamp,
+        NULL AS minTemp, NULL AS maxTemp, NULL AS customizeTime,
+        NULL AS minWater, NULL AS maxWater, NULL AS waterCustomizeTime,
+        NULL AS gateMethod, NULL AS gateResult, NULL AS gateTimestamp
+    FROM users u
+    LEFT JOIN device_logs d ON u.user_id = d.user_id
+  ";
+  if ($whereClauses)
+    $q .= ' WHERE ' . implode(' AND ', $whereClauses);
+  $queries[] = $q;
+}
+
+if ($selectedAction === '' || $selectedAction === 'customizeAC') {
+  $q = "
+    SELECT 
+        u.user_id, u.role_id, u.first_name, u.last_name, u.profile_picture, u.email,
+        NULL, NULL, NULL, ac.customizeTime AS timestamp,
+        ac.minTemp, ac.maxTemp, ac.customizeTime,
+        NULL, NULL, NULL,
+        NULL, NULL, NULL
+    FROM users u
+    JOIN customizeAC ac ON u.user_id = ac.user_id
+  ";
+  if ($whereClauses)
+    $q .= ' WHERE ' . implode(' AND ', $whereClauses);
+  $queries[] = $q;
+}
+
+if ($selectedAction === '' || $selectedAction === 'customizeWater') {
+  $q = "
+    SELECT 
+        u.user_id, u.role_id, u.first_name, u.last_name, u.profile_picture, u.email,
+        NULL, NULL, NULL, cw.customizeTime AS timestamp,
+        NULL, NULL, NULL,
+        cw.minWater, cw.maxWater, cw.customizeTime,
+        NULL, NULL, NULL
+    FROM users u
+    JOIN customizeWater cw ON u.user_id = cw.user_id
+  ";
+  if ($whereClauses)
+    $q .= ' WHERE ' . implode(' AND ', $whereClauses);
+  $queries[] = $q;
+}
+
+if ($selectedAction === '' || $selectedAction === 'gateAccess_logs') {
+
+  $q = "
+SELECT 
+  COALESCE(u.user_id, 0)    AS user_id,
+  u.role_id,
+  u.first_name,
+  u.last_name,
+  u.profile_picture,
+  u.email,
+  NULL, NULL, NULL,        -- for device/customize water/AC columns
+  NULL, NULL, NULL,
+  NULL, NULL, NULL,
+  ga.method   AS gateMethod,
+  ga.result   AS gateResult,
+  ga.timestamp AS timestamp
+FROM gateAccess_logs ga
+LEFT JOIN users u ON u.user_id = ga.user_id
+";
+  if ($whereClauses) {
+
+    $q .= ' WHERE ' . implode(' AND ', $whereClauses);
+  }
+  $queries[] = $q;
+
+}
+
+$query = implode(" UNION ALL ", $queries) . " ORDER BY timestamp DESC";
+
+$stmt = $conn->prepare($query);
+$stmt->execute($params);
+$logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Custom role sort order
+$roleOrder = [1 => 0, 2 => 1, 3 => 2, 4 => 3];
+usort($logs, function ($a, $b) use ($roleOrder) {
+  $roleA = $roleOrder[$a['role_id']] ?? PHP_INT_MAX;
+  $roleB = $roleOrder[$b['role_id']] ?? PHP_INT_MAX;
+  return $roleA <=> $roleB;
+});
+
+$roleMapping = [
+  1 => "Super Admin",
+  2 => "Admin",
+  3 => "Staff Member",
+  4 => "Student"
+];
+
+
+
+// Helper function for checking if the URL exists
+function url_exists(string $url): bool
+{
+  $headers = @get_headers($url);
+  return is_array($headers) && preg_match('#^HTTP/.*\s+200\s#i', $headers[0] ?? '');
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Activity Logs</title>
-
+  <title>Activity Log</title>
   <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/settings.css" />
+  <link rel="stylesheet" href="../assets/css/settings-profile.css" />
+  <link rel="stylesheet" href="../assets/css/settings-password.css" />
   <link rel="stylesheet" href="../assets/css/userActLogPage.css" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    .profile-pic {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
-      object-fit: cover;
+    /* Add your table and other CSS styles here */
+    table.custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      table-layout: fixed;
+    }
+
+    table.custom-table th,
+    table.custom-table td {
+      padding: 8px;
+      height: 50px;
+      line-height: 1.2;
+      text-align: center;
       vertical-align: middle;
+    }
+
+    .custom-table th:nth-child(1),
+    .custom-table td:nth-child(1) {
+      width: 180px;
+      /* Adjust this value as needed */
+      text-align: center;
+      padding-left: 0;
+      /* Reset extra padding if needed */
+    }
+
+
+    .custom-table th:nth-child(2),
+    .custom-table td:nth-child(2) {
+      width: 230px;
+      /* Adjust this value as needed */
+      text-align: center;
+      padding-left: 1 0;
+      /* Reset extra padding if needed */
+    }
+
+    .custom-table td:nth-child(2) {
+      text-align: left;
+      padding-left: 40px;
+    }
+
+    .custom-table th:nth-child(3),
+    .custom-table td:nth-child(3) {
+      width: 100px;
+      /* Adjust this value as needed */
+      text-align: center;
+      padding-left: 0;
+      /* Reset extra padding if needed */
+    }
+
+
+    .custom-table td.username-cell {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .custom-table td.username-cell span {
+      text-transform: capitalize;
+      font-weight: 500;
+      font-size: 15px;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 8px;
+    }
+
+    /* Pagination styles */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .pagination a,
+    .pagination span {
+      padding: 8px 16px;
+      margin: 0 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    .pagination a:hover {
+      background-color: #ddd;
+    }
+
+    .pagination span {
+      background-color: #f1f1f1;
+      color: #6c757d;
     }
   </style>
 </head>
 
 <body>
-  <?php include '../partials/bgMain.php'; ?>
-  <div class="dashboardDevider">
-    <div class="userActLogCont">
-      <nav>
-        <ul>
-          <li>
-            <img src="../assets/images/back.png" alt="Logo" width="50" height="50">
-          </li>
-          <li>User Activity Log</li>
-          <li>
-            <div class="searchContainer">
-              <input type="text" id="searchInputX" placeholder=" " class="searchInput">
-              <button onclick="filterTable()" class="searchButton">
-                <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </button>
-            </div>
-          </li>
-          <li>
-            <div class="filterCont" style="cursor:pointer;">
-              <img src="../assets/images/icon-filter.png" alt="Logo" width="20" height="25" style="margin-right: 10px;">
-              <span> Filter </span>
-            </div>
-            <div class="dateCont" style="cursor:pointer;">
-              <img src="../assets/images/icon-date.png" alt="Logo" width="25" height="25" style="margin-right: 10px;">
-              <span> Date </span>
-            </div>
-            <div class="sortCont" style="cursor:pointer;">
-              <img src="../assets/images/icon-sort.png" alt="Logo" width="25" height="25" style="margin-right: 10px;">
-              <span> Sort </span>
-            </div>
-          </li>
-        </ul>
-      </nav>
-
-      <div class="actLogTable">
-        <table>
-          <thead>
-            <tr>
-              <th>Role</th>
-              <th>Username</th>
-              <th>Floor</th>
-              <th>Action Taken</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-
-          <!-- Data will be inserted here -->
-          </tbody>
-        </table>
-      </div>
-
-      <script>
-        // Fetch and populate the table data
-        document.addEventListener("DOMContentLoaded", function () {
-          function fetchUserActivityLogs() {
-            fetch("../scripts/getUserActLogPage.php")
-              .then(response => response.json())
-              .then(data => populateTable(data))
-              .catch(error => console.error("Error fetching user activity logs:", error));
-          }
-
-          function populateTable(data) {
-            const tableBody = document.getElementById("tableBody");
-            tableBody.innerHTML = ""; // Clear previous data
-
-            data.forEach(user => {
-              const row = document.createElement("tr");
-              row.innerHTML = `
-      <td class="role">${user.role_id}</td>
-      <td class="username">
-        <img src="${user.profile_picture}" alt="Profile Picture" class="profile-pic">
-        <div>
-          <div>${user.name}</div>
-          <div style="font-size: 0.9em; color: gray;">${user.email}</div>
+  <div class="bgMain">
+    <?php include '../partials/bgMain.php'; ?>
+    <div class="containerPart">
+      <div class="headbackCont">
+        <div class="imgBack">
+          <a href="../templates/dashboard.php">
+            <img src="../assets/images/back.png" alt="back" class="backIcon" />
+          </a>
         </div>
-      </td>
-      <td class="floor">${user.floor || '-'}</td>
-      <td class="action">${user.action}</td>
-      <td class="log-time">${user.timestamp}</td>
-    `;
-              tableBody.appendChild(row);
-            });
+        <div class="headerGroup">
+          <div class="headerText">Activity Log</div>
+        </div>
+        <div class="headerSACont">
+          <div class="searchContainer">
+            <input type="text" id="searchInputX" placeholder=" " class="searchInput" />
+            <button onclick="performSearch()" class="searchButton">
+              <svg class="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Icon -->
+        <img src="../assets/images/filter.png" alt="filter" class="topRightOptions" onclick="openFilterModal()"
+          style="cursor:pointer;" />
+
+        <!-- Filter Modal -->
+        <div id="filterModal"
+          style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1000;">
+          <div
+            style="background:#fff; width:400px; max-width:90%; padding:20px; border-radius:10px; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);">
+
+            <h4 style="margin-top: 10px; color: #666;">Filter</h4>
+
+            <!-- Role Filter -->
+            <!-- Role Filter -->
+            <label for="roleFilter">Role</label>
+            <select id="roleFilter" style="width:100%; padding:8px; margin-bottom:15px;">
+              <option value="">All</option>
+              <option value="4" <?= $selectedRole == '4' ? 'selected' : '' ?>>Student (level 1)</option>
+              <option value="3" <?= $selectedRole == '3' ? 'selected' : '' ?>>Staff Member (level 2)</option>
+              <option value="2" <?= $selectedRole == '2' ? 'selected' : '' ?>>Admin (level 3)</option>
+              <option value="1" <?= $selectedRole == '1' ? 'selected' : '' ?>>Super Admin (level 4)</option>
+            </select>
+
+            <!-- Action Filter -->
+            <label for="actionFilter">Action Taken</label>
+            <select id="actionFilter" style="width:100%; padding:8px; margin-bottom:20px;">
+              <option value="" <?= $selectedAction == '' ? 'selected' : '' ?>>All</option>
+              <option value="customizeAC" <?= $selectedAction == 'customizeAC' ? 'selected' : '' ?>>Air Conditioning System
+              </option>
+              <option value="gateAccess_logs" <?= $selectedAction == 'gateAccess_logs' ? 'selected' : '' ?>>Gate Access
+                Control</option>
+              <option value="device_logs" <?= $selectedAction == 'device_logs' ? 'selected' : '' ?>>Lighting Control
+              </option>
+              <option value="customizeWater" <?= $selectedAction == 'customizeWater' ? 'selected' : '' ?>>Water Tank
+                Management</option>
+            </select>
+
+
+
+            <!-- Buttons -->
+            <div style="text-align:right;">
+              <button onclick="applyFilter()" style="margin-right:10px;">Apply</button>
+              <button onclick="closeFilterModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- JavaScript -->
+        <script>
+          function openFilterModal() {
+            document.getElementById('filterModal').style.display = 'block';
+          }
+
+          function closeFilterModal() {
+            document.getElementById('filterModal').style.display = 'none';
+          }
+
+          function applyFilter() {
+            const role = document.getElementById('roleFilter').value;
+            const action = document.getElementById('actionFilter').value;
+
+            const params = new URLSearchParams();
+            if (role) params.append('role', role);
+            if (action) params.append('action', action);
+
+            window.location.href = window.location.pathname + '?' + params.toString();
           }
 
 
-          // Basic search filter for the search input field
-          window.filterTable = function () {
-            const searchInput = document.getElementById("searchInputX").value.toLowerCase();
-            const rows = document.querySelectorAll("#tableBody tr");
+        </script>
 
-            rows.forEach(row => {
-              const id = row.querySelector(".log-id").textContent.toLowerCase();
-              const username = row.querySelector(".username").textContent.toLowerCase();
-              const action = row.querySelector(".action").textContent.toLowerCase();
-              const time = row.querySelector(".log-time").textContent.toLowerCase();
-              if (id.includes(searchInput) || username.includes(searchInput) || action.includes(searchInput) || time.includes(searchInput)) {
-                row.style.display = "";
-              } else {
-                row.style.display = "none";
-              }
-            });
-          };
+        <img src="../assets/images/date.png" alt="filter" class="topRightOptions" />
+        <img src="../assets/images/csv.png" alt="filter" class="topRightOptions" />
+      </div>
+      <br>
 
-          // Fetch data when the page loads
-          fetchUserActivityLogs();
-        });
-      </script>
+      <div class="contentWrapper">
+        <div class="profile-main">
+          <div class="flex-containerOneSA">
+            <div class="whiteLine"></div>
+            <div class="rolesCont">
+              <div id="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Role</th>
+                      <th>User Name</th>
+                      <th>Floor</th>
+                      <th>Action Taken</th>
+                      <th>Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    if (count($logs) > 0) {
+                      foreach ($logs as $log) {
+                        // ─── 1) Normalize all possible fields ─────────────────────────────────────
+                        $dbUserId = isset($log['user_id']) ? (int) $log['user_id'] : 0;
+                        $firstName = $log['first_name'] ?? '';
+                        $lastName = $log['last_name'] ?? '';
+                        $email = $log['email'] ?? 'unknown@example.com';
+                        $profilePic = $log['profile_picture'] ?? null;
+                        $deviceName = $log['device_name'] ?? null;
+                        $status = $log['status'] ?? null;
+                        $locationRaw = $log['location'] ?? null;
+                        $minTemp = $log['minTemp'] ?? null;
+                        $maxTemp = $log['maxTemp'] ?? null;
+                        $minWater = $log['minWater'] ?? null;
+                        $maxWater = $log['maxWater'] ?? null;
+                        $gateMethod = $log['gateMethod'] ?? null;
+                        $gateResult = $log['gateResult'] ?? null;
+                        $timestampRaw = $log['timestamp'] ?? date('Y-m-d H:i:s');
 
-      <style>
-        .status-authorized {
-          background-color: #ceffc2;
-          color: #3b5d33;
-          padding: 5px 10px;
-          border-radius: 15px;
-          font-weight: bold;
-        }
+                        // ─── 2) Determine if this truly is an “invalid RFID tag” ─────────────────
+                        $isBadRFID = ($dbUserId === 0)
+                          && strtolower($gateMethod) === 'rfid'
+                          && strtolower($gateResult) === 'denied';
 
-        .status-unauthorized {
-          background-color: #dd0000;
-          color: #ffcece;
-          padding: 5px 10px;
-          border-radius: 15px;
-          font-weight: bold;
-        }
-      </style>
+                        // ─── 3) Build userName, roleName, roleClass, avatar ──────────────────────
+                        if ($isBadRFID) {
+                          // FORCED anonymous for invalid RFID
+                          $userName = 'Anonymous';
+                          $roleName = 'Anonymous';
+                          $roleClass = 'role-anonymous';
+                          $picUrl = 'https://ui-avatars.com/api/?name=AN&background=999&color=fff';
+                        } else {
+                          // REAL user or non‑RFID log
+                          if ($firstName && $lastName) {
+                            $userName = strtolower($lastName) . ', ' . strtolower(substr($firstName, 0, 1));
+                          } else {
+                            $userName = strstr($email, '@', true);
+                          }
 
-      <!-- New script to add Filter, Date, and Sort functionality -->
-      <script>
-        document.addEventListener("DOMContentLoaded", function () {
-          const filterCont = document.querySelector(".filterCont");
-          const dateCont = document.querySelector(".dateCont");
-          const sortCont = document.querySelector(".sortCont");
+                          $roleName = $roleMapping[$log['role_id']] ?? 'Unknown';
+                          $roleClass = match ($roleName) {
+                            'Super Admin' => 'role-superadmin',
+                            'Admin' => 'role-admin',
+                            'Staff Member' => 'role-staff',
+                            'Student' => 'role-student',
+                            default => '',
+                          };
 
-          // Filter by status (authorized / unauthorized)
-          filterCont.addEventListener("click", function () {
-            const status = prompt("Enter status to filter (authorized/unauthorized) or leave empty to reset:");
-            filterByStatus(status);
-          });
+                          $picUrl = $profilePic
+                            ? $profilePic
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($userName) . '&background=random&color=fff';
+                        }
 
-          // Filter by date (expects a string like YYYY-MM-DD)
-          dateCont.addEventListener("click", function () {
-            const dateInput = prompt("Enter date to filter (YYYY-MM-DD) or leave empty to reset:");
-            filterByDate(dateInput);
-          });
+                        // ─── 4) Build “Action Taken” ─────────────────────────────────────────────
+                        if ($isBadRFID) {
+                          $actionTaken = 'Invalid RFID tag scanned';
+                        } elseif (!empty($gateMethod)) {
+                          // ANY other gateAccess_logs (granted or real‑user denied)
+                          $methodUc = ucfirst($gateMethod);
+                          $res = (strtolower($gateResult) === 'open') ? 'granted' : 'denied';
+                          $actionTaken = "Gate Access Method: {$methodUc}, Result: {$res}";
+                        } elseif (!is_null($minTemp) && !is_null($maxTemp)) {
+                          // customizeAC
+                          $min = rtrim(rtrim(number_format($minTemp, 1), '0'), '.');
+                          $max = rtrim(rtrim(number_format($maxTemp, 1), '0'), '.');
+                          $actionTaken = "Set the MinTemp({$min}°C) and MaxTemp({$max}°C)";
+                        } elseif (!is_null($minWater) && !is_null($maxWater)) {
+                          // customizeWater
+                          $minW = rtrim(rtrim(number_format($minWater, 1), '0'), '.');
+                          $maxW = rtrim(rtrim(number_format($maxWater, 1), '0'), '.');
+                          $actionTaken = "Set the MinWater({$minW}%) and MaxWater({$maxW}%)";
+                        } else {
+                          // device_logs (lighting control)
+                          $deviceMap = [
+                            'FFLightOne' => 'Front Gate',
+                            'FFLightTwo' => 'Front Garage',
+                            'FFLightThree' => 'Rear Garage'
+                          ];
+                          $locationMap = [
+                            '/building/1/lights' => 'Website',
+                            '/building/1/status' => 'Switch'
+                          ];
+                          $dn = $deviceMap[$deviceName] ?? $deviceName;
+                          $loc = $locationMap[$locationRaw] ?? $locationRaw;
+                          $actionTaken = "{$loc} - {$dn} Lights was set to {$status}";
+                        }
 
-          // Sort by timestamp (ascending order)
-          sortCont.addEventListener("click", function () {
-            sortTableByTimestamp();
-          });
+                        // ─── 5) Format timestamp ────────────────────────────────────────────────
+                        $ts = new DateTime($timestampRaw);
+                        $formattedTimestamp = $ts->format('M d y - h:i a');
 
-          function filterByStatus(status) {
-            const rows = document.querySelectorAll("#tableBody tr");
-            rows.forEach(row => {
-              const statusCell = row.querySelector("td:nth-child(5)");
-              // Remove extra spaces and convert to lowercase for comparison
-              let statusText = statusCell.textContent.toLowerCase().trim();
-              if (!status) {
-                row.style.display = "";
-              } else if (statusText.includes(status.toLowerCase())) {
-                row.style.display = "";
-              } else {
-                row.style.display = "none";
-              }
-            });
-          }
+                        // ─── 6) Echo the row ───────────────────────────────────────────────────
+                        echo "<tr>";
+                        echo "<td><span class='{$roleClass}'>" . htmlspecialchars($roleName) . "</span></td>";
+                        echo "<td class='username-cell'>
+              <img src='{$picUrl}' class='user-avatar' />
+              <span>{$userName}</span>
+            </td>";
+                        echo "<td>1st</td>";
+                        echo "<td>{$actionTaken}</td>";
+                        echo "<td>{$formattedTimestamp}</td>";
+                        echo "</tr>";
+                      }
+                    } else {
+                      echo "<tr><td colspan='5'>No logs found</td></tr>";
+                    }
+                    ?>
+                  </tbody>
 
-          function filterByDate(dateInput) {
-            const rows = document.querySelectorAll("#tableBody tr");
-            rows.forEach(row => {
-              const timeCell = row.querySelector("td:nth-child(4)");
-              let timeText = timeCell.textContent;
-              if (!dateInput) {
-                row.style.display = "";
-              } else if (timeText.includes(dateInput)) {
-                row.style.display = "";
-              } else {
-                row.style.display = "none";
-              }
-            });
-          }
 
-          function sortTableByTimestamp() {
-            const table = document.querySelector(".actLogTable table");
-            const tbody = table.querySelector("tbody");
-            const rows = Array.from(tbody.querySelectorAll("tr"));
 
-            rows.sort((a, b) => {
-              const dateA = new Date(a.querySelector("td:nth-child(4)").textContent);
-              const dateB = new Date(b.querySelector("td:nth-child(4)").textContent);
-              return dateA - dateB;
-            });
-
-            // Re-attach sorted rows
-            tbody.innerHTML = "";
-            rows.forEach(row => tbody.appendChild(row));
-          }
-        });
-      </script>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    document.getElementById("searchInputX").addEventListener("input", performSearch);
+
+    function performSearch() {
+      const filter = document.getElementById("searchInputX").value.toLowerCase();
+      const table = document.querySelector("table.custom-table");
+      if (!table) return;
+      const rows = table.querySelectorAll("tbody tr");
+
+      rows.forEach(row => {
+        // Get Action Taken text content
+        const actionTakenCell = row.querySelector('td:nth-child(4)'); // Action Taken is 4th column
+        const actionTakenText = actionTakenCell ? actionTakenCell.textContent.toLowerCase() : '';
+
+        // Check if the filter term matches any part of the row's text content or Action Taken
+        if (row.textContent.toLowerCase().includes(filter) || actionTakenText.includes(filter)) {
+          row.style.display = ""; // Show the row if there's a match
+        } else {
+          row.style.display = "none"; // Hide the row if no match
+        }
+      });
+    }
+
+
+  </script>
 </body>
 
 </html>
