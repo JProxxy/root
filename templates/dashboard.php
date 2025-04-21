@@ -7,19 +7,37 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Get the role_id if the user is logged in
-$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
-echo "Role ID: " . $_SESSION['role_id']; 
-// Now you can use $role_id to conditionally display content
-if ($role_id == 1) {
-    // Show content for role 1
-    echo "You are role 1";
+// Get the user_id from the session
+$user_id = $_SESSION['user_id'];
+
+// Include DB connection (Make sure to replace this with your actual connection file)
+include '../app/config/connection.php';
+
+// Fetch the role_id from the users table using the user_id
+$query = "SELECT role_id FROM users WHERE user_id = :user_id LIMIT 1";
+$stmt = $conn->prepare($query);
+$stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+$stmt->execute();
+
+// Fetch the result
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Check if a role_id was found
+if ($user) {
+    $role_id = $user['role_id'];
+
+    // Now you can use $role_id to conditionally display content
+    if ($role_id == 1) {
+        echo "You are role 1";
+    } elseif ($role_id == 2) {
+        echo "You are role 2";
+    } else {
+        echo "Access denied for this role.";
+    }
 } else {
-    // Show content for other roles or deny access
-    echo "Access denied for this role.";
+    // If no user found with this user_id
+    echo "User not found.";
 }
-// $user_id = $_SESSION['user_id'];
-// echo "Welcome, " . $_SESSION['user_name']; // Debug: Check if session works
 ?>
 
 <!DOCTYPE html>
