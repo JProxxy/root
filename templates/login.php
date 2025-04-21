@@ -23,13 +23,21 @@ require_once '../app/config/connection.php';
 
 $errorMessage = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
-    $username = trim($_POST['username']);
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['identifier'])) {
+    $identifier = trim($_POST['identifier']);
     $password = trim($_POST['password']);
 
     try {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
-        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $identifier = trim($_POST['identifier']);
+
+        // 2) QUERY EITHER COLUMN
+        $stmt = $conn->prepare(
+            "SELECT * FROM users 
+             WHERE username = :ident 
+                OR email    = :ident
+             LIMIT 1"
+        );
+        $stmt->bindParam(':ident', $identifier, PDO::PARAM_STR);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -42,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     window.location.href = '../templates/login.php';
                 </script>";
                 exit();
-            }            
+            }
 
             $hashedPassword = $user['password'];
             $failedAttempts = $user['failed_attempts'];
@@ -64,9 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
             // Check password (if user has no Google ID)
             if ((!empty($hashedPassword) && password_verify($password, $hashedPassword)) || (!empty($user['google_id']) && empty($hashedPassword))) {
                 // Reset failed attempts on successful login
-                $stmt = $conn->prepare("UPDATE users SET failed_attempts = 0, lock_until = NULL WHERE username = :username");
-                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                // On successful login:
+                $stmt = $conn->prepare("
+UPDATE users 
+SET failed_attempts = 0, lock_until = NULL 
+WHERE user_id = :uid
+");
+                $stmt->bindParam(':uid', $user['user_id'], PDO::PARAM_INT);
                 $stmt->execute();
+
 
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['username'] = $user['username'];
@@ -80,14 +94,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                 $failedAttempts++;
 
                 if ($failedAttempts >= 3) {
-                    // Lock account for 30 seconds
-                    $stmt = $conn->prepare("UPDATE users SET failed_attempts = :failed_attempts, lock_until = NOW() + INTERVAL 30 SECOND WHERE username = :username");
+                    $stmt = $conn->prepare("
+                      UPDATE users 
+                      SET failed_attempts = :fa, lock_until = NOW() + INTERVAL 30 SECOND 
+                      WHERE user_id = :uid
+                    ");
                 } else {
-                    $stmt = $conn->prepare("UPDATE users SET failed_attempts = :failed_attempts WHERE username = :username");
+                    $stmt = $conn->prepare("
+                      UPDATE users 
+                      SET failed_attempts = :fa 
+                      WHERE user_id = :uid
+                    ");
                 }
-
-                $stmt->bindParam(':failed_attempts', $failedAttempts, PDO::PARAM_INT);
-                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->bindParam(':fa', $failedAttempts, PDO::PARAM_INT);
+                $stmt->bindParam(':uid', $user['user_id'], PDO::PARAM_INT);
                 $stmt->execute();
 
                 $remainingAttempts = 3 - $failedAttempts;
@@ -146,8 +166,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['username'])) {
                     <div class="box">
                         <div class="input-container">
                             <i class="fas fa-user user-icon"></i>
-                            <input type="text" id="username" name="username" placeholder="Username" required
-                                autocomplete="username" minlength="3" maxlength="30">
+                            <input type="text" id="identifier" name="identifier" placeholder="Username or Email"
+                                required>
                         </div>
                         <div class="input-container">
                             <i class="fas fa-lock lock-icon"></i>
