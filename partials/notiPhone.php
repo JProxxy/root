@@ -68,62 +68,77 @@ if ($log) {
 
 
 // DEVICE LOGS
-[$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
-if ($log) {
-    // 1) Lookup friendly device name
-    $deviceNames = [
-        'FFLightOne'   => 'Front Gate Lights',
-        'FFLightTwo'   => 'Front Garage Lights',
-        'FFLightThree' => 'Rear Garage Lights',
-    ];
-    $friendlyName = $deviceNames[$log['device_name']] ?? $log['device_name'];
+[$_, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');  // just to get latestId
+// Now grab *all* new entries (not just the first) so we can detect streaks:
+$stmt = $conn->prepare("
+    SELECT * 
+      FROM device_logs 
+     WHERE id > (SELECT last_known_id 
+                   FROM system_activity_log_tracking 
+                  WHERE system_name = ?) 
+  ORDER BY id ASC
+");
+$stmt->execute(['device_logs']);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2) Lookup source from 'where'
-    $sourceMap = [
-        '/building/1/lights' => 'website',
-        '/building/1/status' => 'switch',
-    ];
-    $source = $sourceMap[$log['where']] ?? $log['where'];
+$consecutiveCount = 0;
+$lastUserId      = null;
+$alertSent       = false;
+$alertMsg        = '';
+$alertTimestamp  = '';
 
-    // 3) Determine username (falling back to email local part)
-    if (!empty($log['user_id']) && $log['user_id'] != 0) {
-        $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $stmt->execute([$log['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        $userName = $user && !empty($user['username'])
-            ? $user['username']
-            : explode('@', $user['email'])[0];
+foreach ($rows as $log) {
+    $uid = $log['user_id'];
+    if (!empty($uid)) {
+        // same user as previous?
+        if ($uid === $lastUserId) {
+            $consecutiveCount++;
+        } else {
+            $lastUserId      = $uid;
+            $consecutiveCount = 1;
+        }
     } else {
-        $userName = 'superadmin'; // or whatever default you prefer
+        // reset on NULL or zero
+        $lastUserId      = null;
+        $consecutiveCount = 0;
     }
 
-    // 4) Build your final message
-    $status = strtoupper($log['status']);
-    $msg = sprintf(
-        "%s turned %s %s on Floor %d using %s at %s.",
-        $userName,
-        $status,
-        $friendlyName,
-        $log['floor_id'],
-        $source,
-        $log['last_updated']
-    );
+    // once we hit 10 in a row, build and queue our alert
+    if (!$alertSent && $consecutiveCount >= 10) {
+        // lookup username/email
+        $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+        $u->execute([$lastUserId]);
+        $user = $u->fetch(PDO::FETCH_ASSOC);
+        $userName = $user && !empty($user['username'])
+                  ? $user['username']
+                  : explode('@', $user['email'])[0];
 
-    // 5) Push into response
-    $response[] = [
-        'new'         => true,
-        'id'          => $log['id'],
-        'system_name' => 'device_logs',
-        'message'     => $msg,
-        'timestamp'   => $log['last_updated']
-    ];
+        $alertTimestamp = $log['last_updated'];
+        $alertMsg = sprintf(
+            "%s consecutively changed lights 10 times. Please check for abuse. Last action at %s.",
+            $userName,
+            $alertTimestamp
+        );
 
-    // 6) Update tracking
+        $response[] = [
+            'new'         => true,
+            'system_name' => 'device_logs',
+            'message'     => $alertMsg,
+            'timestamp'   => $alertTimestamp
+        ];
+
+        $alertSent = true;
+        // don't break—we still want to advance our tracker below
+    }
+}
+
+// STEP 6: Update the tracking table to the very latest ID
+if (!empty($rows)) {
     $conn->prepare("
         UPDATE system_activity_log_tracking 
            SET last_known_id = ?, updated_at = NOW() 
          WHERE system_name = ?
-    ")->execute([$latestId, 'device_logs']);
+    ")->execute([ $rows[count($rows)-1]['id'], 'device_logs' ]);
 }
 // Ensure a valid response is returned
 if (!empty($response)) {
