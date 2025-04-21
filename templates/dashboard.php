@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Get the user_id from the session
 $user_id = $_SESSION['user_id'];
+$role_id = $_SESSION['role_id'];
 
 // Include DB connection (Make sure to replace this with your actual connection file)
 include '../app/config/connection.php';
