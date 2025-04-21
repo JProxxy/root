@@ -1,0 +1,2 @@
+user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status,rfid
+57,,,,Jerald,$2y$10$BNwuUdkpjNGEh1bnfOS3reRpjY26x3t8YfOpKtuh/O5ek2cccHORy,09282779467,jesqui@rivaniot.online,2,"2025-03-27 02:04:15","2025-04-21 13:38:55",,active,N/A,,,,,,,,,0,,,,,,,yes,unblock,XIYSH

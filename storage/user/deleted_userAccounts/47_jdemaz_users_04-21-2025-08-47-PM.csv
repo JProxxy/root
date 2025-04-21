@@ -1,0 +1,2 @@
+user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status,rfid
+47,Jonathan,,"De Maz",jproxxyv1,,09272274292,jdemaz@rivaniot.online,1,"2025-03-16 10:03:33","2025-04-21 13:38:42",../storage/user/profile_picture/47-jpr.png,active,N/A,,,,,,,,,0,,"1st Floor OJT",,104849103465977385412,,,no,unblock,XIYSC
