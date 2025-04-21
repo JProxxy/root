@@ -82,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Create the full email by appending '@rivaniot.online'
             $email = strtolower($emailPart) . '@rivaniot.online';
-            
+
             // Convert timestamp to 'Y-m-d H:i:s' format for the created_at column
             $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
-                             ->format('Y-m-d H:i:s');
+                ->format('Y-m-d H:i:s');
 
             echo "Parsed Account: [$email]<br>";
             echo "Parsed Date: [$formattedDate]<br>";
@@ -121,6 +121,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             if ($header[$index] == 'reset_token_expiry' && empty($value)) {
                                 $value = null;  // Set to NULL if empty
                             }
+
+                            // Handle invalid datetime values by setting them to NULL or current timestamp
+                            if ($header[$index] == 'minTempTime' && empty($value)) {
+                                $value = null;  // Set to NULL if empty (or use CURRENT_TIMESTAMP for default)
+                            }
+
+                            // Add similar checks for other datetime fields if needed
                         }
 
                         // Insert data into the specified table
@@ -142,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<script>console.error('Error restoring data: " . $e->getMessage() . "');</script>";
                 echo "Error restoring the data: " . $e->getMessage();
             }
+
         } else {
             echo "<script>console.error('Invalid filename format for file: $file');</script>";
             echo "Invalid filename format.<br>";
