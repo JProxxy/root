@@ -65,31 +65,42 @@ if ($log) {
         ->execute([$latestId, 'gateAccess_logs']);
 }
 // DEVICE LOGS
+
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
+    // Initialize userName as "Unknown person" by default
     $userName = "Unknown person";
 
-    // Try to get the user from the users table
+    // Check if user_id is valid and fetch user data
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
+        // If user data is found, use username or part of the email
         if ($user) {
             $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
         }
     }
 
-    // Fallback: Try to extract username from action text
-    if ($userName === "Unknown person" && isset($log['action'])) {
-        if (preg_match('/^([^\s]+)\s+turned/i', $log['action'], $matches)) {
-            $userName = $matches[1];
-        }
+    // If userName is still "Unknown person", it means user_id was invalid or missing
+    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
+        // Set user_id to 0 explicitly, only if userName is still "Unknown person"
+        $log['user_id'] = 0;
     }
 
     // Prepare the message
     $status = strtoupper($log['status']);
     $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
+
+    // Fallback: Extract name from the message itself
+    if ($userName === "Unknown person") {
+        if (preg_match('/^([^\s]+)\s+turned/i', $msg, $matches)) {
+            $userName = $matches[1];
+            // Update message with corrected name
+            $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
+        }
+    }
 
     // Add the response to the array
     $response[] = [
@@ -104,6 +115,5 @@ if ($log) {
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
 }
-
 
 ?>
