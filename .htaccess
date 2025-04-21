@@ -1,0 +1,34 @@
+# ===========================================================
+# .htaccess file for Apache httpd to enhance security
+# ===========================================================
+
+# 1. Disable Directory Listings
+Options -Indexes
+
+# 2. Deny Access to the .git Directory
+# Return a 404 error for any request trying to access .git
+RedirectMatch 404 /\.git
+
+# 3. Set Security Headers
+# a. Prevent clickjacking by allowing framing only from the same origin
+Header always set X-Frame-Options "SAMEORIGIN"
+
+# b. Enable XSS filtering in supported browsers
+Header set X-XSS-Protection "1; mode=block"
+
+# c. Prevent MIME-type sniffing
+Header set X-Content-Type-Options "nosniff"
+
+# d. Set a referrer policy for better privacy
+Header always set Referrer-Policy "no-referrer-when-downgrade"
+
+# e. (Optional) HTTP Strict Transport Security (HSTS)
+# Uncomment and adjust the following line only if you fully support HTTPS:
+# Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+# 4. Disable Caching of Sensitive Files (Optional)
+<FilesMatch "\.(html|htm|php)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+</FilesMatch>
+
