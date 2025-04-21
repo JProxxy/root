@@ -36,47 +36,27 @@ try {
         $stmt->execute([$lastKnownId]);
         $log = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($log) {
-    // STEP 4a: Determine userName
-    $userName = 'Unknown person';
-    
-// Prepare data for debugging
-$debugData = [
-    'user_id' => $log['user_id'],
-    'user_data' => null
-];
+        if ($log) {
+            // STEP 4a: Determine userName
+            if ($log['user_id'] != 0) {
+                // Fetch the user info if a valid user_id exists
+                $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+                $u->execute([$log['user_id']]);
+                $user = $u->fetch(PDO::FETCH_ASSOC);
 
-if ($log['user_id'] != 0) {
-    $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-    $u->execute([$log['user_id']]);
-    $user = $u->fetch(PDO::FETCH_ASSOC);
-
-    // Log the fetched user data in PHP for the frontend to capture
-    $debugData['user_data'] = $user;
-
-    if ($user) {
-        $userName = !empty($user['username'])
-            ? $user['username']
-            : explode('@', $user['email'])[0];
-    }
-}
-
-// Pass debug data to JavaScript (through JSON encoding)
-echo '<script>';
-echo 'var debugData = ' . json_encode($debugData) . ';';
-echo '</script>';
-
-
-    // Send the debug data to the frontend (as part of the response)
-    echo json_encode([
-        'new' => true,
-        'id' => $log['id'],
-        'system_name' => $systemName,
-        'message' => "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}",
-        'timestamp' => $log['timestamp'],
-        'debug' => $debugData  // Include the debug data here
-    ]);
-}
+                if ($user) {
+                    // If the username is available, use it; otherwise, use the local part of the email
+                    $userName = !empty($user['username'])
+                        ? $user['username']
+                        : explode('@', $user['email'])[0];
+                } else {
+                    // If no user data is found, you can also default to "Unknown person"
+                    $userName = 'Unknown person';
+                }
+            } else {
+                // If no valid user_id (user_id = 0), set the name to "Unknown person"
+                $userName = 'Unknown person';
+            }
 
 
             // STEP 4b: Build the action message
@@ -91,11 +71,11 @@ echo '</script>';
 
             // STEP 5: Respond with notification data to be handled by JavaScript (BGMain.php)
             echo json_encode([
-                'new'         => true,
-                'id'          => $log['id'],
+                'new' => true,
+                'id' => $log['id'],
                 'system_name' => $systemName,
-                'message'     => $message,
-                'timestamp'   => $log['timestamp']
+                'message' => $message,
+                'timestamp' => $log['timestamp']
             ]);
 
             // STEP 6: Update the tracking table
