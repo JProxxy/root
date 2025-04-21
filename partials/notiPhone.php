@@ -18,22 +18,27 @@ require_once '../app/config/connection.php';
 $lastKnownId = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
 
 try {
-    // Fetch the latest log
+    // Fetch the latest gate access log
     $stmt = $conn->query("SELECT * FROM gateAccess_logs ORDER BY id DESC LIMIT 1");
     $log = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($log && $log['id'] > $lastKnownId) {
-        // Default name
         $userName = 'Unknown person';
 
         // Lookup user if user_id is not 0
         if ($log['user_id'] != 0) {
-            $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
+            $stmt = $conn->prepare("SELECT username, email FROM users WHERE id = ?");
             $stmt->execute([$log['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
-                $userName = $user['name'] . " (" . $log['user_id'] . ")";
+                if (!empty($user['username'])) {
+                    $userName = $user['username'] . " ({$log['user_id']})";
+                } else {
+                    // Strip @rivaniot.online from email
+                    $emailName = str_replace('@rivaniot.online', '', $user['email']);
+                    $userName = $emailName . " ({$log['user_id']})";
+                }
             }
         }
 
