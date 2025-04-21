@@ -371,6 +371,7 @@ function pollSystems() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
+                    console.log("Payload being sent:", payload);
                 })
                 .then(mailResponse => mailResponse.json())
                 .then(mailResult => {
