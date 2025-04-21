@@ -403,7 +403,25 @@ if (!isset($_SESSION['user_id'])) {
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
                         <tr>
-                            <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
+                        <td class="ffuserTime">
+    <span class="fflogTime">${formatTime(notif.time)}</span>
+</td>
+
+<script>
+    function formatTime(timeStr) {
+        const date = new Date(timeStr);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        // Convert 24-hour to 12-hour format
+        const formattedHours = hours % 12 || 12;  // Convert 0 to 12 (midnight)
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+        return `${formattedHours}:${formattedMinutes} ${ampm}`;
+    }
+</script>
+
                             <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
                         </tr>`;
                             if (index !== data.length - 1) {

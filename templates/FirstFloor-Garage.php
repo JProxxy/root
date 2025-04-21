@@ -489,50 +489,68 @@ if (!isset($_SESSION['user_id'])) {
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
                     <tr>
-                        <td class="ffuserTime"><span class="fflogTime">${notif.time}</span></td>
-                        <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
-                    </tr>`;
+                    <td class="ffuserTime">
+    <span class="fflogTime">${formatTime(notif.time)}</span>
+</td>
 
-                            if (index !== data.length - 1) {
-                                logHTML += `
-                    <tr>
-                        <td colspan="2">
-                            <div class="line-with-circle"></div>
-                        </td>
-                    </tr>`;
-                            }
-                        });
-                        logHTML += "</table>";
+<script>
+    function formatTime(timeStr) {
+        const date = new Date(timeStr);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        // Convert 24-hour to 12-hour format
+        const formattedHours = hours % 12 || 12;  // Convert 0 to 12 (midnight)
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                        // Replace existing table
-                        logContainer.find("table").remove();
-                        logContainer.append(logHTML);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error fetching notifications:", error);
-                    }
-                });
-            }
+        return `${ formattedHours }:${ formattedMinutes } ${ ampm }`;
+    }
+        </script>
 
-            function downloadExcel() {
-                $.ajax({
-                    url: "../scripts/logs_firstFloor_Garage.php",
-                    method: "GET",
-                    dataType: "json",
-                    success: function (data) {
-                        let worksheetData = [["Time", "Message"]];
-                        data.forEach(log => worksheetData.push([log.time, log.message]));
+        <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
+        </tr>`;
 
-                        let ws = XLSX.utils.aoa_to_sheet(worksheetData);
-                        let wb = XLSX.utils.book_new();
-                        XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
-                        XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error downloading Excel:", error);
-                    }
-                });
-            }
+        if (index !== data.length - 1) {
+        logHTML += `
+        <tr>
+            <td colspan="2">
+                <div class="line-with-circle"></div>
+            </td>
+        </tr>`;
+        }
+        });
+        logHTML += "</table>";
+
+        // Replace existing table
+        logContainer.find("table").remove();
+        logContainer.append(logHTML);
+        },
+        error: function (xhr, status, error) {
+        console.error("Error fetching notifications:", error);
+        }
+        });
+        }
+
+        function downloadExcel() {
+        $.ajax({
+        url: "../scripts/logs_firstFloor_Garage.php",
+        method: "GET",
+        dataType: "json",
+        success: function (data) {
+        let worksheetData = [["Time", "Message"]];
+        data.forEach(log => worksheetData.push([log.time, log.message]));
+
+        let ws = XLSX.utils.aoa_to_sheet(worksheetData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Logs_FirstFloor_Garage");
+        XLSX.writeFile(wb, "Logs_FirstFloor_Garage.xlsx");
+        },
+        error: function (xhr, status, error) {
+        console.error("Error downloading Excel:", error);
+        }
+        });
+        }
         </script>
 
         <!-- LIGHTS UPDATE -->
