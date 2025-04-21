@@ -26,6 +26,9 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($user) {
     $role_id = $user['role_id'];
 
+    // Debugging: Display the role_id and user data
+    echo "Debug: User ID is $user_id, Role ID is $role_id";
+
     // Now you can use $role_id to conditionally display content
     if ($role_id == 1) {
         echo "You are role 1";
@@ -182,36 +185,44 @@ if ($user) {
 
                     </div>
 
-                    <?php if (isset($role_id) && $role_id === 1): ?>
-    <div class="dashboardLog">
-        <div class="headerLog">
-            <p>User Activity Log</p>
-            <a href="../templates/userActLogPage.php">
-                <img src="../assets/images/next.png" alt="next icon" class="next" />
-            </a>
-        </div>
+                    <?php
+                    // Debugging: Check if role_id is set
+                    if (isset($role_id)) {
+                        echo "Role ID: $role_id";
+                    } else {
+                        echo "Role ID is not set.";
+                    }
 
-        <table class="userLogTable">
-            <tr>
-                <th>User Name</th>
-                <th>Timestamp</th>
-            </tr>
-            <tbody id="latestUserActivities">
-                <!-- Latest 4 user activities will be inserted here dynamically -->
-            </tbody>
-        </table>
-    </div>
+                    if (isset($role_id) && $role_id === 1): ?>
+                        <div class="dashboardLog">
+                            <div class="headerLog">
+                                <p>User Activity Log</p>
+                                <a href="../templates/userActLogPage.php">
+                                    <img src="../assets/images/next.png" alt="next icon" class="next" />
+                                </a>
+                            </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        fetch('../scripts/userActLogDASHBOARD.php')
-            .then(r => r.json())
-            .then(data => {
-                const container = document.getElementById('latestUserActivities');
-                container.innerHTML = '';
-                data.forEach(user => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = ` 
+                            <table class="userLogTable">
+                                <tr>
+                                    <th>User Name</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                                <tbody id="latestUserActivities">
+                                    <!-- Latest 4 user activities will be inserted here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                fetch('../scripts/userActLogDASHBOARD.php')
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        const container = document.getElementById('latestUserActivities');
+                                        container.innerHTML = '';
+                                        data.forEach(user => {
+                                            const row = document.createElement('tr');
+                                            row.innerHTML = ` 
                         <td class="userLog">
                             <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
                             <span class="userName">${user.username}</span>
@@ -220,13 +231,13 @@ if ($user) {
                             <span class="logTime">${user.timestamp}</span>
                         </td>
                     `;
-                    container.appendChild(row);
-                });
-            })
-            .catch(console.error);
-    });
-    </script>
-<?php endif; ?>
+                                            container.appendChild(row);
+                                        });
+                                    })
+                                    .catch(console.error);
+                            });
+                        </script>
+                    <?php endif; ?>
                 </div>
 
             </div>

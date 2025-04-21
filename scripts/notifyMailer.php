@@ -75,8 +75,7 @@ try {
     Time: 2025-04-21 14:43:55
     </p>
     
-    <p>If this action was not expected, please verify it through the 
-    <a href="https://rivaniot.online/">Admin User Logs </a>.</p>
+  
     <em>This is an automated message. Please do not reply to this email.</em>
     
     <hr>
