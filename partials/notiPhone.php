@@ -66,15 +66,18 @@ if ($log) {
 }
 
 // DEVICE LOGS
+
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
-    if ($log['user_id'] != 0) {
+    $userName = "Unknown person";
+
+    if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        $userName = $user && !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
-    } else {
-        $userName = "Unknown person";
+        if ($user) {
+            $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+        }
     }
 
     $status = strtoupper($log['status']);
@@ -90,13 +93,6 @@ if ($log) {
 
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
-}
-
-// Final output
-if (!empty($response)) {
-    echo json_encode($response);
-} else {
-    echo json_encode(['new' => false]);
 }
 
 ?>
