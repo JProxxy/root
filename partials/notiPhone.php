@@ -66,18 +66,31 @@ if ($log) {
 }
 
 // DEVICE LOGS
-
+// DEVICE LOGS
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
     $userName = "Unknown person";
 
+    // Debug: Check the user_id
+    file_put_contents('php://stderr', "Device Log - User ID: {$log['user_id']}\n", FILE_APPEND);
+
+    // First check if user_id is not 0 or null and get user data
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Debug: Check if user data is returned
+        file_put_contents('php://stderr', "User Query Result: " . print_r($user, true) . "\n", FILE_APPEND);
+        
         if ($user) {
             $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
         }
+    }
+
+    // If $userName is still "Unknown person", set user_id to 0 (after all checks)
+    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
+        $log['user_id'] = 0;
     }
 
     $status = strtoupper($log['status']);
