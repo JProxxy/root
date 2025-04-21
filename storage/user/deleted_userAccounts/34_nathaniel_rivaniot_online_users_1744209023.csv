@@ -1,2 +1,0 @@
-user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status
-34,,,,Nathaniel,$2y$10$w4YCqOAKF1uiYen66ZsqZOKSeJIdvt9nZzd1VKl5MDrwFS7qpKJB.,9262264282,nathaniel@rivaniot.online,4,"2025-03-14 20:17:19","2025-04-09 14:27:29",,active,N/A,,,,,,,,,0,,,,,,,no,unblock

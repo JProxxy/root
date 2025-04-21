@@ -1,2 +1,0 @@
-user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status,rfid
-40,,,,Jose,$2y$10$l4c9tO.7fM.NgNQyEswCGO2R7TvETUnX.6dGOKYyKCxk3hKVlH7HO,0928827382,njose@rivaniot.online,4,"2025-03-15 01:24:48","2025-04-21 07:08:52",,active,N/A,,,,,,,,,0,,,,,,,no,unblock,

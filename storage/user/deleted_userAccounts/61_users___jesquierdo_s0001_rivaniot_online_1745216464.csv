@@ -1,2 +1,0 @@
-user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status,rfid
-61,,,,jesquierdo.s0001,$2y$10$dOEasrcr87jQ7N1g.1FrJehlbKPOkK.VbTQJgTZor4FDKgnux3Q7.,,jesquierdo.s0001@rivaniot.online,4,"2025-04-05 05:58:24","2025-04-21 06:13:02",,active,N/A,,,,,,,,,0,,,,,90190,"2025-04-21 06:22:05",yes,unblock,13A52C31
