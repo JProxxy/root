@@ -106,7 +106,7 @@ try {
           <p style="margin:5px 0;"><a href="mailto:teamrivan@rcvi.org" style="color:#fff;text-decoration:underline;">teamrivan@rcvi.org</a></p>
           <p style="margin:5px 0;"><a href="tel:+639493760000" style="color:#fff;text-decoration:underline;">+63 949-376-0000</a></p>
           <p style="margin:5px 0;"><a href="tel:+63284252848" style="color:#fff;text-decoration:underline;">+63 2-8425-2848</a></p>
-          <p style="margin:5px 0;">Mon–Fri 9:00 AM – 5:00 PM</p>
+          <p style="margin:5px 0;">Mon to Fri at 9:00 AM to 5:00 PM</p>
         </td>
       </tr>
       <tr>
