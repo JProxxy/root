@@ -1,0 +1,2 @@
+user_id,first_name,middle_name,last_name,username,password,phoneNumber,email,role_id,created_at,updated_at,profile_picture,status,gender,street_address,city,postal_code,country,barangay,reset_token,reset_token_expiry,last_login,failed_attempts,lock_until,bio,soc_med,google_id,otp_code,otp_expiry,isEmailVerified,mu_status,rfid
+32,,,,hopscotch,$2y$10$d6/OdjTy7HmI/5uoPxtJyeFUK7qeh0zloUUKC0c8HzVImXixrdZie,9172276209,jhopscotch@rivaniot.online,4,"2025-03-14 18:51:44","2025-04-21 13:39:24",,active,N/A,,,,,,,,,,,,,,62680,"2025-04-21 05:36:13",no,unblock,XIYSM

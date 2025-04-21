@@ -1,0 +1,2 @@
+id,user_id,power,temp,timer,mode,fan,swing,switchState,sleep,sleeptime,powertime,temptime,timertime,modetime,fantime,swingtime,timestamp,timer_status
+10,57,Off,16,0,Cool,High,Off,On,Off,0,"2025-03-27 02:45:28",0,0,0,0,0,"2025-03-27 02:31:53",stopped
