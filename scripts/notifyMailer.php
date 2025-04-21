@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once '../vendor/autoload.php';  // Adjust the path if necessary
 
-// Include DB connection
+// Include DB connection (only if you need it)
 require_once '../app/config/connection.php';
 
 // Get the log ID sent from JS
@@ -17,19 +17,8 @@ if ($logId <= 0) {
     exit;
 }
 
-// Fetch the log details from the database
-$stmt = $conn->prepare("SELECT * FROM logs WHERE id = :logId");
-$stmt->bindParam(':logId', $logId, PDO::PARAM_INT);
-$stmt->execute();
-$log = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$log) {
-    echo json_encode(['status' => 'error', 'message' => 'Log not found']);
-    exit;
-}
-
-// Format the log message based on the event
-$logMessage = formatLogMessage($log);
+// Format the log message based on the event (you can customize this based on the log_id or any other logic)
+$logMessage = "A new event occurred with log ID: {$logId}";
 
 // Prepare the email
 $mail = new PHPMailer(true);
@@ -51,7 +40,7 @@ try {
 
     // Subject and Body
     $mail->Subject = 'New Event Log';
-    $mail->Body = "A new log event has been detected:\n\n" . $logMessage;
+    $mail->Body = "A new log event has been detected with the following details:\n\n" . $logMessage;
 
     // Send the email
     $mail->send();
@@ -61,27 +50,4 @@ try {
     echo json_encode(['status' => 'error', 'message' => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
 }
 
-// Helper function to format the log message based on event type
-function formatLogMessage($log) {
-    switch ($log['event_type']) {
-        case 'gate_access':
-            $user = getUser($log['user_id']);
-            return "{$user['name']} accessed the gate at {$log['timestamp']}";
-        case 'ac_control':
-            return "AC was adjusted at {$log['timestamp']}";
-        case 'water_usage':
-            return "Water usage recorded at {$log['timestamp']}";
-        default:
-            return "Unknown event at {$log['timestamp']}";
-    }
-}
-
-// Function to get user data (for user_id)
-function getUser($userId) {
-    global $conn;
-    $stmt = $conn->prepare("SELECT * FROM users WHERE id = :userId");
-    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
 ?>
