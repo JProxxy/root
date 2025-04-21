@@ -158,7 +158,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                     <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary" style="width: 100%;">
                         <ul class="nav nav-pills flex-column mb-auto">
                             <br>
-                
+
                             <li>
                                 <a href="../templates/SA-manageUsers.php" class="nav-link active">
                                     <img src="../assets/images/icon-users.png" alt="Manage Users" width="16" height="16"
@@ -174,13 +174,15 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                     Manage RFID
                                 </a>
                             </li>
-                            <li>
-                                <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
-                                    <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
-                                        height="16" class="me-2" />
-                                    Deleted User Logs
-                                </a>
-                            </li>
+                            <?php if ($role_id !== 2): ?>
+                                <li id="deletedUserLogsMenu">
+                                    <a href="../templates/getDeletedAccountData.php" class="nav-link active">
+                                        <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
+                                            height="16" class="me-2" />
+                                        Deleted User Logs
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                             <br><br><br><br><br><br><br><br><br><br>
                         </ul>
                     </div>

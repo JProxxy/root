@@ -311,3 +311,19 @@ if ($user_data && $user_data['mu_status'] === 'block') {
   });
   
 </script>
+
+
+<!-- dito TANGGAL YUNG deleted user logs  -->
+
+<script>
+  const ROLE_ID = <?php echo json_encode($role_id); ?>;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (ROLE_ID === 2) {
+      const deletedLogsItem = document.getElementById('deletedUserLogsMenu');
+      if (deletedLogsItem) {
+        deletedLogsItem.style.display = 'none';
+      }
+    }
+  });
+</script>

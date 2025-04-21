@@ -173,13 +173,15 @@ function url_exists(string $url): bool
                                     Manage RFID
                                 </a>
                             </li>
-                            <li>
-                                <a href="../templates/getDeletedAccountData.php" class="nav-link link-body-emphasis">
-                                    <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
-                                        height="16" class="me-2" />
-                                    Deleted User Logs
-                                </a>
-                            </li>
+                            <?php if ($role_id !== 2): ?>
+                                <li id="deletedUserLogsMenu">
+                                    <a href="../templates/getDeletedAccountData.php" class="nav-link active">
+                                        <img src="../assets/images/icon-racoontrash.png" alt="Deleted Logs" width="16"
+                                            height="16" class="me-2" />
+                                        Deleted User Logs
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                             <br><br><br><br><br><br><br><br><br><br>
                         </ul>
                     </div>
