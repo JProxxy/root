@@ -69,7 +69,7 @@ if ($log) {
 if ($log) {
     $userName = "Unknown person";
 
-    // Try DB lookup first
+    // Try to get the user from the users table
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
@@ -80,14 +80,18 @@ if ($log) {
         }
     }
 
-    // If user still unknown, try to extract from log's device user log (assuming it’s stored in log)
-    if ($userName === "Unknown person" && preg_match('/^([^\s]+) turned/i', $log['action'] ?? '', $matches)) {
-        $userName = $matches[1]; // ← assign it directly
+    // Fallback: Try to extract username from action text
+    if ($userName === "Unknown person" && isset($log['action'])) {
+        if (preg_match('/^([^\s]+)\s+turned/i', $log['action'], $matches)) {
+            $userName = $matches[1];
+        }
     }
 
+    // Prepare the message
     $status = strtoupper($log['status']);
     $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
 
+    // Add the response to the array
     $response[] = [
         'new' => true,
         'id' => $log['id'],
@@ -96,6 +100,7 @@ if ($log) {
         'timestamp' => $log['last_updated']
     ];
 
+    // Update the tracking table
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
 }
