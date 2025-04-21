@@ -100,7 +100,7 @@ try {
           <!-- Logo and Tagline -->
           <img src="https://rivaniot.online/assets/images/rivanLogo.png" alt="Rivan IoT Logo" width="80" style="display:block;margin:0 auto 10px;">
           <p style="margin:0 0 20px;"><strong>RivanCyber Training Institute</strong><br>
-          Smart Automation for Smarter Living</p>
+          Rivan IoT Notification System</p>
         </td>
       </tr>
       <tr>

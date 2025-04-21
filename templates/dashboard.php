@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 // Get the user_id from the session
 $user_id = $_SESSION['user_id'];
-$role_id = $_SESSION['role_id'];
 
 // Include DB connection (Make sure to replace this with your actual connection file)
 include '../app/config/connection.php';
@@ -183,7 +182,7 @@ if ($user) {
 
                     </div>
 
-                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] === 1): ?>
+                    <?php if (isset($role_id) && $role_id === 1): ?>
     <div class="dashboardLog">
         <div class="headerLog">
             <p>User Activity Log</p>
@@ -212,7 +211,7 @@ if ($user) {
                 container.innerHTML = '';
                 data.forEach(user => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `
+                    row.innerHTML = ` 
                         <td class="userLog">
                             <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
                             <span class="userName">${user.username}</span>
@@ -228,7 +227,6 @@ if ($user) {
     });
     </script>
 <?php endif; ?>
-
                 </div>
 
             </div>
