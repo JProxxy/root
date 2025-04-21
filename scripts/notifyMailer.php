@@ -81,9 +81,9 @@ try {
     <hr>
 
     
-    <!-- Footer Start -->
     <?php
-    echo '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0D2153;color:#fff;padding:40px 20px;font-family:Arial,sans-serif;font-size:12px;line-height:1.4;">
+    echo <<<HTML
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0D2153;color:#fff;padding:40px 20px;font-family:Arial,sans-serif;font-size:12px;line-height:1.4;">
       <tr>
         <td align="center">
           <img src="https://yourdomain.com/assets/logo.png" alt="Your Logo" width="80" style="display:block;margin:0 auto 10px;">
@@ -94,19 +94,18 @@ try {
         <td align="center" style="padding-bottom:20px;">
           <!-- Social Media Links -->
           <a href="https://www.facebook.com/YourPage" style="margin:0 5px;text-decoration:none;">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/svgs/brands/facebook-square.svg" alt="Facebook" width="24" style="display:inline-block;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" width="24" style="display:inline-block;">
           </a>
           <a href="https://www.instagram.com/YourProfile" style="margin:0 5px;text-decoration:none;">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/svgs/brands/instagram-square.svg" alt="Instagram" width="24" style="display:inline-block;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" width="24" style="display:inline-block;">
           </a>
           <a href="https://twitter.com/YourHandle" style="margin:0 5px;text-decoration:none;">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/svgs/brands/twitter-square.svg" alt="Twitter" width="24" style="display:inline-block;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" width="24" style="display:inline-block;">
           </a>
         </td>
       </tr>
       <tr>
         <td style="padding-bottom:20px;text-align:center;">
-          <!-- Contact Info -->
           <p style="margin:5px 0;">Your Address</p>
           <p style="margin:5px 0;"><a href="mailto:youremail@domain.com" style="color:#fff;text-decoration:underline;">youremail@domain.com</a></p>
           <p style="margin:5px 0;"><a href="tel:+1234567890" style="color:#fff;text-decoration:underline;">+1 234-567-890</a></p>
@@ -118,8 +117,10 @@ try {
           © 2025 Your Company. All rights reserved.
         </td>
       </tr>
-    </table>';
+    </table>
+    HTML;
     ?>
+    
     <!-- Footer End -->
     
 
