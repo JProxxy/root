@@ -3,12 +3,6 @@ header('Content-Type: application/json');
 include '../app/config/connection.php';
 
 try {
-    // Initialize an array to hold all the logs
-    $logs = [];
-
-    // Store the last status of devices to avoid duplicate messages
-    $deviceStatuses = [];
-
     // First, we query for the AC remote logs with username
     $query = "SELECT 
                 r.*, 
@@ -19,6 +13,8 @@ try {
 
     $stmt = $conn->prepare($query);
     $stmt->execute();
+
+    $logs = [];
 
     // Process the AC remote logs first
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -94,9 +90,8 @@ try {
             $message = $row['username'] . " - " . $latestUpdate['message'];
         }
 
-        // Add the log, storing the timestamp for sorting purposes
         $logs[] = [
-            "time" => strtotime($row['timestamp']),
+            "time" => date("h:i A", strtotime($row['timestamp'])),
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
@@ -139,77 +134,61 @@ try {
             $message = "Physical switch in " . $deviceName . " is now " . $deviceRow['status'];
         }
 
-        // Check if the device status is different from the last status logged
-        if (!isset($deviceStatuses[$deviceRow['device_name']]) || $deviceStatuses[$deviceRow['device_name']] !== $deviceRow['status']) {
-            // If the status has changed, log the new entry
-            $logs[] = [
-                "time" => strtotime($deviceRow['last_updated']),
-                "message" => $message,
-                "device" => $deviceRow['device_name'],
-                "full_data" => $deviceRow  // Optional: include all raw data for debugging
-            ];
-
-            // Update the stored status for this device
-            $deviceStatuses[$deviceRow['device_name']] = $deviceRow['status'];
-        }
-    }
-
-    // Retrieve multiple gate access logs
-    $gateLogsQuery = "
-    SELECT g.*, u.email 
-    FROM gateAccess_logs g
-    LEFT JOIN users u 
-      ON g.user_id = u.user_id
-    ORDER BY g.timestamp DESC
-    LIMIT 5
-    ";
-    $gateStmt = $conn->prepare($gateLogsQuery);
-    $gateStmt->execute();
-
-    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        // Convert timestamp to Manila time
-        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("h:i A");
-
-        // Figure out “open” vs “denied” from the `result` column
-        $isDenied = ($gateRow['result'] === 'denied');
-
-        if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
-            // Unknown user
-            if ($isDenied) {
-                $message = "An unknown person tried to access the gate";
-            } else {
-                $message = "An unknown person has opened the gate";
-            }
-        } else {
-            // Known user
-            $username = explode('@', $gateRow['email'])[0];
-            $action   = $isDenied
-                        ? 'failed to open'
-                        : 'has opened';
-            $message = "{$username} {$action} the gate";
-        }
-
-        // Add the log
+        // Add a log for device status change
         $logs[] = [
-            "time"      => strtotime($gateRow['timestamp']),
-            "message"   => $message,
-            "device"    => "Access Gate",
-            "full_data" => $gateRow
+            "time" => date("h:i A", strtotime($deviceRow['last_updated'])),
+            "message" => $message,
+            "device" => $deviceRow['device_name'],
+            "full_data" => $deviceRow  // Optional: include all raw data for debugging
         ];
     }
 
-    // Sort the logs by timestamp (preserving the human-readable time format)
-    usort($logs, function($a, $b) {
-        return $a['time'] - $b['time']; // Ascending order (earliest first)
-    });
+// Retrieve multiple gate access logs
+$gateLogsQuery = "
+SELECT g.*, u.email 
+FROM gateAccess_logs g
+LEFT JOIN users u 
+  ON g.user_id = u.user_id
+ORDER BY g.timestamp DESC
+LIMIT 5
+";
+$gateStmt = $conn->prepare($gateLogsQuery);
+$gateStmt->execute();
 
-    // Final step: Format the logs as a JSON response
-    foreach ($logs as &$log) {
-        // Convert timestamp back to human-readable format for output
-        $log['time'] = date("h:i A", $log['time']);
+while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+    // Convert timestamp to Manila time
+    $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+    $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+    $timeStr = $dt->format("h:i A");
+
+    // Figure out “open” vs “denied” from the result column
+    $isDenied = ($gateRow['result'] === 'denied');
+
+    if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
+        // Unknown user
+        if ($isDenied) {
+            $message = "An unknown person tried to access the gate";
+        } else {
+            $message = "An unknown person has opened the gate";
+        }
+    } else {
+        // Known user
+        $username = explode('@', $gateRow['email'])[0];
+        $action   = $isDenied
+                    ? 'failed to open'
+                    : 'has opened';
+        $message = "{$username} {$action} the gate";
     }
+
+    $logs[] = [
+        "time"      => $timeStr,
+        "message"   => $message,
+        "device"    => "Access Gate",
+        "full_data" => $gateRow
+    ];
+}
+
+
 
     echo json_encode($logs);
 
