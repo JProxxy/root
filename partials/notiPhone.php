@@ -1,5 +1,4 @@
 <?php
-
 // Error reporting (development only)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -9,108 +8,100 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Set header for JSON response
 header('Content-Type: application/json');
 
+// Include database connection
 require_once '../app/config/connection.php';
 
-$response = [];
+$systemName = 'gateAccess_logs';
 
-function checkNewLog($conn, $systemName, $tableName, $idField = 'id')
-{
-    // STEP 1: Get most recent ID
-    $stmt = $conn->prepare("SELECT MAX($idField) AS most_recent_id FROM $tableName");
+try {
+    // STEP 1: Get the most recent log ID from the gateAccess_logs table
+    $stmt = $conn->prepare("SELECT MAX(id) AS most_recent_id FROM gateAccess_logs");
     $stmt->execute();
-    $mostRecentId = $stmt->fetch(PDO::FETCH_ASSOC)['most_recent_id'];
+    $mostRecentLog = $stmt->fetch(PDO::FETCH_ASSOC);
+    $mostRecentId = $mostRecentLog['most_recent_id'];
 
-    // STEP 2: Get last known
+    // STEP 2: Fetch the last known ID for this system from the tracking table
     $stmt = $conn->prepare("SELECT last_known_id FROM system_activity_log_tracking WHERE system_name = ?");
     $stmt->execute([$systemName]);
-    $lastKnownId = $stmt->fetch(PDO::FETCH_ASSOC)['last_known_id'] ?? 0;
+    $trackRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    $lastKnownId = $trackRow ? intval($trackRow['last_known_id']) : 0;
 
-    // STEP 3: If new, fetch log
+    // STEP 3: If the most recent ID is greater than the last known ID, proceed
     if ($mostRecentId > $lastKnownId) {
-        $stmt = $conn->prepare("SELECT * FROM $tableName WHERE $idField > ? ORDER BY $idField ASC LIMIT 1");
+        // STEP 4: Fetch the new log entry since the last known ID
+        $stmt = $conn->prepare("SELECT * FROM gateAccess_logs WHERE id > ? ORDER BY id ASC LIMIT 1");
         $stmt->execute([$lastKnownId]);
-        return [$stmt->fetch(PDO::FETCH_ASSOC), $mostRecentId];
-    }
+        $log = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return [null, $mostRecentId];
-}
+        if ($log) {
+            // STEP 4a: Determine userName
+            if ($log['user_id'] != 0) {
+                // Fetch the user info if a valid user_id exists
+                $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+                $u->execute([$log['user_id']]);
+                $user = $u->fetch(PDO::FETCH_ASSOC);
 
-// GATE ACCESS LOGS
-[$log, $latestId] = checkNewLog($conn, 'gateAccess_logs', 'gateAccess_logs');
-if ($log) {
-    if ($log['user_id'] != 0) {
-        $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $stmt->execute([$log['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        $userName = $user && !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
-    } else {
-        $userName = "Unknown person";
-    }
+                if ($user) {
+                    // If the username is available, use it; otherwise, use the local part of the email
+                    $userName = !empty($user['username'])
+                        ? $user['username']
+                        : explode('@', $user['email'])[0];
+                } else {
+                    // If no user data is found, you can also default to "Unknown person"
+                    $userName = 'Unknown person';
+                }
+            } else {
+                // If no valid user_id (user_id = 0), set the name to "Unknown person"
+                $userName = 'Unknown person';
+            }
 
-    $action = $log['user_id'] == 0
-        ? "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}."
-        : "$userName " . ($log['result'] === 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
 
-    $response[] = [
-        'new' => true,
-        'id' => $log['id'],
-        'system_name' => 'gateAccess_logs',
-        'message' => $action,
-        'timestamp' => $log['timestamp']
-    ];
+            // STEP 4b: Build the action message
+            if ($log['user_id'] == 0) {
+                $message = "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}.";
+            } else {
+                $action = $log['result'] === 'open'
+                    ? 'opened the gate'
+                    : 'was denied access';
+                $message = "$userName $action using {$log['method']} at {$log['timestamp']}.";
+            }
 
-    $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
-        ->execute([$latestId, 'gateAccess_logs']);
-}
+            // STEP 5: Respond with notification data to be handled by JavaScript (BGMain.php)
+            echo json_encode([
+                'new' => true,
+                'id' => $log['id'],
+                'system_name' => $systemName,
+                'message' => $message,
+                'timestamp' => $log['timestamp']
+            ]);
 
-// DEVICE LOGS
-
-[$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
-if ($log) {
-    $userName = "Unknown person";
-
-    // Check the user_id and get user data if available
-    if (!empty($log['user_id']) && $log['user_id'] != 0) {
-        $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $stmt->execute([$log['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($user) {
-            $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+            // STEP 6: Update the tracking table
+            $upd = $conn->prepare("
+                UPDATE system_activity_log_tracking 
+                SET last_known_id = ?, updated_at = NOW() 
+                WHERE system_name = ?
+            ");
+            if ($upd->execute([$mostRecentId, $systemName])) {
+                file_put_contents('php://stderr', "Updated last_known_id for $systemName to $mostRecentId\n");
+            } else {
+                file_put_contents('php://stderr', "Failed to update last_known_id for $systemName\n");
+            }
+        } else {
+            echo json_encode(['new' => false]);
         }
+    } else {
+        echo json_encode(['new' => false]);
     }
-
-    // If userName is still "Unknown person", set user_id to 0 (after checks)
-    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
-        $log['user_id'] = 0;
-    }
-
-    // Prepare the message
-    $status = strtoupper($log['status']);
-    $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
-
-    // Add the response to the array
-    $response[] = [
-        'new' => true,
-        'id' => $log['id'],
-        'system_name' => 'device_logs',
-        'message' => $msg,
-        'timestamp' => $log['last_updated']
-    ];
-
-    // Update the tracking table
-    $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
-        ->execute([$latestId, 'device_logs']);
+} catch (Exception $e) {
+    echo json_encode(['new' => false, 'error' => 'Server error: ' . $e->getMessage()]);
 }
+?>
 
-// Ensure a valid response is returned
-if (!empty($response)) {
-    echo json_encode($response);
-} else {
-    // If no new logs, return a response indicating no new data
-    echo json_encode(['new' => false]);
-}
+<?php
+
+//put device_log here
 
 ?>
