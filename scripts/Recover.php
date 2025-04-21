@@ -106,15 +106,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         continue;
                     $data = str_getcsv($line);
                     if (count($data) === $columnCount) {
-                        // Set the created_at field
+                        // Set the created_at field and handle empty fields
                         foreach ($data as $index => &$value) {
-                            if ($header[$index] == 'created_at') {
-                                $value = $formattedDate;
+                            // Set the created_at field to the formatted date if empty
+                            if ($header[$index] == 'created_at' && empty($value)) {
+                                $value = $formattedDate;  // Set the parsed date
                             }
-                            if ($header[$index] == 'email') {
-                                $value = $email; // Set the email field
+
+                            // Handle last_login field - set to a default timestamp if empty
+                            if ($header[$index] == 'last_login' && empty($value)) {
+                                $value = '1970-01-01 00:00:00';  // Set to default timestamp if empty
                             }
-                            // Handle empty datetime fields like reset_token_expiry
+
+                            // Handle other empty fields that should be NULL
+                            if (empty($value)) {
+                                $value = null;
+                            }
+
+                            // Handle reset_token_expiry field - set to NULL if empty
                             if ($header[$index] == 'reset_token_expiry' && empty($value)) {
                                 $value = null;  // Set to NULL if empty
                             }
