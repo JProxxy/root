@@ -5,23 +5,23 @@ include '../app/config/connection.php'; // sets up PDO as $conn
 
 // -------------------------
 // Static notifications (always present)
-$static_notifications = [
-    ["type" => "error",   "title" => "Error",   "message" => "Light sensor malfunction detected on the 5th floor."],
-    ["type" => "info",    "title" => "Info",    "message" => "Room 1 temperature is now within the optimal range (24°C)."],
-    ["type" => "warning", "title" => "Warning", "message" => "Room 2 temperature is rising above the threshold (32°C)."],
-    ["type" => "success", "title" => "Success", "message" => "Water pump has successfully refilled the tank to 100% capacity."]
-];
+// $static_notifications = [
+//     ["type" => "error",   "title" => "Error",   "message" => "Light sensor malfunction detected on the 5th floor."],
+//     ["type" => "info",    "title" => "Info",    "message" => "Room 1 temperature is now within the optimal range (24°C)."],
+//     ["type" => "warning", "title" => "Warning", "message" => "Room 2 temperature is rising above the threshold (32°C)."],
+//     ["type" => "success", "title" => "Success", "message" => "Water pump has successfully refilled the tank to 100% capacity."]
+// ];
 
-// Initialize session notifications
-if (!isset($_SESSION['notifications'])) {
-    $_SESSION['notifications'] = $static_notifications;
-}
-foreach ($static_notifications as $static) {
-    $exists = array_filter($_SESSION['notifications'], fn($n) => $n['message'] === $static['message']);
-    if (!$exists) {
-        $_SESSION['notifications'][] = $static;
-    }
-}
+// // Initialize session notifications
+// if (!isset($_SESSION['notifications'])) {
+//     $_SESSION['notifications'] = $static_notifications;
+// }
+// foreach ($static_notifications as $static) {
+//     $exists = array_filter($_SESSION['notifications'], fn($n) => $n['message'] === $static['message']);
+//     if (!$exists) {
+//         $_SESSION['notifications'][] = $static;
+//     }
+// }
 
 // -------------------------
 // Dynamic notifications container

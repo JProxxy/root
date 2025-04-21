@@ -137,6 +137,7 @@ EOT;
         } else {
             // For other systems, include user info
             $mail->Body = <<<EOT
+<p><strong>User:</strong> $userPart</p>
 <p><strong>Action:</strong> $actionPart</p>
 <p><strong>Time:</strong> $timestamp</p>
 <p><em>This is an automated message. Please do not reply to this email.</em></p>
