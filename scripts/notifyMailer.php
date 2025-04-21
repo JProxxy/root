@@ -58,6 +58,10 @@ foreach ($inputData as $event) {
     // --- Send email ---
     $mail = new PHPMailer(true);
     try {
+        $mail->SMTPDebug = 2; // or 3 for even more details
+        $mail->Debugoutput = function ($str, $level) {
+            file_put_contents('php://stderr', "SMTP Debug [$level]: $str\n", FILE_APPEND);
+        };
         $mail->isSMTP();
         $mail->Host = 'smtp.hostinger.com';
         $mail->SMTPAuth = true;
@@ -147,7 +151,7 @@ EOT;
             file_put_contents('php://stderr', "Inserted notification for Log ID $logId\n");
         }
 
-        
+
         file_put_contents('php://stderr', "Notification sent for Log ID: $logId\n");
     } catch (Exception $e) {
         file_put_contents('php://stderr', "Mailer Exception for Log ID $logId: {$mail->ErrorInfo}\n", FILE_APPEND);
