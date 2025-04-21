@@ -366,12 +366,14 @@ function pollSystems() {
                     timestamp: data.timestamp  // Now coming from server
                 };
 
+                // Log the payload before sending it
+                console.log("Payload being sent:", payload);
+
                 // Trigger email notification
                 fetch('../scripts/notifyMailer.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
-                    console.log("Payload being sent:", payload);
                 })
                 .then(mailResponse => mailResponse.json())
                 .then(mailResult => {
