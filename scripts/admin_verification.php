@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo json_encode(["status" => "error", "message" => "Email could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
         }
     } else {
-        echo json_encode(["status" => "error", "message" => "Your email isn’t registered for admin access. Please use the correct admin email."]);
+        echo json_encode(["status" => "error", "message" => "Your email isnt registered for admin access. Please use the correct admin email."]);
     }
 
     $stmt->closeCursor(); // Use closeCursor() instead of close() for PDO
