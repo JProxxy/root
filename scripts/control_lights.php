@@ -5,27 +5,27 @@ header('Content-Type: application/json');
 // 1) Authenticate session
 $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null; // Initially null if not available
 
-// Debug: Check if session user_id is set
+// Debug: Log session user_id
 error_log('Session user_id: ' . var_export($userId, true));
 
-// If no valid user_id found from session, we could have another fallback strategy (optional)
+// Fallback if no user_id found
 if ($userId === null) {
-    // Debug: Fallback to 0 if no session user_id is found
+    // Debug: Log fallback to 0
     error_log('No session user_id found, falling back to 0');
-    $userId = 0;  // This is your last choice, i.e., when no valid user_id could be found
+    $userId = 0;  // Fallback to 0 if no valid user_id
 }
 
 // 2) Read and parse incoming JSON
 $raw = file_get_contents('php://input');
 $payload = json_decode($raw, true);
 
+// Check if required keys are present
 if (!isset($payload['body'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid payload']);
     exit;
 }
 
-// Decode nested body
 $body = json_decode($payload['body'], true);
 
 if (
@@ -38,28 +38,27 @@ if (
 }
 
 $deviceName = $body['data']['deviceName'];
-$command    = strtoupper($body['data']['command']); // Normalize to ON/OFF
+$command = strtoupper($body['data']['command']); // Normalize to ON/OFF
 
-// Check the topic to determine the correct user_id
-$topic = isset($payload['topic']) ? $payload['topic'] : '';  // Assuming topic is in the payload
+// 3) Check the topic to determine correct user_id
+$topic = isset($payload['topic']) ? $payload['topic'] : '';
 if ($topic === '/building/1/status') {
-    // If the topic is '/building/1/status', it means the light was physically turned off
-    // Therefore, set user_id to 0
-    error_log('Topic is /building/1/status, setting user_id to 0');
+    // Topic '/building/1/status' means the light was physically turned off, so set user_id to 0
+    error_log('Physical turn off detected, setting user_id to 0');
     $userId = 0;
 }
 
-// Debug: Check if user_id is still null or invalid after all checks
-error_log('Final user_id value: ' . var_export($userId, true));
+// Log user_id before command validation
+error_log('User_id before command check: ' . var_export($userId, true));
 
-// 3) Validate command
+// 4) Validate command
 if (!in_array($command, ['ON', 'OFF'], true)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid command']);
     exit;
 }
 
-// 4) Update the Devices table
+// 5) Update the Devices table
 try {
     require_once '../app/config/connection.php'; // Assumes $conn is defined here
 
@@ -77,7 +76,10 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // 5) Update the user_id in the device_logs table for the most recent log entry
+    // Debug log: Log device update success
+    error_log('Device update for ' . $deviceName . ' to status ' . $command . ' succeeded.');
+
+    // 6) Update the user_id in the device_logs table for the most recent log entry
     // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
     $utcDate = new DateTime('now', new DateTimeZone('UTC'));
     $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
@@ -98,6 +100,9 @@ try {
            SET dl.user_id = :user_id
     ";
 
+    // Log user_id before update
+    error_log('Final user_id before device log update: ' . var_export($userId, true));
+
     // Ensure user_id is not NULL
     if ($userId === null) {
         // Debug: Set user_id to 0 if somehow it's null
@@ -110,6 +115,9 @@ try {
         ':user_id' => $userId,  // Use the correct user_id (0 for physical turn-off, session value otherwise)
         ':device_name' => $deviceName
     ]);
+
+    // Success log
+    error_log('Device log update for ' . $deviceName . ' succeeded.');
 
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
