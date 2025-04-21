@@ -7,8 +7,12 @@ require '../vendor/autoload.php';  // Load PHPMailer
 
 // Include DB connection (only if you need it)
 include '../app/config/connection.php';
+
 // Assuming you are already reading the body as JSON
 $inputData = json_decode(file_get_contents('php://input'), true);
+
+// Log the incoming payload for debugging
+file_put_contents('php://stderr', "Received Payload: " . print_r($inputData, true) . "\n");
 
 // Check if the required fields exist
 $logId = isset($inputData['log_id']) ? (int)$inputData['log_id'] : 0;
@@ -49,4 +53,5 @@ try {
 } catch (Exception $e) {
     echo json_encode(['status' => 'error', 'message' => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
 }
+
 ?>
