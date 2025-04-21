@@ -93,57 +93,41 @@ try {
     </table>
     
     <!-- Footer Start -->
-    <footer class="bg-[#0D2153] text-white pt-16 pb-6 px-4 relative">
-      <div class="container mx-auto max-w-6xl">
-        <div class="flex flex-col md:flex-row justify-between items-start">
-          <div class="md:w-1/2 mb-6 md:mb-0">
-            <h2 class="text-xl font-semibold mb-2">RivanCyber Training Institute</h2>
-            <p class="text-gray-200 mb-4">Rivan Cyber Institute is a Network Engineering Bootcamp that caters not just to people around the IT industry but also career shifters.</p>
-            <div class="flex space-x-4">
-              <a href="https://www.facebook.com/RivanInstitute" target="_blank" rel="noreferrer" class="bg-white rounded-full p-2 transition hover:shadow-lg">
-                <!-- Facebook Icon -->
-              </a>
-              <a href="https://m.me/RivanInstitute" target="_blank" rel="noreferrer" class="bg-white rounded-full p-2 transition hover:shadow-lg">
-                <!-- Messenger Icon -->
-              </a>
-              <a href="https://www.instagram.com/rivancyberinstitute" target="_blank" rel="noreferrer" class="bg-white rounded-full p-2 transition hover:shadow-lg">
-                <!-- Instagram Icon -->
-              </a>
-            </div>
-          </div>
-          <div class="md:w-1/2 flex flex-col items-start md:items-end text-gray-200">
-            <h2 class="text-lg font-semibold mb-2">Contact us</h2>
-            <p class="flex items-center mb-1">
-              <!-- Address Icon -->
-              Rivan Building, 18d Mola, Makati, 1200 Metro Manila
-            </p>
-            <p class="flex items-center mb-1">
-              <!-- Email Icon -->
-              <a href="mailto:teamrivan@rcvi.org@gmail.com" class="hover:text-blue-400 transition">teamrivan@rcvi.org</a>
-            </p>
-            <p class="flex items-center mb-1">
-              <!-- Phone Icon -->
-              <a href="tel:+639493760000" class="hover:text-blue-400 transition">+63 949-376-0000</a>
-            </p>
-            <p class="flex items-center mb-1">
-              <!-- Landline Icon -->
-              <a href="tel:+63284252848" class="hover:text-blue-400 transition">+63 2-8425-2848 (Landline)</a>
-            </p>
-            <p class="flex items-center mb-1">
-              <!-- Working Hours Icon -->
-              Mon-Fri 9:00AM - 5:00PM
-            </p>
-          </div>
-        </div>
-        <div class="mt-6 border-t border-gray-600 pt-4 text-center text-sm">
-          © 2025 All Rights Reserved. Design by Leigh.
-        </div>
-      </div>
-      <button class="fixed bottom-6 right-6 bg-white rounded-full p-3 shadow-lg transition hover:bg-gray-200 cursor-pointer">
-        <!-- Scroll to Top Icon -->
-      </button>
-    </footer>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0D2153;color:#fff;padding:40px 20px;font-family:Arial,sans-serif;font-size:12px;line-height:1.4;">
+      <tr>
+        <td align="center">
+          <!-- Logo and Tagline -->
+          <img src="https://rivaniot.online/assets/images/rivanLogo.png" alt="Rivan IoT Logo" width="80" style="display:block;margin:0 auto 10px;">
+          <p style="margin:0 0 20px;"><strong>RivanCyber Training Institute</strong><br>
+          Smart Automation for Smarter Living</p>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding-bottom:20px;">
+          <!-- Social Links -->
+          <a href="https://www.facebook.com/RivanInstitute" style="margin:0 5px;text-decoration:none;"><img src="https://rivaniot.online/assets/images/facebook-icon.png" alt="Facebook" width="24" style="display:inline-block;"></a>
+          <a href="https://m.me/RivanInstitute" style="margin:0 5px;text-decoration:none;"><img src="https://rivaniot.online/assets/images/messenger-icon.png" alt="Messenger" width="24" style="display:inline-block;"></a>
+          <a href="https://www.instagram.com/rivancyberinstitute" style="margin:0 5px;text-decoration:none;"><img src="https://rivaniot.online/assets/images/instagram-icon.png" alt="Instagram" width="24" style="display:inline-block;"></a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom:20px;text-align:center;">
+          <!-- Contact Info -->
+          <p style="margin:5px 0;">Rivan Building, 18d Mola, Makati, 1200 Metro Manila</p>
+          <p style="margin:5px 0;"><a href="mailto:teamrivan@rcvi.org" style="color:#fff;text-decoration:underline;">teamrivan@rcvi.org</a></p>
+          <p style="margin:5px 0;"><a href="tel:+639493760000" style="color:#fff;text-decoration:underline;">+63 949-376-0000</a></p>
+          <p style="margin:5px 0;"><a href="tel:+63284252848" style="color:#fff;text-decoration:underline;">+63 2-8425-2848</a></p>
+          <p style="margin:5px 0;">Mon–Fri 9:00 AM – 5:00 PM</p>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="border-top:1px solid #444;padding-top:10px;font-size:10px;color:#ccc;">
+          © 2025 Rivan IoT. All rights reserved.
+        </td>
+      </tr>
+    </table>
     <!-- Footer End -->
+    
     EOT;
 
     // Send the email
