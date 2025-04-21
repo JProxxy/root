@@ -55,37 +55,21 @@ try {
                 ? "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}."
                 : "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
 
-            // Prevent duplicates using sent_notifications
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM sent_notifications WHERE log_id = ? AND system_name = ?");
-            $stmt->execute([$log['id'], $systemName]);
-            $alreadySent = $stmt->fetchColumn() > 0;
+            // STEP 5: Update the last_known_id in system_activity_log_tracking
+            $stmt = $conn->prepare("
+                INSERT INTO system_activity_log_tracking (system_name, last_known_id)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE last_known_id = VALUES(last_known_id)
+            ");
+            $stmt->execute([$systemName, $mostRecentId]);
 
-            if (!$alreadySent) {
-                // Store the notification log
-                $stmt = $conn->prepare("
-                    INSERT INTO sent_notifications (log_id, system_name, message)
-                    VALUES (?, ?, ?)
-                ");
-                $stmt->execute([$log['id'], $systemName, $message]);
-
-                // STEP 5: Update the last_known_id in system_activity_log_tracking
-                $stmt = $conn->prepare("
-                    INSERT INTO system_activity_log_tracking (system_name, last_known_id)
-                    VALUES (?, ?)
-                    ON DUPLICATE KEY UPDATE last_known_id = VALUES(last_known_id)
-                ");
-                $stmt->execute([$systemName, $mostRecentId]);
-
-                // Respond with notification
-                echo json_encode([
-                    'new' => true,
-                    'id' => $log['id'],
-                    'message' => $message,
-                    'timestamp' => $log['timestamp']
-                ]);
-            } else {
-                echo json_encode(['new' => false]);
-            }
+            // Respond with notification data to be handled by notifyEmail.php
+            echo json_encode([
+                'new' => true,
+                'id' => $log['id'],
+                'message' => $message,
+                'timestamp' => $log['timestamp']
+            ]);
         } else {
             echo json_encode(['new' => false]);
         }
