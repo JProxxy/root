@@ -66,6 +66,7 @@ if ($log) {
 }
 
 
+
 // DEVICE LOGS
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
@@ -124,7 +125,12 @@ if ($log) {
          WHERE system_name = ?
     ")->execute([$latestId, 'device_logs']);
 }
-
-// ... rest of your echo json_encode($response) logic
+// Ensure a valid response is returned
+if (!empty($response)) {
+    echo json_encode($response);
+} else {
+    // If no new logs, return a response indicating no new data
+    echo json_encode(['new' => false]);
+}
 
 ?>
