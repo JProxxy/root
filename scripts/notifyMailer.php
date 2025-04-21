@@ -46,13 +46,10 @@ if (isset($m[1], $m[2])) {
 }
 
 // --- Dynamic recipients ---
-$recipients = [
-    'gateAccess_logs' => ['gate@rivaniot.online'],
-    'acControl_logs'  => ['ac@rivaniot.online'],
-    'water_logs'      => ['water@rivaniot.online'],
-    'lighting_logs'   => ['lighting@rivaniot.online'],
-];
-$toList = $recipients[$systemName] ?? [];
+// $recipients = [
+// // 
+// ];
+// $toList = $recipients[$systemName] ?? [];
 $toList[] = 'superadmin@rivaniot.online';
 $toList[] = 'jpenarubia.a0001@rivaniot.online';
 
