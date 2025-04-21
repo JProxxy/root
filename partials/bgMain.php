@@ -367,7 +367,11 @@ function pollSystems() {
                 fetch('../scripts/notifyMailer.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ log_id: data.id })
+                    body: JSON.stringify({
+                        log_id: data.id,        // The log ID (88 in your case)
+                        message: data.message,  // The message of the event
+                        timestamp: new Date().toISOString()  // The current timestamp
+                    })
                 }).then(mailResponse => {
                     // Optionally handle the response here (e.g., check if the mail was sent)
                     console.log("Mail sent successfully");
@@ -380,5 +384,5 @@ function pollSystems() {
 }
 
 // Poll every 5 seconds for new events
-setInterval(pollSystems, 5000);  
+setInterval(pollSystems, 5000);
 </script>
