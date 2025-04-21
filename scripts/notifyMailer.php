@@ -86,7 +86,7 @@ try {
       <tr>
         <td align="center">
           <!-- Logo and Tagline -->
-          <img src="https://rivanit.com/assets/logo-DaYZ0U1G.png" alt="Rivan IoT Logo" width="80" style="display:block;margin:0 auto 10px;">
+          <img src="https://rivanit.com/assets/logo-DaYZ0U1G.png" alt="Rivan IoT Logo" width="80" style="display:block;margin:0 auto 10px;padding-top:40px;">
           <p style="margin:0 0 20px;"><strong>RivanCyber Training Institute</strong><br>
           Rivan IoT Notification System</p>
         </td>
