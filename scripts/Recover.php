@@ -100,6 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'otp_expiry',
             ];
 
+            // List integer columns that should default to NULL or 0
+            $intFieldsNull = [
+                'otp_code',
+                'failed_attempts',
+            ];
+
             // Insert data into the specified table
             $conn->beginTransaction();
             try {
@@ -129,8 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $value = 0;
                         }
 
-                        // Any empty datetime field → NULL
+                        // Nullable datetime fields → NULL
                         if (in_array($col, $datetimeFields, true) && $value === '') {
+                            $value = null;
+                        }
+
+                        // Nullable integer fields → NULL
+                        if (in_array($col, $intFieldsNull, true) && $value === '') {
                             $value = null;
                         }
                     }
