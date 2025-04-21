@@ -11,63 +11,68 @@ include '../app/config/connection.php';
 $inputData = json_decode(file_get_contents('php://input'), true);
 file_put_contents('php://stderr', "Received Payload: " . print_r($inputData, true) . "\n");
 
-// Ensure input is always an array of events
+// Normalize input: wrap single event in array
 $events = is_array($inputData) && isset($inputData[0]) ? $inputData : [$inputData];
 
+if (empty($events)) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid payload.']);
+    exit;
+}
+
+// Loop through all valid events
 foreach ($events as $event) {
-    $logId      = isset($event['log_id'])      ? (int) $event['log_id'] : 0;
-    $systemName = isset($event['system_name']) ? $event['system_name']  : '';
-    $message    = isset($event['message'])     ? $event['message']      : '';
-    $timestamp  = isset($event['timestamp'])   ? $event['timestamp']    : '';
+    $logId = isset($event['log_id']) ? (int) $event['log_id'] : 0;
+    $systemName = isset($event['system_name']) ? $event['system_name'] : '';
+    $message = isset($event['message']) ? $event['message'] : '';
+    $timestamp = isset($event['timestamp']) ? $event['timestamp'] : '';
 
     if (!$systemName || !$message) {
+        file_put_contents('php://stderr', "Missing info for Log ID: $logId. Skipping...\n", FILE_APPEND);
         continue;
     }
 
-    // Dynamic subject
+    file_put_contents('php://stderr', "Attempting to send notification for Log ID: $logId\n", FILE_APPEND);
+
+    // Define dynamic subject
     $subjects = [
         'gateAccess_logs' => 'Access Gate Information',
-        'acControl_logs'  => 'Air Conditioning Update',
-        'water_logs'      => 'Water System Log',
-        'lighting_logs'   => 'Lighting Activity',
+        'acControl_logs' => 'Air Conditioning Update',
+        'water_logs' => 'Water System Log',
+        'lighting_logs' => 'Lighting Activity',
     ];
-    $base = $subjects[$systemName] ?? 'System Activity Notification';
-    $fullSubject = sprintf("%s - New Event @ %s", $base, date("h:i A", strtotime($timestamp)));
+    $baseSubject = $subjects[$systemName] ?? 'System Activity Notification';
+    $fullSubject = sprintf("%s - New Event @ %s", $baseSubject, date("h:i A", strtotime($timestamp)));
 
-    // Extract user/action
+    // Extract user and action from message
     preg_match('/^(.+?)\s(opened the gate|was denied access)/i', $message, $m);
-    if (isset($m[1], $m[2])) {
-        $userPart   = $m[1];
-        $actionPart = ucfirst($m[2]);
-    } else {
-        $userPart   = 'Unknown';
-        $actionPart = $message;
-    }
+    $userPart = isset($m[1]) ? $m[1] : 'Unknown';
+    $actionPart = isset($m[2]) ? ucfirst($m[2]) : $message;
 
-    // Recipients
-    $toList = [
+    // Define recipients
+    $toList = array_unique([
         'superadmin@rivaniot.online',
-        'jpenarubia.a0001@rivaniot.online',
-    ];
+        'jpenarubia.a0001@rivaniot.online'
+    ]);
 
+    // Setup PHPMailer
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'superadmin@rivaniot.online';
-        $mail->Password   = 'superAdmin0507!';
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'superadmin@rivaniot.online';
+        $mail->Password = 'superAdmin0507!';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Port = 587;
 
         $mail->setFrom('superadmin@rivaniot.online', 'Rivan IoT');
-        foreach (array_unique($toList) as $addr) {
+        foreach ($toList as $addr) {
             $mail->addAddress($addr);
         }
 
         $mail->isHTML(true);
         $mail->Subject = $fullSubject;
-        $mail->Body    = <<<EOT
+        $mail->Body = <<<EOT
 <p><strong>User:</strong> $userPart</p>
 <p><strong>Action:</strong> $actionPart</p>
 <p><strong>Time:</strong> $timestamp</p>
@@ -131,19 +136,26 @@ EOT;
 
         $mail->send();
 
-        // Log successful notification
-        $stmt = $conn->prepare("
-          INSERT INTO sent_notifications (log_id, system_name, message)
-          VALUES (?, ?, ?)
-        ");
+        // Insert to database as confirmation
+        $stmt = $conn->prepare("INSERT INTO sent_notifications (log_id, system_name, message) VALUES (?, ?, ?)");
         $stmt->execute([$logId, $systemName, $message]);
 
-        echo json_encode(['status' => 'success', 'message' => "Notification sent for log_id: $logId"]);
+        if ($stmt->rowCount() === 0) {
+            file_put_contents('php://stderr', "Insert failed for Log ID $logId\n", FILE_APPEND);
+        } else {
+            file_put_contents('php://stderr', "Inserted notification for Log ID $logId\n", FILE_APPEND);
+        }
+
+        file_put_contents('php://stderr', "Notification sent for Log ID: $logId\n", FILE_APPEND);
+
     } catch (Exception $e) {
+        file_put_contents('php://stderr', "Mailer Exception for Log ID $logId: {$mail->ErrorInfo}\n", FILE_APPEND);
         echo json_encode([
-            'status'  => 'error',
-            'log_id'  => $logId,
+            'status' => 'error',
+            'log_id' => $logId,
             'message' => "Mailer Error: {$mail->ErrorInfo}"
         ]);
     }
 }
+
+echo json_encode(['status' => 'success', 'message' => 'Notifications processed.']);
