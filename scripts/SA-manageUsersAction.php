@@ -29,7 +29,7 @@ if (!isset($data['user_id']) || !isset($data['action'])) {
 }
 
 $user_id = $data['user_id'];
-$action  = $data['action'];
+$action = $data['action'];
 error_log("Received action: $action for user_id: $user_id");
 
 include '../app/config/connection.php';
@@ -51,15 +51,19 @@ if (!$user) {
     exit;
 }
 $adminUsername = $user['username'];
-$adminRoleId   = $user['role_id'];
+$adminRoleId = $user['role_id'];
 
 function generateDescription($action, $user_id, $adminUsername)
 {
     switch ($action) {
-        case 'block':   return "Admin $adminUsername blocked user with ID $user_id";
-        case 'unblock': return "Admin $adminUsername unblocked user with ID $user_id";
-        case 'delete':  return "Admin $adminUsername deleted user with ID $user_id";
-        default:        return "Admin $adminUsername performed an unknown action on user with ID $user_id";
+        case 'block':
+            return "Admin $adminUsername blocked user with ID $user_id";
+        case 'unblock':
+            return "Admin $adminUsername unblocked user with ID $user_id";
+        case 'delete':
+            return "Admin $adminUsername deleted user with ID $user_id";
+        default:
+            return "Admin $adminUsername performed an unknown action on user with ID $user_id";
     }
 }
 
@@ -88,16 +92,16 @@ if ($action === 'delete') {
 
         // Load every table name
         $tablesStmt = $conn->query("SHOW TABLES");
-        $tables      = $tablesStmt->fetchAll(PDO::FETCH_NUM);
+        $tables = $tablesStmt->fetchAll(PDO::FETCH_NUM);
 
         $backupSuccess = true;
         foreach ($tables as $tableRow) {
             $tableName = $tableRow[0];
 
             // Only backup tables containing `user_id`
-            $colsStmt = $conn->query("DESCRIBE `$tableName`...");
-            $cols     = $colsStmt->fetchAll(PDO::FETCH_ASSOC);
-            $hasUser  = false;
+            $colsStmt = $conn->query("DESCRIBE `$tableName`");
+            $cols = $colsStmt->fetchAll(PDO::FETCH_ASSOC);
+            $hasUser = false;
             foreach ($cols as $col) {
                 if (strtolower($col['Field']) === 'user_id') {
                     $hasUser = true;
@@ -121,11 +125,11 @@ if ($action === 'delete') {
             // Build filename: {user_id}_{localPart}_{tableName}_{MM-DD-YYYY-hh-mm-AM/PM}.csv
             $stmt = $conn->prepare("SELECT email FROM users WHERE user_id = ?");
             $stmt->execute([$user_id]);
-            $userEmail     = $stmt->fetchColumn() ?: '';
+            $userEmail = $stmt->fetchColumn() ?: '';
             // Extract local part (before '@')
-            $emailParts    = explode('@', $userEmail);
-            $localPart     = $emailParts[0];
-            $timestamp     = date('m-d-Y-h-i-A', time());
+            $emailParts = explode('@', $userEmail);
+            $localPart = $emailParts[0];
+            $timestamp = date('m-d-Y-h-i-A', time());
 
             $filename = sprintf(
                 '%d_%s_%s_%s.csv',
@@ -160,8 +164,8 @@ if ($action === 'delete') {
             $tableName = $tableRow[0];
 
             $colsStmt = $conn->query("DESCRIBE `$tableName`");
-            $cols     = $colsStmt->fetchAll(PDO::FETCH_ASSOC);
-            $hasUser  = false;
+            $cols = $colsStmt->fetchAll(PDO::FETCH_ASSOC);
+            $hasUser = false;
             foreach ($cols as $col) {
                 if (strtolower($col['Field']) === 'user_id') {
                     $hasUser = true;
@@ -188,7 +192,7 @@ if ($action === 'delete') {
 
         // Log into manageuser
         $desc = generateDescription($action, $user_id, $adminUsername);
-        $log  = $conn->prepare(
+        $log = $conn->prepare(
             "INSERT INTO manageuser
               (user_id, username, role_id, type_of_action, to_whom, date, description)
             VALUES (?, ?, ?, ?, ?, NOW(), ?)"
@@ -218,7 +222,7 @@ if ($action === 'block' || $action === 'unblock') {
 
     if ($res) {
         $desc = generateDescription($action, $user_id, $adminUsername);
-        $log  = $conn->prepare(
+        $log = $conn->prepare(
             "INSERT INTO manageuser
               (user_id, username, role_id, type_of_action, to_whom, date, description)
             VALUES (?, ?, ?, ?, ?, NOW(), ?)"
