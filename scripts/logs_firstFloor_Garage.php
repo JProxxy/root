@@ -3,10 +3,7 @@ header('Content-Type: application/json');
 include '../app/config/connection.php';
 
 try {
-    // Initialize an array to store all logs
-    $logs = [];
-
-    // 1) Fetch AC remote logs with username
+    // First, we query for the AC remote logs with username
     $query = "SELECT 
                 r.*, 
                 u.username 
@@ -16,6 +13,8 @@ try {
 
     $stmt = $conn->prepare($query);
     $stmt->execute();
+
+    $logs = [];
 
     // Process the AC remote logs first
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -99,7 +98,7 @@ try {
         ];
     }
 
-    // 2) Fetch Device logs
+    // Now, let's retrieve logs from the device_logs table
     $deviceLogsQuery = "
     SELECT dl.*, u.username
     FROM device_logs dl
@@ -144,59 +143,53 @@ try {
         ];
     }
 
-    // 3) Retrieve multiple gate access logs
-    $gateLogsQuery = "
-    SELECT g.*, u.email 
-    FROM gateAccess_logs g
-    LEFT JOIN users u ON g.user_id = u.user_id
-    ORDER BY g.timestamp DESC
-    LIMIT 5
-    ";
-    $gateStmt = $conn->prepare($gateLogsQuery);
-    $gateStmt->execute();
+// Retrieve multiple gate access logs
+$gateLogsQuery = "
+SELECT g.*, u.email 
+FROM gateAccess_logs g
+LEFT JOIN users u 
+  ON g.user_id = u.user_id
+ORDER BY g.timestamp DESC
+LIMIT 5
+";
+$gateStmt = $conn->prepare($gateLogsQuery);
+$gateStmt->execute();
 
-    // Process gate access logs
-    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        // Convert UTC to Manila time
-        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("h:i A");
+while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+    // Convert timestamp to Manila time
+    $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+    $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+    $timeStr = $dt->format("h:i A");
 
-        // Figure out “open” vs “denied” from the `result` column
-        $isDenied = ($gateRow['result'] === 'denied');
+    // Figure out “open” vs “denied” from the `result` column
+    $isDenied = ($gateRow['result'] === 'denied');
 
-        if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
-            // Unknown user
-            if ($isDenied) {
-                $message = "An unknown person tried to access the gate";
-            } else {
-                $message = "An unknown person has opened the gate";
-            }
+    if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
+        // Unknown user
+        if ($isDenied) {
+            $message = "An unknown person tried to access the gate";
         } else {
-            // Known user
-            $username = explode('@', $gateRow['email'])[0];
-            $action   = $isDenied
-                        ? 'failed to open'
-                        : 'has opened';
-            $message = "{$username} {$action} the gate";
+            $message = "An unknown person has opened the gate";
         }
-
-        $logs[] = [
-            "time"      => $timeStr,
-            "message"   => $message,
-            "device"    => "Access Gate",
-            "full_data" => $gateRow
-        ];
+    } else {
+        // Known user
+        $username = explode('@', $gateRow['email'])[0];
+        $action   = $isDenied
+                    ? 'failed to open'
+                    : 'has opened';
+        $message = "{$username} {$action} the gate";
     }
 
-    // 4) Sort all logs by the timestamp (latest first)
-    usort($logs, function($a, $b) {
-        $timeA = strtotime($a['time']);
-        $timeB = strtotime($b['time']);
-        return $timeB - $timeA; // Sort in descending order
-    });
+    $logs[] = [
+        "time"      => $timeStr,
+        "message"   => $message,
+        "device"    => "Access Gate",
+        "full_data" => $gateRow
+    ];
+}
 
-    // 5) Return the sorted logs as JSON
+
+
     echo json_encode($logs);
 
 } catch (PDOException $e) {
