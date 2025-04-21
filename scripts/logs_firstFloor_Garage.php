@@ -91,6 +91,7 @@ try {
             $message = $row['username'] . " - " . $latestUpdate['message'];
         }
 
+        // Add the log, storing the timestamp for sorting purposes
         $logs[] = [
             "time" => strtotime($row['timestamp']),
             "message" => $message,
@@ -157,10 +158,10 @@ try {
     $gateStmt->execute();
 
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC')); // Assuming stored in UTC
-        $dt->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to Manila time
-        $timeStr = $dt->format("h:i A");  // Format time as needed
-        
+        // Convert timestamp to Manila time
+        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+        $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+        $timeStr = $dt->format("h:i A");
 
         // Figure out “open” vs “denied” from the `result` column
         $isDenied = ($gateRow['result'] === 'denied');
@@ -181,6 +182,7 @@ try {
             $message = "{$username} {$action} the gate";
         }
 
+        // Add the log
         $logs[] = [
             "time"      => strtotime($gateRow['timestamp']),
             "message"   => $message,
@@ -189,12 +191,17 @@ try {
         ];
     }
 
-    // Sort the logs by timestamp
+    // Sort the logs by timestamp (preserving the human-readable time format)
     usort($logs, function($a, $b) {
         return $a['time'] - $b['time']; // Ascending order (earliest first)
     });
 
-    // Format the logs as a JSON response
+    // Final step: Format the logs as a JSON response
+    foreach ($logs as &$log) {
+        // Convert timestamp back to human-readable format for output
+        $log['time'] = date("h:i A", $log['time']);
+    }
+
     echo json_encode($logs);
 
 } catch (PDOException $e) {
