@@ -23,7 +23,7 @@ if (!isset($_POST['password'])) {
 $password = $_POST['password'];
 $user_id = $_SESSION['user_id']; // Get the user_id from the session
 
-echo "User ID: [$user_id]<br>";  // Debug: Print user_id
+echo "User ID: [{$user_id}]<br>";  // Debug: Print user_id
 
 // Fetch the hashed password from the database for this user
 $sql = "SELECT password FROM users WHERE user_id = :user_id LIMIT 1";
@@ -33,15 +33,15 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Debug: Check if user was fetched successfully
 if ($user) {
-    echo "User found: [" . $user['password'] . "]<br>";  // Debug: print hashed password
+    echo "User found: [{$user['password']}]<br>";  // Debug: print hashed password
 } else {
-    echo "<script>console.error('User with ID $user_id not found in the database.');</script>";
+    echo "<script>console.error('User with ID {$user_id} not found in the database.');</script>";
     echo "User not found.<br>";
     exit;
 }
 
 if (!password_verify($password, $user['password'])) {
-    echo "<script>console.error('Incorrect password attempt for user $user_id.');</script>";
+    echo "<script>console.error('Incorrect password attempt for user {$user_id}.');</script>";
     echo "Incorrect password.<br>";
     exit;
 }
@@ -49,19 +49,19 @@ if (!password_verify($password, $user['password'])) {
 // At this point, password is correct, so we proceed with file recovery.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $file = trim($_POST['file']);
-    echo "Received filename: [$file]<br>";  // Debug the received filename
+    echo "Received filename: [{$file}]<br>";  // Debug the received filename
 
     $backupDir = __DIR__ . '/../storage/user/deleted_userAccounts/';
-    echo "Backup Directory (raw): [$backupDir]<br>";
+    echo "Backup Directory (raw): [{$backupDir}]<br>";
     echo "Backup Directory (realpath): [" . realpath($backupDir) . "]<br>";
 
     $filePath = $backupDir . $file;
-    echo "Looking for file: [$filePath]<br>";
+    echo "Looking for file: [{$filePath}]<br>";
 
     if (file_exists($filePath)) {
-        echo "File exists: [$filePath]<br>";  // Debug: Confirm file exists
+        echo "File exists: [{$filePath}]<br>";  // Debug: Confirm file exists
 
-        // Parse the filename
+        // Parse the filename with regex
         $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
 
         if (preg_match($pattern, $file, $matches)) {
@@ -69,19 +69,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             var_dump($matches);  // Debug: Display the matches
 
             // Extract parts
-            $user_id    = $matches[1];
-            $emailPart  = $matches[2];
-            $tableName  = $matches[3];
-            $timestamp  = $matches[4];
+            $user_id   = $matches[1];
+            $emailPart = $matches[2];
+            $tableName = $matches[3];
+            $timestamp = $matches[4];
 
             // Build email and formatted date
             $email         = strtolower($emailPart) . '@rivaniot.online';
             $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
                                  ->format('Y-m-d H:i:s');
 
-            echo "Parsed Account: [$email]<br>";
-            echo "Parsed Date: [$formattedDate]<br>";
-            echo "Destination Table: [$tableName]<br>";
+            echo "Parsed Account: [{$email}]<br>";
+            echo "Parsed Date: [{$formattedDate}]<br>";
+            echo "Destination Table: [{$tableName}]<br>";
 
             $fileData    = file_get_contents($filePath);
             $lines       = explode("\n", $fileData);
@@ -89,16 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $columnCount = count($header);
             echo "CSV Header: " . implode(', ', $header) . "<br>";
 
-            // Prepare to treat these as nullable datetimes
+            // List columns to treat as nullable datetimes
             $datetimeFields = [
                 'minTempTime',
                 'maxTempTime',
                 'last_login',
                 'updated_at',
-                // add more datetime columns here if needed
+                'lock_until',
+                'reset_token_expiry',
+                'otp_expiry',
             ];
 
-            // Insert data into the correct table
+            // Insert data into the specified table
             $conn->beginTransaction();
             try {
                 foreach ($lines as $line) {
@@ -110,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         continue;
                     }
 
-                    // Normalize each column
+                    // Normalize each column value
                     foreach ($data as $idx => &$value) {
                         $col = $header[$idx];
 
@@ -127,11 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $value = 0;
                         }
 
-                        // Reset token expiry → NULL if empty
-                        if ($col === 'reset_token_expiry' && $value === '') {
-                            $value = null;
-                        }
-
                         // Any empty datetime field → NULL
                         if (in_array($col, $datetimeFields, true) && $value === '') {
                             $value = null;
@@ -141,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Build and execute INSERT
                     $placeholders = implode(',', array_fill(0, $columnCount, '?'));
-                    $sql = "INSERT INTO `$tableName` (" . implode(',', $header) . ") VALUES ($placeholders)";
+                    $sql = "INSERT INTO `{$tableName}` (" . implode(',', $header) . ") VALUES ({$placeholders})";
                     $stmt = $conn->prepare($sql);
                     $stmt->execute($data);
                 }
@@ -155,16 +152,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (PDOException $e) {
                 $conn->rollBack();
-                echo "<script>console.error('Error restoring data: " . $e->getMessage() . "');</script>";
+                echo "<script>console.error('Error restoring data: " . addslashes($e->getMessage()) . "');</script>";
                 echo "Error restoring the data: " . $e->getMessage();
             }
         } else {
-            echo "<script>console.error('Invalid filename format for file: $file');</script>";
+            echo "<script>console.error('Invalid filename format for file: {$file}');</script>";
             echo "Invalid filename format.<br>";
         }
     } else {
-        echo "<script>console.error('File not found: $filePath');</script>";
-        echo "File not found: [$filePath]<br>";
+        echo "<script>console.error('File not found: {$filePath}');</script>";
+        echo "File not found: [{$filePath}]<br>";
         echo "Checking file existence with file_exists(): " . (file_exists($filePath) ? 'Yes' : 'No') . "<br>";
     }
 } else {
