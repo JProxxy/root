@@ -50,7 +50,7 @@ include '../app/config/connection.php';  // Include database connection
             </div>
 
             <!-- Error Message -->
-            <span class="password-strength-message error-message" style="display: none;">
+            <span class="password-strength-message error-messages" style="display: none;">
                 Weak password
             </span>
 
