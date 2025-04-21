@@ -93,15 +93,6 @@ if ($log) {
     $status = strtoupper($log['status']);
     $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
 
-    // Fallback: Extract name from the message itself
-    if ($userName === "Unknown person") {
-        if (preg_match('/^([^\s]+)\s+turned/i', $msg, $matches)) {
-            $userName = $matches[1];
-            // Update message with corrected name
-            $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
-        }
-    }
-
     // Add the response to the array
     $response[] = [
         'new' => true,
@@ -114,6 +105,14 @@ if ($log) {
     // Update the tracking table
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
+}
+
+// Ensure a valid response is returned
+if (!empty($response)) {
+    echo json_encode($response);
+} else {
+    // If no new logs, return a response indicating no new data
+    echo json_encode(['new' => false]);
 }
 
 ?>
