@@ -238,55 +238,55 @@ if (!isset($_SESSION['user_id'])) {
                             <span>Outdoor</span>
 
                             <div class="switch-container">
-  <label class="switch">
-    <input type="checkbox" id="accessGateSwitch">
-    <span class="slider"></span>
-  </label>
-</div>
+                                <label class="switch">
+                                    <input type="checkbox" id="accessGateSwitch">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
 
-<script>
-  const gateSwitch = document.getElementById('accessGateSwitch');
+                            <script>
+                                const gateSwitch = document.getElementById('accessGateSwitch');
 
-  gateSwitch.addEventListener('change', function() {
-    // only when user turns it ON:
-    if (!this.checked) return;
+                                gateSwitch.addEventListener('change', function () {
+                                    // only when user turns it ON:
+                                    if (!this.checked) return;
 
-    // disable so you can't spam‑click
-    this.disabled = true;
+                                    // disable so you can't spam‑click
+                                    this.disabled = true;
 
-    // 1) Notify AWS
-    fetch('https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'open',
-        user_id: sessionStorage.getItem('user_id') || 'unknown_user'
-      })
-    })
-    .then(r => r.json())
-    .then(d => console.log('Gate API response:', d))
-    .catch(e => console.error('Gate API error:', e));
+                                    // 1) Notify AWS
+                                    fetch('https://vw2oxci132.execute-api.ap-southeast-1.amazonaws.com/dev-accessgate/accessgate', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            action: 'open',
+                                            user_id: sessionStorage.getItem('user_id') || 'unknown_user'
+                                        })
+                                    })
+                                        .then(r => r.json())
+                                        .then(d => console.log('Gate API response:', d))
+                                        .catch(e => console.error('Gate API error:', e));
 
-    // 2) Log locally
-    fetch('../scripts/log_access_gate.php', {
-      method: 'POST',
-      credentials: 'include'
-    })
-    .then(r => r.json())
-    .then(j => {
-      if (j.success) console.log('Logged locally, id=', j.insertedId);
-      else           console.error('Local log failed:', j.error);
-    })
-    .catch(e => console.error('Logging error:', e));
+                                    // 2) Log locally
+                                    fetch('../scripts/log_access_gate.php', {
+                                        method: 'POST',
+                                        credentials: 'include'
+                                    })
+                                        .then(r => r.json())
+                                        .then(j => {
+                                            if (j.success) console.log('Logged locally, id=', j.insertedId);
+                                            else console.error('Local log failed:', j.error);
+                                        })
+                                        .catch(e => console.error('Logging error:', e));
 
-    // 3) After 2 seconds, reset visually & re-enable
-    setTimeout(() => {
-      gateSwitch.checked = false;  // this flips the UI slider back
-      gateSwitch.disabled = false; // allow new clicks
-      console.log('Switch reset to OFF automatically');
-    }, 2000);
-  });
-</script>
+                                    // 3) After 2 seconds, reset visually & re-enable
+                                    setTimeout(() => {
+                                        gateSwitch.checked = false;  // this flips the UI slider back
+                                        gateSwitch.disabled = false; // allow new clicks
+                                        console.log('Switch reset to OFF automatically');
+                                    }, 2000);
+                                });
+                            </script>
 
 
 
@@ -403,25 +403,7 @@ if (!isset($_SESSION['user_id'])) {
                         data.reverse().forEach((notif, index) => {
                             logHTML += `
                         <tr>
-                        <td class="ffuserTime">
-    <span class="fflogTime">${formatTime(notif.time)}</span>
-</td>
-
-<script>
-    function formatTime(timeStr) {
-        const date = new Date(timeStr);
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        
-        // Convert 24-hour to 12-hour format
-        const formattedHours = hours % 12 || 12;  // Convert 0 to 12 (midnight)
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-        return `${formattedHours}:${formattedMinutes} ${ampm}`;
-    }
-</script>
-
+                        <td class="ffuserTime"><span class="fflogTime">${new Date(notif.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</span></td>
                             <td class="ffuserLog"><span class="ffuserDid">${notif.message}</span></td>
                         </tr>`;
                             if (index !== data.length - 1) {
