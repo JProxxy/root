@@ -45,16 +45,29 @@ try {
         if ($log) {
             $userName = 'Unknown person';
 
-            // Fetch user details if user_id exists in the log
-            if ($log['user_id'] != 0) {
+            // Prepare the message
+            if ($log['user_id'] == 0) {
+                // Unknown person (no user_id associated)
+                $message = "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}.";
+            } else {
+                // Known person (user_id exists)
+                // Fetch the username and email (local part only if email is used)
                 $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
                 $stmt->execute([$log['user_id']]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
                 if ($user) {
-                    $cleanEmail = explode('@', $user['email'])[0];
-                    $userName = (!empty($user['username']) ? $user['username'] : $cleanEmail) . " ({$log['user_id']})";
+                    // If the username is available, use it; otherwise, use the local part of the email
+                    $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+
+                    // Construct the action message (opened or denied access)
+                    $message = "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
+                } else {
+                    // Fallback if user info is missing
+                    $message = "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}.";
                 }
             }
+
 
             // Prepare the message
             $message = $log['user_id'] == 0
