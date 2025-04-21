@@ -11,73 +11,67 @@ include '../app/config/connection.php';
 $inputData = json_decode(file_get_contents('php://input'), true);
 file_put_contents('php://stderr', "Received Payload: " . print_r($inputData, true) . "\n");
 
-if (!is_array($inputData) || empty($inputData)) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid payload.']);
+$logId      = isset($inputData['log_id'])      ? (int)$inputData['log_id'] : 0;
+$systemName = isset($inputData['system_name']) ? $inputData['system_name']   : '';
+$message    = isset($inputData['message'])     ? $inputData['message']      : '';
+$timestamp  = isset($inputData['timestamp'])   ? $inputData['timestamp']    : '';
+
+if (!$systemName || !$message) {
+    echo json_encode(['status'=>'error','message'=>'Message and system name are required']);
     exit;
 }
 
-// --- Loop through all events and send emails ---
-file_put_contents('php://stderr', "Attempting to send notification for Log ID: $logId\n", FILE_APPEND);
+// --- Dynamic subject ---
+$subjects = [
+    'gateAccess_logs' => 'Access Gate Information',
+    'acControl_logs'  => 'Air Conditioning Update',
+    'water_logs'      => 'Water System Log',
+    'lighting_logs'   => 'Lighting Activity',
+];
+$base = $subjects[$systemName] ?? 'System Activity Notification';
+$fullSubject = sprintf("%s - New Event @ %s",
+    $base,
+    date("h:i A", strtotime($timestamp))
+);
 
-foreach ($inputData as $event) {
-    $logId = isset($event['log_id']) ? (int) $event['log_id'] : 0;
-    $systemName = isset($event['system_name']) ? $event['system_name'] : '';
-    $message = isset($event['message']) ? $event['message'] : '';
-    $timestamp = isset($event['timestamp']) ? $event['timestamp'] : '';
+// --- Determine “User” and “Action” from $message ---
+preg_match('/^(.+?)\s(opened the gate|was denied access)/i', $message, $m);
+if (isset($m[1], $m[2])) {
+    $userPart   = $m[1];
+    $actionPart = ucfirst($m[2]);
+} else {
+    // fallback: show entire message as action
+    $userPart   = 'Unknown';
+    $actionPart = $message;
+}
 
-    if (!$systemName || !$message) {
-        file_put_contents('php://stderr', "Event: system_name=$systemName, message=$message\n", FILE_APPEND);
-        continue;  // Skip this event if it's missing critical information
+// --- Dynamic recipients ---
+// $recipients = [
+// // 
+// ];
+// $toList = $recipients[$systemName] ?? [];
+$toList[] = 'superadmin@rivaniot.online';
+$toList[] = 'jpenarubia.a0001@rivaniot.online';
+
+// --- Send email ---
+$mail = new PHPMailer(true);
+try {
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.hostinger.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'superadmin@rivaniot.online';
+    $mail->Password   = 'superAdmin0507!';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    $mail->setFrom('superadmin@rivaniot.online','Rivan IoT');
+    foreach (array_unique($toList) as $addr) {
+        $mail->addAddress($addr);
     }
 
-    // --- Dynamic subject ---
-    $subjects = [
-        'gateAccess_logs' => 'Access Gate Information',
-        'acControl_logs' => 'Air Conditioning Update',
-        'water_logs' => 'Water System Log',
-        'lighting_logs' => 'Lighting Activity',
-    ];
-    $base = $subjects[$systemName] ?? 'System Activity Notification';
-    $fullSubject = sprintf("%s - New Event @ %s", $base, date("h:i A", strtotime($timestamp)));
-
-    // --- Determine “User” and “Action” from $message ---
-    preg_match('/^(.+?)\s(opened the gate|was denied access)/i', $message, $m);
-    if (isset($m[1], $m[2])) {
-        $userPart = $m[1];
-        $actionPart = ucfirst($m[2]);
-    } else {
-        // fallback: show entire message as action
-        $userPart = 'Unknown';
-        $actionPart = $message;
-    }
-
-    // --- Dynamic recipients ---
-    $toList[] = 'superadmin@rivaniot.online';
-    $toList[] = 'jpenarubia.a0001@rivaniot.online';
-
-    // --- Send email ---
-    $mail = new PHPMailer(true);
-    try {
-        $mail->SMTPDebug = 2; // or 3 for even more details
-        $mail->Debugoutput = function ($str, $level) {
-            file_put_contents('php://stderr', "SMTP Debug [$level]: $str\n", FILE_APPEND);
-        };
-        $mail->isSMTP();
-        $mail->Host = 'smtp.hostinger.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'superadmin@rivaniot.online';
-        $mail->Password = 'superAdmin0507!';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        $mail->setFrom('superadmin@rivaniot.online', 'Rivan IoT');
-        foreach (array_unique($toList) as $addr) {
-            $mail->addAddress($addr);
-        }
-
-        $mail->isHTML(true);
-        $mail->Subject = $fullSubject;
-        $mail->Body = <<<EOT
+    $mail->isHTML(true);
+    $mail->Subject = $fullSubject;
+    $mail->Body    = <<<EOT
 <p><strong>User:</strong> $userPart</p>
 <p><strong>Action:</strong> $actionPart</p>
 <p><strong>Time:</strong> $timestamp</p>
@@ -139,28 +133,18 @@ foreach ($inputData as $event) {
 </table>
 EOT;
 
-        $mail->send();
+    $mail->send();
 
-        // Record this notification as sent
-        $stmt = $conn->prepare("INSERT INTO sent_notifications (log_id, system_name, message) VALUES (?, ?, ?)");
-        $stmt->execute([$logId, $systemName, $message]);
+    $stmt = $conn->prepare("
+      INSERT INTO sent_notifications (log_id, system_name, message)
+      VALUES (?, ?, ?)
+    ");
+    $stmt->execute([$logId, $systemName, $message]);
 
-        if ($stmt->rowCount() === 0) {
-            file_put_contents('php://stderr', "Insert failed for Log ID $logId\n");
-        } else {
-            file_put_contents('php://stderr', "Inserted notification for Log ID $logId\n");
-        }
-
-
-        file_put_contents('php://stderr', "Notification sent for Log ID: $logId\n");
-    } catch (Exception $e) {
-        file_put_contents('php://stderr', "Mailer Exception for Log ID $logId: {$mail->ErrorInfo}\n", FILE_APPEND);
-        echo json_encode([
-            'status' => 'error',
-            'message' => "Mailer Error: {$mail->ErrorInfo}"
-        ]);
-    }
-
+    echo json_encode(['status'=>'success','message'=>'Notification sent successfully']);
+} catch (Exception $e) {
+    echo json_encode([
+      'status'=>'error',
+      'message'=>"Mailer Error: {$mail->ErrorInfo}"
+    ]);
 }
-
-echo json_encode(['status' => 'success', 'message' => 'Notifications sent successfully']);
