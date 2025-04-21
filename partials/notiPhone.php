@@ -71,31 +71,27 @@ if ($log) {
 if ($log) {
     $userName = "Unknown person";
 
-    // Debug: Check the user_id
-    file_put_contents('php://stderr', "Device Log - User ID: {$log['user_id']}\n", FILE_APPEND);
-
-    // First check if user_id is not 0 or null and get user data
+    // Check the user_id and get user data if available
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Debug: Check if user data is returned
-        file_put_contents('php://stderr', "User Query Result: " . print_r($user, true) . "\n", FILE_APPEND);
         
         if ($user) {
             $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
         }
     }
 
-    // If $userName is still "Unknown person", set user_id to 0 (after all checks)
+    // If userName is still "Unknown person", set user_id to 0 (after checks)
     if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
         $log['user_id'] = 0;
     }
 
+    // Prepare the message
     $status = strtoupper($log['status']);
     $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
 
+    // Add the response to the array
     $response[] = [
         'new' => true,
         'id' => $log['id'],
@@ -104,8 +100,17 @@ if ($log) {
         'timestamp' => $log['last_updated']
     ];
 
+    // Update the tracking table
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
+}
+
+// Ensure a valid response is returned
+if (!empty($response)) {
+    echo json_encode($response);
+} else {
+    // If no new logs, return a response indicating no new data
+    echo json_encode(['new' => false]);
 }
 
 ?>
