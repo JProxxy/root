@@ -62,84 +62,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "File exists: [$filePath]<br>";  // Debug: Confirm file exists
 
         // Parse the filename
-        // Expected format: 32_jhopscotch_acRemote_04-21-2025-07-27-AM.csv
-        // This pattern:
-        // Group 1: user_id (digits)
-        // Group 2: email (before the first underscore)
-        // Group 3: table name (before the last underscore)
-        // Group 4: timestamp in the format XX-XX-XXXX-XX-XX-[AM|PM]
         $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
 
         if (preg_match($pattern, $file, $matches)) {
             echo "Pattern matched. Matches found:<br>";
             var_dump($matches);  // Debug: Display the matches
 
-            // Extract the necessary parts from the filename
-            $user_id = $matches[1];           // e.g., "32"
-            $emailPart = $matches[2];         // e.g., "jhopscotch"
-            $tableName = $matches[3];         // e.g., "acRemote"
-            $timestamp = $matches[4];         // e.g., "04-21-2025-07-27-AM"
+            // Extract parts
+            $user_id    = $matches[1];
+            $emailPart  = $matches[2];
+            $tableName  = $matches[3];
+            $timestamp  = $matches[4];
 
-            // Create the full email by appending '@rivaniot.online'
-            $email = strtolower($emailPart) . '@rivaniot.online';
-
-            // Convert timestamp to 'Y-m-d H:i:s' format for the created_at column
+            // Build email and formatted date
+            $email         = strtolower($emailPart) . '@rivaniot.online';
             $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
-                ->format('Y-m-d H:i:s');
+                                 ->format('Y-m-d H:i:s');
 
             echo "Parsed Account: [$email]<br>";
             echo "Parsed Date: [$formattedDate]<br>";
             echo "Destination Table: [$tableName]<br>";
 
-            $fileData = file_get_contents($filePath);
-            $lines = explode("\n", $fileData);
-            // Get CSV header
-            $header = str_getcsv(array_shift($lines));
+            $fileData    = file_get_contents($filePath);
+            $lines       = explode("\n", $fileData);
+            $header      = str_getcsv(array_shift($lines));
             $columnCount = count($header);
             echo "CSV Header: " . implode(', ', $header) . "<br>";
+
+            // Prepare to treat these as nullable datetimes
+            $datetimeFields = [
+                'minTempTime',
+                'maxTempTime',
+                'last_login',
+                'updated_at',
+                // add more datetime columns here if needed
+            ];
 
             // Insert data into the correct table
             $conn->beginTransaction();
             try {
                 foreach ($lines as $line) {
-                    if (trim($line) === '')
+                    if (trim($line) === '') {
                         continue;
+                    }
                     $data = str_getcsv($line);
-                    if (count($data) === $columnCount) {
-                        // Set the created_at field
-                        foreach ($data as $index => &$value) {
-                            if ($header[$index] == 'created_at') {
-                                $value = $formattedDate;
-                            }
-                            if ($header[$index] == 'email') {
-                                $value = $email; // Set the email field
-                            }
-                            // Handle empty or null fields for required columns
-                            if ($header[$index] == 'timer' && empty($value)) {
-                                $value = 0;  // Set default value for 'timer' if it's empty
-                            }
-                            if ($header[$index] == 'reset_token_expiry' && empty($value)) {
-                                $value = null;  // Set to NULL if empty
-                            }
+                    if (count($data) !== $columnCount) {
+                        continue;
+                    }
 
-                            // Handle invalid datetime values by setting them to NULL if empty
-                            if ($header[$index] == 'minTempTime' && empty($value)) {
-                                $value = null;  // Set to NULL if empty
-                            }
-                            if ($header[$index] == 'maxTempTime' && empty($value)) {
-                                $value = null;  // Set to NULL if empty (or use CURRENT_TIMESTAMP if needed)
-                            }
+                    // Normalize each column
+                    foreach ($data as $idx => &$value) {
+                        $col = $header[$idx];
 
-                            // Add similar checks for other datetime fields if needed
+                        // Override created_at and email
+                        if ($col === 'created_at') {
+                            $value = $formattedDate;
+                        }
+                        if ($col === 'email') {
+                            $value = $email;
                         }
 
-                        // Insert data into the specified table
-                        $placeholders = implode(',', array_fill(0, $columnCount, '?'));
-                        $sql = "INSERT INTO `$tableName` (" . implode(',', $header) . ") VALUES ($placeholders)";
-                        $stmt = $conn->prepare($sql);
-                        $stmt->execute($data);
+                        // Default timer to 0 if empty
+                        if ($col === 'timer' && $value === '') {
+                            $value = 0;
+                        }
+
+                        // Reset token expiry → NULL if empty
+                        if ($col === 'reset_token_expiry' && $value === '') {
+                            $value = null;
+                        }
+
+                        // Any empty datetime field → NULL
+                        if (in_array($col, $datetimeFields, true) && $value === '') {
+                            $value = null;
+                        }
                     }
+                    unset($value);
+
+                    // Build and execute INSERT
+                    $placeholders = implode(',', array_fill(0, $columnCount, '?'));
+                    $sql = "INSERT INTO `$tableName` (" . implode(',', $header) . ") VALUES ($placeholders)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute($data);
                 }
+
                 $conn->commit();
 
                 if (unlink($filePath)) {
@@ -152,7 +158,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<script>console.error('Error restoring data: " . $e->getMessage() . "');</script>";
                 echo "Error restoring the data: " . $e->getMessage();
             }
-
         } else {
             echo "<script>console.error('Invalid filename format for file: $file');</script>";
             echo "Invalid filename format.<br>";
