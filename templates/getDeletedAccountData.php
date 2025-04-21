@@ -273,47 +273,48 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($files as $index => $file): ?>
-                                                <?php
-                                                /* 
-                                                  Expected filename format:
-                                                  [user_id]_[table]___[emailPart]_[timestamp].csv
-                                                  Example: 51_users___eaquierdojeraldine_04-09-2025-07-21-PM.csv
-                                                */
-                                                $pattern = '/^(\d+)_([^_]+)_(.+?)_(?:(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(?:AM|PM))|(\d{10}))\.csv$/i';
-                                                if (preg_match($pattern, $file, $matches)) {
-                                                    // Build the account email as "table_emailPart@rivaniot.online"
-                                                    $tableName = $matches[2];          // e.g., "users"
-                                                    $emailPart = $matches[3];          // e.g., "eaquierdojeraldine"
-                                                    $account = strtolower($tableName . '_' . $emailPart) . '@rivaniot.online';
+    <?php foreach ($files as $index => $file): ?>
+        <?php
+        /*
+          New expected filename format:
+          [user_id]_[emailPart]_[tableName]_[timestamp].csv
+          Example: 32_jhopscotch_users_04-21-2025-07-27-AM.csv
+        */
+        $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
 
-                                                    // Format the timestamp (replace '-' with space)
-                                                    $rawTimestamp = $matches[4];       // e.g., "04-09-2025-07-21-PM"
-                                                    $formattedDate = str_replace('-', ' ', $rawTimestamp);  // "04 09 2025 07 21 PM"
-                                                } else {
-                                                    // For files that don't match, skip this iteration.
-                                                    continue;
-                                                }
-                                                ?>
-                                                <tr>
-                                                    <td><?php echo htmlspecialchars($account); ?></td>
-                                                    <td><?php echo htmlspecialchars($formattedDate); ?></td>
-                                                    <td class="action-column">
-                                                        <!-- Download button -->
-                                                        <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
-                                                            class="btn btn-download"
-                                                            download="<?php echo htmlspecialchars($file); ?>">
-                                                            Download
-                                                        </a>
-                                                        <!-- Recover button (calls your JS modal for recovery) -->
-                                                        <button type="button" class="btn btn-recover"
-                                                            onclick="showRecoverModal('<?php echo htmlspecialchars($account); ?>', '<?php echo htmlspecialchars($file); ?>')">
-                                                            Recover
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
+        if (preg_match($pattern, $file, $matches)) {
+            $userId     = $matches[1]; // Not used but extracted if needed
+            $emailPart  = $matches[2]; // e.g. "jhopscotch"
+            $tableName  = $matches[3]; // e.g. "users"
+            $timestamp  = $matches[4]; // e.g. "04-21-2025-07-27-AM"
+
+            $account = strtolower($emailPart) . '@rivaniot.online'; // Display email
+            $formattedDate = str_replace('-', ' ', $timestamp);     // Display timestamp
+        } else {
+            continue;
+        }
+        ?>
+        <tr>
+            <td>
+                <?php echo htmlspecialchars($account); ?><br>
+                <small><?php echo htmlspecialchars($file); ?></small> <!-- Display the full filename below the email -->
+            </td>
+            <td><?php echo htmlspecialchars($formattedDate); ?></td>
+            <td class="action-column">
+                <a href="/storage/user/deleted_userAccounts/<?php echo urlencode($file); ?>"
+                   class="btn btn-download"
+                   download="<?php echo htmlspecialchars($file); ?>">
+                    Download
+                </a>
+                <button type="button" class="btn btn-recover"
+                        onclick="showRecoverModal('<?php echo htmlspecialchars($account); ?>', '<?php echo htmlspecialchars($file); ?>')">
+                    Recover
+                </button>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
+
                                     </table>
                                 </div> <!-- End of the scrollable container -->
                             <?php endif; ?>
