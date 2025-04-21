@@ -354,65 +354,92 @@ if (!empty($user_data['profile_picture'])) {
 
 <!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
 <script>
-async function pollSystems() {
-  try {
-    // 1. Trigger all fetches in parallel
-    const [respGate, respDevice, respCustomize] = await Promise.all([
-      fetch('../partials/notiPhone.php'),
-      fetch('../partials/device_logsLights.php'),
-      fetch('../partials/customizeWater.php') 
-    ]);
+  async function pollSystems() {
+    try {
+      // 1. Trigger both fetches in parallel
+      const [respGate, respDevice] = await Promise.all([
+        fetch('../partials/notiPhone.php'),
+        fetch('../partials/device_logsLights.php')
+      ]);
 
-    // 2. Parse all JSON responses
-    const dataGate      = await respGate.json();
-    const dataDevice    = await respDevice.json();
-    const dataCustomize = await respCustomize.json();
+      // 2. Parse both JSON bodies
+      const dataGate = await respGate.json();
+      const dataDevice = await respDevice.json();
 
-    // 3. Merge into a single array of events
-    const events = [];
+      // 3. Merge into a single array of events
+      const events = [];
+      if (Array.isArray(dataGate)) events.push(...dataGate);
+      else if (dataGate.new) events.push(dataGate);
+      if (Array.isArray(dataDevice)) events.push(...dataDevice);
+      else if (dataDevice.new) events.push(dataDevice);
 
-    if (Array.isArray(dataGate))        events.push(...dataGate);
-    else if (dataGate.new)              events.push(dataGate);
+      // 4. Process each event
+      if (events.length) {
+        events.forEach(event => {
+          console.log("New Event:", event.message);
+          const payload = {
+            log_id: event.id,
+            system_name: event.system_name,
+            message: event.message,
+            timestamp: event.timestamp
+          };
+          console.log("Payload being sent:", payload);
 
-    if (Array.isArray(dataDevice))      events.push(...dataDevice);
-    else if (dataDevice.new)            events.push(dataDevice);
+          fetch('../scripts/notifyMailer.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+            .then(r => r.json())
+            .then(result => {
+              if (result.status === "success") console.log("Mail sent:", result.message);
+              else console.error("Mail error:", result.message);
+            })
+            .catch(err => console.error("Mail sending failed:", err));
+        });
+      } else {
+        console.log("No new events.");
+      }
 
-    if (Array.isArray(dataCustomize))   events.push(...dataCustomize);
-    else if (dataCustomize.new)         events.push(dataCustomize); 
-
-    // 4. Process each event
-    if (events.length) {
-      events.forEach(event => {
-        console.log("New Event:", event.message);
-        const payload = {
-          log_id:      event.id,
-          system_name: event.system_name,
-          message:     event.message,
-          timestamp:   event.timestamp
-        };
-        console.log("Payload being sent:", payload);
-
-        fetch('../scripts/notifyMailer.php', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(payload)
-        })
-        .then(r => r.json())
-        .then(result => {
-          if (result.status === "success") console.log("Mail sent:", result.message);
-          else                             console.error("Mail error:", result.message);
-        })
-        .catch(err => console.error("Mail sending failed:", err));
-      });
-    } else {
-      console.log("No new events.");
+    } catch (err) {
+      console.error('Polling failed:', err);
     }
-
-  } catch (err) {
-    console.error('Polling failed:', err);
   }
-}
 
-// Start polling every 5 seconds
-setInterval(pollSystems, 5000);
+  // Start polling every 5 seconds
+  setInterval(pollSystems, 5000);
+</script>
+
+
+
+<script>
+
+  async function checkAndSendData() {
+    const currentTime = new Date();
+    const currentMinute = currentTime.getMinutes();
+    const currentSecond = currentTime.getSeconds();
+
+    // Check if the current time is exactly a whole hour (e.g., 1:00, 2:00)
+    if (currentMinute === 0 && currentSecond === 0) {
+      console.log("Sending email...");
+
+      // Send the request to the PHP script to trigger the email
+      try {
+        const response = await fetch('../partials/sendRoomData.php', { method: 'GET' });
+        const result = await response.json();
+
+        if (result.sent) {
+          console.log('Email sent successfully!');
+        } else {
+          console.log('Failed to send email:', result.message);
+        }
+      } catch (error) {
+        console.error("Error in sending email:", error);
+      }
+    }
+  }
+
+  // Poll every 10 seconds
+  setInterval(checkAndSendData, 10000);
+
 </script>
