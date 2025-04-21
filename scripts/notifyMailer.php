@@ -106,12 +106,12 @@ try {
           <p style="margin:5px 0;"><a href="mailto:teamrivan@rcvi.org" style="color:#fff;text-decoration:underline;">teamrivan@rcvi.org</a></p>
           <p style="margin:5px 0;"><a href="tel:+639493760000" style="color:#fff;text-decoration:underline;">+63 949-376-0000</a></p>
           <p style="margin:5px 0;"><a href="tel:+63284252848" style="color:#fff;text-decoration:underline;">+63 2-8425-2848</a></p>
-          <p style="margin:5px 0;">Mon to Fri at 9:00 AM to 5:00 PM</p>
+          <p style="margin:5px 0;">Mon to Fri at 9:00 AM to 5:00PM</p>
         </td>
       </tr>
       <tr>
         <td align="center" style="border-top:1px solid #444;padding-top:10px;font-size:10px;color:#ccc;">
-          © 2025 Rivan IoT. All rights reserved.
+        © 2025 Rivan IoT. All rights reserved.
         </td>
       </tr>
     </table>
