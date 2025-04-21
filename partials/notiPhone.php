@@ -28,9 +28,14 @@ try {
     $stmt->execute([$systemName]);
     $trackRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $lastKnownId = $trackRow ? intval($trackRow['last_known_id']) : 0;
+    // Ensure last_known_id is retrieved correctly
+    if ($trackRow) {
+        $lastKnownId = intval($trackRow['last_known_id']);
+    } else {
+        $lastKnownId = 0; // Default to 0 if no record found
+    }
 
-    // STEP 3: If the most recent ID is different from the last known ID, proceed
+    // STEP 3: If the most recent ID is greater than the last known ID, proceed
     if ($mostRecentId > $lastKnownId) {
         // STEP 4: Fetch the new log entry since the last known ID
         $stmt = $conn->prepare("SELECT * FROM gateAccess_logs WHERE id > ? ORDER BY id ASC LIMIT 1");
@@ -40,35 +45,23 @@ try {
         if ($log) {
             $userName = 'Unknown person';
 
+            // Fetch user details if user_id exists in the log
             if ($log['user_id'] != 0) {
                 $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
                 $stmt->execute([$log['user_id']]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
                 if ($user) {
                     $cleanEmail = explode('@', $user['email'])[0];
                     $userName = (!empty($user['username']) ? $user['username'] : $cleanEmail) . " ({$log['user_id']})";
                 }
             }
 
+            // Prepare the message
             $message = $log['user_id'] == 0
                 ? "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}."
                 : "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
 
-            // STEP 5: Update the last_known_id in system_activity_log_tracking
-            // STEP 5: Update only the last_known_id and updated_at in system_activity_log_tracking
-            $stmt = $conn->prepare("
-UPDATE system_activity_log_tracking 
-SET last_known_id = ?, updated_at = NOW() 
-WHERE system_name = ?
-");
-       
-            // Log the last_known_id update attempt
-            file_put_contents('php://stderr', "Updated last_known_id for $systemName to $mostRecentId\n");
-            
-            $stmt->execute([$mostRecentId, $systemName]);
-
-            // Respond with notification data to be handled by notifyEmail.php
+            // STEP 5: Respond with notification data to be handled by JavaScript (BGMain.php)
             echo json_encode([
                 'new' => true,
                 'id' => $log['id'],
@@ -76,6 +69,20 @@ WHERE system_name = ?
                 'message' => $message,         // Ensure message is set correctly
                 'timestamp' => $log['timestamp']
             ]);
+
+            // STEP 6: After sending the message, update the system_activity_log_tracking table with the new last_known_id and timestamp
+            $stmt = $conn->prepare("
+                UPDATE system_activity_log_tracking 
+                SET last_known_id = ?, updated_at = NOW() 
+                WHERE system_name = ?
+            ");
+
+            if ($stmt->execute([$mostRecentId, $systemName])) {
+                // Log update attempt for debugging
+                file_put_contents('php://stderr', "Updated last_known_id for $systemName to $mostRecentId\n");
+            } else {
+                file_put_contents('php://stderr', "Failed to update last_known_id for $systemName\n");
+            }
         } else {
             echo json_encode(['new' => false]);
         }
