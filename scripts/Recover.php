@@ -100,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'otp_expiry',
             ];
 
-            // List integer columns that should default to NULL or 0
-            $intFieldsNull = [
+            // List integer columns that should default to 0 if empty
+            $intFieldsZero = [
                 'otp_code',
                 'failed_attempts',
             ];
@@ -140,9 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $value = null;
                         }
 
-                        // Nullable integer fields → NULL
-                        if (in_array($col, $intFieldsNull, true) && $value === '') {
-                            $value = null;
+                        // Integer fields → 0 if empty
+                        if (in_array($col, $intFieldsZero, true) && $value === '') {
+                            $value = 0;
                         }
                     }
                     unset($value);
