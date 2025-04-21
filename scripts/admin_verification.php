@@ -40,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.hostinger.com'; // Replace with your SMTP server
             $mail->SMTPAuth = true;
-            $mail->Username = 'superadmin@rivaniot.online'; // Your email
-            $mail->Password = 'superadmin0507!'; // Your email password
+            $mail->Username = 'jpenarubia.a0001@rivaniot.online'; // Your email
+            $mail->Password = 'ExcelAltH0103!'; // Your email password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo json_encode(["status" => "error", "message" => "Email could not be sent. Mailer Error: {$mail->ErrorInfo}"]);
         }
     } else {
-        echo json_encode(["status" => "error", "message" => "Your email isnt registered for admin access. Please use the correct admin email."]);
+        echo json_encode(["status" => "error", "message" => "Your email isn’t registered for admin access. Please use the correct admin email."]);
     }
 
     $stmt->closeCursor(); // Use closeCursor() instead of close() for PDO
