@@ -413,31 +413,29 @@ if (!empty($user_data['profile_picture'])) {
 
 
 <script>
+async function checkAndSendData() {
+  console.log("Checking time..."); // Add this line
+  const currentTime = new Date();
+  const currentMinute = currentTime.getMinutes();
+  const currentSecond = currentTime.getSeconds();
 
-  async function checkAndSendData() {
-    const currentTime = new Date();
-    const currentMinute = currentTime.getMinutes();
-    const currentSecond = currentTime.getSeconds();
+  if (currentMinute === 0 && currentSecond === 0) {
+    console.log("Sending email...");
 
-    // Check if the current time is exactly a whole hour (e.g., 1:00, 2:00)
-    if (currentMinute === 0 && currentSecond === 0) {
-      console.log("Sending email...");
+    try {
+      const response = await fetch('../partials/sendRoomData.php', { method: 'GET' });
+      const result = await response.json();
 
-      // Send the request to the PHP script to trigger the email
-      try {
-        const response = await fetch('../partials/sendRoomData.php', { method: 'GET' });
-        const result = await response.json();
-
-        if (result.sent) {
-          console.log('Email sent successfully!');
-        } else {
-          console.log('Failed to send email:', result.message);
-        }
-      } catch (error) {
-        console.error("Error in sending email:", error);
+      if (result.sent) {
+        console.log('Email sent successfully!');
+      } else {
+        console.log('Failed to send email:', result.message);
       }
+    } catch (error) {
+      console.error("Error in sending email:", error);
     }
   }
+}
 
   // Poll every 10 seconds
   setInterval(checkAndSendData, 10000);
