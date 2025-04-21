@@ -122,9 +122,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $value = null;  // Set to NULL if empty
                             }
 
-                            // Handle invalid datetime values by setting them to NULL or current timestamp
+                            // Handle invalid datetime values by setting them to NULL if empty
                             if ($header[$index] == 'minTempTime' && empty($value)) {
-                                $value = null;  // Set to NULL if empty (or use CURRENT_TIMESTAMP for default)
+                                $value = null;  // Set to NULL if empty
+                            }
+                            if ($header[$index] == 'maxTempTime' && empty($value)) {
+                                $value = null;  // Set to NULL if empty (or use CURRENT_TIMESTAMP if needed)
                             }
 
                             // Add similar checks for other datetime fields if needed
