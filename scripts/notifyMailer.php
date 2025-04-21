@@ -120,9 +120,8 @@ try {
       </tr>
     </table>';
     ?>
-    
     <!-- Footer End -->
-    EOT;
+    
 
     // Send the email
     $mail->send();
