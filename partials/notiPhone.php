@@ -3,7 +3,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Start session if not started
+// Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,46 +14,74 @@ header('Content-Type: application/json');
 // Include database connection
 require_once '../app/config/connection.php';
 
-// Get the last known ID from the client
-$lastKnownId = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
+$systemName = 'gateAccess_logs';
 
 try {
-    // Fetch the latest gate access log
-    $stmt = $conn->query("SELECT * FROM gateAccess_logs ORDER BY id DESC LIMIT 1");
+    // STEP 1: Fetch the last known ID for this system from tracking table
+    $stmt = $conn->prepare("SELECT last_known_id FROM system_activity_log_tracking WHERE system_name = ?");
+    $stmt->execute([$systemName]);
+    $trackRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $lastKnownId = $trackRow ? intval($trackRow['last_known_id']) : 0;
+
+    // STEP 2: Check for new log
+    $stmt = $conn->prepare("SELECT * FROM gateAccess_logs WHERE id > ? ORDER BY id ASC LIMIT 1");
+    $stmt->execute([$lastKnownId]);
     $log = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($log && $log['id'] > $lastKnownId) {
+    if ($log) {
         $userName = 'Unknown person';
 
-        // Lookup user if user_id is not 0
         if ($log['user_id'] != 0) {
             $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
             $stmt->execute([$log['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
             if ($user) {
-                $cleanEmail = explode('@', $user['email'])[0];  // Clean email for output
+                $cleanEmail = explode('@', $user['email'])[0];
                 $userName = (!empty($user['username']) ? $user['username'] : $cleanEmail) . " ({$log['user_id']})";
             }
         }
-        
-        // Prepare the message
+
         $message = $log['user_id'] == 0
             ? "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}."
             : "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
 
-        echo json_encode([
-            'new' => true,
-            'id' => $log['id'],
-            'message' => $message,
-        ]);
+        // STEP 3: Prevent duplicates using sent_notifications
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM sent_notifications WHERE log_id = ? AND system_name = ?");
+        $stmt->execute([$log['id'], $systemName]);
+        $alreadySent = $stmt->fetchColumn() > 0;
+
+        if (!$alreadySent) {
+            // STEP 4: Update the tracking table
+            $stmt = $conn->prepare("
+                INSERT INTO system_activity_log_tracking (system_name, last_known_id)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE last_known_id = VALUES(last_known_id)
+            ");
+            $stmt->execute([$systemName, $log['id']]);
+
+            // STEP 5: Store notification log
+            $stmt = $conn->prepare("
+                INSERT INTO sent_notifications (log_id, system_name, message)
+                VALUES (?, ?, ?)
+            ");
+            $stmt->execute([$log['id'], $systemName, $message]);
+
+            // STEP 6: Respond with notification
+            echo json_encode([
+                'new' => true,
+                'id' => $log['id'],
+                'message' => $message,
+                'timestamp' => $log['timestamp']
+            ]);
+        } else {
+            echo json_encode(['new' => false]);
+        }
     } else {
-        echo json_encode(['new' => false]);  // No new event found
+        echo json_encode(['new' => false]);
     }
 } catch (Exception $e) {
-    echo json_encode([
-        'new' => false,
-        'error' => 'Server error: ' . $e->getMessage()  // Return error message if exception occurs
-    ]);
+    echo json_encode(['new' => false, 'error' => 'Server error: ' . $e->getMessage()]);
 }
 ?>

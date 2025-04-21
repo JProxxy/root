@@ -350,43 +350,42 @@ if (!empty($user_data['profile_picture'])) {
 
 
 
-
-<!-- NOTIFY USING EMAIL (POLLING) -->
+<!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
 <script>
-let lastKnownId = 0;  // Track the last known ID for all systems (gate, AC, etc.)
-
 function pollSystems() {
-    fetch('../partials/notiPhone.php?last_id=' + lastKnownId)
+    fetch('../partials/notiPhone.php')  // No need to pass `last_id` anymore
         .then(response => response.json())
         .then(data => {
             if (data.new) {
-                lastKnownId = data.id;
                 console.log("New Event:", data.message);
 
-                // Prepare the payload with log_id, message, and timestamp
                 const payload = {
                     log_id: data.id,
+                    system_name: data.system_name, 
                     message: data.message,
-                    timestamp: new Date().toISOString()  // Optionally add the timestamp here
+                    timestamp: data.timestamp  // Now coming from server
                 };
 
-                // Trigger mail notification if there’s a new log event
+                // Trigger email notification
                 fetch('../scripts/notifyMailer.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
-                }).then(mailResponse => {
-                    // Optionally handle the response here
-                    console.log("Mail sent successfully");
-                }).catch(mailError => {
-                    console.error("Mail sending failed:", mailError);
-                });
+                })
+                .then(mailResponse => mailResponse.json())
+                .then(mailResult => {
+                    if (mailResult.status === "success") {
+                        console.log("Mail sent:", mailResult.message);
+                    } else {
+                        console.error("Mail error:", mailResult.message);
+                    }
+                })
+                .catch(mailError => console.error("Mail sending failed:", mailError));
             }
         })
         .catch(error => console.error('Polling failed:', error));
 }
 
-
-// Poll every 5 seconds for new events
+// Poll every 5 seconds
 setInterval(pollSystems, 5000);
 </script>
