@@ -280,7 +280,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
           [user_id]_[emailPart]_[tableName]_[timestamp].csv
           Example: 32_jhopscotch_users_04-21-2025-07-27-AM.csv
         */
-        $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
+        $pattern = '/^(\d+)_([^_]+)_([\w]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
 
         if (preg_match($pattern, $file, $matches)) {
             $userId     = $matches[1]; // Not used but extracted if needed
