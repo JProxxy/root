@@ -64,26 +64,28 @@ if ($log) {
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'gateAccess_logs']);
 }
+// DEVICE LOGS
 
-// DEVICE LOGS
-// DEVICE LOGS
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
+    // Initialize userName as "Unknown person" by default
     $userName = "Unknown person";
 
-    // Check the user_id and get user data if available
+    // Check if user_id is valid and fetch user data
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        // If user data is found, use username or part of the email
         if ($user) {
             $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
         }
     }
 
-    // If userName is still "Unknown person", set user_id to 0 (after checks)
+    // If userName is still "Unknown person", it means user_id was invalid or missing
     if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
+        // Set user_id to 0 explicitly, only if userName is still "Unknown person"
         $log['user_id'] = 0;
     }
 
