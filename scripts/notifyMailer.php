@@ -66,7 +66,23 @@ try {
 
     // Email content
     $mail->Subject = $fullSubject;
-    $mail->Body = "A new log event has been detected in [$systemName]:\n\n" . $message . "\nTimestamp: " . $timestamp;
+    $mail->Body = <<<EOT
+    New Gate Access Event
+    
+    User: jpenarubia.a0001  
+    Action: Opened the gate using website  
+    Time: 2025-04-21 14:43:55
+    
+    If this action was not expected, please verify through the admin dashboard.
+    
+    —
+    Rivan IoT Notification System  
+    Smart Automation for Smarter Living  
+    https://rivaniot.online
+    
+    This is an automated message. Please do not reply to this email.
+    EOT;
+    
 
     // Send the email
     $mail->send();
