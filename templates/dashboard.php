@@ -182,7 +182,7 @@ if ($user) {
 
                     </div>
 
-                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] === 1): ?>
+                  
     <div class="dashboardLog">
         <div class="headerLog">
             <p>User Activity Log</p>
@@ -226,7 +226,7 @@ if ($user) {
             .catch(console.error);
     });
     </script>
-<?php endif; ?>
+
 
                 </div>
 
