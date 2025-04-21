@@ -68,7 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Group 2: table name (any characters except underscore)
         // Group 3: email portion (rest of characters until the next underscore)
         // Group 4: timestamp in the format XX-XX-XXXX-XX-XX-[AP]M
-        $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+        // Filename pattern to match [user_id]_[emailPart]_[table]_[MM-DD-YYYY-hh-mm-AM|PM].csv
+        $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
+
         if (preg_match($pattern, $file, $matches)) {
             echo "Pattern matched. Matches found:<br>";
             var_dump($matches);  // Debug: Display the matches
@@ -98,7 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->beginTransaction();
             try {
                 foreach ($lines as $line) {
-                    if (trim($line) === '') continue;
+                    if (trim($line) === '')
+                        continue;
                     $data = str_getcsv($line);
                     if (count($data) === $columnCount) {
                         foreach ($data as &$value) {
