@@ -82,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Create the full email by appending '@rivaniot.online'
             $email = strtolower($emailPart) . '@rivaniot.online';
-            
+
             // Convert timestamp to 'Y-m-d H:i:s' format for the created_at column
             $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
-                             ->format('Y-m-d H:i:s');
+                ->format('Y-m-d H:i:s');
 
             echo "Parsed Account: [$email]<br>";
             echo "Parsed Date: [$formattedDate]<br>";
@@ -113,9 +113,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $value = $formattedDate;  // Set the parsed date
                             }
 
-                            // Handle last_login field - set to a default timestamp if empty
+                            // Handle last_login field - set to NULL if empty
                             if ($header[$index] == 'last_login' && empty($value)) {
-                                $value = '1970-01-01 00:00:00';  // Set to default timestamp if empty
+                                $value = null;  // Set to NULL if empty
                             }
 
                             // Handle other empty fields that should be NULL
