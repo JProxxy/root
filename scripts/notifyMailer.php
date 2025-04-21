@@ -48,7 +48,26 @@ try {
     $mail->addAddress('jpenarubia.a0001@rivaniot.online');
 
     // Email content
-    $mail->Subject = 'New Event Log';
+    // Prepare dynamic subject based on system
+    $subjectPrefix = [
+        'gateAccess_logs' => 'Access Gate Information',
+        'acControl_logs' => 'Air Conditioning Update',
+        'water_logs' => 'Water System Log',
+        'lighting_logs' => 'Lighting Activity'
+    ];
+
+    // Use default if systemName is not in the array
+    $subject = isset($subjectPrefix[$systemName])
+        ? $subjectPrefix[$systemName]
+        : 'System Activity Notification';
+
+    // Add context (like time or alert summary)
+    $fullSubject = "$subject - New Event @ " . date("h:i A", strtotime($timestamp));
+
+    // Email content
+    $mail->Subject = $fullSubject;
+    $mail->Body = "A new log event has been detected in [$systemName]:\n\n" . $message . "\nTimestamp: " . $timestamp;
+
     $mail->Body = "A new log event has been detected:\n\n" . $message . "\nTimestamp: " . $timestamp;
 
     // Send the email
