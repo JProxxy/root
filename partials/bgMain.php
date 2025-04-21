@@ -288,7 +288,7 @@ if (!empty($user_data['profile_picture'])) {
 
 </html>
 
-
+<!-- ALL check box state -->
 <script>
   const ROLE_ID = <?php echo json_encode($role_id); ?>;
 
@@ -306,6 +306,8 @@ if (!empty($user_data['profile_picture'])) {
   });
 </script>
 
+
+<!-- AC -->
 <script>
   const ROLE_ID = <?php echo json_encode($role_id); ?>;
 

@@ -76,7 +76,8 @@ try {
     </p>
     
     <p>If this action was not expected, please verify it through the 
-    <a href="https://rivaniot.online/dashboard">admin dashboard</a>.</p>
+    <a href="https://rivaniot.online/dashboard">admin dashboard </a>.</p>
+    <em>This is an automated message. Please do not reply to this email.</em>
     
     <hr>
     
@@ -87,7 +88,7 @@ try {
           <p style="margin: 5px 0;"><strong>Rivan IoT Notification System</strong><br>
           Smart Automation for Smarter Living</p>
           <a href="https://rivaniot.online" style="color: #007BFF;">https://rivaniot.online</a><br><br>
-          <em>This is an automated message. Please do not reply to this email.</em>
+       
         </td>
       </tr>
     </table>

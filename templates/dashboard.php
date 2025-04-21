@@ -1,11 +1,23 @@
 <?php
-// session_start(); // Ensure session starts
+session_start(); // Ensure session starts
 
-// if (!isset($_SESSION['user_id'])) {
-//     header("Location: ../templates/login.php");
-//     exit();
-// }
+// Check if user is logged in by checking if 'user_id' session variable is set
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../templates/login.php");
+    exit();
+}
 
+// Get the role_id if the user is logged in
+$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
+
+// Now you can use $role_id to conditionally display content
+if ($role_id == 1) {
+    // Show content for role 1
+    echo "You are role 1";
+} else {
+    // Show content for other roles or deny access
+    echo "Access denied for this role.";
+}
 // $user_id = $_SESSION['user_id'];
 // echo "Welcome, " . $_SESSION['user_name']; // Debug: Check if session works
 ?>
