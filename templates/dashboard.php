@@ -182,56 +182,52 @@ if ($user) {
 
                     </div>
 
-                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] != 3 && $_SESSION['role_id'] != 4): ?>
-                        <div class="dashboardLog">
-                            <div class="headerLog">
-                                <p>User Activity Log</p>
-                                <a href="../templates/userActLogPage.php">
-                                    <img src="../assets/images/next.png" alt="next icon" class="next" />
-                                </a>
-                            </div>
+                    <?php if (isset($_SESSION['role_id']) && $_SESSION['role_id'] === 1): ?>
+    <div class="dashboardLog">
+        <div class="headerLog">
+            <p>User Activity Log</p>
+            <a href="../templates/userActLogPage.php">
+                <img src="../assets/images/next.png" alt="next icon" class="next" />
+            </a>
+        </div>
 
-                            <table class="userLogTable">
-                                <tr>
-                                    <th>User Name</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                                <tbody id="latestUserActivities">
-                                    <!-- Latest 4 user activities will be inserted here dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
+        <table class="userLogTable">
+            <tr>
+                <th>User Name</th>
+                <th>Timestamp</th>
+            </tr>
+            <tbody id="latestUserActivities">
+                <!-- Latest 4 user activities will be inserted here dynamically -->
+            </tbody>
+        </table>
+    </div>
 
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                fetch('../scripts/userActLogDASHBOARD.php') // Replace with actual PHP file path
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (Array.isArray(data)) {
-                                            const activityContainer = document.getElementById('latestUserActivities');
-                                            activityContainer.innerHTML = ''; // Clear previous data
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('../scripts/userActLogDASHBOARD.php')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('latestUserActivities');
+                container.innerHTML = '';
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="userLog">
+                            <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
+                            <span class="userName">${user.username}</span>
+                        </td>
+                        <td class="userTime">
+                            <span class="logTime">${user.timestamp}</span>
+                        </td>
+                    `;
+                    container.appendChild(row);
+                });
+            })
+            .catch(console.error);
+    });
+    </script>
+<?php endif; ?>
 
-                                            data.forEach(user => {
-                                                const row = document.createElement('tr');
-                                                row.innerHTML = `
-                            <td class="userLog">
-                                <img src="${user.profile_picture}" alt="User Icon" class="userIcon" />
-                                <span class="userName">${user.username}</span>
-                            </td>
-                            <td class="userTime">
-                                <span class="logTime">${user.timestamp}</span>
-                            </td>
-                        `;
-                                                activityContainer.appendChild(row);
-                                            });
-                                        } else {
-                                            console.error("Error: Invalid data format", data);
-                                        }
-                                    })
-                                    .catch(error => console.error('Error fetching user activities:', error));
-                            });
-                        </script>
-                    <?php endif; ?>
                 </div>
 
             </div>
