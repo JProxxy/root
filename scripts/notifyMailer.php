@@ -68,7 +68,18 @@ try {
     $mail->Subject = $fullSubject;
     $mail->Body = "A new log event has been detected in [$systemName]:\n\n" . $message . "\nTimestamp: " . $timestamp;
 
-    $mail->Body = "A new log event has been detected:\n\n" . $message . "\nTimestamp: " . $timestamp;
+    // Compose the base body
+    $mail->Body = "A new log event has been detected:\n\n" . $message;
+
+    // Append timestamp if it's not already included
+    if (strpos($message, $timestamp) === false) {
+        $mail->Body .= "\nTimestamp: " . $timestamp;
+    }
+
+    // Add a professional footer
+    $mail->Body .= "\n\n-- \nRivan IoT Notification System\nSmart Automation for Smarter Living\nhttps://rivaniot.online\n\nThis is an automated message. Please do not reply directly to this email.";
+
+
 
     // Send the email
     $mail->send();
