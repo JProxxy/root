@@ -257,7 +257,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                 <p>No backup files found.</p>
                             <?php else: ?>
                                 <div class="scrollable-table-container"> <!-- Add the scrollable container -->
-                                    <table class="table table-striped">
+                                <div style="max-height: 400px; overflow-y: auto;">
                                         <thead>
                                             <tr>
                                                 <th>Account</th>
