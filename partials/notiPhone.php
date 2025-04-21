@@ -64,43 +64,63 @@ if ($log) {
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'gateAccess_logs']);
 }
-// DEVICE LOGS
 
+
+// DEVICE LOGS
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
-    // Initialize userName as "Unknown person" by default
+    // Initialize variables
     $userName = "Unknown person";
+    $consecutiveCount = 0;
+    $lastUserId = null;
 
-    // Check if user_id is valid and fetch user data
-    if (!empty($log['user_id']) && $log['user_id'] != 0) {
-        $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $stmt->execute([$log['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // If user data is found, use username or part of the email
-        if ($user) {
-            $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+    // Prepare an array to store consecutive user actions
+    $consecutiveLogs = [];
+
+    // Loop to process logs and check consecutive user actions
+    while ($log) {
+        if (!empty($log['user_id']) && $log['user_id'] != 0) {
+            // Check for consecutive actions
+            if ($log['user_id'] == $lastUserId) {
+                $consecutiveCount++;
+            } else {
+                $consecutiveCount = 1; // Reset the count for a different user
+            }
+
+            // Store the current user_id and the action
+            $lastUserId = $log['user_id'];
+
+            // If we've reached 10 consecutive actions, generate the message
+            if ($consecutiveCount >= 10) {
+                $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+                $stmt->execute([$log['user_id']]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Use username or part of email
+                $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+
+                // Create the message
+                $msg = "$userName consecutively changed lights 10 times. Please check if there's any abuse.";
+
+                // Add the response to the array
+                $response[] = [
+                    'new' => true,
+                    'system_name' => 'device_logs',
+                    'message' => $msg,
+                    'timestamp' => $log['last_updated']
+                ];
+
+                // Break out of the loop after sending the message
+                break;
+            }
+        } else {
+            // Reset consecutive count if user_id is NULL
+            $consecutiveCount = 0;
         }
+
+        // Move to the next log entry
+        [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
     }
-
-    // If userName is still "Unknown person", it means user_id was invalid or missing
-    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
-        // Set user_id to 0 explicitly, only if userName is still "Unknown person"
-        $log['user_id'] = 0;
-    }
-
-    // Prepare the message
-    $status = strtoupper($log['status']);
-    $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
-
-    // Add the response to the array
-    $response[] = [
-        'new' => true,
-        'id' => $log['id'],
-        'system_name' => 'device_logs',
-        'message' => $msg,
-        'timestamp' => $log['last_updated']
-    ];
 
     // Update the tracking table
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
