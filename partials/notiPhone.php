@@ -27,20 +27,16 @@ try {
 
         // Lookup user if user_id is not 0
         if ($log['user_id'] != 0) {
-            $stmt = $conn->prepare("SELECT username, email FROM users WHERE id = ?");
+            $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
             $stmt->execute([$log['user_id']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
             if ($user) {
-                if (!empty($user['username'])) {
-                    $userName = $user['username'] . " ({$log['user_id']})";
-                } else {
-                    // Strip @rivaniot.online from email
-                    $emailName = str_replace('@rivaniot.online', '', $user['email']);
-                    $userName = $emailName . " ({$log['user_id']})";
-                }
+                $cleanEmail = explode('@', $user['email'])[0];
+                $userName = (!empty($user['username']) ? $user['username'] : $cleanEmail) . " ({$log['user_id']})";
             }
         }
+        
 
         // Prepare the message
         $message = $log['user_id'] == 0
