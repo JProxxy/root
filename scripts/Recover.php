@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "File exists: [$filePath]<br>";  // Debug: Confirm file exists
 
         // Parse the filename
-        // Expected format: 32_jhopscotch_users_04-21-2025-07-27-AM.csv
+        // Expected format: 32_jhopscotch_acRemote_04-21-2025-07-27-AM.csv
         // This pattern:
         // Group 1: user_id (digits)
         // Group 2: email (before the first underscore)
@@ -77,15 +77,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Extract the necessary parts from the filename
             $user_id = $matches[1];           // e.g., "32"
             $emailPart = $matches[2];         // e.g., "jhopscotch"
-            $tableName = $matches[3];         // e.g., "users"
+            $tableName = $matches[3];         // e.g., "acRemote"
             $timestamp = $matches[4];         // e.g., "04-21-2025-07-27-AM"
 
             // Create the full email by appending '@rivaniot.online'
             $email = strtolower($emailPart) . '@rivaniot.online';
-
+            
             // Convert timestamp to 'Y-m-d H:i:s' format for the created_at column
             $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
-                ->format('Y-m-d H:i:s');
+                             ->format('Y-m-d H:i:s');
 
             echo "Parsed Account: [$email]<br>";
             echo "Parsed Date: [$formattedDate]<br>";
@@ -106,24 +106,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         continue;
                     $data = str_getcsv($line);
                     if (count($data) === $columnCount) {
-                        // Set the created_at field and handle empty fields
+                        // Set the created_at field
                         foreach ($data as $index => &$value) {
-                            // Set the created_at field to the formatted date if empty
-                            if ($header[$index] == 'created_at' && empty($value)) {
-                                $value = $formattedDate;  // Set the parsed date
+                            if ($header[$index] == 'created_at') {
+                                $value = $formattedDate;
                             }
-
-                            // Handle last_login field - set to NULL if empty
-                            if ($header[$index] == 'last_login' && empty($value)) {
-                                $value = null;  // Set to NULL if empty
+                            if ($header[$index] == 'email') {
+                                $value = $email; // Set the email field
                             }
-
-                            // Handle other empty fields that should be NULL
-                            if (empty($value)) {
-                                $value = null;
+                            // Handle empty or null fields for required columns
+                            if ($header[$index] == 'timer' && empty($value)) {
+                                $value = 0;  // Set default value for 'timer' if it's empty
                             }
-
-                            // Handle reset_token_expiry field - set to NULL if empty
                             if ($header[$index] == 'reset_token_expiry' && empty($value)) {
                                 $value = null;  // Set to NULL if empty
                             }
