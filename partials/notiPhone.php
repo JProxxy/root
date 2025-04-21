@@ -67,7 +67,8 @@ try {
             echo json_encode([
                 'new' => true,
                 'id' => $log['id'],
-                'message' => $message,
+                'system_name' => $systemName,  // Ensure system_name is set correctly
+                'message' => $message,         // Ensure message is set correctly
                 'timestamp' => $log['timestamp']
             ]);
         } else {
