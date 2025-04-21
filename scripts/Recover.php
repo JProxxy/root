@@ -79,24 +79,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     var_dump($matches);  // Debug: Display the matches
 
     // Extract parts
-    $user_id   = $matches[1];
+    $user_id = $matches[1];
     $emailPart = $matches[2];
     $tableName = $matches[3];
     $timestamp = $matches[4];
 
     // Build email and formatted date
-    $email         = strtolower($emailPart) . '@rivaniot.online';
+    $email = strtolower($emailPart) . '@rivaniot.online';
     $formattedDate = DateTime::createFromFormat('m-d-Y-h-i-A', $timestamp)
-                         ->format('Y-m-d H:i:s');
+        ->format('Y-m-d H:i:s');
 
     echo "Parsed Account: [{$email}]<br>";
     echo "Parsed Date: [{$formattedDate}]<br>";
     echo "Destination Table: [{$tableName}]<br>";
 
     // Read CSV
-    $fileData    = file_get_contents($filePath);
-    $lines       = explode("\n", trim($fileData));
-    $header      = str_getcsv(array_shift($lines));
+    $fileData = file_get_contents($filePath);
+    $lines = explode("\n", trim($fileData));
+    $header = str_getcsv(array_shift($lines));
     $columnCount = count($header);
     echo "CSV Header: " . implode(', ', $header) . "<br>";
 
@@ -179,7 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Build and execute INSERT
             $placeholders = implode(',', array_fill(0, $columnCount, '?'));
-            $sql = "INSERT INTO `{$tableName}` (" . implode(',', $header) . ") VALUES ({$placeholders})";
+            $escapedHeader = array_map(fn($col) => "`$col`", $header); // add backticks
+            $sql = "INSERT INTO `{$tableName}` (" . implode(',', $escapedHeader) . ") VALUES ({$placeholders})";
             $stmt = $conn->prepare($sql);
             $stmt->execute($data);
         }
