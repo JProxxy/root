@@ -353,26 +353,32 @@ if (!empty($user_data['profile_picture'])) {
 
 
 <!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
-<!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
 <script>
 async function pollSystems() {
   try {
-    // 1. Trigger both fetches in parallel
-    const [respGate, respDevice] = await Promise.all([
+    // 1. Trigger all fetches in parallel
+    const [respGate, respDevice, respCustomize] = await Promise.all([
       fetch('../partials/notiPhone.php'),
-      fetch('../partials/device_logsLights.php')
+      fetch('../partials/device_logsLights.php'),
+      fetch('../partials/customizeWater.php') 
     ]);
 
-    // 2. Parse both JSON bodies
-    const dataGate   = await respGate.json();
-    const dataDevice = await respDevice.json();
+    // 2. Parse all JSON responses
+    const dataGate      = await respGate.json();
+    const dataDevice    = await respDevice.json();
+    const dataCustomize = await respCustomize.json();
 
     // 3. Merge into a single array of events
     const events = [];
-    if (Array.isArray(dataGate))   events.push(...dataGate);
-    else if (dataGate.new)          events.push(dataGate);
-    if (Array.isArray(dataDevice)) events.push(...dataDevice);
-    else if (dataDevice.new)        events.push(dataDevice);
+
+    if (Array.isArray(dataGate))        events.push(...dataGate);
+    else if (dataGate.new)              events.push(dataGate);
+
+    if (Array.isArray(dataDevice))      events.push(...dataDevice);
+    else if (dataDevice.new)            events.push(dataDevice);
+
+    if (Array.isArray(dataCustomize))   events.push(...dataCustomize);
+    else if (dataCustomize.new)         events.push(dataCustomize); 
 
     // 4. Process each event
     if (events.length) {
@@ -394,7 +400,7 @@ async function pollSystems() {
         .then(r => r.json())
         .then(result => {
           if (result.status === "success") console.log("Mail sent:", result.message);
-          else                                console.error("Mail error:", result.message);
+          else                             console.error("Mail error:", result.message);
         })
         .catch(err => console.error("Mail sending failed:", err));
       });
