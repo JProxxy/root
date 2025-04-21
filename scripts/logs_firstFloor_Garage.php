@@ -119,7 +119,6 @@ try {
 
     // Process the device logs
     while ($deviceRow = $deviceStmt->fetch(PDO::FETCH_ASSOC)) {
-        // Check if username is null (i.e., if there's no user associated with the log)
         $username = $deviceRow['username'] ? $deviceRow['username'] : "Unknown User";
 
         // Map device name to a friendly name
@@ -127,14 +126,11 @@ try {
 
         // Build message for device logs
         if ($deviceRow['username']) {
-            // If there is a user associated, display the username
             $message = $username . " - " . $deviceName . " is now " . $deviceRow['status'];
         } else {
-            // If no user, indicate it was a physical switch
             $message = "Physical switch in " . $deviceName . " is now " . $deviceRow['status'];
         }
 
-        // Add a log for device status change
         $logs[] = [
             "time" => date("h:i A", strtotime($deviceRow['last_updated'])),
             "message" => $message,
@@ -143,52 +139,49 @@ try {
         ];
     }
 
-// Retrieve multiple gate access logs
-$gateLogsQuery = "
-SELECT g.*, u.email 
-FROM gateAccess_logs g
-LEFT JOIN users u 
-  ON g.user_id = u.user_id
-ORDER BY g.timestamp DESC
-LIMIT 5
-";
-$gateStmt = $conn->prepare($gateLogsQuery);
-$gateStmt->execute();
+    // Retrieve multiple gate access logs
+    $gateLogsQuery = "
+    SELECT g.*, u.email 
+    FROM gateAccess_logs g
+    LEFT JOIN users u 
+    ON g.user_id = u.user_id
+    ORDER BY g.timestamp DESC
+    LIMIT 5
+    ";
+    $gateStmt = $conn->prepare($gateLogsQuery);
+    $gateStmt->execute();
 
-while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-    // Convert timestamp to Manila time
-    $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
-    $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-    $timeStr = $dt->format("h:i A");
+    while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
+        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
+        $dt->setTimezone(new DateTimeZone('Asia/Manila'));
+        $timeStr = $dt->format("h:i A");
 
-    // Figure out “open” vs “denied” from the `result` column
-    $isDenied = ($gateRow['result'] === 'denied');
+        $isDenied = ($gateRow['result'] === 'denied');
 
-    if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
-        // Unknown user
-        if ($isDenied) {
-            $message = "An unknown person tried to access the gate";
+        if ((int)$gateRow['user_id'] === 0 || empty($gateRow['email'])) {
+            if ($isDenied) {
+                $message = "An unknown person tried to access the gate";
+            } else {
+                $message = "An unknown person has opened the gate";
+            }
         } else {
-            $message = "An unknown person has opened the gate";
+            $username = explode('@', $gateRow['email'])[0];
+            $action = $isDenied ? 'failed to open' : 'has opened';
+            $message = "{$username} {$action} the gate";
         }
-    } else {
-        // Known user
-        $username = explode('@', $gateRow['email'])[0];
-        $action   = $isDenied
-                    ? 'failed to open'
-                    : 'has opened';
-        $message = "{$username} {$action} the gate";
+
+        $logs[] = [
+            "time" => $timeStr,
+            "message" => $message,
+            "device" => "Access Gate",
+            "full_data" => $gateRow
+        ];
     }
 
-    $logs[] = [
-        "time"      => $timeStr,
-        "message"   => $message,
-        "device"    => "Access Gate",
-        "full_data" => $gateRow
-    ];
-}
-
-
+    // Sort all logs by timestamp
+    usort($logs, function($a, $b) {
+        return strtotime($a['time']) - strtotime($b['time']);
+    });
 
     echo json_encode($logs);
 
