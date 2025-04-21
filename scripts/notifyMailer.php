@@ -64,25 +64,34 @@ try {
     // Add context (like time or alert summary)
     $fullSubject = "$subject - New Event @ " . date("h:i A", strtotime($timestamp));
 
-    // Email content
-    $mail->Subject = $fullSubject;
-    $mail->Body = <<<EOT
-    New Gate Access Event
-    
-    User: jpenarubia.a0001  
-    Action: Opened the gate using website  
-    Time: 2025-04-21 14:43:55
-    
-    If this action was not expected, please verify through the admin dashboard.
-    
-    —
-    Rivan IoT Notification System  
-    Smart Automation for Smarter Living  
-    https://rivaniot.online
-    
-    This is an automated message. Please do not reply to this email.
-    EOT;
-    
+    $mail->isHTML(true);
+$mail->Subject = $fullSubject;
+$mail->Body = <<<EOT
+<p><strong>New Gate Access Event</strong></p>
+
+<p>
+User: <strong>jpenarubia.a0001</strong><br>
+Action: Opened the gate using website<br>
+Time: 2025-04-21 14:43:55
+</p>
+
+<p>If this action was not expected, please verify it through the 
+<a href="https://rivaniot.online/dashboard">admin dashboard</a>.</p>
+
+<hr>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="font-family: Arial, sans-serif; font-size: 12px; color: #555;">
+  <tr>
+    <td align="center">
+      <img src="https://rivaniot.online/assets/images/rivanLogo.png" alt="Rivan IoT Logo" width="100" style="margin-bottom: 10px;">
+      <p style="margin: 5px 0;"><strong>Rivan IoT Notification System</strong><br>
+      Smart Automation for Smarter Living</p>
+      <a href="https://rivaniot.online" style="color: #007BFF;">https://rivaniot.online</a><br><br>
+      <em>This is an automated message. Please do not reply to this email.</em>
+    </td>
+  </tr>
+</table>
+EOT;
 
     // Send the email
     $mail->send();
