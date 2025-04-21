@@ -18,7 +18,7 @@ $inputData = json_decode(file_get_contents('php://input'), true);
 file_put_contents('php://stderr', "Received Payload: " . print_r($inputData, true) . "\n");
 
 // Extract data from payload
-$logId = isset($inputData['log_id']) ? (int)$inputData['log_id'] : 0;
+$logId = isset($inputData['log_id']) ? (int) $inputData['log_id'] : 0;
 $systemName = isset($inputData['system_name']) ? $inputData['system_name'] : '';
 $message = isset($inputData['message']) ? $inputData['message'] : '';
 $timestamp = isset($inputData['timestamp']) ? $inputData['timestamp'] : '';
@@ -54,9 +54,9 @@ try {
     // Send the email
     $mail->send();
 
-    // ✅ Insert into sent_notifications table
-    $stmt = $conn->prepare("INSERT INTO sent_notifications (log_id, system_name) VALUES (?, ?)");
-    $stmt->execute([$logId, $systemName]);
+    // Insert into sent_notifications table
+    $stmt = $conn->prepare("INSERT INTO sent_notifications (log_id, system_name, message) VALUES (?, ?, ?)");
+    $stmt->execute([$logId, $systemName, $message]);
 
     echo json_encode(['status' => 'success', 'message' => 'Notification sent successfully']);
 } catch (Exception $e) {
