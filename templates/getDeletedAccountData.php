@@ -226,32 +226,24 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             foreach ($files as $file) {
                                 if (preg_match($pattern, $file, $m)) {
                                     list(, $id, $table, $emailPart, $prettyDate, $rawTs) = $m;
-                            
+
                                     if ($prettyDate) {
-                                        $dateObj = DateTime::createFromFormat('m-d-Y-h-i-A', $prettyDate);
-                                        if ($dateObj) {
-                                            $ts = $dateObj->getTimestamp();
-                                            $displayDate = $dateObj->format('m d Y h:i A');
-                                        } else {
-                                            // fallback just in case
-                                            $ts = 0;
-                                            $displayDate = 'Invalid Date';
-                                        }
+                                        $ts = strtotime(str_replace('-', ' ', $prettyDate));
+                                        $displayDate = str_replace('-', ' ', $prettyDate);
                                     } else {
                                         $ts = (int) $rawTs;
                                         $displayDate = date('m d Y h:i A', $ts);
                                     }
-                            
+
                                     if (($currentTime - $ts) > 30 * 24 * 60 * 60) {
                                         $oldFiles[] = [
-                                            'account' => strtolower($emailPart) . '@rivaniot.online',
+                                            'account' => strtolower("{$table}_{$emailPart}") . '@rivaniot.online',
                                             'file' => $file,
                                             'date' => $displayDate
                                         ];
                                     }
                                 }
                             }
-                            
 
                             // Check if the backup directory exists
                             if (!is_dir($backupDir)) {

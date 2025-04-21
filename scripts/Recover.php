@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo "File exists: [{$filePath}]<br>";  // Debug: Confirm file exists
 
     // Parse the filename with regex
-    $pattern = '/^(\d+)_([^_]+)_([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
+    $pattern = '/^(\d+)_([^_]+)_([\w]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(AM|PM))\.csv$/i';
     if (!preg_match($pattern, $file, $matches)) {
         echo "<script>console.error('Invalid filename format for file: {$file}');</script>";
         echo "Invalid filename format.<br>";
