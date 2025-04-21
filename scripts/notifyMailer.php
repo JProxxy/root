@@ -38,7 +38,7 @@ foreach ($events as $event) {
         'gateAccess_logs' => 'Access Gate Information',
         'acControl_logs' => 'Air Conditioning Update',
         'water_logs' => 'Water System Log',
-        'lighting_logs' => 'Lights Activity Notification', // Updated for lights
+        'device_logs' => 'Lights Activity Notification', // Updated for lights
     ];
     $baseSubject = $subjects[$systemName] ?? 'System Activity Notification';
     $fullSubject = sprintf("%s - New Event @ %s", $baseSubject, date("h:i A", strtotime($timestamp)));
@@ -74,7 +74,7 @@ foreach ($events as $event) {
         $mail->Subject = $fullSubject;
 
         // Conditional logic: if it's a lighting log, do not include the user info
-        if ($systemName == 'lighting_logs') {
+        if ($systemName == 'device_logs') {
             $mail->Body = <<<EOT
 <p><strong>Action:</strong> $actionPart</p>
 <p><strong>Time:</strong> $timestamp</p>
