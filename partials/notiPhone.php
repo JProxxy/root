@@ -66,56 +66,65 @@ if ($log) {
 }
 
 
-
 // DEVICE LOGS
-
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
-    // Initialize userName as "Unknown person" by default
-    $userName = "Unknown person";
+    // 1) Lookup friendly device name
+    $deviceNames = [
+        'FFLightOne'   => 'Front Gate Lights',
+        'FFLightTwo'   => 'Front Garage Lights',
+        'FFLightThree' => 'Rear Garage Lights',
+    ];
+    $friendlyName = $deviceNames[$log['device_name']] ?? $log['device_name'];
 
-    // Check if user_id is valid and fetch user data
+    // 2) Lookup source from 'where'
+    $sourceMap = [
+        '/building/1/lights' => 'website',
+        '/building/1/status' => 'switch',
+    ];
+    $source = $sourceMap[$log['where']] ?? $log['where'];
+
+    // 3) Determine username (falling back to email local part)
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // If user data is found, use username or part of the email
-        if ($user) {
-            $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
-        }
+        $userName = $user && !empty($user['username'])
+            ? $user['username']
+            : explode('@', $user['email'])[0];
+    } else {
+        $userName = 'superadmin'; // or whatever default you prefer
     }
 
-    // If userName is still "Unknown person", it means user_id was invalid or missing
-    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
-        // Set user_id to 0 explicitly, only if userName is still "Unknown person"
-        $log['user_id'] = 0;
-    }
-
-    // Prepare the message
+    // 4) Build your final message
     $status = strtoupper($log['status']);
-    $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
+    $msg = sprintf(
+        "%s turned %s %s on Floor %d using %s at %s.",
+        $userName,
+        $status,
+        $friendlyName,
+        $log['floor_id'],
+        $source,
+        $log['last_updated']
+    );
 
-    // Add the response to the array
+    // 5) Push into response
     $response[] = [
-        'new' => true,
-        'id' => $log['id'],
+        'new'         => true,
+        'id'          => $log['id'],
         'system_name' => 'device_logs',
-        'message' => $msg,
-        'timestamp' => $log['last_updated']
+        'message'     => $msg,
+        'timestamp'   => $log['last_updated']
     ];
 
-    // Update the tracking table
-    $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
-        ->execute([$latestId, 'device_logs']);
+    // 6) Update tracking
+    $conn->prepare("
+        UPDATE system_activity_log_tracking 
+           SET last_known_id = ?, updated_at = NOW() 
+         WHERE system_name = ?
+    ")->execute([$latestId, 'device_logs']);
 }
 
-// Ensure a valid response is returned
-if (!empty($response)) {
-    echo json_encode($response);
-} else {
-    // If no new logs, return a response indicating no new data
-    echo json_encode(['new' => false]);
-}
+// ... rest of your echo json_encode($response) logic
 
 ?>
