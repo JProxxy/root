@@ -91,7 +91,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("h:i A", strtotime($row['timestamp'])),  // Only time format (no date)
+            "time" => date("Y-m-d h:i A", strtotime($row['timestamp'])),  // Full timestamp for sorting
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
@@ -132,7 +132,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("h:i A", strtotime($deviceRow['last_updated'])),  // Only time format (no date)
+            "time" => date("Y-m-d h:i A", strtotime($deviceRow['last_updated'])),  // Full timestamp for sorting
             "message" => $message,
             "device" => $deviceRow['device_name'],
             "full_data" => $deviceRow  // Optional: include all raw data for debugging
@@ -154,7 +154,7 @@ try {
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
         $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
         $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("h:i A");  // Only time format (no date)
+        $timeStr = $dt->format("Y-m-d h:i A");  // Full timestamp for sorting
 
         $isDenied = ($gateRow['result'] === 'denied');
 
@@ -171,7 +171,7 @@ try {
         }
 
         $logs[] = [
-            "time" => $timeStr,  // Only time format (no date)
+            "time" => date("h:i A", strtotime($gateRow['timestamp'])),  // Full timestamp for sorting
             "message" => $message,
             "device" => "Access Gate",
             "full_data" => $gateRow
@@ -183,7 +183,13 @@ try {
         return strtotime($a['time']) - strtotime($b['time']);
     });
 
-    echo json_encode($logs);
+    // Adjust final output: only show time (h:i A)
+    $finalLogs = array_map(function($log) {
+        $log['time'] = date("h:i A", strtotime($log['time']));  // Show only the time
+        return $log;
+    }, $logs);
+
+    echo json_encode($finalLogs);
 
 } catch (PDOException $e) {
     echo json_encode([
