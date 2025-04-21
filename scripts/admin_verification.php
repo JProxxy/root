@@ -45,7 +45,7 @@ try {
         try {
             $mail->isSMTP();
             $mail->SMTPDebug = 0;
-            $mail->Host = 'smtp.gmail.com';
+            $mail->Host = 'smtp.hostinger.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'superadmin@rivaniot.online';  // NEW EMAIL
             $mail->Password = 'superAdmin0507!';             // NEW PASSWORD
