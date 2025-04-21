@@ -15,10 +15,7 @@ if ($topic === '/building/1/status') {
 // Log user_id before device status validation
 error_log('User_id before device status update: ' . var_export($userId, true));
 
-// 4) Define a Static Timestamp (example: a fixed time or current time)
-$staticTimestamp = '2025-04-22 12:00:00'; // Replace with your desired static timestamp
-
-// 5) Device validation and database updates
+// 4) Device validation and database updates
 try {
     require_once '../app/config/connection.php'; // Assumes $conn is defined here
 
@@ -26,15 +23,14 @@ try {
     $sql = "
         UPDATE Devices
            SET status = :status,
-               last_updated = :last_updated
+               last_updated = CONVERT_TZ(NOW(), @@session.time_zone, '+08:00')  -- Set last_updated to PHT
          WHERE device_name = :deviceName
     ";
 
     $stmt = $conn->prepare($sql);
     $stmt->execute([ 
         ':status' => $command,
-        ':deviceName' => $deviceName,
-        ':last_updated' => $staticTimestamp // Use the static timestamp here
+        ':deviceName' => $deviceName
     ]);
 
     // Log the success of the device status update
@@ -58,7 +54,7 @@ try {
            ON dl.last_updated = latest_log.latest_time
           AND dl.device_name = :device_name
            SET dl.user_id = :user_id,
-               dl.last_updated = :last_updated  // Set static timestamp here too
+               dl.last_updated = CONVERT_TZ(NOW(), @@session.time_zone, '+08:00')  -- Set last_updated to PHT
     ";
 
     // Log the final user_id used for the device_logs update
@@ -67,8 +63,7 @@ try {
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([ 
         ':user_id' => $userId,  // Use the correct user_id (0 for physical turn-off, session value otherwise)
-        ':device_name' => $deviceName,
-        ':last_updated' => $staticTimestamp // Use the static timestamp here too
+        ':device_name' => $deviceName
     ]);
 
     // Success log
