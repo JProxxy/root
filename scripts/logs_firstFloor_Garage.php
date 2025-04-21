@@ -157,10 +157,10 @@ try {
     $gateStmt->execute();
 
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
-        // Convert timestamp to Manila time
-        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("h:i A");
+        $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC')); // Assuming stored in UTC
+        $dt->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to Manila time
+        $timeStr = $dt->format("h:i A");  // Format time as needed
+        
 
         // Figure out “open” vs “denied” from the `result` column
         $isDenied = ($gateRow['result'] === 'denied');
