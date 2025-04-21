@@ -65,35 +65,34 @@ if ($log) {
         ->execute([$latestId, 'gateAccess_logs']);
 }
 // DEVICE LOGS
-
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
-    // Initialize userName as "Unknown person" by default
     $userName = "Unknown person";
 
-    // Check if user_id is valid and fetch user data
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // If user data is found, use username or part of the email
+
         if ($user) {
-            $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+            $userName = !empty($user['username']) 
+                ? $user['username'] 
+                : explode('@', $user['email'])[0];
         }
     }
 
-    // If userName is still "Unknown person", it means user_id was invalid or missing
-    if ($userName == "Unknown person" && (is_null($log['user_id']) || $log['user_id'] == 0)) {
-        // Set user_id to 0 explicitly, only if userName is still "Unknown person"
-        $log['user_id'] = 0;
+    // If still unknown, get it from the action
+    if ($userName === "Unknown person") {
+        // Extract from device_name log string (assuming it's like 'jpenarubia.a0001 turned OFF...')
+        preg_match('/^([a-zA-Z0-9_.]+) turned/i', "{$log['description']}", $matches);
+        if (!empty($matches[1])) {
+            $userName = $matches[1];
+        }
     }
 
-    // Prepare the message
     $status = strtoupper($log['status']);
     $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
 
-    // Add the response to the array
     $response[] = [
         'new' => true,
         'id' => $log['id'],
@@ -102,17 +101,9 @@ if ($log) {
         'timestamp' => $log['last_updated']
     ];
 
-    // Update the tracking table
     $conn->prepare("UPDATE system_activity_log_tracking SET last_known_id = ?, updated_at = NOW() WHERE system_name = ?")
         ->execute([$latestId, 'device_logs']);
 }
 
-// Ensure a valid response is returned
-if (!empty($response)) {
-    echo json_encode($response);
-} else {
-    // If no new logs, return a response indicating no new data
-    echo json_encode(['new' => false]);
-}
 
 ?>
