@@ -66,70 +66,77 @@ if ($log) {
 }
 
 
+// ─── DEVICE LOGS WITH 10‑CLICK “ABUSE” CHECK ────────────────────────────────────
+list($devRows, $devLatest) = checkNewLog($conn, 'device_logs', 'device_logs');
+if (!empty($devRows)) {
+    $consecutiveCount = 0;
+    $lastUserId      = null;
+    $alertSent       = false;
 
-// DEVICE LOGS
-[$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
-if ($log) {
-    // 1) Lookup friendly device name
-    $deviceNames = [
-        'FFLightOne'   => 'Front Gate Lights',
-        'FFLightTwo'   => 'Front Garage Lights',
-        'FFLightThree' => 'Rear Garage Lights',
-    ];
-    $friendlyName = $deviceNames[$log['device_name']] ?? $log['device_name'];
+    foreach ($devRows as $log) {
+        $uid = (int)$log['user_id'];
+        // only count real users (>0); ignore 0/null
+        if ($uid > 0) {
+            if ($uid === $lastUserId) {
+                $consecutiveCount++;
+            } else {
+                $lastUserId      = $uid;
+                $consecutiveCount = 1;
+            }
+        }
+        // once we hit 10 by the same user → send abuse alert
+        if (!$alertSent && $consecutiveCount >= 10) {
+            // lookup their name
+            $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+            $u->execute([$lastUserId]);
+            $user = $u->fetch(PDO::FETCH_ASSOC);
+            $userName = $user['username'] 
+                ?: explode('@', $user['email'])[0];
 
-    // 2) Lookup source from 'where'
-    $sourceMap = [
-        '/building/1/lights' => 'website',
-        '/building/1/status' => 'switch',
-    ];
-    $source = $sourceMap[$log['where']] ?? $log['where'];
+            // friendly device name map
+            $friendly = [
+                'FFLightOne'   => 'Front Gate Lights',
+                'FFLightTwo'   => 'Front Garage Lights',
+                'FFLightThree' => 'Rear Garage Lights',
+            ][$log['device_name']] ?? $log['device_name'];
 
-    // 3) Determine username (falling back to email local part)
-    if (!empty($log['user_id']) && $log['user_id'] != 0) {
-        $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $stmt->execute([$log['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        $userName = $user && !empty($user['username'])
-            ? $user['username']
-            : explode('@', $user['email'])[0];
-    } else {
-        $userName = 'superadmin'; // or whatever default you prefer
+            // source map
+            $source = [
+                '/building/1/lights' => 'website',
+                '/building/1/status' => 'switch',
+            ][$log['where']] ?? $log['where'];
+
+            $timestamp = $log['last_updated'];
+            $response[] = [
+                'new'         => true,
+                'id'          => $log['id'],
+                'system_name' => 'device_logs',
+                'message'     => sprintf(
+                    "%s consecutively changed %s 10 times via %s on Floor %d. Please check for abuse.",
+                    $userName,
+                    $friendly,
+                    $source,
+                    $log['floor_id']
+                ),
+                'timestamp'   => $timestamp,
+            ];
+            $alertSent = true;
+            break;  // stop once we’ve alerted
+        }
     }
 
-    // 4) Build your final message
-    $status = strtoupper($log['status']);
-    $msg = sprintf(
-        "%s turned %s %s on Floor %d using %s at %s.",
-        $userName,
-        $status,
-        $friendlyName,
-        $log['floor_id'],
-        $source,
-        $log['last_updated']
-    );
-
-    // 5) Push into response
-    $response[] = [
-        'new'         => true,
-        'id'          => $log['id'],
-        'system_name' => 'device_logs',
-        'message'     => $msg,
-        'timestamp'   => $log['last_updated']
-    ];
-
-    // 6) Update tracking
+    // advance tracker past all these
     $conn->prepare("
-        UPDATE system_activity_log_tracking 
-           SET last_known_id = ?, updated_at = NOW() 
+        UPDATE system_activity_log_tracking
+           SET last_known_id = ?, updated_at = NOW()
          WHERE system_name = ?
-    ")->execute([$latestId, 'device_logs']);
+    ")->execute([$devLatest, 'device_logs']);
 }
-// Ensure a valid response is returned
+
+// ─── OUTPUT ────────────────────────────────────────────────────────────────────
 if (!empty($response)) {
     echo json_encode($response);
 } else {
-    // If no new logs, return a response indicating no new data
     echo json_encode(['new' => false]);
 }
 
