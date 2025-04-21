@@ -363,17 +363,20 @@ function pollSystems() {
                 lastKnownId = data.id;
                 console.log("New Event:", data.message);
 
+                // Prepare the payload with log_id, message, and timestamp
+                const payload = {
+                    log_id: data.id,
+                    message: data.message,
+                    timestamp: new Date().toISOString()  // Optionally add the timestamp here
+                };
+
                 // Trigger mail notification if there’s a new log event
                 fetch('../scripts/notifyMailer.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        log_id: data.id,        // The log ID (88 in your case)
-                        message: data.message,  // The message of the event
-                        timestamp: new Date().toISOString()  // The current timestamp
-                    })
+                    body: JSON.stringify(payload)
                 }).then(mailResponse => {
-                    // Optionally handle the response here (e.g., check if the mail was sent)
+                    // Optionally handle the response here
                     console.log("Mail sent successfully");
                 }).catch(mailError => {
                     console.error("Mail sending failed:", mailError);
@@ -382,6 +385,7 @@ function pollSystems() {
         })
         .catch(error => console.error('Polling failed:', error));
 }
+
 
 // Poll every 5 seconds for new events
 setInterval(pollSystems, 5000);
