@@ -34,10 +34,10 @@ $mail = new PHPMailer(true);
 try {
     // Set PHPMailer to use SMTP
     $mail->isSMTP();
-    $mail->Host = 'smtp.gmail.com';
+    $mail->Host = 'smtp.hostinger.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'superadmin@rivaniot.online'; // Your SMTP username
-    $mail->Password = 'superAdmin0507!'; // Your SMTP password
+    $mail->Username = 'superadmin@rivaniot.online'; // Your full Hostinger email address
+    $mail->Password = 'superAdmin0507!'; // Your Hostinger email password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
