@@ -224,21 +224,22 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             $oldFiles = [];
 
                             foreach ($files as $file) {
-                                // Expected filename format: [user_id]_[table]___[emailPart]_[timestamp].csv
-                                $pattern = '/^(\d+)_([^_]+)_(.+?)_(?:(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(?:AM|PM))|(\d{10}))\.csv$/i';
-                                if (preg_match($pattern, $file, $matches)) {
-                                    $rawTimestamp = $matches[4]; // "04-09-2025-07-21-PM"
-                                    $formattedDate = str_replace('-', ' ', $rawTimestamp); // "04 09 2025 07 21 PM"
-                            
-                                    // Convert timestamp to Unix timestamp
-                                    $timestamp = strtotime(str_replace(['AM', 'PM'], ['am', 'pm'], $formattedDate));
+                                if (preg_match($pattern, $file, $m)) {
+                                    list(, $id, $table, $emailPart, $prettyDate, $rawTs) = $m;
 
-                                    // Check if the file is older than 30 days
-                                    if (($currentTime - $timestamp) > 30 * 24 * 60 * 60) { // 30 days in seconds
+                                    if ($prettyDate) {
+                                        $ts = strtotime(str_replace('-', ' ', $prettyDate));
+                                        $displayDate = str_replace('-', ' ', $prettyDate);
+                                    } else {
+                                        $ts = (int)$rawTs;
+                                        $displayDate = date('m d Y h:i A', $ts);
+                                    }
+
+                                    if (($currentTime - $ts) > 30 * 24 * 60 * 60) {
                                         $oldFiles[] = [
-                                            'account' => strtolower($matches[2] . '_' . $matches[3]) . '@rivaniot.online',
-                                            'file' => $file,
-                                            'date' => $formattedDate
+                                            'account' => strtolower("{$table}_{$emailPart}") . '@rivaniot.online',
+                                            'file'    => $file,
+                                            'date'    => $displayDate
                                         ];
                                     }
                                 }
