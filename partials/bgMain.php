@@ -355,37 +355,41 @@ if (!empty($user_data['profile_picture'])) {
 <!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
 <script>
 function pollSystems() {
-    fetch('../partials/notiPhone.php')  // No need to pass `last_id` anymore
+    fetch('../partials/notiPhone.php')
         .then(response => response.json())
         .then(data => {
-            if (data.new) {
-                console.log("New Event:", data.message);
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(event => {
+                    console.log("New Event:", event.message);
 
-                const payload = {
-                    log_id: data.id,
-                    system_name: data.system_name, 
-                    message: data.message,
-                    timestamp: data.timestamp  // Now coming from server
-                };
+                    const payload = {
+                        log_id: event.id,
+                        system_name: event.system_name,
+                        message: event.message,
+                        timestamp: event.timestamp
+                    };
 
-                // Log the payload before sending it
-                console.log("Payload being sent:", payload);
+                    // Log the payload before sending
+                    console.log("Payload being sent:", payload);
 
-                // Trigger email notification
-                fetch('../scripts/notifyMailer.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(mailResponse => mailResponse.json())
-                .then(mailResult => {
-                    if (mailResult.status === "success") {
-                        console.log("Mail sent:", mailResult.message);
-                    } else {
-                        console.error("Mail error:", mailResult.message);
-                    }
-                })
-                .catch(mailError => console.error("Mail sending failed:", mailError));
+                    // Trigger email notification
+                    fetch('../scripts/notifyMailer.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(mailResponse => mailResponse.json())
+                    .then(mailResult => {
+                        if (mailResult.status === "success") {
+                            console.log("Mail sent:", mailResult.message);
+                        } else {
+                            console.error("Mail error:", mailResult.message);
+                        }
+                    })
+                    .catch(mailError => console.error("Mail sending failed:", mailError));
+                });
+            } else {
+                console.log("No new events.");
             }
         })
         .catch(error => console.error('Polling failed:', error));
