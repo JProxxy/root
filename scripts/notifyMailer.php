@@ -124,7 +124,7 @@ try {
       <p style="margin:5px 0;">
         <a href="tel:+63284252848" style="color:#fff;">+63 2-8425-2848</a>
       </p>
-      <p style="margin:5px 0;">Mon–Fri 09:00 AM–05:00 PM</p>
+      <p style="margin:5px 0;">Mon to Fri from 09:00 AM to 05:00 PM</p>
     </td>
   </tr>
   <tr>
