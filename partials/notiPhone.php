@@ -66,85 +66,77 @@ if ($log) {
 }
 
 
+// ─── DEVICE LOGS WITH 10‑CLICK “ABUSE” CHECK ────────────────────────────────────
+list($devRows, $devLatest) = checkNewLog($conn, 'device_logs', 'device_logs');
+if (!empty($devRows)) {
+    $consecutiveCount = 0;
+    $lastUserId      = null;
+    $alertSent       = false;
 
-// DEVICE LOGS
-[$_, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');  // just to get latestId
-// Now grab *all* new entries (not just the first) so we can detect streaks:
-$stmt = $conn->prepare("
-    SELECT * 
-      FROM device_logs 
-     WHERE id > (SELECT last_known_id 
-                   FROM system_activity_log_tracking 
-                  WHERE system_name = ?) 
-  ORDER BY id ASC
-");
-$stmt->execute(['device_logs']);
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$consecutiveCount = 0;
-$lastUserId      = null;
-$alertSent       = false;
-$alertMsg        = '';
-$alertTimestamp  = '';
-
-foreach ($rows as $log) {
-    $uid = $log['user_id'];
-    if (!empty($uid)) {
-        // same user as previous?
-        if ($uid === $lastUserId) {
-            $consecutiveCount++;
-        } else {
-            $lastUserId      = $uid;
-            $consecutiveCount = 1;
+    foreach ($devRows as $log) {
+        $uid = (int)$log['user_id'];
+        // only count real users (>0); ignore 0/null
+        if ($uid > 0) {
+            if ($uid === $lastUserId) {
+                $consecutiveCount++;
+            } else {
+                $lastUserId      = $uid;
+                $consecutiveCount = 1;
+            }
         }
-    } else {
-        // reset on NULL or zero
-        $lastUserId      = null;
-        $consecutiveCount = 0;
+        // once we hit 10 by the same user → send abuse alert
+        if (!$alertSent && $consecutiveCount >= 10) {
+            // lookup their name
+            $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
+            $u->execute([$lastUserId]);
+            $user = $u->fetch(PDO::FETCH_ASSOC);
+            $userName = $user['username'] 
+                ?: explode('@', $user['email'])[0];
+
+            // friendly device name map
+            $friendly = [
+                'FFLightOne'   => 'Front Gate Lights',
+                'FFLightTwo'   => 'Front Garage Lights',
+                'FFLightThree' => 'Rear Garage Lights',
+            ][$log['device_name']] ?? $log['device_name'];
+
+            // source map
+            $source = [
+                '/building/1/lights' => 'website',
+                '/building/1/status' => 'switch',
+            ][$log['where']] ?? $log['where'];
+
+            $timestamp = $log['last_updated'];
+            $response[] = [
+                'new'         => true,
+                'id'          => $log['id'],
+                'system_name' => 'device_logs',
+                'message'     => sprintf(
+                    "%s consecutively changed %s 10 times via %s on Floor %d. Please check for abuse.",
+                    $userName,
+                    $friendly,
+                    $source,
+                    $log['floor_id']
+                ),
+                'timestamp'   => $timestamp,
+            ];
+            $alertSent = true;
+            break;  // stop once we’ve alerted
+        }
     }
 
-    // once we hit 10 in a row, build and queue our alert
-    if (!$alertSent && $consecutiveCount >= 10) {
-        // lookup username/email
-        $u = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
-        $u->execute([$lastUserId]);
-        $user = $u->fetch(PDO::FETCH_ASSOC);
-        $userName = $user && !empty($user['username'])
-                  ? $user['username']
-                  : explode('@', $user['email'])[0];
-
-        $alertTimestamp = $log['last_updated'];
-        $alertMsg = sprintf(
-            "%s consecutively changed lights 10 times. Please check for abuse. Last action at %s.",
-            $userName,
-            $alertTimestamp
-        );
-
-        $response[] = [
-            'new'         => true,
-            'system_name' => 'device_logs',
-            'message'     => $alertMsg,
-            'timestamp'   => $alertTimestamp
-        ];
-
-        $alertSent = true;
-        // don't break—we still want to advance our tracker below
-    }
-}
-
-// STEP 6: Update the tracking table to the very latest ID
-if (!empty($rows)) {
+    // advance tracker past all these
     $conn->prepare("
-        UPDATE system_activity_log_tracking 
-           SET last_known_id = ?, updated_at = NOW() 
+        UPDATE system_activity_log_tracking
+           SET last_known_id = ?, updated_at = NOW()
          WHERE system_name = ?
-    ")->execute([ $rows[count($rows)-1]['id'], 'device_logs' ]);
+    ")->execute([$devLatest, 'device_logs']);
 }
-// Ensure a valid response is returned
+
+// ─── OUTPUT ────────────────────────────────────────────────────────────────────
 if (!empty($response)) {
     echo json_encode($response);
 } else {
-    // If no new logs, return a response indicating no new data
     echo json_encode(['new' => false]);
 }
 
