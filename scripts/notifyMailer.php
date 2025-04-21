@@ -3,10 +3,10 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once '../vendor/autoload.php';  // Adjust the path if necessary
+require '../vendor/autoload.php';  // Load PHPMailer
 
 // Include DB connection (only if you need it)
-require_once '../app/config/connection.php';
+include '../app/config/connection.php';
 // Assuming you are already reading the body as JSON
 $inputData = json_decode(file_get_contents('php://input'), true);
 
