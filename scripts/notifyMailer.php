@@ -68,33 +68,6 @@ try {
     $mail->Subject = $fullSubject;
     $mail->Body = "A new log event has been detected in [$systemName]:\n\n" . $message . "\nTimestamp: " . $timestamp;
 
-    // Build the professional email body
-    $mail->Body = <<<EOT
-📢 *New Gate Access Event*
-
-Dear Team,
-
-We would like to inform you of a new access event logged by the system:
-
-$message
-
-⏱ Timestamp: {$timestamp}
-
-If this activity seems suspicious or unexpected, please review it immediately through the admin dashboard.
-
-—
-
-Kind regards,  
-**Rivan IoT Notification System**  
-Smart Automation for Smarter Living  
-🌐 https://rivaniot.online  
-
----
-
-*This is an automated notification. Please do not reply to this email.*
-EOT;
-
-
     // Send the email
     $mail->send();
 
