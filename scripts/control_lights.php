@@ -3,14 +3,15 @@ session_start();
 header('Content-Type: application/json');
 
 // 1) Authenticate session
-// Use user_id from session, check if valid user_id is available
 $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null; // Initially null if not available
 
+// Debug: Check if session user_id is set
+error_log('Session user_id: ' . var_export($userId, true));
+
 // If no valid user_id found from session, we could have another fallback strategy (optional)
-// For example, checking for specific conditions or returning a specific error.
 if ($userId === null) {
-    // Optional: Add another method of getting user_id (from token, query param, etc.) before defaulting to 0
-    // Fallback to 0 if absolutely no valid user_id exists
+    // Debug: Fallback to 0 if no session user_id is found
+    error_log('No session user_id found, falling back to 0');
     $userId = 0;  // This is your last choice, i.e., when no valid user_id could be found
 }
 
@@ -44,8 +45,12 @@ $topic = isset($payload['topic']) ? $payload['topic'] : '';  // Assuming topic i
 if ($topic === '/building/1/status') {
     // If the topic is '/building/1/status', it means the light was physically turned off
     // Therefore, set user_id to 0
+    error_log('Topic is /building/1/status, setting user_id to 0');
     $userId = 0;
 }
+
+// Debug: Check if user_id is still null or invalid after all checks
+error_log('Final user_id value: ' . var_export($userId, true));
 
 // 3) Validate command
 if (!in_array($command, ['ON', 'OFF'], true)) {
@@ -95,7 +100,9 @@ try {
 
     // Ensure user_id is not NULL
     if ($userId === null) {
-        $userId = 0;  // If somehow user_id is still null after all checks, set it to 0
+        // Debug: Set user_id to 0 if somehow it's null
+        error_log('user_id is null, setting it to 0');
+        $userId = 0;
     }
 
     $logStmt = $conn->prepare($logSql);
