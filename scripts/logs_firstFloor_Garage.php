@@ -91,7 +91,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("Y-m-d h:i A", strtotime($row['timestamp'])),  // Full date and time
+            "time" => date("h:i A", strtotime($row['timestamp'])),  // Only time format (no date)
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
@@ -132,7 +132,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("Y-m-d h:i A", strtotime($deviceRow['last_updated'])),  // Full date and time
+            "time" => date("h:i A", strtotime($deviceRow['last_updated'])),  // Only time format (no date)
             "message" => $message,
             "device" => $deviceRow['device_name'],
             "full_data" => $deviceRow  // Optional: include all raw data for debugging
@@ -154,7 +154,7 @@ try {
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
         $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
         $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("Y-m-d h:i A");  // Full date and time
+        $timeStr = $dt->format("h:i A");  // Only time format (no date)
 
         $isDenied = ($gateRow['result'] === 'denied');
 
@@ -171,7 +171,7 @@ try {
         }
 
         $logs[] = [
-            "time" => $timeStr,
+            "time" => $timeStr,  // Only time format (no date)
             "message" => $message,
             "device" => "Access Gate",
             "full_data" => $gateRow
