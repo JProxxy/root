@@ -40,7 +40,7 @@ $mail = new PHPMailer(true);
 try {
     // Set PHPMailer to use SMTP
     $mail->isSMTP();
-    $mail->Host = 'smtp.mailtrap.io'; // Replace with your SMTP server
+    $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'superadmin@rivaniot.online'; // Your SMTP username
     $mail->Password = 'superAdmin0507!'; // Your SMTP password
