@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
-            $mail->setFrom('jpenarubia.a0001@rivaniot.online', 'Admin Verification');
+            $mail->setFrom('superadmin@rivaniot.online', 'Admin Verification');
             $mail->addAddress($adminEmail);
 
             $mail->isHTML(true);
