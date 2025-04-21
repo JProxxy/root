@@ -91,7 +91,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("h:i A", strtotime($row['timestamp'])),
+            "time" => date("Y-m-d h:i A", strtotime($row['timestamp'])),  // Full date and time
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
@@ -132,7 +132,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("h:i A", strtotime($deviceRow['last_updated'])),
+            "time" => date("Y-m-d h:i A", strtotime($deviceRow['last_updated'])),  // Full date and time
             "message" => $message,
             "device" => $deviceRow['device_name'],
             "full_data" => $deviceRow  // Optional: include all raw data for debugging
@@ -154,7 +154,7 @@ try {
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
         $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
         $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("h:i A");
+        $timeStr = $dt->format("Y-m-d h:i A");  // Full date and time
 
         $isDenied = ($gateRow['result'] === 'denied');
 
@@ -178,7 +178,7 @@ try {
         ];
     }
 
-    // Sort all logs by timestamp
+    // Sort all logs by full timestamp (date and time)
     usort($logs, function($a, $b) {
         return strtotime($a['time']) - strtotime($b['time']);
     });
