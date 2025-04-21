@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Get the role_id if the user is logged in
 $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
-
+echo "Role ID: " . $_SESSION['role_id']; 
 // Now you can use $role_id to conditionally display content
 if ($role_id == 1) {
     // Show content for role 1
