@@ -56,12 +56,17 @@ try {
                 : "$userName " . ($log['result'] == 'open' ? 'opened the gate' : 'was denied access') . " using {$log['method']} at {$log['timestamp']}.";
 
             // STEP 5: Update the last_known_id in system_activity_log_tracking
+            // STEP 5: Update only the last_known_id and updated_at in system_activity_log_tracking
             $stmt = $conn->prepare("
-                INSERT INTO system_activity_log_tracking (system_name, last_known_id)
-                VALUES (?, ?)
-                ON DUPLICATE KEY UPDATE last_known_id = VALUES(last_known_id)
-            ");
-            $stmt->execute([$systemName, $mostRecentId]);
+UPDATE system_activity_log_tracking 
+SET last_known_id = ?, updated_at = NOW() 
+WHERE system_name = ?
+");
+       
+            // Log the last_known_id update attempt
+            file_put_contents('php://stderr', "Updated last_known_id for $systemName to $mostRecentId\n");
+            
+            $stmt->execute([$mostRecentId, $systemName]);
 
             // Respond with notification data to be handled by notifyEmail.php
             echo json_encode([
