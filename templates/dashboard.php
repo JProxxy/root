@@ -187,11 +187,11 @@ if ($user) {
 
                     <?php
                     // Debugging: Check if role_id is set
-                    if (isset($role_id)) {
-                        echo "Role ID: $role_id";
-                    } else {
-                        echo "Role ID is not set.";
-                    }
+                    // if (isset($role_id)) {
+                    //     echo "Role ID: $role_id";
+                    // } else {
+                    //     echo "Role ID is not set.";
+                    // }
 
                     if (isset($role_id) && $role_id === 1): ?>
                         <div class="dashboardLog">
