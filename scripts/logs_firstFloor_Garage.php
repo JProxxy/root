@@ -6,6 +6,9 @@ try {
     // Initialize an array to hold all the logs
     $logs = [];
 
+    // Store the last status of devices to avoid duplicate messages
+    $deviceStatuses = [];
+
     // First, we query for the AC remote logs with username
     $query = "SELECT 
                 r.*, 
@@ -136,13 +139,19 @@ try {
             $message = "Physical switch in " . $deviceName . " is now " . $deviceRow['status'];
         }
 
-        // Add a log for device status change
-        $logs[] = [
-            "time" => strtotime($deviceRow['last_updated']),
-            "message" => $message,
-            "device" => $deviceRow['device_name'],
-            "full_data" => $deviceRow  // Optional: include all raw data for debugging
-        ];
+        // Check if the device status is different from the last status logged
+        if (!isset($deviceStatuses[$deviceRow['device_name']]) || $deviceStatuses[$deviceRow['device_name']] !== $deviceRow['status']) {
+            // If the status has changed, log the new entry
+            $logs[] = [
+                "time" => strtotime($deviceRow['last_updated']),
+                "message" => $message,
+                "device" => $deviceRow['device_name'],
+                "full_data" => $deviceRow  // Optional: include all raw data for debugging
+            ];
+
+            // Update the stored status for this device
+            $deviceStatuses[$deviceRow['device_name']] = $deviceRow['status'];
+        }
     }
 
     // Retrieve multiple gate access logs
