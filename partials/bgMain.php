@@ -3,6 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
+$_SESSION['role_id']   = $row['role_id']; 
 
 // Include the database connection
 require_once '../app/config/connection.php';
