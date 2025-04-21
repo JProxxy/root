@@ -102,12 +102,20 @@ try {
             $rows = $backupStmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($rows)) {
-                $filename = sprintf('%s%d_%s_%s_%d.csv',
+                // Extract username from email (everything before '@')
+                $shortEmail = explode('@', $userEmail)[0];
+
+                // Get the current time in a human-readable format
+                $timeNow = date('m-d-Y-h-i-A');  // e.g., 04-09-2025-05-00-PM
+
+                // Construct the filename in the desired format
+                $filename = sprintf(
+                    '%s%d_%s_%s_%s.csv',
                     $backupDir,
                     $userId,
-                    $sanitizedEmail,
+                    $shortEmail,
                     $tableName,
-                    time()
+                    $timeNow
                 );
 
                 $file = fopen($filename, 'w');
@@ -169,7 +177,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Account deleted successfully and backup saved.',
-        'debug'   => $debugInfo  // Debug info for development; remove in production.
+        'debug' => $debugInfo  // Debug info for development; remove in production.
     ]);
 
 } catch (Exception $e) {
@@ -177,7 +185,7 @@ try {
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage(),
-        'debug'   => $debugInfo
+        'debug' => $debugInfo
     ]);
     exit;
 }
