@@ -114,6 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             if ($header[$index] == 'email') {
                                 $value = $email; // Set the email field
                             }
+                            // Handle empty datetime fields like reset_token_expiry
+                            if ($header[$index] == 'reset_token_expiry' && empty($value)) {
+                                $value = null;  // Set to NULL if empty
+                            }
                         }
 
                         // Insert data into the specified table
