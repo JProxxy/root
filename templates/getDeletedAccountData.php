@@ -231,15 +231,15 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                         $ts = strtotime(str_replace('-', ' ', $prettyDate));
                                         $displayDate = str_replace('-', ' ', $prettyDate);
                                     } else {
-                                        $ts = (int)$rawTs;
+                                        $ts = (int) $rawTs;
                                         $displayDate = date('m d Y h:i A', $ts);
                                     }
 
                                     if (($currentTime - $ts) > 30 * 24 * 60 * 60) {
                                         $oldFiles[] = [
                                             'account' => strtolower("{$table}_{$emailPart}") . '@rivaniot.online',
-                                            'file'    => $file,
-                                            'date'    => $displayDate
+                                            'file' => $file,
+                                            'date' => $displayDate
                                         ];
                                     }
                                 }
@@ -256,6 +256,13 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                             if (empty($files)): ?>
                                 <p>No backup files found.</p>
                             <?php else: ?>
+                                <style>
+                                    .scrollable-table-container {
+                                        max-height: 400px;
+                                        /* or any height you want */
+                                        overflow-y: auto;
+                                    }
+                                </style>
                                 <div class="scrollable-table-container"> <!-- Add the scrollable container -->
                                     <table class="table table-striped">
                                         <thead>
