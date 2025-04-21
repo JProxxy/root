@@ -63,8 +63,10 @@ try {
             if ($log['user_id'] == 0) {
                 $message = "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}.";
             } else {
-                $action = $log['result'] === 'open'
-                    ? 'opened the gate'
+                // Check for either “open” or “granted”…
+                $isGranted = ($log['result'] === 'open' || $log['result'] === 'granted');
+                $action = $isGranted
+                    ? 'was granted access'
                     : 'was denied access';
                 $message = "$userName $action using {$log['method']} at {$log['timestamp']}.";
             }
@@ -99,4 +101,3 @@ try {
     echo json_encode(['new' => false, 'error' => 'Server error: ' . $e->getMessage()]);
 }
 ?>
-
