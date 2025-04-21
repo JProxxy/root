@@ -1,68 +1,25 @@
 <?php
-session_start();
-header('Content-Type: application/json');
-
 // 1) Authenticate session
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null; // Initially null if not available
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; // Default to 0 if session user_id is not found
 
-// Debug: Log session user_id
-error_log('Session user_id: ' . var_export($userId, true));
+// 2) Read and parse incoming JSON (as before)
+// Example: Assume incoming data is parsed into variables like $topic, $deviceName, $command
 
-// Fallback if no user_id found
-if ($userId === null) {
-    // Debug: Log fallback to 0
-    error_log('No session user_id found, falling back to 0');
-    $userId = 0;  // Fallback to 0 if no valid user_id
-}
-
-// 2) Read and parse incoming JSON
-$raw = file_get_contents('php://input');
-$payload = json_decode($raw, true);
-
-// Check if required keys are present
-if (!isset($payload['body'])) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid payload']);
-    exit;
-}
-
-$body = json_decode($payload['body'], true);
-
-if (
-    !isset($body['data']['deviceName']) ||
-    !isset($body['data']['command'])
-) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Missing deviceName or command']);
-    exit;
-}
-
-$deviceName = $body['data']['deviceName'];
-$command = strtoupper($body['data']['command']); // Normalize to ON/OFF
-
-// 3) Check the topic to determine correct user_id
-$topic = isset($payload['topic']) ? $payload['topic'] : '';
+// 3) Handle topic check
 if ($topic === '/building/1/status') {
-    // Topic '/building/1/status' means the light was physically turned off, so set user_id to 0
-    error_log('Physical turn off detected, setting user_id to 0');
+    // Physical turn-off detection, set user_id to 0
+    error_log('Physical turn-off detected, setting user_id to 0');
     $userId = 0;
 }
 
-// Log user_id before command validation
-error_log('User_id before command check: ' . var_export($userId, true));
+// Log user_id before device status validation
+error_log('User_id before device status update: ' . var_export($userId, true));
 
-// 4) Validate command
-if (!in_array($command, ['ON', 'OFF'], true)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid command']);
-    exit;
-}
-
-// 5) Update the Devices table
+// 4) Device validation and database updates
 try {
     require_once '../app/config/connection.php'; // Assumes $conn is defined here
 
-    // Update the Devices table
+    // Update the Devices table (same logic as before)
     $sql = "
         UPDATE Devices
            SET status = :status,
@@ -76,18 +33,17 @@ try {
         ':deviceName' => $deviceName
     ]);
 
-    // Debug log: Log device update success
-    error_log('Device update for ' . $deviceName . ' to status ' . $command . ' succeeded.');
+    // Log the success of the device status update
+    error_log('Device status update succeeded for ' . $deviceName . ' to ' . $command);
 
-    // 6) Update the user_id in the device_logs table for the most recent log entry
-    // Convert the UTC time to PH time (UTC +8) using PHP DateTime class
-    $utcDate = new DateTime('now', new DateTimeZone('UTC'));
-    $utcDate->setTimezone(new DateTimeZone('Asia/Manila'));  // Convert to PH time
+    // Ensure user_id is valid before updating logs
+    if ($userId === null) {
+        // If user_id is null (after all checks), set it to 0
+        error_log('User_id is null after all checks, setting it to 0');
+        $userId = 0;
+    }
 
-    // Now, we can use this PH time in the SQL query
-    $ph_time = $utcDate->format('Y-m-d H:i:s'); // This will give you the time in PH format (YYYY-MM-DD HH:MM:SS)
-
-    // Update device_logs table by joining it on the latest log entry
+    // Update the device_logs table for the most recent entry
     $logSql = "
         UPDATE device_logs dl
            JOIN (
@@ -100,15 +56,8 @@ try {
            SET dl.user_id = :user_id
     ";
 
-    // Log user_id before update
-    error_log('Final user_id before device log update: ' . var_export($userId, true));
-
-    // Ensure user_id is not NULL
-    if ($userId === null) {
-        // Debug: Set user_id to 0 if somehow it's null
-        error_log('user_id is null, setting it to 0');
-        $userId = 0;
-    }
+    // Log the final user_id used for the device_logs update
+    error_log('Final user_id before device_logs update: ' . var_export($userId, true));
 
     $logStmt = $conn->prepare($logSql);
     $logStmt->execute([ 
