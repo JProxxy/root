@@ -225,7 +225,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
 
                             foreach ($files as $file) {
                                 // Expected filename format: [user_id]_[table]___[emailPart]_[timestamp].csv
-                                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+                                $pattern = '/^(\d+)_([^_]+)_(.+?)_(?:(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(?:AM|PM))|(\d{10}))\.csv$/i';
                                 if (preg_match($pattern, $file, $matches)) {
                                     $rawTimestamp = $matches[4]; // "04-09-2025-07-21-PM"
                                     $formattedDate = str_replace('-', ' ', $rawTimestamp); // "04 09 2025 07 21 PM"
@@ -272,7 +272,7 @@ if (isset($_GET['download_csv']) && $_GET['download_csv'] == 'true') {
                                                   [user_id]_[table]___[emailPart]_[timestamp].csv
                                                   Example: 51_users___eaquierdojeraldine_04-09-2025-07-21-PM.csv
                                                 */
-                                                $pattern = '/(\d+)_([^_]+)_+([^_]+)_(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-[AP]M)\.csv/i';
+                                                $pattern = '/^(\d+)_([^_]+)_(.+?)_(?:(\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-(?:AM|PM))|(\d{10}))\.csv$/i';
                                                 if (preg_match($pattern, $file, $matches)) {
                                                     // Build the account email as "table_emailPart@rivaniot.online"
                                                     $tableName = $matches[2];          // e.g., "users"
