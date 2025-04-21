@@ -91,7 +91,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("Y-m-d h:i A", strtotime($row['timestamp'])),  // Full timestamp for sorting
+            "time" => date("Y-m-d h:i A", strtotime($row['timestamp'])),  // Full date and time
             "message" => $message,
             "device" => "AC Remote",
             "full_data" => $row  // Optional: include all raw data for debugging
@@ -132,7 +132,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("Y-m-d h:i A", strtotime($deviceRow['last_updated'])),  // Full timestamp for sorting
+            "time" => date("Y-m-d h:i A", strtotime($deviceRow['last_updated'])),  // Full date and time
             "message" => $message,
             "device" => $deviceRow['device_name'],
             "full_data" => $deviceRow  // Optional: include all raw data for debugging
@@ -154,7 +154,7 @@ try {
     while ($gateRow = $gateStmt->fetch(PDO::FETCH_ASSOC)) {
         $dt = new DateTime($gateRow['timestamp'], new DateTimeZone('UTC'));
         $dt->setTimezone(new DateTimeZone('Asia/Manila'));
-        $timeStr = $dt->format("Y-m-d h:i A");  // Full timestamp for sorting
+        $timeStr = $dt->format("Y-m-d h:i A");  // Full date and time
 
         $isDenied = ($gateRow['result'] === 'denied');
 
@@ -171,7 +171,7 @@ try {
         }
 
         $logs[] = [
-            "time" => date("h:i A", strtotime($gateRow['timestamp'])),  // Full timestamp for sorting
+            "time" => $timeStr,
             "message" => $message,
             "device" => "Access Gate",
             "full_data" => $gateRow
@@ -183,13 +183,7 @@ try {
         return strtotime($a['time']) - strtotime($b['time']);
     });
 
-    // Adjust final output: only show time (h:i A)
-    $finalLogs = array_map(function($log) {
-        $log['time'] = date("h:i A", strtotime($log['time']));  // Show only the time
-        return $log;
-    }, $logs);
-
-    echo json_encode($finalLogs);
+    echo json_encode($logs);
 
 } catch (PDOException $e) {
     echo json_encode([
