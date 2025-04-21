@@ -67,10 +67,9 @@ if ($log) {
 // DEVICE LOGS
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
-    // Default userName
     $userName = "Unknown person";
 
-    // Attempt to get from DB
+    // Try DB lookup first
     if (!empty($log['user_id']) && $log['user_id'] != 0) {
         $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
         $stmt->execute([$log['user_id']]);
@@ -81,16 +80,13 @@ if ($log) {
         }
     }
 
-    // Build the message first
-    $status = strtoupper($log['status']);
-    $msg = "{$userName} turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
-
-    // If user is unknown, try to extract from the message
-    if ($userName == "Unknown person" && preg_match('/^([^\s]+) turned/i', $msg, $matches)) {
-        $userName = $matches[1]; // Use the extracted name from the message
-        // Rebuild the message with proper username
-        $msg = "{$userName} turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
+    // If user still unknown, try to extract from log's device user log (assuming it’s stored in log)
+    if ($userName === "Unknown person" && preg_match('/^([^\s]+) turned/i', $log['action'] ?? '', $matches)) {
+        $userName = $matches[1]; // ← assign it directly
     }
+
+    $status = strtoupper($log['status']);
+    $msg = "$userName turned $status {$log['device_name']} on Floor {$log['floor_id']} ({$log['where']}) at {$log['last_updated']}.";
 
     $response[] = [
         'new' => true,
