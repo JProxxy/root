@@ -3,8 +3,16 @@ session_start();
 header('Content-Type: application/json');
 
 // 1) Authenticate session
-// Use user_id from session, default to 0 if no session is found
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+// Use user_id from session, check if valid user_id is available
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null; // Initially null if not available
+
+// If no valid user_id found from session, we could have another fallback strategy (optional)
+// For example, checking for specific conditions or returning a specific error.
+if ($userId === null) {
+    // Optional: Add another method of getting user_id (from token, query param, etc.) before defaulting to 0
+    // Fallback to 0 if absolutely no valid user_id exists
+    $userId = 0;  // This is your last choice, i.e., when no valid user_id could be found
+}
 
 // 2) Read and parse incoming JSON
 $raw = file_get_contents('php://input');
@@ -39,11 +47,6 @@ if ($topic === '/building/1/status') {
     $userId = 0;
 }
 
-// Ensure that user_id is not NULL, use session value if NULL
-if ($userId === null) {
-    $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;  // Default to session user_id or 0
-}
-
 // 3) Validate command
 if (!in_array($command, ['ON', 'OFF'], true)) {
     http_response_code(400);
@@ -64,7 +67,7 @@ try {
     ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->execute([
+    $stmt->execute([ 
         ':status' => $command,
         ':deviceName' => $deviceName
     ]);
@@ -92,11 +95,11 @@ try {
 
     // Ensure user_id is not NULL
     if ($userId === null) {
-        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;  // Default to session user_id or 0
+        $userId = 0;  // If somehow user_id is still null after all checks, set it to 0
     }
 
     $logStmt = $conn->prepare($logSql);
-    $logStmt->execute([
+    $logStmt->execute([ 
         ':user_id' => $userId,  // Use the correct user_id (0 for physical turn-off, session value otherwise)
         ':device_name' => $deviceName
     ]);
@@ -104,7 +107,7 @@ try {
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode([
+    echo json_encode([ 
         'error' => 'Database error',
         'details' => $e->getMessage()
     ]);
