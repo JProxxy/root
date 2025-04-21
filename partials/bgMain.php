@@ -341,6 +341,16 @@ if (!empty($user_data['profile_picture'])) {
 
 
 
+
+
+
+
+
+
+
+
+
+
 <!-- NOTIFY USING EMAIL (POLLING) -->
 <script>
 let lastKnownId = 0;  // Track the last known ID for all systems (gate, AC, etc.)
@@ -353,16 +363,22 @@ function pollSystems() {
                 lastKnownId = data.id;
                 console.log("New Event:", data.message);
 
-                // Optional: Trigger mail
+                // Trigger mail notification if there’s a new log event
                 fetch('../scripts/notifyMailer.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ log_id: lastKnownId })
+                    body: JSON.stringify({ log_id: data.id })
+                }).then(mailResponse => {
+                    // Optionally handle the response here (e.g., check if the mail was sent)
+                    console.log("Mail sent successfully");
+                }).catch(mailError => {
+                    console.error("Mail sending failed:", mailError);
                 });
             }
         })
         .catch(error => console.error('Polling failed:', error));
 }
 
-setInterval(pollSystems, 5000);  // Poll every 5 seconds for new events
+// Poll every 5 seconds for new events
+setInterval(pollSystems, 5000);  
 </script>

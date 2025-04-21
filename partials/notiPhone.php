@@ -32,12 +32,11 @@ try {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
             if ($user) {
-                $cleanEmail = explode('@', $user['email'])[0];
+                $cleanEmail = explode('@', $user['email'])[0];  // Clean email for output
                 $userName = (!empty($user['username']) ? $user['username'] : $cleanEmail) . " ({$log['user_id']})";
             }
         }
         
-
         // Prepare the message
         $message = $log['user_id'] == 0
             ? "Unknown person tried to access the gate using an unknown RFID at {$log['timestamp']}."
@@ -49,11 +48,12 @@ try {
             'message' => $message,
         ]);
     } else {
-        echo json_encode(['new' => false]);
+        echo json_encode(['new' => false]);  // No new event found
     }
 } catch (Exception $e) {
     echo json_encode([
         'new' => false,
-        'error' => 'Server error: ' . $e->getMessage()
+        'error' => 'Server error: ' . $e->getMessage()  // Return error message if exception occurs
     ]);
 }
+?>
