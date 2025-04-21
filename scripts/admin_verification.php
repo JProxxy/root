@@ -40,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.hostinger.com'; // Replace with your SMTP server
             $mail->SMTPAuth = true;
-            $mail->Username = 'jpenarubia.a0001@rivaniot.online'; // Your email
-            $mail->Password = 'ExcelAltH0103!'; // Your email password
+            $mail->Username = 'superadmin@rivaniot.online'; // Your email
+            $mail->Password = 'superAdmin0507!'; // Your email password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 
