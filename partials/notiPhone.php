@@ -100,8 +100,3 @@ try {
 }
 ?>
 
-<?php
-
-//put device_log here
-
-?>

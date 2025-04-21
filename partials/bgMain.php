@@ -353,48 +353,60 @@ if (!empty($user_data['profile_picture'])) {
 
 
 <!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
+<!-- NOTIFY USING EMAIL (POLLING here on BGMain.php) -->
 <script>
-function pollSystems() {
-    fetch('../partials/notiPhone.php')
-        .then(response => response.json())
-        .then(data => {
-            if (Array.isArray(data) && data.length > 0) {
-                data.forEach(event => {
-                    console.log("New Event:", event.message);
+async function pollSystems() {
+  try {
+    // 1. Trigger both fetches in parallel
+    const [respGate, respDevice] = await Promise.all([
+      fetch('../partials/notiPhone.php'),
+      fetch('../partials/device_logsLights.php')
+    ]);
 
-                    const payload = {
-                        log_id: event.id,
-                        system_name: event.system_name,
-                        message: event.message,
-                        timestamp: event.timestamp
-                    };
+    // 2. Parse both JSON bodies
+    const dataGate   = await respGate.json();
+    const dataDevice = await respDevice.json();
 
-                    // Log the payload before sending
-                    console.log("Payload being sent:", payload);
+    // 3. Merge into a single array of events
+    const events = [];
+    if (Array.isArray(dataGate))   events.push(...dataGate);
+    else if (dataGate.new)          events.push(dataGate);
+    if (Array.isArray(dataDevice)) events.push(...dataDevice);
+    else if (dataDevice.new)        events.push(dataDevice);
 
-                    // Trigger email notification
-                    fetch('../scripts/notifyMailer.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(mailResponse => mailResponse.json())
-                    .then(mailResult => {
-                        if (mailResult.status === "success") {
-                            console.log("Mail sent:", mailResult.message);
-                        } else {
-                            console.error("Mail error:", mailResult.message);
-                        }
-                    })
-                    .catch(mailError => console.error("Mail sending failed:", mailError));
-                });
-            } else {
-                console.log("No new events.");
-            }
+    // 4. Process each event
+    if (events.length) {
+      events.forEach(event => {
+        console.log("New Event:", event.message);
+        const payload = {
+          log_id:      event.id,
+          system_name: event.system_name,
+          message:     event.message,
+          timestamp:   event.timestamp
+        };
+        console.log("Payload being sent:", payload);
+
+        fetch('../scripts/notifyMailer.php', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload)
         })
-        .catch(error => console.error('Polling failed:', error));
+        .then(r => r.json())
+        .then(result => {
+          if (result.status === "success") console.log("Mail sent:", result.message);
+          else                                console.error("Mail error:", result.message);
+        })
+        .catch(err => console.error("Mail sending failed:", err));
+      });
+    } else {
+      console.log("No new events.");
+    }
+
+  } catch (err) {
+    console.error('Polling failed:', err);
+  }
 }
 
-// Poll every 5 seconds
+// Start polling every 5 seconds
 setInterval(pollSystems, 5000);
 </script>
