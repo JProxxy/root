@@ -70,7 +70,7 @@ if ($log) {
 [$log, $latestId] = checkNewLog($conn, 'device_logs', 'device_logs');
 if ($log) {
     // Initialize variables
-    $userName = "";
+    $userName = "Unknown person";
     $consecutiveCount = 0;
     $lastUserId = null;
 
@@ -95,22 +95,20 @@ if ($log) {
                 $stmt = $conn->prepare("SELECT username, email FROM users WHERE user_id = ?");
                 $stmt->execute([$log['user_id']]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Use username or part of email
+                $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
 
-                // If user data is found, use username or part of the email
-                if ($user) {
-                    $userName = !empty($user['username']) ? $user['username'] : explode('@', $user['email'])[0];
+                // Create the message
+                $msg = "$userName consecutively changed lights 10 times. Please check if there's any abuse.";
 
-                    // Create the message
-                    $msg = "$userName consecutively changed lights 10 times. Please check if there's any abuse.";
-
-                    // Add the response to the array
-                    $response[] = [
-                        'new' => true,
-                        'system_name' => 'device_logs',
-                        'message' => $msg,
-                        'timestamp' => $log['last_updated']
-                    ];
-                }
+                // Add the response to the array
+                $response[] = [
+                    'new' => true,
+                    'system_name' => 'device_logs',
+                    'message' => $msg,
+                    'timestamp' => $log['last_updated']
+                ];
 
                 // Break out of the loop after sending the message
                 break;
