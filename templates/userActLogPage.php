@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila');
 include '../app/config/connection.php';
 
 $selectedRole = $_GET['role'] ?? '';
@@ -114,13 +115,6 @@ $stmt = $conn->prepare($query);
 $stmt->execute($params);
 $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Custom role sort order
-$roleOrder = [1 => 0, 2 => 1, 3 => 2, 4 => 3];
-usort($logs, function ($a, $b) use ($roleOrder) {
-  $roleA = $roleOrder[$a['role_id']] ?? PHP_INT_MAX;
-  $roleB = $roleOrder[$b['role_id']] ?? PHP_INT_MAX;
-  return $roleA <=> $roleB;
-});
 
 $roleMapping = [
   1 => "Super Admin",
@@ -563,7 +557,9 @@ function url_exists(string $url): bool
                         }
 
                         // ─── 5) Format timestamp ────────────────────────────────────────────────
-                        $ts = new DateTime($timestampRaw);
+// assume $timestampRaw is in UTC; convert it to Manila
+                        $ts = new DateTime($timestampRaw, new DateTimeZone('UTC'));
+                        $ts->setTimezone(new DateTimeZone('Asia/Manila'));
                         $formattedTimestamp = $ts->format('M d y - h:i a');
 
                         // ─── 6) Echo the row ───────────────────────────────────────────────────

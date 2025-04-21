@@ -277,3 +277,24 @@ if ($user_data && $user_data['mu_status'] === 'block') {
 </body>
 
 </html>
+
+<script>
+  // THIS MUST COME AFTER YOUR PHP-OUTPUT FOR ROLE_ID
+  const ROLE_ID = <?php echo json_encode($role_id); ?>;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // IF THE CURRENT USER IS ROLE 3 OR 4, DISABLE ALL SWITCH CONTROLS
+    if (ROLE_ID === 4) {
+      document.querySelectorAll('.switch-control').forEach(el => {
+        // FOR <input> CONTROLS
+        if ('disabled' in el) {
+          el.disabled = true;
+        }
+        // FOR BUTTONS, DIVS, ETC.
+        el.style.pointerEvents = 'none';
+        // DIM IT TO SHOW IT'S INACTIVE
+        el.style.opacity = '0.5';
+      });
+    }
+  });
+</script>
