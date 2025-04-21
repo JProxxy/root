@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $columnCount = count($header);
             echo "CSV Header: " . implode(', ', $header) . "<br>";
 
-            // List columns to treat as nullable datetimes
+            // Columns to treat as nullable datetimes
             $datetimeFields = [
                 'minTempTime',
                 'maxTempTime',
@@ -100,13 +100,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'otp_expiry',
             ];
 
-            // List integer columns that should default to 0 if empty
+            // Integer columns to default to 0 if empty
             $intFieldsZero = [
+                'timer',
                 'otp_code',
                 'failed_attempts',
             ];
 
-            // Insert data into the specified table
+            // ENUM columns to treat as NULL if empty
+            $enumFieldsNull = [
+                'status',
+                'gender',
+                'isEmailVerified',
+                'mu_status',
+            ];
+
+            // Begin transaction
             $conn->beginTransaction();
             try {
                 foreach ($lines as $line) {
@@ -130,11 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $value = $email;
                         }
 
-                        // Default timer to 0 if empty
-                        if ($col === 'timer' && $value === '') {
-                            $value = 0;
-                        }
-
                         // Nullable datetime fields → NULL
                         if (in_array($col, $datetimeFields, true) && $value === '') {
                             $value = null;
@@ -143,6 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Integer fields → 0 if empty
                         if (in_array($col, $intFieldsZero, true) && $value === '') {
                             $value = 0;
+                        }
+
+                        // ENUM fields → NULL if empty or invalid
+                        if (in_array($col, $enumFieldsNull, true) && $value === '') {
+                            $value = null;
                         }
                     }
                     unset($value);
