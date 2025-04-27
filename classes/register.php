@@ -6,6 +6,11 @@ error_reporting(E_ALL);
 session_start();
 require_once '../app/config/connection.php';
 
+// Load PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require '../vendor/autoload.php'; // adjust if your path is different
+
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "<script>alert('Invalid request method.');</script>";
@@ -123,9 +128,52 @@ try {
         ':role_id'  => $roleSelect
     ]);
 
-    // On success, output a JavaScript alert and then redirect to the login page when "OK" is clicked.
+    // Prepare PHPMailer to send credentials email
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.hostinger.com';     // Replace with your SMTP server
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'superadmin@rivaniot.online'; // Replace with your SMTP username
+        $mail->Password   = 'superAdmin0507!';        // Replace with your SMTP password
+        $mail->SMTPSecure = 'tls';                     // Or 'ssl' if your server requires
+        $mail->Port       = 587;                       // Or 465 if using SSL
+
+        // Recipients
+        $mail->setFrom('no-reply@rivaniot.online', 'Rivaniot Support');
+        $mail->addAddress($email, $username);
+
+        // Content
+        $roleName = array_search($roleSelect, [
+            2 => "Admin",
+            3 => "Staff",
+            4 => "Student"
+        ]);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Welcome to Rivaniot System - Your Account Credentials';
+        $mail->Body    = "
+            <h2>Welcome, $username!</h2>
+            <p>Thank you for registering. Here are your credentials:</p>
+            <ul>
+                <li><strong>Username:</strong> $username</li>
+                <li><strong>Email:</strong> $email</li>
+                <li><strong>Role:</strong> $roleName</li>
+            </ul>
+            <p>Please keep this information secure.<br>Regards,<br><strong>Rivaniot Team</strong></p>
+        ";
+
+        $mail->send();
+    } catch (Exception $e) {
+        error_log('Mailer Error: ' . $mail->ErrorInfo);
+        // Email failed, but we won't stop signup because of it
+    }
+
+    // On success, output a JavaScript alert and then redirect to the login page
     echo "<script>
-            alert('Signup successful!');
+            alert('Signup successful! Credentials have been emailed.');
             window.location.href = '../templates/login.php';
           </script>";
     exit;
