@@ -134,12 +134,12 @@ try {
     try {
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com';     // Replace with your SMTP server
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'superadmin@rivaniot.online'; // Replace with your SMTP username
-        $mail->Password   = 'superAdmin0507!';        // Replace with your SMTP password
-        $mail->SMTPSecure = 'tls';                     // Or 'ssl' if your server requires
-        $mail->Port       = 587;                       // Or 465 if using SSL
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'superadmin@rivaniot.online';
+        $mail->Password = 'superAdmin0507!';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
 
         // Recipients
         $mail->setFrom('no-reply@rivaniot.online', 'Rivaniot Support');
