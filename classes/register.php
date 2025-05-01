@@ -5,6 +5,10 @@ error_reporting(E_ALL);
 
 session_start();
 require_once '../app/config/connection.php';
+// PHPMailer imports
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require '../vendor/autoload.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -25,30 +29,15 @@ $username = strstr($email, '@', true);
 // Initialize an array for error messages
 $errors = [];
 
-// Validate reCAPTCHA first
-$recaptcha_secret = "6LcWnvEqAAAAAPPiyMaVPKIHb_DtNDdGUaSG_3fq"; // Replace with your reCAPTCHA Secret Key
+// Validate reCAPTCHA
+$recaptcha_secret = "6LcWnvEqAAAAAPPiyMaVPKIHb_DtNDdGUaSG_3fq";
 $verify_url       = "https://www.google.com/recaptcha/api/siteverify";
-$data             = [
-    'secret'   => $recaptcha_secret,
-    'response' => $recaptchaResponse
-];
-
-$options = [
-    'http' => [
-        'header'  => "Content-type: application/x-www-form-urlencoded",
-        'method'  => 'POST',
-        'content' => http_build_query($data)
-    ]
-];
-
+$data             = ['secret' => $recaptcha_secret, 'response' => $recaptchaResponse];
+$options = ['http' => ['header' => "Content-type: application/x-www-form-urlencoded", 'method' => 'POST', 'content' => http_build_query($data)]];
 $context         = stream_context_create($options);
 $verify_response = file_get_contents($verify_url, false, $context);
 $response_data   = json_decode($verify_response);
 
-// Output the reCAPTCHA response to the browser console (for debugging)
-echo "<script>console.log('reCAPTCHA response: " . json_encode($response_data) . "');</script>";
-
-// If reCAPTCHA fails or score is too low, block registration
 if (!$response_data->success || $response_data->score < 0.5) {
     $errors[] = "reCAPTCHA verification failed. Please try again.";
 }
@@ -71,63 +60,69 @@ if ($password !== $retypePassword) {
 if (empty($roleSelect)) {
     $errors[] = "Role selection is required.";
 } else {
-    // Map dropdown values to numeric role IDs
-    $roleMap = [
-        "admin"   => 2,
-        "staff"   => 3,
-        "student" => 4
-    ];
-    if (array_key_exists($roleSelect, $roleMap)) {
+    $roleMap = ["admin" => 2, "staff" => 3, "student" => 4];
+    if (isset($roleMap[$roleSelect])) {
         $roleSelect = $roleMap[$roleSelect];
     } else {
         $errors[] = "Invalid role selection.";
     }
 }
 
-// If there are errors, output them via alert and stop processing
 if (!empty($errors)) {
     $errorMsg = "Registration Errors:\n" . implode("\n", $errors);
     echo "<script>alert(" . json_encode($errorMsg) . ");</script>";
     exit;
 }
 
-// Check if a user with the same email or username already exists
+// Check existing user
 try {
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email OR username = :username LIMIT 1");
-    $stmt->execute([
-        ':email' => $email,
-        ':username' => $username
-    ]);
-    $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($existingUser) {
-        echo "<script>alert('Email or Username already exists. Please try a different one.');</script>";
+    $stmt->execute([':email' => $email, ':username' => $username]);
+    if ($stmt->fetch()) {
+        echo "<script>alert('Email or Username already exists.');</script>";
         exit;
     }
 } catch (PDOException $e) {
-    error_log("Database Error: " . $e->getMessage());
-    echo "<script>alert('System error. Please try again later.');</script>";
+    error_log($e->getMessage());
+    echo "<script>alert('System error.');</script>";
     exit;
 }
 
-// Hash the password using a secure algorithm
+// Hash password
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-// Insert the new user into the database (including the username)
+// Insert user
 try {
     $stmt = $conn->prepare("INSERT INTO users (username, email, password, role_id, created_at, updated_at) VALUES (:username, :email, :password, :role_id, NOW(), NOW())");
-    $stmt->execute([
-        ':username' => $username,
-        ':email'    => $email,
-        ':password' => $hashedPassword,
-        ':role_id'  => $roleSelect
-    ]);
+    $stmt->execute([':username' => $username, ':email' => $email, ':password' => $hashedPassword, ':role_id' => $roleSelect]);
 
-    // On success, output a JavaScript alert and then redirect to the login page when "OK" is clicked.
-    echo "<script>
-            alert('Signup successful!');
-            window.location.href = '../templates/login.php';
-          </script>";
+    // Send confirmation email with credentials
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.hostinger.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'superadmin@rivaniot.online';
+        $mail->Password   = 'superAdmin0507!';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('superadmin@rivaniot.online', 'Rivan IoT');
+        $mail->addAddress($email, $username);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Your Rivan IoT Account Details';
+        $mail->Body    = "<p>Dear {$username},</p>" .
+                         "<p>Your account has been created successfully. Here are your login details:</p>" .
+                         "<p><strong>Email:</strong> {$email}<br>" .
+                         "<strong>Password:</strong> {$password}</p>" .
+                         "<p>Please keep this information secure.</p>";
+        $mail->send();
+    } catch (Exception $e) {
+        error_log('Mailer Error: ' . $mail->ErrorInfo);
+    }
+
+    echo "<script>alert('Signup successful! Check your email.'); window.location.href = '../templates/login.php';</script>";
     exit;
 } catch (PDOException $e) {
     echo "<script>alert('Database Insert Error: " . addslashes($e->getMessage()) . "');</script>";
